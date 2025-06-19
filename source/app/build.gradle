@@ -1,0 +1,153 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 30
+    buildToolsVersion "30.0.3"
+
+    defaultConfig {
+        applicationId "com.movie_hub.android"
+        minSdkVersion 24
+        targetSdkVersion 30
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        buildConfigField "String", "BASE_URL", "\"https://.vn/\""
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments += ["room.schemaLocation": "$projectDir/schemas".toString()]
+            }
+        }
+    }
+
+    buildTypes {
+        debug {
+
+        }
+
+        release {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    buildFeatures {
+        dataBinding true
+        viewBinding true
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+}
+
+dependencies {
+    def fragment_version = "1.3.4"
+    implementation "androidx.fragment:fragment:$fragment_version"
+
+    implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.3.1'
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.3.1'
+    implementation 'androidx.navigation:navigation-fragment:2.4.0-alpha02'
+    implementation 'androidx.navigation:navigation-ui:2.4.0-alpha02'
+
+    // lombok
+    compileOnly 'org.projectlombok:lombok:1.18.12'
+    annotationProcessor 'org.projectlombok:lombok:1.18.12'
+
+    implementation 'androidx.appcompat:appcompat:1.2.0'
+    implementation 'com.google.android.material:material:1.3.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
+    testImplementation 'junit:junit:4.+'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.2'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
+
+    implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+
+    //multidex
+    def multidex_version = "2.0.1"
+    implementation "androidx.multidex:multidex:$multidex_version"
+
+    //Preference
+    implementation "androidx.preference:preference:1.1.1"
+
+    // Unit sdp ssp
+    implementation 'com.intuit.sdp:sdp-android:1.0.6'
+    implementation 'com.intuit.ssp:ssp-android:1.0.6'
+
+    //GSON
+    implementation 'com.google.code.gson:gson:2.8.6'
+
+    // retrofit
+    def retrofit = '2.9.0'
+    implementation "com.squareup.retrofit2:retrofit:${retrofit}"
+    implementation "com.squareup.retrofit2:converter-gson:${retrofit}"
+    implementation "com.github.akarnokd:rxjava3-retrofit-adapter:3.0.0"
+
+    implementation 'com.squareup.okhttp3:okhttp:4.9.0'
+    implementation 'com.squareup.okhttp3:logging-interceptor:4.9.0'
+
+    //RxAndroid
+    def rxAndroidVer = '3.0.0'
+    implementation "io.reactivex.rxjava3:rxandroid:${rxAndroidVer}"
+    //RxJava
+    def rxJavaVer = '3.0.7'
+    implementation "io.reactivex.rxjava3:rxjava:${rxJavaVer}"
+
+    // ViewModel
+    implementation 'androidx.lifecycle:lifecycle-viewmodel:2.3.1'
+
+    // LiveData
+    implementation 'androidx.lifecycle:lifecycle-livedata:2.3.1'
+
+    // Room
+    def room_version = "2.4.0-alpha03"
+    implementation "androidx.room:room-runtime:$room_version"
+    annotationProcessor "androidx.room:room-compiler:$room_version"
+    // optional - RxJava2 support for Room
+    implementation "androidx.room:room-rxjava2:$room_version"
+
+    // optional - RxJava3 support for Room
+    implementation "androidx.room:room-rxjava3:$room_version"
+
+    // Glide
+    implementation 'com.github.bumptech.glide:glide:4.12.0'
+    annotationProcessor 'com.github.bumptech.glide:compiler:4.12.0'
+
+    //Timber
+    implementation 'com.jakewharton.timber:timber:4.7.1'
+
+    //Dagger
+    def dagger_2 = "2.35.1"
+    implementation "com.google.dagger:dagger:$dagger_2"
+    annotationProcessor "com.google.dagger:dagger-compiler:$dagger_2"
+
+    //Toasty
+    implementation 'com.github.GrenderG:Toasty:1.5.0'
+
+    implementation 'com.google.android.gms:play-services-auth:19.0.0'
+    implementation 'com.facebook.android:facebook-login:8.1.0'
+
+    // lib for SMS verification (Phone Auth)
+    implementation 'com.google.android.gms:play-services-auth:19.0.0'
+    implementation 'com.google.android.gms:play-services-auth-api-phone:17.5.0'
+    
+    // map
+    implementation 'com.google.android.gms:play-services-maps:17.0.1'
+    implementation 'com.google.android.gms:play-services-location:18.0.0'
+
+
+    //web view
+    implementation 'androidx.webkit:webkit:1.4.0'
+
+    //hash id
+    implementation "org.hashids:hashids:1.0.3"
+
+    //Flexible Adapter
+    final flexible_adapter_version = 'c8013533';
+    implementation "com.github.arkon.FlexibleAdapter:flexible-adapter:$flexible_adapter_version"
+    implementation "com.github.arkon.FlexibleAdapter:flexible-adapter-databinding:$flexible_adapter_version"
+    implementation "com.github.arkon.FlexibleAdapter:flexible-adapter-ui:$flexible_adapter_version"
+}

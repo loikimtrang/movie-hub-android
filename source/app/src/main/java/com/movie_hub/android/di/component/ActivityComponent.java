@@ -1,0 +1,14 @@
+package com.movie_hub.android.di.component;
+
+import com.movie_hub.android.di.module.ActivityModule;
+import com.movie_hub.android.di.scope.ActivityScope;
+import com.movie_hub.android.ui.main.MainActivity;
+
+import dagger.Component;
+
+@ActivityScope
+@Component(modules = {ActivityModule.class}, dependencies = AppComponent.class)
+public interface ActivityComponent {
+    void inject(MainActivity activity);
+}
+
