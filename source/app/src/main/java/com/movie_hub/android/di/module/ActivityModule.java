@@ -11,6 +11,7 @@ import com.movie_hub.android.data.Repository;
 import com.movie_hub.android.di.scope.ActivityScope;
 import com.movie_hub.android.ui.base.activity.BaseActivity;
 import com.movie_hub.android.ui.main.MainViewModel;
+import com.movie_hub.android.ui.main.splash.SplashViewModel;
 import com.movie_hub.android.utils.GetInfo;
 
 import javax.inject.Named;
@@ -40,8 +41,6 @@ public class ActivityModule {
     String provideDeviceId( Context applicationContext){
         return GetInfo.getAll(applicationContext);
     }
-
-
     @Provides
     @ActivityScope
     MainViewModel provideMainViewModel(Repository repository, Context application) {
@@ -50,5 +49,11 @@ public class ActivityModule {
         return new ViewModelProvider(activity, factory).get(MainViewModel.class);
     }
 
-
+    @Provides
+    @ActivityScope
+    SplashViewModel provideSplashViewModel(Repository repository, Context application) {
+        Supplier<SplashViewModel> supplier = () -> new SplashViewModel(repository, (MVVMApplication)application);
+        ViewModelProviderFactory<SplashViewModel> factory = new ViewModelProviderFactory<>(SplashViewModel.class, supplier);
+        return new ViewModelProvider(activity, factory).get(SplashViewModel.class);
+    }
 }

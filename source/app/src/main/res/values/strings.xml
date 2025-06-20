@@ -1,9 +1,15 @@
 <resources>
-    <string name="app_name">StreamHub</string>
+    <string name="app_name">Rổ Phim Clone</string>
     <string name="msg_loading">Xin chờ...</string>
 
     <!--Network error-->
     <string name="newtwork_error">Không thể kết nối, vui lòng kiểm tra kết nối mạng của bạn.</string>
     <string name="newtwork_error_button_retry">Thử lại</string>
     <string name="newtwork_error_button_exit">Thoát</string>
+
+
+    <string name="home">Home</string>
+    <string name="search">Search</string>
+    <string name="schedule">Schedule</string>
+    <string name="account">Account</string>
 </resources>

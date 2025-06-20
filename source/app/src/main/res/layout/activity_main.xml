@@ -15,8 +15,32 @@
         <import type="android.view.View" />
     </data>
 
-    <FrameLayout
+    <LinearLayout
+        android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
-    </FrameLayout>
+
+        <FrameLayout
+            android:id="@+id/fragment_container"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:background="@color/bg_app"/>
+
+        <com.google.android.material.bottomnavigation.BottomNavigationView
+            android:id="@+id/bottomNav"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/bg_tab_bar"
+            app:labelVisibilityMode="labeled"
+            app:itemIconTint="@color/nav_icon_color"
+            app:itemTextColor="@color/nav_icon_color"
+            app:itemIconSize="@dimen/_16sdp"
+            app:itemTextAppearanceActive="@style/Text_9_Normal"
+            app:itemTextAppearanceInactive="@style/Text_9_Normal"
+            app:menu="@menu/bottom_navigation_menu"
+            android:paddingBottom="@dimen/_8sdp"
+            android:paddingTop="@dimen/_8sdp"/>
+
+    </LinearLayout>
 </layout>
