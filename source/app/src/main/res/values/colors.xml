@@ -12,4 +12,11 @@
     <color name="primary_color">#0D72FF</color>
     <color name="secondary_color">#ffffff</color>
     <color name="tertiary_color">#F5F5F5</color>
+
+    <color name="bg_app">#12161F</color>
+    <color name="bg_tab_bar">#100F14</color>
+    <color name="ic_tab_bar">#A4A4A4</color>
+    <color name="ic_tab_bar_tint">#F9D57B</color>
+    <color name="logo">#15151F</color>
+    <color name="text">#FAF9FC</color>
 </resources>

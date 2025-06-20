@@ -70,12 +70,11 @@ public abstract class BaseFragment <B extends ViewDataBinding,V extends BaseFrag
         super.onCreate(savedInstanceState);
 
     }
+    protected abstract void performDataBinding();
 
     public abstract int getBindingVariable();
 
     protected abstract int getLayoutId();
-
-    protected abstract void performDataBinding();
 
     protected abstract void performDependencyInjection(FragmentComponent buildComponent);
 
