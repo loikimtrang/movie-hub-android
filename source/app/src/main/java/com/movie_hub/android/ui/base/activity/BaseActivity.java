@@ -6,31 +6,41 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.FrameLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import androidx.annotation.ColorRes;
 import androidx.annotation.LayoutRes;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.databinding.Observable;
 import androidx.databinding.ObservableBoolean;
 import androidx.databinding.ObservableField;
 import androidx.databinding.ViewDataBinding;
+import androidx.fragment.app.Fragment;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
+import com.google.gson.Gson;
 import com.movie_hub.android.MVVMApplication;
 import com.movie_hub.android.R;
 import com.movie_hub.android.constant.Constants;
+import com.movie_hub.android.data.local.prefs.AppPreferencesService;
+import com.movie_hub.android.data.model.other.ToastMessage;
 import com.movie_hub.android.di.component.ActivityComponent;
 import com.movie_hub.android.di.component.DaggerActivityComponent;
 import com.movie_hub.android.di.module.ActivityModule;
+import com.movie_hub.android.helper.LocaleHelper;
 import com.movie_hub.android.utils.DialogUtils;
 
 import javax.inject.Inject;
@@ -65,26 +75,29 @@ public abstract class BaseActivity<B extends ViewDataBinding, V extends BaseView
         super.onCreate(savedInstanceState);
         performDataBinding();
         updateCurrentAcitivity();
-        setTransparentSystemBars();
-        viewModel.mIsLoading.addOnPropertyChangedCallback(new Observable.OnPropertyChangedCallback(){
 
+        new ToastMessage(ToastMessage.TYPE_WARNING, getString(R.string.mgs_passwords_do_not_match)).showMessage(this);
+        viewModel.mIsLoading.addOnPropertyChangedCallback(new Observable.OnPropertyChangedCallback(){
             @Override
             public void onPropertyChanged(Observable sender, int propertyId) {
-                if(((ObservableBoolean)sender).get()){
-                    showProgressbar(getResources().getString(R.string.msg_loading));
-                }else{
-                    hideProgress();
+                ProgressBar loadingBar = findViewById(R.id.bottom_loading_bar);
+                FrameLayout overLay = findViewById(R.id.loading_overlay);
+                if (loadingBar != null && overLay != null) {
+                    if (viewModel.mIsLoading.get()) {
+                        loadingBar.setVisibility(View.VISIBLE);
+                        overLay.setVisibility(View.VISIBLE);
+                    }
+                    else {
+                        loadingBar.setVisibility(View.GONE);
+                        overLay.setVisibility(View.GONE);
+                    }
                 }
             }
         });
+
         viewModel.mErrorMessage.observe(this, toastMessage -> {
             if(toastMessage!=null){
                 toastMessage.showMessage(getApplicationContext());
-            }
-        });
-        viewModel.progressBarMsg.observe(this, progressBarMsg ->{
-            if (progressBarMsg != null){
-                changeProgressBarMsg(progressBarMsg);
             }
         });
         filterGlobalApplication = new IntentFilter();
@@ -102,7 +115,15 @@ public abstract class BaseActivity<B extends ViewDataBinding, V extends BaseView
             }
         };
     }
-    private void setTransparentSystemBars() {
+
+    protected void applySystemBarColors() {
+        if (!(this instanceof SystemBarColorProvider)) return;
+
+        SystemBarColorProvider provider = (SystemBarColorProvider) this;
+        setSystemBarsColor(provider.getStatusBarColor(), provider.getNavigationBarColor());
+    }
+
+    public void setSystemBarsColor(@ColorRes int statusBarColor, @ColorRes int navBarColor) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             Window window = getWindow();
             window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
@@ -111,10 +132,9 @@ public abstract class BaseActivity<B extends ViewDataBinding, V extends BaseView
                             | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
                             | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
             );
-            window.setNavigationBarColor(getResources().getColor(R.color.bg_tab_bar)); // 💥 Mấu chốt: đặt màu đen
-            window.setStatusBarColor(getResources().getColor(R.color.bg_app)); // Tuỳ chọn
+            window.setStatusBarColor(ContextCompat.getColor(this, statusBarColor));
+            window.setNavigationBarColor(ContextCompat.getColor(this, navBarColor));
         }
-
     }
 
     @Override
@@ -122,6 +142,7 @@ public abstract class BaseActivity<B extends ViewDataBinding, V extends BaseView
         super.onResume();
         LocalBroadcastManager.getInstance(this).registerReceiver(globalApplicationReceiver, filterGlobalApplication);
         updateCurrentAcitivity();
+        applySystemBarColors();
     }
 
     @Override
@@ -129,7 +150,14 @@ public abstract class BaseActivity<B extends ViewDataBinding, V extends BaseView
         super.onPause();
         LocalBroadcastManager.getInstance(this).unregisterReceiver(globalApplicationReceiver);
     }
-
+    @Override
+    public void onAttachFragment(@NonNull Fragment fragment) {
+        super.onAttachFragment(fragment);
+        if (fragment instanceof SystemBarColorProvider) {
+            SystemBarColorProvider provider = (SystemBarColorProvider) fragment;
+            setSystemBarsColor(provider.getStatusBarColor(), provider.getNavigationBarColor());
+        }
+    }
     public abstract @LayoutRes int getLayoutId();
 
     public abstract int getBindingVariable();
@@ -171,18 +199,18 @@ public abstract class BaseActivity<B extends ViewDataBinding, V extends BaseView
         progressDialog.show();
     }
 
-    public void changeProgressBarMsg(String msg){
-        if (progressDialog != null){
-            ((TextView)progressDialog.findViewById(R.id.progressbar_msg)).setText(msg);
-        }
-    }
-
-    public void hideProgress() {
-        if (progressDialog != null) {
-            progressDialog.dismiss();
-            progressDialog = null;
-        }
-    }
+//    public void changeProgressBarMsg(String msg){
+//        if (progressDialog != null){
+//            ((TextView)progressDialog.findViewById(R.id.progressbar_msg)).setText(msg);
+//        }
+//    }
+//
+//    public void hideProgress() {
+//        if (progressDialog != null) {
+//            progressDialog.dismiss();
+//            progressDialog = null;
+//        }
+//    }
 
 
     private ActivityComponent getBuildComponent() {
@@ -218,5 +246,16 @@ public abstract class BaseActivity<B extends ViewDataBinding, V extends BaseView
         } else {
             leftTitle.set(msg);
         }
+    }
+    public void navigateToNewActivity(Context from, Class<?> toActivityClass) {
+        Intent it = new Intent(from, toActivityClass);
+        from.startActivity(it);
+    }
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        AppPreferencesService prefs = new AppPreferencesService(newBase, Constants.PREF_NAME, new Gson());
+        String langCode = prefs.getAppLanguage();
+        Context context = LocaleHelper.setLocale(newBase, langCode);
+        super.attachBaseContext(context);
     }
 }

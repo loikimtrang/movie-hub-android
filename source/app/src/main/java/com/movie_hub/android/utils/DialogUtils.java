@@ -53,10 +53,10 @@ public class DialogUtils {
         android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(context);
 
         View layout = inflater.inflate(R.layout.layout_progressbar, null);
-        if(msg!=null) {
-            TextView progressbarMsg = (TextView) layout.findViewById(R.id.progressbar_msg);
-            progressbarMsg.setText(msg);
-        }
+//        if(msg!=null) {
+//            TextView progressbarMsg = (TextView) layout.findViewById(R.id.progressbar_msg);
+//            progressbarMsg.setText(msg);
+//        }
 
         builder.setCancelable(false); // if you want user to wait for some process to finish,
         builder.setView(layout);

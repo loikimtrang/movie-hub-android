@@ -112,4 +112,13 @@ public class AppPreferencesService implements PreferencesService {
         }
         return Primitives.wrap(mModelClass).cast(object);
     }
+    public static final String KEY_LANGUAGE_CODE = "language_code";
+
+    public void setAppLanguage(String langCode) {
+        mPrefs.edit().putString(KEY_LANGUAGE_CODE, langCode).apply();
+    }
+
+    public String getAppLanguage() {
+        return mPrefs.getString(KEY_LANGUAGE_CODE, "vi");
+    }
 }

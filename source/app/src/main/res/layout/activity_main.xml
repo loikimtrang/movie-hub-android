@@ -14,23 +14,36 @@
 
         <import type="android.view.View" />
     </data>
-
-    <LinearLayout
-        android:orientation="vertical"
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:background="@color/bg_app">
 
         <FrameLayout
             android:id="@+id/fragment_container"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:background="@color/bg_app"/>
+            android:layout_height="match_parent"
+            android:layout_marginBottom="@dimen/_70sdp"/>
+
+        <com.google.android.material.progressindicator.LinearProgressIndicator
+            android:id="@+id/bottom_loading_bar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:layout_marginBottom="@dimen/_70sdp"
+            android:indeterminate="true"
+            android:visibility="gone"
+            app:trackThickness="1dp"
+            app:indicatorColor="@color/ic_tab_bar_tint"
+            app:trackColor="@android:color/transparent"
+            style="@style/Widget.MaterialComponents.LinearProgressIndicator" />
+
+
 
         <com.google.android.material.bottomnavigation.BottomNavigationView
             android:id="@+id/bottomNav"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="@dimen/_70sdp"
             android:background="@color/bg_tab_bar"
             app:labelVisibilityMode="labeled"
             app:itemIconTint="@color/nav_icon_color"
@@ -39,8 +52,15 @@
             app:itemTextAppearanceActive="@style/Text_9_Normal"
             app:itemTextAppearanceInactive="@style/Text_9_Normal"
             app:menu="@menu/bottom_navigation_menu"
-            android:paddingBottom="@dimen/_8sdp"
-            android:paddingTop="@dimen/_8sdp"/>
+            android:layout_gravity="bottom"/>
 
-    </LinearLayout>
+        <FrameLayout
+            android:id="@+id/loading_overlay"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@android:color/transparent"
+            android:visibility="gone"
+            android:clickable="true"
+            android:focusable="true"/>
+    </FrameLayout>
 </layout>

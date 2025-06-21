@@ -17,17 +17,20 @@ import androidx.fragment.app.FragmentManager;
 import com.movie_hub.android.BR;
 import com.movie_hub.android.BuildConfig;
 import com.movie_hub.android.R;
+import com.movie_hub.android.constant.Constants;
 import com.movie_hub.android.databinding.ActivityMainBinding;
 import com.movie_hub.android.di.component.ActivityComponent;
 import com.movie_hub.android.ui.base.activity.BaseActivity;
+import com.movie_hub.android.ui.base.activity.SystemBarColorProvider;
 import com.movie_hub.android.ui.main.account.AccountFragment;
 import com.movie_hub.android.ui.main.account.UnLoginAccountFragment;
+import com.movie_hub.android.ui.main.account.language.LanguageActivity;
 import com.movie_hub.android.ui.main.home.HomeFragment;
 import com.movie_hub.android.ui.main.schedule.ScheduleFragment;
 import com.movie_hub.android.ui.main.search.SearchFragment;
 
 
-public class MainActivity extends BaseActivity<ActivityMainBinding, MainViewModel> {
+public class MainActivity extends BaseActivity<ActivityMainBinding, MainViewModel> implements SystemBarColorProvider {
     private Fragment active;
     private FragmentManager fm;
     private HomeFragment homeFragment;
@@ -82,7 +85,6 @@ public class MainActivity extends BaseActivity<ActivityMainBinding, MainViewMode
         active = homeFragment;
     }
     public void handleFragment(String tag) {
-        viewModel.hideLoading();
         if (fm == null) fm = getSupportFragmentManager();
 
         if (homeFragment == null) homeFragment = new HomeFragment();
@@ -124,6 +126,22 @@ public class MainActivity extends BaseActivity<ActivityMainBinding, MainViewMode
         }
         active = target;
     }
+
+    public void navigateToLanguage() {
+        Intent intent = new Intent(this, LanguageActivity.class);
+        startActivityForResult(intent, Constants.REQUEST_LANGUAGE);
+    }
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == Constants.REQUEST_LANGUAGE && resultCode == RESULT_OK) {
+            if (data != null && data.getBooleanExtra("languageChanged", false)) {
+                Intent intent = getIntent();
+                finish();
+                startActivity(intent);
+            }
+        }
+    }
         @Override
     protected void onResume() {
         super.onResume();
@@ -141,5 +159,15 @@ public class MainActivity extends BaseActivity<ActivityMainBinding, MainViewMode
     @Override
     public void performDependencyInjection(ActivityComponent buildComponent) {
         buildComponent.inject(this);
+    }
+
+    @Override
+    public int getStatusBarColor() {
+        return R.color.bg_app;
+    }
+
+    @Override
+    public int getNavigationBarColor() {
+        return R.color.bg_tab_bar;
     }
 }

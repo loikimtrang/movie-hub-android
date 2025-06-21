@@ -30,4 +30,6 @@ public interface PreferencesService {
     float getFloatVal(String key);
 
     <T> T getObjectVal(String key, Class<T> mModelClass);
+    public void setAppLanguage(String langCode);
+    public String getAppLanguage();
 }

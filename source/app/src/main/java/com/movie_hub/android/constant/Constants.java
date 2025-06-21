@@ -10,7 +10,7 @@ public class Constants {
     public static final String ACTION_EXPIRED_TOKEN ="ACTION_EXPIRED_TOKEN";
     public static final String INSTAGRAM_LOGIN_URL = "https://www.instagram.com/accounts/login/";
     public static final String INSTAGRAM_URL = "https://www.instagram.com/";
-
+    public static final int REQUEST_LANGUAGE = 1001;
     private Constants(){
 
     }

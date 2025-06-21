@@ -1,6 +1,8 @@
 package com.movie_hub.android;
 
 import android.app.Application;
+import android.content.Context;
+import android.content.SharedPreferences;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.Lifecycle;
@@ -13,6 +15,8 @@ import io.reactivex.rxjava3.schedulers.Schedulers;
 import io.reactivex.rxjava3.subjects.PublishSubject;
 import lombok.Getter;
 import lombok.Setter;
+
+import com.movie_hub.android.data.local.prefs.AppPreferencesService;
 import com.movie_hub.android.di.component.AppComponent;
 import com.movie_hub.android.di.component.DaggerAppComponent;
 import com.movie_hub.android.others.MyTimberDebugTree;
@@ -76,5 +80,4 @@ public class MVVMApplication extends Application implements LifecycleObserver {
         );
         return subject;
     }
-
 }

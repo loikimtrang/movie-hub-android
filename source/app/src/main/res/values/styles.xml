@@ -41,6 +41,7 @@
     <style name="BaseText_Inter_Bold">
         <item name="android:fontFamily">@font/inter_bold</item>
         <item name="android:textColor">@color/text</item>
+        <item name="android:textStyle">bold</item>
     </style>
 
 

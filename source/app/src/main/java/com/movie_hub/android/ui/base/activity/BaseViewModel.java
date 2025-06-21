@@ -72,4 +72,10 @@ public class BaseViewModel extends ViewModel {
     public boolean isLogin() {
         return repository.getToken() != null && !Objects.equals(repository.getToken(), "") && !Objects.equals(repository.getToken(), "NULL");
     }
+    public void setLanguage(String code) {
+        repository.getSharedPreferences().setAppLanguage(code);
+    }
+    public String getLanguage() {
+        return repository.getSharedPreferences().getAppLanguage();
+    }
 }

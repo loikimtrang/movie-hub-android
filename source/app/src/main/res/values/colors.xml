@@ -18,5 +18,14 @@
     <color name="ic_tab_bar">#A4A4A4</color>
     <color name="ic_tab_bar_tint">#F9D57B</color>
     <color name="logo">#15151F</color>
-    <color name="text">#FAF9FC</color>
+    <color name="text">#FAF9FC</color> // ic
+
+    <color name="account_header">#0F1015</color>
+    <color name="bg_dialog">#0F1015</color>
+    <color name="btn_login">#FFF09B</color>
+    <color name="btn_select">#45464F</color>
+
+    <color name="bg_toast_normal">#444A68</color>
+    <color name="bg_toast_warning">#360E17</color>
+
 </resources>

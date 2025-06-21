@@ -55,8 +55,9 @@
             </intent-filter>
         </activity>
 
-
         <activity android:name=".ui.main.MainActivity"/>
+        <activity android:name=".ui.main.account.language.LanguageActivity"/>
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.provider"
