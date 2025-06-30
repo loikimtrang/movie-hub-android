@@ -44,10 +44,11 @@
         android:theme="@style/AppTheme"
         android:hardwareAccelerated="true"
         android:windowSoftInputMode="adjustResize|stateHidden">
-        
+
         <activity
             android:name=".ui.main.splash.SplashActivity"
             android:theme="@style/SplashTheme"
+            android:screenOrientation="portrait"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -55,8 +56,15 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".ui.main.MainActivity"/>
-        <activity android:name=".ui.main.account.language.LanguageActivity"/>
+        <activity android:name=".ui.main.MainActivity"
+            android:windowSoftInputMode="adjustResize|stateHidden"
+            android:screenOrientation="portrait" />
+
+        <activity android:name=".ui.main.account.language.LanguageActivity"
+            android:windowSoftInputMode="adjustResize"
+            android:screenOrientation="portrait" />
+
+        <activity android:name=".ui.main.account.manage_account.ManageAccountActivity"/>
 
         <provider
             android:name="androidx.core.content.FileProvider"

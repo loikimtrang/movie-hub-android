@@ -1,19 +1,19 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 30
+    compileSdkVersion 31
     buildToolsVersion "30.0.3"
 
     defaultConfig {
         applicationId "com.movie_hub.android"
-        minSdkVersion 24
-        targetSdkVersion 30
+        minSdkVersion 21
+        targetSdkVersion 33
         versionCode 1
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
-        buildConfigField "String", "BASE_URL", "\"https://master-api-service-latest.onrender.com/\""
+        buildConfigField "String", "BASE_URL", "\"https://tenant-api-service-latest.onrender.com/\""
         javaCompileOptions {
             annotationProcessorOptions {
                 arguments += ["room.schemaLocation": "$projectDir/schemas".toString()]
@@ -150,4 +150,7 @@ dependencies {
     implementation "com.github.arkon.FlexibleAdapter:flexible-adapter:$flexible_adapter_version"
     implementation "com.github.arkon.FlexibleAdapter:flexible-adapter-databinding:$flexible_adapter_version"
     implementation "com.github.arkon.FlexibleAdapter:flexible-adapter-ui:$flexible_adapter_version"
+
+    implementation 'com.github.mmin18:RealtimeBlurView:82df3520b4'
+
 }

@@ -23,9 +23,14 @@
     <color name="account_header">#0F1015</color>
     <color name="bg_dialog">#0F1015</color>
     <color name="btn_login">#FFF09B</color>
+    <color name="btn_login_google">#2D3038</color>
     <color name="btn_select">#45464F</color>
+    <color name="btn_log_out">#3B3F5A</color>
+    <color name="text_orange">#E3565C</color>
 
     <color name="bg_toast_normal">#444A68</color>
     <color name="bg_toast_warning">#360E17</color>
-
+    <color name="tx_un_select">#262930</color>
+    <color name="tx_select">#FFF09B</color>
+    <color name="text_gray">#A7AAAD</color>
 </resources>

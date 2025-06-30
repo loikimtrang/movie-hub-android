@@ -1,6 +1,5 @@
 package com.movie_hub.android.ui.main.account.language.adapter;
 
-import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,7 +11,6 @@ import com.movie_hub.android.R;
 import com.movie_hub.android.custom.CustomDialog;
 import com.movie_hub.android.databinding.ItemLanguageMenuBinding;
 import com.movie_hub.android.ui.main.account.language.model.LanguageItemModel;
-import com.movie_hub.android.ui.main.splash.SplashActivity;
 
 import java.util.List;
 

@@ -76,7 +76,6 @@ public abstract class BaseActivity<B extends ViewDataBinding, V extends BaseView
         performDataBinding();
         updateCurrentAcitivity();
 
-        new ToastMessage(ToastMessage.TYPE_WARNING, getString(R.string.mgs_passwords_do_not_match)).showMessage(this);
         viewModel.mIsLoading.addOnPropertyChangedCallback(new Observable.OnPropertyChangedCallback(){
             @Override
             public void onPropertyChanged(Observable sender, int propertyId) {

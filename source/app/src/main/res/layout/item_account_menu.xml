@@ -14,7 +14,7 @@
         android:layout_height="@dimen/_12sdp"
         android:layout_centerVertical="true"
         android:layout_marginStart="@dimen/_6sdp"
-        android:src="@drawable/ic_watching" />
+        android:src="@drawable/ic_lock" />
 
     <TextView
         android:id="@+id/title"

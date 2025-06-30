@@ -17,7 +17,8 @@
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/bg_app">
+        android:background="@color/bg_app"
+        android:fitsSystemWindows="true">
 
         <FrameLayout
             android:id="@+id/fragment_container"
@@ -62,5 +63,7 @@
             android:visibility="gone"
             android:clickable="true"
             android:focusable="true"/>
+
+
     </FrameLayout>
 </layout>

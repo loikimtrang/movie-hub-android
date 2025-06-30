@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 import com.movie_hub.android.constant.Constants;
+import com.movie_hub.android.data.model.api.response.login.UserLoginResponse;
 import com.movie_hub.android.di.qualifier.PreferenceInfo;
 import com.movie_hub.android.utils.LogService;
 import com.google.gson.Gson;
@@ -20,6 +21,35 @@ public class AppPreferencesService implements PreferencesService {
     public AppPreferencesService(Context context, @PreferenceInfo String prefFileName, Gson gson) {
         mPrefs = context.getSharedPreferences(prefFileName, Context.MODE_PRIVATE);
         this.gson = gson;
+    }
+
+    @Override
+    public void saveAccessTokenObject(UserLoginResponse userLoginResponse) {
+        try {
+            String json = gson.toJson(userLoginResponse);
+            mPrefs.edit().putString(KEY_ACCESS_TOKEN_OBJECT, json).apply();
+        } catch (Exception e) {
+            LogService.e(e);
+        }
+    }
+
+    @Override
+    public UserLoginResponse getUserAccessTokenObject() {
+        try {
+            String json = mPrefs.getString(KEY_ACCESS_TOKEN_OBJECT, null);
+            if (json != null) {
+                return gson.fromJson(json, UserLoginResponse.class);
+            }
+        } catch (Exception e) {
+            LogService.e(e);
+        }
+        return null;
+    }
+
+    @Override
+    public void clearAuthData() {
+        removeKey(KEY_BEARER_TOKEN);
+        removeKey(KEY_ACCESS_TOKEN_OBJECT);
     }
 
     @Override

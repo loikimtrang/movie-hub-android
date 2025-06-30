@@ -1,6 +1,7 @@
 package com.movie_hub.android.ui.main.account;
 
 import android.annotation.SuppressLint;
+import android.util.Log;
 
 import androidx.recyclerview.widget.LinearLayoutManager;
 
@@ -11,8 +12,11 @@ import com.movie_hub.android.ui.base.activity.SystemBarColorProvider;
 import com.movie_hub.android.ui.base.fragment.BaseFragment;
 import com.movie_hub.android.ui.main.MainActivity;
 import com.movie_hub.android.ui.main.account.adapter.AccountMenuAdapter;
+import com.movie_hub.android.ui.main.account.fragment.LoginBottomSheetFragment;
+import com.movie_hub.android.ui.main.account.fragment.RegisterBottomSheetFragment;
 import com.movie_hub.android.ui.main.account.language.LanguageActivity;
 import com.movie_hub.android.ui.main.account.model.MenuItemModel;
+import com.movie_hub.android.utils.ClickUtils;
 
 import java.util.Arrays;
 import java.util.List;
@@ -86,5 +90,19 @@ public class UnLoginAccountFragment extends BaseFragment<FragmentUnLoginAccountB
                 ((MainActivity) requireActivity()).navigateToLanguage();
                 break;
         }
+    }
+
+    public void onRegisterClick() {
+        ClickUtils.debounceClick(binding.register);
+
+        RegisterBottomSheetFragment registerBottom = new RegisterBottomSheetFragment();
+        registerBottom.show(requireActivity().getSupportFragmentManager(), registerBottom.getTag());
+    }
+
+    public void onLoginClick() {
+        ClickUtils.debounceClick(binding.login);
+
+        LoginBottomSheetFragment loginBottom = new LoginBottomSheetFragment();
+        loginBottom.show(requireActivity().getSupportFragmentManager(), loginBottom.getTag());
     }
 }

@@ -30,30 +30,43 @@ public class AuthInterceptor implements Interceptor {
     @NotNull
     @Override
     public Response intercept(@NotNull Interceptor.Chain chain) throws IOException {
-        String isIgnore = chain.request().header("IgnoreAuth");
-        if (isIgnore != null && isIgnore.equals("1")) {
-            Request.Builder newRequest = chain.request().newBuilder();
+        Request originalRequest = chain.request();
+        Request.Builder newRequest = originalRequest.newBuilder();
+
+        if ("1".equals(originalRequest.header("IgnoreAuth"))) {
             newRequest.removeHeader("IgnoreAuth");
-            newRequest.addHeader("X-tenant", "movie_hub");
+            newRequest.addHeader("X-tenant", "1235");
             return chain.proceed(newRequest.build());
         }
 
-        //Add Authentication
-        Request.Builder newRequest = chain.request().newBuilder();
-        String token = appPreferences.getToken();
-        if (token != null && !token.equals("")) {
-            newRequest.addHeader("Authorization", "Bearer " + token);
-        }
-        newRequest.addHeader("X-tenant", "movie_hub");
+        if ("1".equals(originalRequest.header("UseBasicAuth"))) {
+            newRequest.removeHeader("UseBasicAuth");
 
-        Response origResponse = chain.proceed(newRequest.build());
-        if (origResponse.code() == 403 || origResponse.code() == 401) {
-            LogService.i("Error http =====================> code: "+origResponse.code());
+            String username = "abc_client";
+            String password = "abc123";
+            String credentials = username + ":" + password;
+
+            String basicAuth = "Basic " + android.util.Base64.encodeToString(credentials.getBytes(), android.util.Base64.NO_WRAP);
+            newRequest.addHeader("Authorization", basicAuth);
+        } else {
+            String token = appPreferences.getToken();
+            if (token != null && !token.isEmpty() && !"NULL".equalsIgnoreCase(token)) {
+                newRequest.addHeader("Authorization", "Bearer " + token);
+            }
+        }
+
+        newRequest.addHeader("X-tenant", "1235");
+
+        Response response = chain.proceed(newRequest.build());
+
+        if (response.code() == 401 || response.code() == 403) {
+            LogService.i("Auth error code: " + response.code());
             appPreferences.removeKey(PreferencesService.KEY_BEARER_TOKEN);
-            Intent intent = new Intent();
-            intent.setAction(Constants.ACTION_EXPIRED_TOKEN);
+
+            Intent intent = new Intent(Constants.ACTION_EXPIRED_TOKEN);
             LocalBroadcastManager.getInstance(application.getApplicationContext()).sendBroadcast(intent);
         }
-        return origResponse;
+
+        return response;
     }
 }

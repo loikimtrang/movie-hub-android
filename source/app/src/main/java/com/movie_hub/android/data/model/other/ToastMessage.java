@@ -43,7 +43,6 @@ public class ToastMessage {
             case TYPE_NORMAL:
                 icon.setImageResource(R.drawable.ic_bell);
                 layout.setBackgroundResource(R.color.bg_toast_normal);
-
                 break;
             case TYPE_SUCCESS:
                 Toasty.success(context, message).show();
@@ -58,9 +57,10 @@ public class ToastMessage {
             default:
                 break;
         }
-        toast.setGravity(Gravity.BOTTOM | Gravity.FILL_HORIZONTAL, 0, 100);
-        toast.setDuration(Toast.LENGTH_SHORT);
         toast.setView(layout);
+        toast.setDuration(Toast.LENGTH_SHORT);
+        int bottomOffset = context.getResources().getDimensionPixelSize(R.dimen._70sdp);
+        toast.setGravity(Gravity.BOTTOM | Gravity.FILL_HORIZONTAL, 0, bottomOffset);
         toast.show();
     }
 }
