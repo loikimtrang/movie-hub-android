@@ -12,6 +12,7 @@ import retrofit2.http.Body;
 import retrofit2.http.GET;
 import retrofit2.http.Headers;
 import retrofit2.http.POST;
+import retrofit2.http.PUT;
 
 public interface ApiService {
 
@@ -30,6 +31,6 @@ public interface ApiService {
     @GET("v1/user/update-profile")
     Observable<ResponseWrapper> updateUserProfile();
 
-    @GET("v1/user/change-password")
+    @PUT("v1/user/change-password")
     Observable<ResponseWrapper> changeUserPassword(@Body UserChangePasswordRequest request);
 }

@@ -24,6 +24,7 @@ import com.movie_hub.android.R;
 import com.movie_hub.android.data.model.api.FormError;
 import com.movie_hub.android.data.model.api.ResponseWrapper;
 import com.movie_hub.android.data.model.api.request.login.UserRegisterRequest;
+import com.movie_hub.android.data.model.api.request.user.UserChangePasswordRequest;
 import com.movie_hub.android.data.model.other.ToastMessage;
 import com.movie_hub.android.databinding.FragmentBottomSheetChangePasswordBinding;
 import com.movie_hub.android.databinding.FragmentBottomSheetRegisterBinding;
@@ -31,6 +32,7 @@ import com.movie_hub.android.helper.BlurEffectManager;
 import com.movie_hub.android.ui.main.MainActivity;
 import com.movie_hub.android.ui.main.MainCallback;
 import com.movie_hub.android.ui.main.account.fragment.LoginBottomSheetFragment;
+import com.movie_hub.android.ui.main.account.manage_account.ManageAccountActivity;
 import com.movie_hub.android.utils.ClickUtils;
 
 import java.lang.reflect.Type;
@@ -63,11 +65,100 @@ public class ChangePasswordBottomSheetFragment extends BottomSheetDialogFragment
 
         binding.layout.setOnClickListener(v -> hideKeyboard());
 
-        binding.cancel.setOnClickListener(v -> dismiss());
+        binding.cancel.setOnClickListener(v -> onCancelClick());
+
+        binding.update.setOnClickListener(v -> onUpdateClick());
 
         return view;
     }
 
+    public void onUpdateClick() {
+        if (validateChangePassword()) {
+
+            ClickUtils.debounceClick(binding.update);
+            hideKeyboard();
+            clearAllFocus();
+            binding.update.setText("");
+            binding.loadingUpdate.setVisibility(View.VISIBLE);
+            binding.update.setClickable(false);
+
+            UserChangePasswordRequest request = new UserChangePasswordRequest();
+            request.setOldPassword(Objects.requireNonNull(binding.oldPassword.getText()).toString().trim());
+            request.setNewPassword(Objects.requireNonNull(binding.reNewPassword.getText()).toString().trim());
+
+            ((ManageAccountActivity) requireActivity()).userChangePassword(request, new MainCallback<ResponseWrapper>() {
+                @Override
+                public void doSuccess(ResponseWrapper object) {
+                    hideKeyboard();
+                    new Handler(Looper.getMainLooper()).postDelayed(() -> dismiss(), 500);
+                }
+                @Override
+                public void doError(Throwable throwable) {
+                    if (throwable instanceof UnknownHostException || throwable instanceof SocketTimeoutException) {
+                        showUpdateError(getString(R.string.network_error_please_check_your_internet_connection));
+                    } else if (throwable instanceof ConnectException) {
+                        showUpdateError(getString(R.string.cannot_connect_to_the_server_please_try_again));
+                    } else {
+                        showUpdateError(getString(R.string.change_password_failed));
+                    }
+                }
+
+                @Override
+                public void doSuccess() {
+
+                }
+
+                @Override
+                public void doFail() {
+                    showUpdateError(getString(R.string.error_incorrect_old_password));
+                }
+            });
+        }
+
+    }
+    public boolean validateChangePassword() {
+        String oldPassword = binding.oldPassword.getText().toString().trim();
+        String newPassword = binding.newPassword.getText().toString().trim();
+        String reNewPassword = binding.reNewPassword.getText().toString().trim();
+
+        if (oldPassword.isEmpty() || newPassword.isEmpty() || reNewPassword.isEmpty()) {
+            new ToastMessage(ToastMessage.TYPE_WARNING, getString(R.string.mgs_please_fill_in_all_the_required_information)).showMessage(getContext());
+            return false;
+        }
+
+        if (newPassword.length() < 6) {
+            new ToastMessage(ToastMessage.TYPE_WARNING, getString(R.string.error_password_length)).showMessage(getContext());
+            return false;
+        }
+
+        if (!newPassword.matches(".*[A-Z].*") || !newPassword.matches(".*[!@#$%^&*+=?].*")) {
+            new ToastMessage(ToastMessage.TYPE_WARNING, getString(R.string.error_password_format)).showMessage(getContext());
+            return false;
+        }
+
+        if (!newPassword.equals(reNewPassword)) {
+            new ToastMessage(ToastMessage.TYPE_WARNING, getString(R.string.error_password_mismatch)).showMessage(getContext());
+            return false;
+        }
+
+        if (newPassword.equals(oldPassword)) {
+            new ToastMessage(ToastMessage.TYPE_WARNING, getString(R.string.error_password_same_as_old)).showMessage(getContext());
+            return false;
+        }
+
+        return true;
+    }
+    private void showUpdateError(String message) {
+        new ToastMessage(ToastMessage.TYPE_WARNING, message).showMessage(getContext());
+
+        binding.update.setText(getString(R.string.update));
+        binding.loadingUpdate.setVisibility(View.GONE);
+        binding.update.setClickable(true);
+    }
+    public void onCancelClick() {
+        hideKeyboard();
+        dismiss();
+    }
     private void setUpPassword() {
         binding.hideOldPassword.setOnClickListener(v -> {
             isOldPasswordVisible[0] = !isOldPasswordVisible[0];

@@ -10,6 +10,7 @@ public class UserResponse {
     private String createdDate;
     private String email;
     private String fullName;
+    private int gender;
     private GroupResponse group;
     private long id;
     private int kind;

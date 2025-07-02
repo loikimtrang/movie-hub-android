@@ -62,4 +62,15 @@
     <string name="current_password">Mật Khẩu hiện tại</string>
     <string name="confirm_new_password">Xác nhận mật khẩu mới</string>
     <string name="update">Cập nhật</string>
+    <string name="error_password_same_as_old" translatable="false">Mật khẩu mới phải khác với mật khẩu cũ</string>
+    <string name="change_password_success">Thay đổi mật khẩu thành công</string>
+    <string name="change_password_failed">Thay đổi mật khẩu không thành công</string>
+    <string name="error_incorrect_old_password">Mật khẩu cũ không đúng</string>
+
+    <string name="display_name">Tên hiển thị</string>
+    <string name="gender">Giới tính</string>
+    <string name="male">Nam</string>
+    <string name="female">Nữ</string>
+    <string name="unspecified">Không xác định</string>
+    <string name="phone_number">Số điện thoại</string>
 </resources>

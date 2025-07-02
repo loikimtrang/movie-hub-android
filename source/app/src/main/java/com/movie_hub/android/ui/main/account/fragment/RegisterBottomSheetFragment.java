@@ -101,11 +101,11 @@ public class RegisterBottomSheetFragment extends BottomSheetDialogFragment {
                     @Override
                     public void doError(Throwable throwable) {
                         if (throwable instanceof UnknownHostException || throwable instanceof SocketTimeoutException) {
-                            showLoginError(getString(R.string.network_error_please_check_your_internet_connection));
+                            showRegisterError(getString(R.string.network_error_please_check_your_internet_connection));
                         } else if (throwable instanceof ConnectException) {
-                            showLoginError(getString(R.string.cannot_connect_to_the_server_please_try_again));
+                            showRegisterError(getString(R.string.cannot_connect_to_the_server_please_try_again));
                         } else {
-                            showLoginError(getString(R.string.register_error_please_try_again));
+                            showRegisterError(getString(R.string.register_error_please_try_again));
                         }
                     }
 
@@ -128,28 +128,26 @@ public class RegisterBottomSheetFragment extends BottomSheetDialogFragment {
                             for (FormError error : errors) {
                                 switch (error.getField()) {
                                     case "username":
-                                        showLoginError(getString(R.string.the_username_already_exists_or_is_invalid));
+                                        showRegisterError(getString(R.string.the_username_already_exists_or_is_invalid));
                                         break;
                                     case "email":
-                                        showLoginError(getString(R.string.the_email_already_exists_or_is_invalid));
+                                        showRegisterError(getString(R.string.the_email_already_exists_or_is_invalid));
                                         break;
                                 }
                             }
                         } catch (Exception e) {
-                            showLoginError(getString(R.string.register_error_please_try_again));
+                            showRegisterError(getString(R.string.register_error_please_try_again));
                         }
                     }
-
-
                 });
             }
         });
     }
 
-    private void showLoginError(String message) {
+    private void showRegisterError(String message) {
         new ToastMessage(ToastMessage.TYPE_WARNING, message).showMessage(getContext());
 
-        binding.register.setText(getString(R.string.login));
+        binding.register.setText(getString(R.string.sign_in));
         binding.registerLoading.setVisibility(View.GONE);
         binding.register.setClickable(true);
     }

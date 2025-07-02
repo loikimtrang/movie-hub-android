@@ -9,11 +9,17 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.bumptech.glide.Glide;
 import com.movie_hub.android.R;
+import com.movie_hub.android.data.model.api.ResponseWrapper;
+import com.movie_hub.android.data.model.api.request.login.UserRegisterRequest;
+import com.movie_hub.android.data.model.api.request.user.UserChangePasswordRequest;
 import com.movie_hub.android.data.model.api.response.user.UserResponse;
+import com.movie_hub.android.data.model.other.ToastMessage;
 import com.movie_hub.android.databinding.ActivityManageAccountBinding;
 import com.movie_hub.android.di.component.ActivityComponent;
 import com.movie_hub.android.ui.base.activity.BaseActivity;
 import com.movie_hub.android.ui.base.activity.SystemBarColorProvider;
+import com.movie_hub.android.ui.main.MainActivity;
+import com.movie_hub.android.ui.main.MainCallback;
 import com.movie_hub.android.ui.main.account.fragment.RegisterBottomSheetFragment;
 import com.movie_hub.android.ui.main.account.manage_account.adapter.ManageAccountMenuAdapter;
 import com.movie_hub.android.ui.main.account.manage_account.fragment.ChangePasswordBottomSheetFragment;
@@ -106,5 +112,31 @@ public class ManageAccountActivity extends BaseActivity<ActivityManageAccountBin
     protected void onDestroy() {
         super.onDestroy();
         PROFILE = new MutableLiveData<>();
+    }
+    public void userChangePassword(UserChangePasswordRequest request, MainCallback<ResponseWrapper> callback) {
+        viewModel.userChangePassWord(new MainCallback<ResponseWrapper>() {
+            @Override
+            public void doSuccess(ResponseWrapper object) {
+                new ToastMessage(ToastMessage.TYPE_NORMAL, getString(R.string.change_password_success)).showMessage(ManageAccountActivity.this);
+                callback.doSuccess(object);
+            }
+            @Override
+            public void doErrorForm(ResponseWrapper response) {
+                callback.doErrorForm(response);
+            }
+            @Override
+            public void doFail() {
+                callback.doFail();
+            }
+
+            @Override
+            public void doError(Throwable throwable) {
+                callback.doError(throwable);
+            }
+
+            @Override
+            public void doSuccess() {}
+
+        }, request);
     }
 }
