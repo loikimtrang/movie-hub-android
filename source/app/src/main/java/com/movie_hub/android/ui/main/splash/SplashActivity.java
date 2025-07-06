@@ -7,10 +7,13 @@ import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.movie_hub.android.R;
+import com.movie_hub.android.data.model.api.response.user.UserResponse;
 import com.movie_hub.android.databinding.ActivitySplashBinding;
 import com.movie_hub.android.di.component.ActivityComponent;
 import com.movie_hub.android.ui.base.activity.BaseActivity;
 import com.movie_hub.android.ui.main.MainActivity;
+import com.movie_hub.android.ui.main.MainCallback;
+import com.movie_hub.android.ui.main.account.AccountFragment;
 
 import eu.davidea.flexibleadapter.databinding.BR;
 

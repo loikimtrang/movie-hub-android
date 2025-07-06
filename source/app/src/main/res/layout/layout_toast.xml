@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:paddingVertical="@dimen/_12sdp"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/bg_toast_normal">
+
+    <ImageView
+        android:id="@+id/icon"
+        android:layout_width="@dimen/_16sdp"
+        android:layout_height="@dimen/_16sdp"
+        android:layout_marginEnd="@dimen/_12sdp"
+        android:src="@drawable/ic_bell"
+        android:layout_marginStart="@dimen/_12sdp"/>
+
+    <TextView
+        android:id="@+id/mgs"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:layout_marginEnd="@dimen/_12sdp"
+        style="@style/Text_10_Normal"
+        android:text="@string/mgs_please_fill_in_all_the_required_information"/>
+</LinearLayout>

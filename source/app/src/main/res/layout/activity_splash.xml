@@ -17,7 +17,8 @@
         android:layout_height="match_parent"
         android:orientation="vertical"
         android:gravity="center"
-        android:background="#15151F">
+        android:background="#15151F"
+        android:fitsSystemWindows="true">
 
         <ImageView
             android:layout_width="@dimen/_150sdp"

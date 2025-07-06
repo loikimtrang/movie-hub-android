@@ -19,6 +19,8 @@ import com.movie_hub.android.R;
 import com.movie_hub.android.di.component.DaggerFragmentComponent;
 import com.movie_hub.android.di.component.FragmentComponent;
 import com.movie_hub.android.di.module.FragmentModule;
+import com.movie_hub.android.ui.base.activity.BaseActivity;
+import com.movie_hub.android.ui.base.activity.SystemBarColorProvider;
 import com.movie_hub.android.utils.DialogUtils;
 
 import javax.inject.Inject;
@@ -101,4 +103,16 @@ public abstract class BaseFragment <B extends ViewDataBinding,V extends BaseFrag
         }
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (this instanceof SystemBarColorProvider && getActivity() instanceof BaseActivity) {
+            BaseActivity<?, ?> baseActivity = (BaseActivity<?, ?>) getActivity();
+            SystemBarColorProvider provider = (SystemBarColorProvider) this;
+            baseActivity.setSystemBarsColor(
+                    provider.getStatusBarColor(),
+                    provider.getNavigationBarColor()
+            );
+        }
+    }
 }

@@ -8,6 +8,7 @@ import com.movie_hub.android.MVVMApplication;
 import com.movie_hub.android.data.Repository;
 import com.movie_hub.android.data.model.other.ToastMessage;
 
+import io.reactivex.rxjava3.disposables.CompositeDisposable;
 import lombok.Setter;
 
 public class BaseFragmentViewModel extends ViewModel {
@@ -16,6 +17,7 @@ public class BaseFragmentViewModel extends ViewModel {
     protected final MVVMApplication application;
     protected final MutableLiveData<ToastMessage> mErrorMessage = new MutableLiveData<>();
     protected final ObservableBoolean mIsLoading = new ObservableBoolean();
+    protected CompositeDisposable compositeDisposable;
 
 
     @Setter
@@ -24,6 +26,8 @@ public class BaseFragmentViewModel extends ViewModel {
     public BaseFragmentViewModel(Repository repository, MVVMApplication application) {
         this.repository = repository;
         this.application = application;
+        this.compositeDisposable = new CompositeDisposable();
+
     }
 
     public void showSuccessMessage(String message){

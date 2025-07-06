@@ -11,6 +11,8 @@ import com.movie_hub.android.data.Repository;
 import com.movie_hub.android.di.scope.ActivityScope;
 import com.movie_hub.android.ui.base.activity.BaseActivity;
 import com.movie_hub.android.ui.main.MainViewModel;
+import com.movie_hub.android.ui.main.account.language.LanguageViewModel;
+import com.movie_hub.android.ui.main.account.manage_account.ManageAccountViewModel;
 import com.movie_hub.android.ui.main.splash.SplashViewModel;
 import com.movie_hub.android.utils.GetInfo;
 
@@ -55,5 +57,21 @@ public class ActivityModule {
         Supplier<SplashViewModel> supplier = () -> new SplashViewModel(repository, (MVVMApplication)application);
         ViewModelProviderFactory<SplashViewModel> factory = new ViewModelProviderFactory<>(SplashViewModel.class, supplier);
         return new ViewModelProvider(activity, factory).get(SplashViewModel.class);
+    }
+
+    @Provides
+    @ActivityScope
+    LanguageViewModel provideLanguageViewModel(Repository repository, Context application) {
+        Supplier<LanguageViewModel> supplier = () -> new LanguageViewModel(repository, (MVVMApplication)application);
+        ViewModelProviderFactory<LanguageViewModel> factory = new ViewModelProviderFactory<>(LanguageViewModel.class, supplier);
+        return new ViewModelProvider(activity, factory).get(LanguageViewModel.class);
+    }
+
+    @Provides
+    @ActivityScope
+    ManageAccountViewModel provideManageAccountViewModel(Repository repository, Context application) {
+        Supplier<ManageAccountViewModel> supplier = () -> new ManageAccountViewModel(repository, (MVVMApplication)application);
+        ViewModelProviderFactory<ManageAccountViewModel> factory = new ViewModelProviderFactory<>(ManageAccountViewModel.class, supplier);
+        return new ViewModelProvider(activity, factory).get(ManageAccountViewModel.class);
     }
 }

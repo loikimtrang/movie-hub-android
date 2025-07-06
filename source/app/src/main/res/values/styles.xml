@@ -18,7 +18,17 @@
         <item name="android:windowBackground">@drawable/splash_screen</item>
         <item name="android:windowNoTitle">true</item>
         <item name="android:windowFullscreen">true</item>
+        <item name="android:statusBarColor">@color/bg_app</item>
+        <item name="android:navigationBarColor">@color/bg_app</item>
     </style>
+
+    <style name="Theme.MovieHub.NoActionBar" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <!-- Tùy chỉnh màu sắc splash -->
+        <item name="android:windowBackground">@color/bg_app</item>
+        <item name="android:statusBarColor">@color/bg_app</item>
+        <item name="android:navigationBarColor">@color/bg_app</item>
+    </style>
+
     <style name="CustomLoadingDialog" parent="Theme.AppCompat.Dialog">
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:windowNoTitle">true</item>
@@ -30,7 +40,14 @@
         <item name="android:textSize">@dimen/_11ssp</item>
         <item name="android:fontFamily">@font/application_font</item>
     </style>
-
+    <style name="CustomOutlinedBox" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+        <item name="boxStrokeWidth">1dp</item>
+        <item name="boxStrokeWidthFocused">2dp</item>
+        <item name="boxStrokeColor">@color/custom_box_stroke_color</item>
+        <item name="hintTextColor">@color/tx_select</item>
+        <item name="android:textColorHint">@color/text_gray</item>
+        <item name="iconEndPadding">12dp</item>
+    </style>
     <!-- Style cơ bản dùng Inter Regular -->
     <style name="BaseText_Inter">
         <item name="android:fontFamily">@font/inter</item>
@@ -41,7 +58,11 @@
     <style name="BaseText_Inter_Bold">
         <item name="android:fontFamily">@font/inter_bold</item>
         <item name="android:textColor">@color/text</item>
+        <item name="android:textStyle">bold</item>
     </style>
+
+
+
 
 
     <style name="Text_6_Normal" parent="BaseText_Inter">
