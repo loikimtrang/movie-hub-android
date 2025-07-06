@@ -1,4 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <paths xmlns:android="http://schemas.android.com/apk/res/android">
-    <external-path name="external_files" path="."/>
+
+    <!-- Dùng cho getCacheDir() -->
+    <cache-path name="cache" path="." />
+
+    <!-- Dùng cho getFilesDir() -->
+    <files-path name="internal_files" path="." />
+
+    <!-- Dùng cho getExternalFilesDir() -->
+    <external-files-path name="external_files" path="." />
+
+    <!-- Dùng cho Environment.getExternalStorageDirectory() (deprecated từ Android Q) -->
+    <external-path name="external_storage_root" path="." />
+
 </paths>

@@ -1,7 +1,7 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 31
+    compileSdkVersion 33 // 31
     buildToolsVersion "30.0.3"
 
     defaultConfig {
@@ -13,7 +13,7 @@ android {
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
-        buildConfigField "String", "BASE_URL", "\"https://tenant-api-service-latest.onrender.com/\""
+        buildConfigField "String", "BASE_URL", "\"https://tenant.moviehub.biz/\""
         javaCompileOptions {
             annotationProcessorOptions {
                 arguments += ["room.schemaLocation": "$projectDir/schemas".toString()]
@@ -152,5 +152,6 @@ dependencies {
     implementation "com.github.arkon.FlexibleAdapter:flexible-adapter-ui:$flexible_adapter_version"
 
     implementation 'com.github.mmin18:RealtimeBlurView:82df3520b4'
+    implementation 'com.github.yalantis:ucrop:2.2.8'
 
 }

@@ -6,9 +6,8 @@ import lombok.Data;
 public class UserUpdateProfileRequest {
     private String avatarPath;
     private String fullName;
-    private String newPassword;
-    private String oldPassword;
     private String phone;
     private String username;
+    private int gender;
 }
 

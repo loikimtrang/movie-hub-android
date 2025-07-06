@@ -136,53 +136,24 @@ public class AppModule {
     @Provides
     @Singleton
     AppDatabase provideAppDatabase(@DatabaseInfo String dbName, Context context) {
-        File div = new File(Environment.getExternalStorageDirectory(),
-                "do_not_delete");
-        if (!div.exists()) {
-            div.mkdirs();
-        }
-        String dbPath;
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
-            boolean grant = Environment.isExternalStorageManager();
-            if (grant){
-                dbPath = Environment.getExternalStorageDirectory().getAbsolutePath()+"/do_not_delete";
-            } else {
-                dbPath = context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS).getAbsolutePath();
-            }
-        } else {
-            dbPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS).getAbsolutePath()+"/do_not_delete";
-        }
-
-        File databasePath = new File(dbPath, dbName);
-
-        // Check if the database file exists
-        if (!databasePath.exists()) {
-            try {
-                // Create a new empty database file
-                Timber.d("🟩"+String.valueOf(databasePath.createNewFile()));
-                Timber.d("🟩CREATE NEW FILE");
-            } catch (IOException e) {
-                Timber.d(e);
-            }
-        }
-        return Room.databaseBuilder(context, AppDatabase.class, databasePath.getAbsolutePath())
-//                .createFromAsset("mvvm_db.db")
+        return Room.databaseBuilder(context, AppDatabase.class, "movie_hub_room.db")
+                .setJournalMode(RoomDatabase.JournalMode.TRUNCATE)
                 .addCallback(new RoomDatabase.Callback() {
                     @Override
                     public void onCreate(@NonNull SupportSQLiteDatabase db) {
                         super.onCreate(db);
-                        Timber.d("🟩"+db.getPath());
+                        Timber.d("🟩 Database created: %s", db.getPath());
                     }
 
                     @Override
                     public void onOpen(@NonNull SupportSQLiteDatabase db) {
                         super.onOpen(db);
-                        Timber.d("🟩"+db.getPath());
+                        Timber.d("🟩 Database opened: %s", db.getPath());
                     }
                 })
-                .setJournalMode(RoomDatabase.JournalMode.TRUNCATE)
                 .build();
     }
+
     @Provides
     @Singleton
     RoomService provideDbService(AppDbService roomService) {

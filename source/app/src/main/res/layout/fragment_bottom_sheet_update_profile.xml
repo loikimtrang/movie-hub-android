@@ -26,7 +26,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/change_password"
+                android:text="@string/update_information"
                 style="@style/Text_14_Bold"
                 android:layout_gravity="center_horizontal"
                 android:layout_marginTop="@dimen/_12sdp"
@@ -48,7 +48,6 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:hint="@string/display_name"
-                        android:inputType="textPassword"
                         android:singleLine="true"
                         style="@style/Text_12_Normal"
                         android:paddingHorizontal="@dimen/_12sdp"/>
@@ -106,7 +105,7 @@
                     android:text="@string/male"
                     android:background="@drawable/bg_item_stroke_white_radius_6sdp"
                     android:paddingVertical="@dimen/_3sdp"
-                    android:paddingHorizontal="@dimen/_6sdp"
+                    android:paddingHorizontal="@dimen/_12sdp"
                     android:layout_marginEnd="@dimen/_6sdp"/>
 
                 <TextView
@@ -117,7 +116,7 @@
                     android:text="@string/female"
                     android:background="@drawable/bg_item_stroke_white_radius_6sdp"
                     android:paddingVertical="@dimen/_3sdp"
-                    android:paddingHorizontal="@dimen/_6sdp"
+                    android:paddingHorizontal="@dimen/_12sdp"
                     android:layout_marginEnd="@dimen/_6sdp"/>
 
                 <TextView
@@ -128,7 +127,7 @@
                     android:text="@string/unspecified"
                     android:background="@drawable/bg_item_stroke_white_radius_6sdp"
                     android:paddingVertical="@dimen/_3sdp"
-                    android:paddingHorizontal="@dimen/_6sdp"
+                    android:paddingHorizontal="@dimen/_12sdp"
                     android:layout_marginEnd="@dimen/_6sdp"/>
 
             </LinearLayout>

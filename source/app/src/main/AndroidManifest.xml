@@ -30,6 +30,8 @@
     <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.VIBRATE" />
 
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+
     <application
         android:requestLegacyExternalStorage="true"
         android:name="com.movie_hub.android.MVVMApplication"
@@ -65,6 +67,10 @@
             android:screenOrientation="portrait" />
 
         <activity android:name=".ui.main.account.manage_account.ManageAccountActivity"/>
+        <activity
+            android:name="com.yalantis.ucrop.UCropActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
 
         <provider
             android:name="androidx.core.content.FileProvider"

@@ -25,7 +25,6 @@ public class SplashActivity extends BaseActivity<ActivitySplashBinding, SplashVi
         setTheme(R.style.SplashTheme);
         viewBinding.setA(this);
         viewBinding.setVm(viewModel);
-        getUserProfile();
         viewModel = new ViewModelProvider(this).get(SplashViewModel.class);
         startActivity(new Intent(this, MainActivity.class));
         finish();
@@ -44,28 +43,5 @@ public class SplashActivity extends BaseActivity<ActivitySplashBinding, SplashVi
     @Override
     public void performDependencyInjection(ActivityComponent buildComponent) {
         buildComponent.inject(this);
-    }
-    public void getUserProfile() {
-        viewModel.getUserProfile(new MainCallback<UserResponse>() {
-            @Override
-            public void doError(Throwable error) {
-
-            }
-
-            @Override
-            public void doSuccess() {
-
-            }
-
-            @Override
-            public void doFail() {
-
-            }
-
-            @Override
-            public void doSuccess(UserResponse object) {
-                AccountFragment.PROFILE.setValue(object);
-            }
-        });
     }
 }

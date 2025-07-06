@@ -73,4 +73,16 @@
     <string name="female">Female</string>
     <string name="unspecified">Unspecified</string>
     <string name="phone_number">Phone Number</string>
+    <string name="mgs_invalid_phone_number">Invalid phone number</string>
+    <string name="mgs_update_success">Information updated successfully</string>
+    <string name="mgs_update_failed">Failed to update information</string>
+    <string name="view_avatar">View avatar</string>
+    <string name="choose_avatar">Choose avatar</string>
+    <string name="take_photo">Take a photo</string>
+    <string name="choose_from_library">Choose from library</string>
+    <string name="choose_existing_photo">Choose existing photo</string>
+    <string name="permission_camera_required">Camera permission is required</string>
+    <string name="permission_storage_required">Storage permission is required</string>
+    <string name="upload_image_failed">Image upload failed</string>
+
 </resources>

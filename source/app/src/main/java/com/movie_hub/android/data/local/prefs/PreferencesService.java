@@ -3,11 +3,14 @@ package com.movie_hub.android.data.local.prefs;
 import android.content.SharedPreferences;
 
 import com.movie_hub.android.data.model.api.response.login.UserLoginResponse;
+import com.movie_hub.android.data.model.api.response.user.UserResponse;
 
 public interface PreferencesService {
     public static final String KEY_BEARER_TOKEN="KEY_BEARER_TOKEN";
 
     String KEY_ACCESS_TOKEN_OBJECT = "KEY_ACCESS_TOKEN_OBJECT";
+    String KEY_USER_RESPONSE = "KEY_USER_RESPONSE";
+
     void saveAccessTokenObject(UserLoginResponse userLoginResponse);
     UserLoginResponse getUserAccessTokenObject();
     void clearAuthData();

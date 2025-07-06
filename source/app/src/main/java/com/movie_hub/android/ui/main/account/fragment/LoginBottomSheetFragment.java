@@ -69,7 +69,6 @@ public class LoginBottomSheetFragment extends BottomSheetDialogFragment {
         return false;
     }
 
-
     private void onRegisterNowClick() {
         binding.registerNow.setOnClickListener(v -> {
             ClickUtils.debounceClick(binding.registerNow);
@@ -97,6 +96,7 @@ public class LoginBottomSheetFragment extends BottomSheetDialogFragment {
                 ((MainActivity) requireActivity()).userLogin(request, new MainCallback<UserLoginResponse>() {
                     @Override
                     public void doSuccess(UserLoginResponse object) {
+
                         dismiss();
                     }
 

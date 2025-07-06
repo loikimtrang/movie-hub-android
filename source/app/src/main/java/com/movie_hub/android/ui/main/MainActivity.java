@@ -46,6 +46,10 @@ public class MainActivity extends BaseActivity<ActivityMainBinding, MainViewMode
         viewBinding.setA(this);
         viewBinding.setVm(viewModel);
         setUpFragment();
+
+        if (viewModel.isLogin()) {
+            getUserProfile();
+        }
     }
 
     @SuppressLint("NonConstantResourceId")
@@ -102,7 +106,6 @@ public class MainActivity extends BaseActivity<ActivityMainBinding, MainViewMode
                 target = scheduleFragment;
                 break;
             case Constants.ACCOUNT:
-                getUserProfile(Constants.ACCOUNT);
                 target = accountFragment;
                 break;
             case Constants.ACCOUNT_UN_LOGIN:
@@ -172,10 +175,14 @@ public class MainActivity extends BaseActivity<ActivityMainBinding, MainViewMode
         viewModel.userLogin(new MainCallback<UserLoginResponse>() {
             @Override
             public void doSuccess(UserLoginResponse object) {
-                new ToastMessage(ToastMessage.TYPE_NORMAL, getString(R.string.login_successful)).showMessage(MainActivity.this);
                 callback.doSuccess(object);
-                getUserProfile(Constants.ACCOUNT);
-                handleFragment(Constants.ACCOUNT);
+
+                runOnUiThread(() -> {
+                    new ToastMessage(ToastMessage.TYPE_NORMAL, getString(R.string.login_successful))
+                            .showMessage(MainActivity.this);
+                    viewBinding.bottomNav.setSelectedItemId(R.id.home);
+                });
+
             }
 
             @Override
@@ -197,12 +204,10 @@ public class MainActivity extends BaseActivity<ActivityMainBinding, MainViewMode
         viewModel.userRegister(new MainCallback<ResponseWrapper>() {
             @Override
             public void doSuccess(ResponseWrapper object) {
-                new ToastMessage(ToastMessage.TYPE_NORMAL, getString(R.string.your_account_has_been_successfully_registered)).showMessage(MainActivity.this);
+                if (object.isResult()) {
+                    new ToastMessage(ToastMessage.TYPE_NORMAL, getString(R.string.your_account_has_been_successfully_registered)).showMessage(MainActivity.this);
+                }
                 callback.doSuccess(object);
-            }
-            @Override
-            public void doErrorForm(ResponseWrapper response) {
-                callback.doErrorForm(response);
             }
             @Override
             public void doFail() {
@@ -228,7 +233,7 @@ public class MainActivity extends BaseActivity<ActivityMainBinding, MainViewMode
         }, 1000);
     }
 
-    public void getUserProfile(String nameLayout) {
+    public void getUserProfile() {
         viewModel.getUserProfile(new MainCallback<UserResponse>() {
             @Override
             public void doError(Throwable error) {
@@ -243,19 +248,6 @@ public class MainActivity extends BaseActivity<ActivityMainBinding, MainViewMode
             @Override
             public void doFail() {
 
-            }
-
-            @Override
-            public void doSuccess(UserResponse object) {
-                switch (nameLayout) {
-                    case Constants.ACCOUNT:
-                        AccountFragment.PROFILE.setValue(object);
-                        break;
-                    case Constants.ACTIVITY_MANAGE_ACCOUNT:
-                        ManageAccountActivity.PROFILE.setValue(object);
-                        navigateToManageAccount();
-                        break;
-                }
             }
         });
     }

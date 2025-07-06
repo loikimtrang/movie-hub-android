@@ -45,7 +45,7 @@
     <string name="enter_your_username">Tên đăng nhập</string>
     <string name="incorrect_username_or_password">Tài khoản hoặc mật khẩu không đúng</string>
     <string name="login_error_please_try_again">Lỗi đăng nhập. Vui lòng thử lại</string>
-    <string name="register_error_please_try_again">Lỗi đăng kys. Please try again</string>
+    <string name="register_error_please_try_again">Lỗi đăng ký. Vui lòng thử lại</string>
     <string name="login_successful">Đăng nhập thành công</string>
     <string name="cannot_connect_to_the_server_please_try_again">Không thể kết nối đến máy chủ. Vui lòng thử lại.</string>
     <string name="network_error_please_check_your_internet_connection">Không thể kết nối đến máy chủ. Vui lòng thử lại</string>
@@ -73,4 +73,16 @@
     <string name="female">Nữ</string>
     <string name="unspecified">Không xác định</string>
     <string name="phone_number">Số điện thoại</string>
+    <string name="mgs_invalid_phone_number">Số điện thoại không hợp lệ</string>
+    <string name="mgs_update_success">Thay đổi thông tin thành công</string>
+    <string name="mgs_update_failed">Thay đổi thông tin thất bại</string>
+    <string name="view_avatar">Xem ảnh đại diện</string>
+    <string name="choose_avatar">Chọn ảnh đại diện</string>
+    <string name="take_photo">Chụp ảnh</string>
+    <string name="choose_from_library">Chọn ảnh từ thư viện</string>
+    <string name="choose_existing_photo">Chọn ảnh có sẵn</string>
+    <string name="permission_camera_required">Bạn cần cấp quyền để truy cập Camera</string>
+    <string name="permission_storage_required">Bạn cần cấp quyền truy cập thư viện</string>
+    <string name="upload_image_failed">Upload ảnh không thành công</string>
+
 </resources>

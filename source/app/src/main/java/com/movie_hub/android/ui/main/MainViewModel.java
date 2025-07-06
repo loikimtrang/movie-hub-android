@@ -1,22 +1,17 @@
 package com.movie_hub.android.ui.main;
 
-import android.content.Context;
+import android.annotation.SuppressLint;
 
 import com.movie_hub.android.MVVMApplication;
-import com.movie_hub.android.R;
-import com.movie_hub.android.constant.Constants;
 import com.movie_hub.android.data.Repository;
 import com.movie_hub.android.data.model.api.ResponseWrapper;
 import com.movie_hub.android.data.model.api.request.login.UserLoginRequest;
 import com.movie_hub.android.data.model.api.request.login.UserRegisterRequest;
 import com.movie_hub.android.data.model.api.response.login.UserLoginResponse;
 import com.movie_hub.android.data.model.api.response.user.UserResponse;
-import com.movie_hub.android.data.model.other.ToastMessage;
+import com.movie_hub.android.data.model.mapper.UserMapper;
+import com.movie_hub.android.data.model.room.UserEntity;
 import com.movie_hub.android.ui.base.activity.BaseViewModel;
-
-import java.io.IOException;
-import java.net.SocketTimeoutException;
-import java.util.Objects;
 
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.schedulers.Schedulers;
@@ -40,7 +35,30 @@ public class MainViewModel extends BaseViewModel {
                             if (response.getAccess_token() != null) {
                                 repository.getSharedPreferences().setToken(response.getAccess_token());
                                 repository.getSharedPreferences().saveAccessTokenObject(response);
-                                callback.doSuccess(response);
+                                compositeDisposable.add(repository.getApiService().getUserProfile()
+                                        .subscribeOn(Schedulers.io())
+                                        .observeOn(AndroidSchedulers.mainThread())
+                                        .subscribe(
+                                                user -> {
+                                                    if (user.isResult()) {
+                                                        UserEntity entity = UserMapper.fromResponse(user.getData());
+                                                        compositeDisposable.add(
+                                                                repository.getRoomService().userDao().insert(entity)
+                                                                        .subscribeOn(Schedulers.io())
+                                                                        .subscribe(() -> {
+                                                                            callback.doSuccess(response);
+                                                                        }, throwable -> {
+                                                                        })
+                                                        );
+                                                    } else {
+                                                        callback.doFail();
+                                                    }
+                                                }, throwable -> {
+                                                    Timber.e(throwable);
+                                                    callback.doError(throwable);
+                                                }
+                                        )
+                                );
                             } else {
                                 callback.doFail();
                             }
@@ -72,11 +90,7 @@ public class MainViewModel extends BaseViewModel {
                 .subscribe(
                         response -> {
                             hideLoading();
-                            if (response.isResult()) {
-                                callback.doSuccess(response);
-                            } else {
-                                callback.doErrorForm(response);
-                            }
+                            callback.doSuccess(response);
                         },
                         throwable -> {
                             hideLoading();
@@ -96,9 +110,20 @@ public class MainViewModel extends BaseViewModel {
                 )
         );
     }
+    @SuppressLint("CheckResult")
     public void userSignOut() {
         repository.getSharedPreferences().clearAuthData();
+
+        compositeDisposable.add(
+                repository.getRoomService().userDao().clear()
+                        .subscribeOn(Schedulers.io())
+                        .subscribe(() -> {
+                        }, throwable -> {
+                        })
+        );
     }
+
+
     public void getUserProfile(MainCallback<UserResponse> callback) {
         compositeDisposable.add(repository.getApiService().getUserProfile()
                 .subscribeOn(Schedulers.io())
@@ -106,6 +131,15 @@ public class MainViewModel extends BaseViewModel {
                 .subscribe(
                         response -> {
                             if (response.isResult()) {
+
+                                UserEntity entity = UserMapper.fromResponse(response.getData());
+                                compositeDisposable.add(
+                                        repository.getRoomService().userDao().insert(entity)
+                                                .subscribeOn(Schedulers.io())
+                                                .subscribe(() -> {
+                                                }, throwable -> {
+                                                })
+                                );
                                 callback.doSuccess(response.getData());
                             } else {
                                 callback.doFail();

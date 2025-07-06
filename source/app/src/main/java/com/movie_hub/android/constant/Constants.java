@@ -20,7 +20,11 @@ public class Constants {
     public static final String INSTAGRAM_LOGIN_URL = "https://www.instagram.com/accounts/login/";
     public static final String INSTAGRAM_URL = "https://www.instagram.com/";
     public static final int REQUEST_LANGUAGE = 1001;
+    public static final int GENDER_MALE = 1;
+    public static final int GENDER_FEMALE = 2;
+    public static final int GENDER_UNSPECIFIED = 3;
 
+    public static final String MEDIA_URL = "https://media.moviehub.biz/v1/file/download";
     public static final String ERROR = "ERROR";
     private Constants(){
 

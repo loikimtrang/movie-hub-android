@@ -74,25 +74,15 @@
             android:layout_marginTop="@dimen/_40sdp"
             android:layout_marginBottom="@dimen/_25sdp">
 
-            <androidx.cardview.widget.CardView
-                android:id="@+id/l_avatar"
-                android:layout_width="@dimen/_60sdp"
-                android:layout_height="@dimen/_60sdp"
-                android:layout_gravity="center"
-                app:cardCornerRadius="@dimen/_30sdp"
-                app:cardElevation="0dp"
-                app:cardPreventCornerOverlap="true"
-                app:cardUseCompatPadding="false"
-                android:layout_marginTop="@dimen/_14sdp">
-
-                <ImageView
-                    android:id="@+id/avatar"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:scaleType="centerCrop"
-                    android:src="@drawable/logo"
-                    android:contentDescription="@string/app_name"/>
-            </androidx.cardview.widget.CardView>
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/avatar"
+                android:layout_width="@dimen/_80sdp"
+                android:layout_height="@dimen/_80sdp"
+                android:scaleType="centerCrop"
+                app:shapeAppearanceOverlay="@style/roundImg"
+                android:src="@drawable/logo"
+                android:layout_marginTop="@dimen/_14sdp"
+                android:layout_gravity="center"/>
 
             <TextView
                 android:id="@+id/name"

@@ -94,9 +94,17 @@ public class RegisterBottomSheetFragment extends BottomSheetDialogFragment {
                     @Override
                     public void doSuccess(ResponseWrapper object) {
                         hideKeyboard();
-                        new Handler(Looper.getMainLooper()).postDelayed(() -> dismiss(), 500);
-                        LoginBottomSheetFragment loginBottom = new LoginBottomSheetFragment();
-                        loginBottom.show(requireActivity().getSupportFragmentManager(), loginBottom.getTag());
+                        if (object.isResult()) {
+
+                            new Handler(Looper.getMainLooper()).postDelayed(() -> dismiss(), 500);
+                            LoginBottomSheetFragment loginBottom = new LoginBottomSheetFragment();
+                            loginBottom.show(requireActivity().getSupportFragmentManager(), loginBottom.getTag());
+                        } else {
+                            if (Objects.equals(object.getCode(), "ERROR-ACCOUNT-ERROR-0002"))
+                                showRegisterError(getString(R.string.the_username_already_exists_or_is_invalid));
+                            else showRegisterError(getString(R.string.the_email_already_exists_or_is_invalid));
+                        }
+
                     }
                     @Override
                     public void doError(Throwable throwable) {
@@ -116,28 +124,6 @@ public class RegisterBottomSheetFragment extends BottomSheetDialogFragment {
 
                     @Override
                     public void doFail() {
-                    }
-
-                    @Override
-                    public void doErrorForm(ResponseWrapper response) {
-                        try {
-                            Gson gson = new Gson();
-                            Type type = new TypeToken<List<FormError>>() {}.getType();
-                            List<FormError> errors = gson.fromJson(gson.toJson(response.getData()), type);
-
-                            for (FormError error : errors) {
-                                switch (error.getField()) {
-                                    case "username":
-                                        showRegisterError(getString(R.string.the_username_already_exists_or_is_invalid));
-                                        break;
-                                    case "email":
-                                        showRegisterError(getString(R.string.the_email_already_exists_or_is_invalid));
-                                        break;
-                                }
-                            }
-                        } catch (Exception e) {
-                            showRegisterError(getString(R.string.register_error_please_try_again));
-                        }
                     }
                 });
             }

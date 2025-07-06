@@ -35,7 +35,7 @@ public class AuthInterceptor implements Interceptor {
 
         if ("1".equals(originalRequest.header("IgnoreAuth"))) {
             newRequest.removeHeader("IgnoreAuth");
-            newRequest.addHeader("X-tenant", "1235");
+            newRequest.addHeader("X-tenant", "1234");
             return chain.proceed(newRequest.build());
         }
 
@@ -55,17 +55,17 @@ public class AuthInterceptor implements Interceptor {
             }
         }
 
-        newRequest.addHeader("X-tenant", "1235");
+        newRequest.addHeader("X-tenant", "1234");
 
         Response response = chain.proceed(newRequest.build());
 
-        if (response.code() == 401 || response.code() == 403) {
-            LogService.i("Auth error code: " + response.code());
-            appPreferences.removeKey(PreferencesService.KEY_BEARER_TOKEN);
-
-            Intent intent = new Intent(Constants.ACTION_EXPIRED_TOKEN);
-            LocalBroadcastManager.getInstance(application.getApplicationContext()).sendBroadcast(intent);
-        }
+//        if (response.code() == 401 || response.code() == 403) {
+//            LogService.i("Auth error code: " + response.code());
+//            appPreferences.removeKey(PreferencesService.KEY_BEARER_TOKEN);
+//
+//            Intent intent = new Intent(Constants.ACTION_EXPIRED_TOKEN);
+//            LocalBroadcastManager.getInstance(application.getApplicationContext()).sendBroadcast(intent);
+//        }
 
         return response;
     }

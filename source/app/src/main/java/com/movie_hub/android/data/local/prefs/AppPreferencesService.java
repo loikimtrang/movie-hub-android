@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 
 import com.movie_hub.android.constant.Constants;
 import com.movie_hub.android.data.model.api.response.login.UserLoginResponse;
+import com.movie_hub.android.data.model.api.response.user.UserResponse;
 import com.movie_hub.android.di.qualifier.PreferenceInfo;
 import com.movie_hub.android.utils.LogService;
 import com.google.gson.Gson;
@@ -12,6 +13,8 @@ import com.google.gson.internal.Primitives;
 
 import javax.inject.Inject;
 
+import timber.log.Timber;
+import android.util.Log;
 public class AppPreferencesService implements PreferencesService {
 
     private final SharedPreferences mPrefs;
@@ -50,6 +53,7 @@ public class AppPreferencesService implements PreferencesService {
     public void clearAuthData() {
         removeKey(KEY_BEARER_TOKEN);
         removeKey(KEY_ACCESS_TOKEN_OBJECT);
+        removeKey(KEY_USER_RESPONSE);
     }
 
     @Override
@@ -151,4 +155,5 @@ public class AppPreferencesService implements PreferencesService {
     public String getAppLanguage() {
         return mPrefs.getString(KEY_LANGUAGE_CODE, "vi");
     }
+
 }

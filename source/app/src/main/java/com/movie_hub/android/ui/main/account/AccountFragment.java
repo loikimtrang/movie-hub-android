@@ -22,23 +22,29 @@ import java.util.Arrays;
 import java.util.List;
 
 import eu.davidea.flexibleadapter.databinding.BR;
+import timber.log.Timber;
 
 public class AccountFragment extends BaseFragment<FragmentAccountBinding, AccountViewModel> implements AccountMenuAdapter.OnItemClickListener, SystemBarColorProvider {
     private AccountMenuAdapter adapter;
-    public static MutableLiveData<UserResponse> PROFILE = new MutableLiveData<>();
 
     @Override
     protected void performDataBinding() {
         binding.setF(this);
         binding.setVm(viewModel);
-        setUpObserversProfile();
         setUpMenu();
+        viewModel.getUser();
+        viewModel.getCurrentUserLiveData().observe(getViewLifecycleOwner(), user -> {
+            if (user != null) {
+                Timber.d("👤 Hiển thị user: %s", user.getUsername());
+                setUpUser(user);
+            }
+        });
     }
+
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        PROFILE = new MutableLiveData<>();
     }
 
     @Override
@@ -64,21 +70,22 @@ public class AccountFragment extends BaseFragment<FragmentAccountBinding, Accoun
     public int getNavigationBarColor() {
         return R.color.bg_tab_bar;
     }
-    public void setUpObserversProfile() {
-        PROFILE.observe(this, profile -> {
-            if (profile == null) return;
-            Glide.with(this)
-                    .load(profile.getAvatarPath())
-                    .placeholder(R.drawable.logo)
-                    .error(R.drawable.logo)
-                    .into(binding.avatar);
-            if (profile.getFullName() == null) {
-                binding.name.setText(profile.getUsername());
-            } else {
-                binding.name.setText(profile.getFullName());
-            }
-            binding.email.setText(profile.getEmail());
-        });
+    public void setUpUser(UserResponse profile) {
+
+
+        if (profile == null) return;
+        Glide.with(this)
+                .load(Constants.MEDIA_URL + profile.getAvatarPath())
+                .placeholder(R.drawable.logo)
+                .error(R.drawable.logo)
+                .into(binding.avatar);
+        if (profile.getFullName() == null) {
+            binding.name.setText(profile.getUsername());
+        } else {
+            binding.name.setText(profile.getFullName());
+        }
+        binding.email.setText(profile.getEmail());
+
     }
     public void setUpMenu() {
         List<MenuItemModel> menuItems = Arrays.asList(
@@ -95,7 +102,6 @@ public class AccountFragment extends BaseFragment<FragmentAccountBinding, Accoun
         binding.rvMenu.setAdapter(adapter);
     }
     public void onManageAccountClick() {
-        ManageAccountActivity.PROFILE.setValue(PROFILE.getValue());
         ((MainActivity) requireActivity()).navigateToNewActivity(getContext(), ManageAccountActivity.class);
     }
     public void onSignOutClick() {
@@ -120,4 +126,21 @@ public class AccountFragment extends BaseFragment<FragmentAccountBinding, Accoun
                 break;
         }
     }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        viewModel.getUser();
+        setUpUser(viewModel.getCurrentUserLiveData().getValue());
+    }
+
+    @Override
+    public void onHiddenChanged(boolean hidden) {
+        super.onHiddenChanged(hidden);
+        if (!hidden) {
+            viewModel.getUser();
+            setUpUser(viewModel.getCurrentUserLiveData().getValue());
+        }
+    }
+
 }

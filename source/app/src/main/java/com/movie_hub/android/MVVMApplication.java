@@ -17,6 +17,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import com.movie_hub.android.data.local.prefs.AppPreferencesService;
+import com.movie_hub.android.data.remote.UploadApiService;
 import com.movie_hub.android.di.component.AppComponent;
 import com.movie_hub.android.di.component.DaggerAppComponent;
 import com.movie_hub.android.others.MyTimberDebugTree;
@@ -39,7 +40,13 @@ public class MVVMApplication extends Application implements LifecycleObserver {
                 .application(this)
                 .build();
         appComponent.inject(this);
+        if (BuildConfig.DEBUG) {
+            Timber.plant(new MyTimberDebugTree()); // hoặc Timber.DebugTree() nếu không cần custom
+        } else {
+            Timber.plant(new MyTimberReleaseTree());
+        }
 
+        UploadApiService.init(this);
         // Init Toasty
         Toasty.Config.getInstance()
                 .allowQueue(false)
@@ -60,13 +67,6 @@ public class MVVMApplication extends Application implements LifecycleObserver {
         // App in foreground
         Timber.d("APP IN FOREGROUND");
         inBackground = false;
-    }
-
-
-    public void getUser(){
-        appComponent.getRepository().getRoomService().userDao().loadAll()
-                .subscribeOn(Schedulers.io())
-                .subscribe();
     }
 
 

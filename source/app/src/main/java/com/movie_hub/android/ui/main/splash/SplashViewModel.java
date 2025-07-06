@@ -14,22 +14,4 @@ public class SplashViewModel extends BaseViewModel {
     public SplashViewModel(Repository repository, MVVMApplication application) {
         super(repository, application);
     }
-    public void getUserProfile(MainCallback<UserResponse> callback) {
-        compositeDisposable.add(repository.getApiService().getUserProfile()
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(
-                        response -> {
-                            if (response.isResult()) {
-                                callback.doSuccess(response.getData());
-                            } else {
-                                callback.doFail();
-                            }
-                        }, throwable -> {
-                            Timber.e(throwable);
-                            callback.doError(throwable);
-                        }
-                )
-        );
-    }
 }

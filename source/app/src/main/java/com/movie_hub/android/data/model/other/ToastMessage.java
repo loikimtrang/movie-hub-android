@@ -2,6 +2,8 @@ package com.movie_hub.android.data.model.other;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -30,6 +32,10 @@ public class ToastMessage {
     }
 
     public void showMessage(Context context){
+        if (Looper.myLooper() != Looper.getMainLooper()) {
+            new Handler(Looper.getMainLooper()).post(() -> showMessage(context));
+            return;
+        }
         LayoutInflater inflater = LayoutInflater.from(context);
         @SuppressLint("InflateParams") View layout = inflater.inflate(R.layout.layout_toast, null);
 
