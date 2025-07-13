@@ -85,4 +85,9 @@
     <string name="permission_storage_required">Storage permission is required</string>
     <string name="upload_image_failed">Image upload failed</string>
     <string name="most_viewed">Most viewed</string>
+    <string name="delete">Delete</string>
+    <string name="movie_list">Movie list</string>
+    <string name="actor_list">Actor list</string>
+    <string name="fetch_data_failed">Failed to fetch data</string>
+    <string name="no_result">No result</string>
 </resources>

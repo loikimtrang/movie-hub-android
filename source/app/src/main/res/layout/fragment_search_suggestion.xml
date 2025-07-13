@@ -11,19 +11,100 @@
 
         <import type="android.view.View"/>
     </data>
-    <LinearLayout
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:background="@color/account_header"
+        android:background="@color/bg_app"
         android:fitsSystemWindows="true">
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/_1sdp"
+            android:background="@color/line"/>
 
-
-        <FrameLayout
-            android:id="@+id/contentView"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@color/text_orange"/>
+            android:orientation="vertical">
 
-    </LinearLayout>
+            <LinearLayout
+                android:id="@+id/l_movie"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    style="@style/Text_12_Normal"
+                    android:text="@string/movie_list"
+                    android:layout_margin="@dimen/_12sdp"
+                    android:textColor="@color/text_gray"/>
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rv_movie"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="@dimen/_12sdp"/>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/l_actor"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    style="@style/Text_12_Normal"
+                    android:text="@string/actor_list"
+                    android:layout_margin="@dimen/_12sdp"
+                    android:textColor="@color/text_gray"/>
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rv_actor"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/_80sdp"
+                    android:layout_marginHorizontal="@dimen/_12sdp"/>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <FrameLayout
+            android:id="@+id/layout_empty"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/bg_app"
+            android:layout_marginTop="@dimen/_1sdp"
+            android:visibility="gone">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_gravity="center|top"
+                android:layout_marginTop="@dimen/_84sdp">
+                <ImageView
+                    android:layout_width="@dimen/_60sdp"
+                    android:layout_height="@dimen/_60sdp"
+                    android:src="@drawable/ic_empty"
+                   />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    style="@style/Text_12_Normal"
+                    android:text="@string/no_result"
+                    android:textColor="@color/text_empty"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="@dimen/_6sdp"/>
+            </LinearLayout>
+
+        </FrameLayout>
+
+    </FrameLayout>
 </layout>

@@ -33,4 +33,8 @@
     <color name="tx_un_select">#262930</color>
     <color name="tx_select">#FFF09B</color>
     <color name="text_gray">#A7AAAD</color>
+    <color name="bg_item_search">#272A3B</color>
+    <color name="bg_delete_history">#51566C</color>
+    <color name="line">#272635</color>
+    <color name="text_empty">#727587</color>
 </resources>

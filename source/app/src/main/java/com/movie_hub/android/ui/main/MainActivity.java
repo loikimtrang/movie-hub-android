@@ -89,7 +89,8 @@ public class MainActivity extends BaseActivity<ActivityMainBinding, MainViewMode
         if (fm == null) fm = getSupportFragmentManager();
 
         if (homeFragment == null) homeFragment = new HomeFragment();
-        if (searchFragment == null) searchFragment = new SearchFragment();
+//        if (searchFragment == null) searchFragment = new SearchFragment();
+        searchFragment = new SearchFragment();
         if (scheduleFragment == null) scheduleFragment = new ScheduleFragment();
         if (accountFragment == null) accountFragment = new AccountFragment();
         if (unLoginAccountFragment == null) unLoginAccountFragment = new UnLoginAccountFragment();

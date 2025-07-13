@@ -85,4 +85,9 @@
     <string name="permission_storage_required">Bạn cần cấp quyền truy cập thư viện</string>
     <string name="upload_image_failed">Upload ảnh không thành công</string>
     <string name="most_viewed">Được xem nhiều nhất</string>
+    <string name="delete">Xóa</string>
+    <string name="movie_list">Danh sách phim</string>
+    <string name="actor_list">Danh sách diễn viên</string>
+    <string name="fetch_data_failed">Lấy dữ liệu thất bại</string>
+    <string name="no_result">Không có kết quả</string>
 </resources>

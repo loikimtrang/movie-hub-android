@@ -46,6 +46,7 @@ public class MainViewModel extends BaseViewModel {
                                                                 repository.getRoomService().userDao().insert(entity)
                                                                         .subscribeOn(Schedulers.io())
                                                                         .subscribe(() -> {
+                                                                            repository.getSharedPreferences().setUserId(response.getUser_id());
                                                                             callback.doSuccess(response);
                                                                         }, throwable -> {
                                                                         })
@@ -131,9 +132,10 @@ public class MainViewModel extends BaseViewModel {
                 .subscribe(
                         response -> {
                             if (response.isResult()) {
-
+                                repository.getSharedPreferences().setUserId(response.getData().getId());
                                 UserEntity entity = UserMapper.fromResponse(response.getData());
                                 compositeDisposable.add(
+
                                         repository.getRoomService().userDao().insert(entity)
                                                 .subscribeOn(Schedulers.io())
                                                 .subscribe(() -> {

@@ -153,5 +153,6 @@ dependencies {
 
     implementation 'com.github.mmin18:RealtimeBlurView:82df3520b4'
     implementation 'com.github.yalantis:ucrop:2.2.8'
+    implementation 'com.google.android.flexbox:flexbox:3.0.0'
 
 }

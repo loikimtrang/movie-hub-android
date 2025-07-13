@@ -4,7 +4,7 @@ public class Constants {
     public static final String DB_NAME = "room";
     public static final String PREF_NAME = "mvvm.prefs";
     public static final String VALUE_BEARER_TOKEN_DEFAULT="NULL";
-
+    public static final Long VALUE_USER_ID_DEFAULT = -1L;
     public static final String HOME = "HOME";
     public static final String SEARCH = "SEARCH";
     public static final String SCHEDULE = "SCHEDULE";

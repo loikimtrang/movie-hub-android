@@ -1,17 +1,19 @@
 package com.movie_hub.android.ui.main.search.topTrending;
 
-import android.content.Context;
-import android.content.res.Resources;
-import android.graphics.Movie;
-import android.util.TypedValue;
+import android.view.View;
 
 import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.flexbox.AlignItems;
+import com.google.android.flexbox.FlexDirection;
+import com.google.android.flexbox.FlexWrap;
+import com.google.android.flexbox.FlexboxLayoutManager;
+import com.google.android.flexbox.JustifyContent;
 import com.movie_hub.android.R;
 import com.movie_hub.android.data.model.api.request.movie.MovieRequest;
 import com.movie_hub.android.data.model.api.response.movie.MovieResponse;
 import com.movie_hub.android.data.model.other.ToastMessage;
+import com.movie_hub.android.data.model.room.SearchHistoryEntity;
 import com.movie_hub.android.databinding.FragmentSearchTopTrendingBinding;
 import com.movie_hub.android.di.component.FragmentComponent;
 import com.movie_hub.android.ui.base.fragment.BaseFragment;
@@ -19,22 +21,45 @@ import com.movie_hub.android.ui.main.MainActivity;
 import com.movie_hub.android.ui.main.MainCallback;
 import com.movie_hub.android.ui.main.custom.GridSpacingItemDecoration;
 import com.movie_hub.android.ui.main.search.topTrending.adapter.MovieVerticalAdapter;
+import com.movie_hub.android.ui.main.search.topTrending.adapter.SearchHistoryAdapter;
 import com.movie_hub.android.utils.GridUtil;
 
-import java.util.Arrays;
+import java.net.ConnectException;
+import java.net.SocketTimeoutException;
+import java.net.UnknownHostException;
 import java.util.List;
 
 import eu.davidea.flexibleadapter.databinding.BR;
 
-public class SearchTopTrendingFragment extends BaseFragment<FragmentSearchTopTrendingBinding, SearchTopTrendingViewModel> implements MovieVerticalAdapter.OnMovieClickListener{
+public class SearchTopTrendingFragment extends BaseFragment<FragmentSearchTopTrendingBinding, SearchTopTrendingViewModel> implements MovieVerticalAdapter.OnMovieClickListener, SearchHistoryAdapter.OnItemClickListener{
 
     private MovieVerticalAdapter movieAdapter;
+    private SearchHistoryAdapter historyAdapter;
     @Override
     protected void performDataBinding() {
         binding.setF(this);
         binding.setVm(viewModel);
         setUpAdapter();
         getListMovie();
+        viewModel.getHistory();
+        setUpHistory();
+    }
+
+    public void setUpHistory() {
+        viewModel.getHistoriesLiveData().observe(getViewLifecycleOwner(),  histories -> {
+            if (histories != null && !histories.isEmpty()) {
+                binding.searchHistory.setVisibility(View.VISIBLE);
+
+                SearchHistoryEntity delete = new SearchHistoryEntity();
+                delete.keyword = getString(R.string.delete);
+
+                histories.add(delete);
+
+                historyAdapter.setData(histories);
+            } else {
+                binding.searchHistory.setVisibility(View.GONE);
+            }
+        });
     }
 
     public void setUpAdapter() {
@@ -47,34 +72,73 @@ public class SearchTopTrendingFragment extends BaseFragment<FragmentSearchTopTre
         binding.rvMovie.setLayoutManager(layoutManager);
         binding.rvMovie.addItemDecoration(new GridSpacingItemDecoration(spanCount, spacing));
         binding.rvMovie.setAdapter(movieAdapter);
+
+        historyAdapter = new SearchHistoryAdapter(this);
+
+        FlexboxLayoutManager layout = new FlexboxLayoutManager(getContext());
+        layout.setFlexDirection(FlexDirection.ROW);
+        layout.setFlexWrap(FlexWrap.WRAP);
+        layout.setJustifyContent(JustifyContent.FLEX_START);
+        layout.setAlignItems(AlignItems.FLEX_START);
+
+        binding.searchHistory.setLayoutManager(layout);
+
+        int a = getResources().getDimensionPixelSize(R.dimen._6sdp);
+        binding.searchHistory.addItemDecoration(new FlexSpacingItemDecoration(a));
+
+
+
+        binding.searchHistory.setAdapter(historyAdapter);
+    }
+    @Override
+    public void onHiddenChanged(boolean hidden) {
+        super.onHiddenChanged(hidden);
+        if (!hidden) {
+            viewModel.getHistory();
+            setUpHistory();
+        }
     }
 
-
     public void getListMovie() {
+        if (!isAdded()) return; // Fragment đã bị detach
+
         ((MainActivity) requireActivity()).showLoading();
+
         viewModel.getListMovie(new MainCallback<List<MovieResponse>>() {
             @Override
-            public void doError(Throwable error) {
+            public void doError(Throwable throwable) {
+                if (!isAdded()) return;
 
-            }
-
-            @Override
-            public void doSuccess() {
-
+                if (throwable instanceof UnknownHostException || throwable instanceof SocketTimeoutException) {
+                    showError(getString(R.string.network_error_please_check_your_internet_connection));
+                } else if (throwable instanceof ConnectException) {
+                    showError(getString(R.string.cannot_connect_to_the_server_please_try_again));
+                } else {
+                    showError(getString(R.string.fetch_data_failed));
+                }
             }
 
             @Override
             public void doFail() {
-
+                if (!isAdded()) return;
+                showError(getString(R.string.fetch_data_failed));
             }
 
             @Override
             public void doSuccess(List<MovieResponse> list) {
+                if (!isAdded()) return;
+
                 ((MainActivity) requireActivity()).hideLoading();
                 movieAdapter.setData(list);
             }
+
+            @Override
+            public void doSuccess() {
+                // không cần xử lý gì
+            }
         }, new MovieRequest());
     }
+
 
     @Override
     public int getBindingVariable() {
@@ -95,4 +159,25 @@ public class SearchTopTrendingFragment extends BaseFragment<FragmentSearchTopTre
     public void onMovieClick(MovieResponse movie) {
 
     }
+
+    private void showError(String message) {
+        if (getContext() != null) {
+            new ToastMessage(ToastMessage.TYPE_WARNING, message).showMessage(getContext());
+        }
+    }
+
+
+    @Override
+    public void onItemClick(SearchHistoryEntity item, int position) {
+
+
+        if (getString(R.string.delete).equals(item.keyword)) {
+            binding.searchHistory.setVisibility(View.GONE);
+            viewModel.clearAllHistory();
+        } else {
+
+//            viewModel.insertSearchKeyword(item.keyword);
+        }
+    }
+
 }

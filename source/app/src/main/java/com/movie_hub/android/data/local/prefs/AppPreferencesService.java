@@ -54,6 +54,7 @@ public class AppPreferencesService implements PreferencesService {
         removeKey(KEY_BEARER_TOKEN);
         removeKey(KEY_ACCESS_TOKEN_OBJECT);
         removeKey(KEY_USER_RESPONSE);
+        removeKey(KEY_USER_ID);
     }
 
     @Override
@@ -64,6 +65,16 @@ public class AppPreferencesService implements PreferencesService {
     @Override
     public void setToken(String token) {
         mPrefs.edit().putString(KEY_BEARER_TOKEN, token).apply();
+    }
+
+    @Override
+    public Long getUserId() {
+        return mPrefs.getLong(KEY_USER_ID, Constants.VALUE_USER_ID_DEFAULT);
+    }
+
+    @Override
+    public void setUserId(Long id) {
+        mPrefs.edit().putLong(KEY_USER_ID, id).apply();
     }
 
     @Override
