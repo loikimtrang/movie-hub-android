@@ -136,6 +136,14 @@ public abstract class BaseActivity<B extends ViewDataBinding, V extends BaseView
         }
     }
 
+    public void showLoading() {
+        viewModel.showLoading();
+    }
+
+    public void hideLoading() {
+        viewModel.hideLoading();
+    }
+
     @Override
     protected void onResume() {
         super.onResume();

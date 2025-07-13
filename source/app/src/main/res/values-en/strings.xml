@@ -84,5 +84,5 @@
     <string name="permission_camera_required">Camera permission is required</string>
     <string name="permission_storage_required">Storage permission is required</string>
     <string name="upload_image_failed">Image upload failed</string>
-
+    <string name="most_viewed">Most viewed</string>
 </resources>

@@ -84,5 +84,5 @@
     <string name="permission_camera_required">Bạn cần cấp quyền để truy cập Camera</string>
     <string name="permission_storage_required">Bạn cần cấp quyền truy cập thư viện</string>
     <string name="upload_image_failed">Upload ảnh không thành công</string>
-
+    <string name="most_viewed">Được xem nhiều nhất</string>
 </resources>

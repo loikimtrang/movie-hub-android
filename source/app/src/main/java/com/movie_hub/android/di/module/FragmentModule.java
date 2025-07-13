@@ -16,6 +16,10 @@ import com.movie_hub.android.ui.main.account.UnLoginAccountViewModel;
 import com.movie_hub.android.ui.main.home.HomeViewModel;
 import com.movie_hub.android.ui.main.schedule.ScheduleViewModel;
 import com.movie_hub.android.ui.main.search.SearchViewModel;
+import com.movie_hub.android.ui.main.search.result.SearchResultFragment;
+import com.movie_hub.android.ui.main.search.result.SearchResultViewModel;
+import com.movie_hub.android.ui.main.search.suggestion.SearchSuggestionViewModel;
+import com.movie_hub.android.ui.main.search.topTrending.SearchTopTrendingViewModel;
 
 import javax.inject.Named;
 
@@ -75,5 +79,29 @@ public class FragmentModule {
         Supplier<UnLoginAccountViewModel> supplier = () -> new UnLoginAccountViewModel(repository, (MVVMApplication)application);
         ViewModelProviderFactory<UnLoginAccountViewModel> factory = new ViewModelProviderFactory<>(UnLoginAccountViewModel.class, supplier);
         return new ViewModelProvider(fragment, factory).get(UnLoginAccountViewModel.class);
+    }
+
+    @Provides
+    @FragmentScope
+    SearchTopTrendingViewModel provideSearchTopTrendingViewModel(Repository repository, Context application) {
+        Supplier<SearchTopTrendingViewModel> supplier = () -> new SearchTopTrendingViewModel(repository, (MVVMApplication)application);
+        ViewModelProviderFactory<SearchTopTrendingViewModel> factory = new ViewModelProviderFactory<>(SearchTopTrendingViewModel.class, supplier);
+        return new ViewModelProvider(fragment, factory).get(SearchTopTrendingViewModel.class);
+    }
+
+    @Provides
+    @FragmentScope
+    SearchSuggestionViewModel provideSearchSuggestionViewModel(Repository repository, Context application) {
+        Supplier<SearchSuggestionViewModel> supplier = () -> new SearchSuggestionViewModel(repository, (MVVMApplication)application);
+        ViewModelProviderFactory<SearchSuggestionViewModel> factory = new ViewModelProviderFactory<>(SearchSuggestionViewModel.class, supplier);
+        return new ViewModelProvider(fragment, factory).get(SearchSuggestionViewModel.class);
+    }
+
+    @Provides
+    @FragmentScope
+    SearchResultViewModel provideSearchResultViewModel(Repository repository, Context application) {
+        Supplier<SearchResultViewModel> supplier = () -> new SearchResultViewModel(repository, (MVVMApplication)application);
+        ViewModelProviderFactory<SearchResultViewModel> factory = new ViewModelProviderFactory<>(SearchResultViewModel.class, supplier);
+        return new ViewModelProvider(fragment, factory).get(SearchResultViewModel.class);
     }
 }
