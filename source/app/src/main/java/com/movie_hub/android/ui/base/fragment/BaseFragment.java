@@ -20,6 +20,7 @@ import androidx.fragment.app.Fragment;
 
 import com.movie_hub.android.MVVMApplication;
 import com.movie_hub.android.R;
+import com.movie_hub.android.data.model.other.ToastMessage;
 import com.movie_hub.android.di.component.DaggerFragmentComponent;
 import com.movie_hub.android.di.component.FragmentComponent;
 import com.movie_hub.android.di.module.FragmentModule;
@@ -151,6 +152,11 @@ public abstract class BaseFragment <B extends ViewDataBinding,V extends BaseFrag
                     provider.getStatusBarColor(),
                     provider.getNavigationBarColor()
             );
+        }
+    }
+    public void showError(String message) {
+        if (getContext() != null) {
+            new ToastMessage(ToastMessage.TYPE_WARNING, message).showMessage(getContext());
         }
     }
 }

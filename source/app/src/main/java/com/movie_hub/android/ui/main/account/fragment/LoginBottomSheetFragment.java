@@ -3,6 +3,7 @@ package com.movie_hub.android.ui.main.account.fragment;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.RenderEffect;
 import android.graphics.Shader;
 import android.os.Build;
@@ -18,11 +19,18 @@ import android.view.inputmethod.InputMethodManager;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.common.api.ApiException;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.movie_hub.android.R;
 import com.movie_hub.android.constant.Constants;
 import com.movie_hub.android.data.model.api.request.login.UserLoginRequest;
+import com.movie_hub.android.data.model.api.request.user.UserLoginGoogleRequest;
 import com.movie_hub.android.data.model.api.response.login.UserLoginResponse;
 import com.movie_hub.android.data.model.other.ToastMessage;
 import com.movie_hub.android.databinding.FragmentBottomSheetLoginBinding;
@@ -38,6 +46,7 @@ import java.net.UnknownHostException;
 import java.util.Objects;
 
 public class LoginBottomSheetFragment extends BottomSheetDialogFragment {
+    private GoogleSignInClient mGoogleSignInClient;
 
     private FragmentBottomSheetLoginBinding binding;
     final boolean[] isPasswordVisible = {false};
@@ -52,16 +61,84 @@ public class LoginBottomSheetFragment extends BottomSheetDialogFragment {
 
         BlurEffectManager.addBlurEffect(requireActivity());
 
+        setUpGoogleSignIn();
         setUpPassword();
         onLoginClick();
         onRegisterNowClick();
         binding.layout.setOnClickListener(v -> hideKeyboard());
-
+        binding.loginGoogle.setOnClickListener(v -> onLoginGoogleClick());
         return view;
     }
 
+    public void onLoginGoogleClick() {
+        mGoogleSignInClient.signOut().addOnCompleteListener(task -> {
+            Intent signInIntent = mGoogleSignInClient.getSignInIntent();
+            startActivityForResult(signInIntent, Constants.RC_SIGN_IN);
+        });
+    }
+    private void setUpGoogleSignIn() {
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken("144532728035-rbu66k0hirdckcp1ato2kff2m83uta4g.apps.googleusercontent.com")
+                .requestEmail()
+                .build();
+
+
+        mGoogleSignInClient = GoogleSignIn.getClient(requireContext(), gso);
+    }
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == Constants.RC_SIGN_IN) {
+            Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
+            try {
+                GoogleSignInAccount account = task.getResult(ApiException.class);
+                if (account == null || account.getIdToken() == null) {
+                    showLoginError("Không thể lấy mã token từ Google. Vui lòng thử lại.");
+                    return;
+                }
+
+                String idToken = account.getIdToken();
+
+
+                UserLoginGoogleRequest request = new UserLoginGoogleRequest();
+                request.setIdToken(idToken);
+                request.setPlatform(Constants.PLATFORM_ANDROID);
+
+                ((MainActivity) requireActivity()).userLoginGoogle(request, new MainCallback<UserLoginResponse>() {
+                    @Override
+                    public void doSuccess(UserLoginResponse object) {
+                        dismiss();
+                    }
+                    @Override
+                    public void doFail() {
+                        showLoginError(getString(R.string.login_error_please_try_again));
+                    }
+
+                    @Override
+                    public void doError(Throwable throwable) {
+                        if (throwable instanceof UnknownHostException || throwable instanceof SocketTimeoutException) {
+                            showLoginError(getString(R.string.network_error_please_check_your_internet_connection));
+                        } else if (throwable instanceof ConnectException) {
+                            showLoginError(getString(R.string.cannot_connect_to_the_server_please_try_again));
+                        } else {
+                            showLoginError(getString(R.string.login_error_please_try_again));
+                        }
+                    }
+
+                    @Override
+                    public void doSuccess() {}
+                });
+
+            } catch (ApiException e) {
+                e.printStackTrace();
+                showLoginError(getString(R.string.login_error_please_try_again));
+            }
+        }
+    }
+
     public Boolean isEmptyForm() {
-        if (binding.username.getText() == null || binding.password.getText() == null || binding.username.getText().toString().trim().isEmpty() || binding.password.getText().toString().trim().isEmpty()) {
+        if (binding.email.getText() == null || binding.password.getText() == null || binding.email.getText().toString().trim().isEmpty() || binding.password.getText().toString().trim().isEmpty()) {
             new ToastMessage(ToastMessage.TYPE_NORMAL,
                     getString(R.string.mgs_please_fill_in_all_the_required_information)).showMessage(getContext());
             return true;
@@ -90,7 +167,7 @@ public class LoginBottomSheetFragment extends BottomSheetDialogFragment {
                 binding.login.setClickable(false);
 
                 UserLoginRequest request = new UserLoginRequest();
-                request.setUsername(Objects.requireNonNull(binding.username.getText()).toString().trim());
+                request.setUsername(Objects.requireNonNull(binding.email.getText()).toString().trim());
                 request.setPassword(Objects.requireNonNull(binding.password.getText()).toString().trim());
 
                 ((MainActivity) requireActivity()).userLogin(request, new MainCallback<UserLoginResponse>() {

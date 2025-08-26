@@ -1,9 +1,9 @@
-package com.movie_hub.android.data.model.api.request.actor;
+package com.movie_hub.android.data.model.api.request.person;
 
 import lombok.Data;
 
 @Data
-public class ActorRequest {
+public class PersonRequest {
     private String country;
     private Integer gender;
     private Long id;

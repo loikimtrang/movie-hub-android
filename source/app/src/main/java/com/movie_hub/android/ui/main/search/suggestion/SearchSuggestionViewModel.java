@@ -6,9 +6,9 @@ import androidx.lifecycle.MutableLiveData;
 import com.movie_hub.android.MVVMApplication;
 import com.movie_hub.android.data.Repository;
 import com.movie_hub.android.data.model.api.RequestToMapConverter;
-import com.movie_hub.android.data.model.api.request.actor.ActorRequest;
+import com.movie_hub.android.data.model.api.request.person.PersonRequest;
 import com.movie_hub.android.data.model.api.request.movie.MovieRequest;
-import com.movie_hub.android.data.model.api.response.actor.ActorResponse;
+import com.movie_hub.android.data.model.api.response.person.PersonResponse;
 import com.movie_hub.android.data.model.api.response.movie.MovieResponse;
 import com.movie_hub.android.ui.base.fragment.BaseFragmentViewModel;
 import com.movie_hub.android.ui.main.MainCallback;
@@ -23,13 +23,13 @@ import timber.log.Timber;
 public class SearchSuggestionViewModel extends BaseFragmentViewModel {
 
     private final MutableLiveData<List<MovieResponse>> movieResult = new MutableLiveData<>();
-    private final MutableLiveData<List<ActorResponse>> actorResult = new MutableLiveData<>();
+    private final MutableLiveData<List<PersonResponse>> actorResult = new MutableLiveData<>();
 
     public LiveData<List<MovieResponse>> getMovieResult() {
         return movieResult;
     }
 
-    public LiveData<List<ActorResponse>> getActorResult() {
+    public LiveData<List<PersonResponse>> getActorResult() {
         return actorResult;
     }
     public SearchSuggestionViewModel(Repository repository, MVVMApplication application) {
@@ -57,10 +57,10 @@ public class SearchSuggestionViewModel extends BaseFragmentViewModel {
         );
     }
 
-    public void getListActor(MainCallback<List<ActorResponse>> callback, ActorRequest request) {
+    public void getListPerson(MainCallback<List<PersonResponse>> callback, PersonRequest request) {
         Map<String, Object> query = RequestToMapConverter.convert(request);
 
-        compositeDisposable.add(repository.getApiService().getListActor(query)
+        compositeDisposable.add(repository.getApiService().getListPerson(query)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(

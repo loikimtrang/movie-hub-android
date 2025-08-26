@@ -12,17 +12,17 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.movie_hub.android.R;
 import com.movie_hub.android.constant.Constants;
-import com.movie_hub.android.data.model.api.response.actor.ActorResponse;
+import com.movie_hub.android.data.model.api.response.person.PersonResponse;
 import com.movie_hub.android.databinding.ItemActorBinding;
 import java.util.ArrayList;
 import java.util.List;
 public class ActorAdapter extends RecyclerView.Adapter<ActorAdapter.ActorViewHolder> {
 
-    private final List<ActorResponse> movieList = new ArrayList<>();
+    private final List<PersonResponse> movieList = new ArrayList<>();
     private OnActorClickListener listener;
 
     public interface OnActorClickListener {
-        void onActorClick(ActorResponse actor);
+        void onActorClick(PersonResponse actor);
     }
 
     public ActorAdapter(OnActorClickListener listener) {
@@ -40,7 +40,7 @@ public class ActorAdapter extends RecyclerView.Adapter<ActorAdapter.ActorViewHol
 
     @Override
     public void onBindViewHolder(@NonNull ActorViewHolder holder, @SuppressLint("RecyclerView") int position) {
-        ActorResponse actor = movieList.get(position);
+        PersonResponse actor = movieList.get(position);
 
         holder.binding.name.setText(actor.getName());
 
@@ -67,7 +67,7 @@ public class ActorAdapter extends RecyclerView.Adapter<ActorAdapter.ActorViewHol
     public void onViewDetachedFromWindow(@NonNull ActorViewHolder holder) {
         holder.itemView.clearAnimation();
     }
-    public void setData(List<ActorResponse> newData) {
+    public void setData(List<PersonResponse> newData) {
         movieList.clear();
         if (newData != null) {
             movieList.addAll(newData);

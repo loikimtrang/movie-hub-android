@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "667165993096",
+    "project_id": "moviehub-android",
+    "storage_bucket": "moviehub-android.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:667165993096:android:3c3005ffc28a0ea523573d",
+        "android_client_info": {
+          "package_name": "com.movie_hub.android"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "667165993096-c4m3puare93uln6g094j6887r686uh7f.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.movie_hub.android",
+            "certificate_hash": "4283919f72e734a4175490b2b61d65df369206c8"
+          }
+        },
+        {
+          "client_id": "667165993096-f4qbii9g8o9ikgp4ibb79kars4k0hh25.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCY-M1kWtOlVTq0HqNHvjjo6XnjMQYZHcA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "667165993096-f4qbii9g8o9ikgp4ibb79kars4k0hh25.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

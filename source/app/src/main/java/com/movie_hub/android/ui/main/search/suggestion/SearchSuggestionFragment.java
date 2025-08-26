@@ -5,9 +5,9 @@ import android.view.View;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.movie_hub.android.R;
-import com.movie_hub.android.data.model.api.request.actor.ActorRequest;
+import com.movie_hub.android.data.model.api.request.person.PersonRequest;
 import com.movie_hub.android.data.model.api.request.movie.MovieRequest;
-import com.movie_hub.android.data.model.api.response.actor.ActorResponse;
+import com.movie_hub.android.data.model.api.response.person.PersonResponse;
 import com.movie_hub.android.data.model.api.response.movie.MovieResponse;
 import com.movie_hub.android.data.model.other.ToastMessage;
 import com.movie_hub.android.databinding.FragmentSearchSuggestionBinding;
@@ -62,9 +62,9 @@ public class SearchSuggestionFragment extends BaseFragment<FragmentSearchSuggest
         movieRequest.setTitle(keyWord);
         getListMovie(movieRequest);
 
-        ActorRequest actorRequest = new ActorRequest();
-        actorRequest.setName(keyWord);
-        getListActor(actorRequest);
+        PersonRequest personRequest = new PersonRequest();
+        personRequest.setName(keyWord);
+        getListActor(personRequest);
     }
 
     public void getListMovie(MovieRequest request) {
@@ -82,10 +82,10 @@ public class SearchSuggestionFragment extends BaseFragment<FragmentSearchSuggest
             @Override public void doSuccess() {}
         }, request);
     }
-    public void getListActor(ActorRequest request) {
+    public void getListActor(PersonRequest request) {
         isActorDone = false;
-        viewModel.getListActor(new MainCallback<List<ActorResponse>>() {
-            @Override public void doSuccess(List<ActorResponse> data) {
+        viewModel.getListPerson(new MainCallback<List<PersonResponse>>() {
+            @Override public void doSuccess(List<PersonResponse> data) {
                 hasActor = data != null && !data.isEmpty();
                 actorAdapter.setData(data);
                 isActorDone = true;
@@ -149,15 +149,8 @@ public class SearchSuggestionFragment extends BaseFragment<FragmentSearchSuggest
         buildComponent.inject(this);
     }
 
-    private void showError(String message) {
-        if (getContext() != null) {
-            new ToastMessage(ToastMessage.TYPE_WARNING, message).showMessage(getContext());
-        }
-    }
-
-
     @Override
-    public void onActorClick(ActorResponse actor) {
+    public void onActorClick(PersonResponse actor) {
 
     }
 

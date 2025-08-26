@@ -90,4 +90,14 @@
     <string name="actor_list">Danh sách diễn viên</string>
     <string name="fetch_data_failed">Lấy dữ liệu thất bại</string>
     <string name="no_result">Không có kết quả</string>
+    <string name="watch_now">Xem ngay</string>
+    <string name="episode">Tập Phim</string>
+    <string name="cast">Diễn viên</string>
+    <string name="details">Chi tiết</string>
+    <string name="favorite">Yêu thích</string>
+    <string name="add">Thêm vào</string>
+    <string name="rating">Đánh giá</string>
+    <string name="comment">Bình luận</string>
+    <string name="share">Chia sẻ</string>
+
 </resources>

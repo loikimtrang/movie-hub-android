@@ -1,5 +1,7 @@
 package com.movie_hub.android.constant;
 
+import android.os.CpuUsageInfo;
+
 public class Constants {
     public static final String DB_NAME = "room";
     public static final String PREF_NAME = "mvvm.prefs";
@@ -26,6 +28,10 @@ public class Constants {
 
     public static final String MEDIA_URL = "https://media.moviehub.biz/v1/file/download";
     public static final String ERROR = "ERROR";
+    public static final int RC_SIGN_IN = 1001;
+
+    public static final String CLIENT_ID = "144532728035-sv194mjng41tf9cb9v7ol5jhaohjt17q.apps.googleusercontent.com";
+    public static int PLATFORM_ANDROID = 1;
     private Constants(){
 
     }

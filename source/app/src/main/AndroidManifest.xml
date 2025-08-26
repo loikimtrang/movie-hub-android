@@ -67,6 +67,9 @@
             android:screenOrientation="portrait" />
 
         <activity android:name=".ui.main.account.manage_account.ManageAccountActivity"/>
+        <activity android:name=".ui.main.movie.detail.MovieDetailActivity"/>
+        <activity android:name=".ui.main.movie.watch.WatchMovieActivity"/>
+
         <activity
             android:name="com.yalantis.ucrop.UCropActivity"
             android:screenOrientation="portrait"

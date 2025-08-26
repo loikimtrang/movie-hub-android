@@ -1,10 +1,10 @@
-package com.movie_hub.android.data.model.api.response.actor;
+package com.movie_hub.android.data.model.api.response.person;
 
 import lombok.Data;
 import java.util.List;
 
 @Data
-public class ActorResponse {
+public class PersonResponse {
     private String avatarPath;
     private String bio;
     private String country;

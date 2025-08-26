@@ -1,5 +1,6 @@
 package com.movie_hub.android.ui.main.search.topTrending;
 
+import android.content.Intent;
 import android.view.View;
 
 import androidx.recyclerview.widget.GridLayoutManager;
@@ -20,6 +21,7 @@ import com.movie_hub.android.ui.base.fragment.BaseFragment;
 import com.movie_hub.android.ui.main.MainActivity;
 import com.movie_hub.android.ui.main.MainCallback;
 import com.movie_hub.android.ui.main.custom.GridSpacingItemDecoration;
+import com.movie_hub.android.ui.main.movie.detail.MovieDetailActivity;
 import com.movie_hub.android.ui.main.search.topTrending.adapter.MovieVerticalAdapter;
 import com.movie_hub.android.ui.main.search.topTrending.adapter.SearchHistoryAdapter;
 import com.movie_hub.android.utils.GridUtil;
@@ -85,8 +87,6 @@ public class SearchTopTrendingFragment extends BaseFragment<FragmentSearchTopTre
 
         int a = getResources().getDimensionPixelSize(R.dimen._6sdp);
         binding.searchHistory.addItemDecoration(new FlexSpacingItemDecoration(a));
-
-
 
         binding.searchHistory.setAdapter(historyAdapter);
     }
@@ -157,15 +157,10 @@ public class SearchTopTrendingFragment extends BaseFragment<FragmentSearchTopTre
 
     @Override
     public void onMovieClick(MovieResponse movie) {
-
+        Intent intent = new Intent(getContext(), MovieDetailActivity.class);
+        intent.putExtra("movie_details", movie);
+        startActivity(intent);
     }
-
-    private void showError(String message) {
-        if (getContext() != null) {
-            new ToastMessage(ToastMessage.TYPE_WARNING, message).showMessage(getContext());
-        }
-    }
-
 
     @Override
     public void onItemClick(SearchHistoryEntity item, int position) {

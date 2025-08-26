@@ -158,5 +158,8 @@
     <style name="Text_16_Bold" parent="BaseText_Inter_Bold">
         <item name="android:textSize">@dimen/_16ssp</item>
     </style>
+    <style name="Text_Transparent" parent="TextAppearance.MaterialComponents.Headline6">
+        <item name="android:textColor">@android:color/transparent</item>
+    </style>
 
 </resources>
