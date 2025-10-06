@@ -17,6 +17,16 @@
         app:layout_scrollFlags="enterAlwaysCollapsed"
         >
 
+        <com.movie_hub.android.ui.main.custom.RatioFrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_collapseMode="parallax">
+
+            <androidx.media3.ui.PlayerView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+        </com.movie_hub.android.ui.main.custom.RatioFrameLayout>
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
