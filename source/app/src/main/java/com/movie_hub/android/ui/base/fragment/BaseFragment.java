@@ -1,10 +1,14 @@
 package com.movie_hub.android.ui.base.fragment;
 
+import android.annotation.SuppressLint;
 import android.app.Dialog;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -16,6 +20,7 @@ import androidx.fragment.app.Fragment;
 
 import com.movie_hub.android.MVVMApplication;
 import com.movie_hub.android.R;
+import com.movie_hub.android.data.model.other.ToastMessage;
 import com.movie_hub.android.di.component.DaggerFragmentComponent;
 import com.movie_hub.android.di.component.FragmentComponent;
 import com.movie_hub.android.di.module.FragmentModule;
@@ -64,6 +69,8 @@ public abstract class BaseFragment <B extends ViewDataBinding,V extends BaseFrag
                 }
             }
         });
+//        setupFocusListeners(binding.getRoot());
+//        setupTouchListenerToHideKeyboard(binding.getRoot());
         return binding.getRoot();
     }
 
@@ -85,6 +92,38 @@ public abstract class BaseFragment <B extends ViewDataBinding,V extends BaseFrag
                 .appComponent(((MVVMApplication) requireActivity().getApplication()).getAppComponent())
                 .fragmentModule(new FragmentModule(this))
                 .build();
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    private void setupTouchListenerToHideKeyboard(View rootView) {
+        rootView.setOnTouchListener((v, event) -> {
+            if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                View focused = requireActivity().getCurrentFocus();
+                if (focused instanceof EditText) {
+                    Rect outRect = new Rect();
+                    focused.getGlobalVisibleRect(outRect);
+                    if (!outRect.contains((int) event.getRawX(), (int) event.getRawY())) {
+                        focused.clearFocus();
+                        ((BaseActivity<?, ?>) requireActivity()).hideKeyboard();
+                    }
+                }
+            }
+            return false;
+        });
+    }
+    private void setupFocusListeners(View root) {
+        if (root instanceof ViewGroup) {
+            ViewGroup group = (ViewGroup) root;
+            for (int i = 0; i < group.getChildCount(); i++) {
+                setupFocusListeners(group.getChildAt(i));
+            }
+        } else if (root instanceof android.widget.EditText) {
+            root.setOnFocusChangeListener((v, hasFocus) -> {
+                if (!hasFocus) {
+                    ((BaseActivity<?, ?>) requireActivity()).hideKeyboard();
+                }
+            });
+        }
     }
 
     public void showProgressbar(String msg){
@@ -113,6 +152,11 @@ public abstract class BaseFragment <B extends ViewDataBinding,V extends BaseFrag
                     provider.getStatusBarColor(),
                     provider.getNavigationBarColor()
             );
+        }
+    }
+    public void showError(String message) {
+        if (getContext() != null) {
+            new ToastMessage(ToastMessage.TYPE_WARNING, message).showMessage(getContext());
         }
     }
 }

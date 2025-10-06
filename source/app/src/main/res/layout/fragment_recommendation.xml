@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:tools="http://schemas.android.com/tools"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <data>
+        <variable
+            name="f"
+            type="com.movie_hub.android.ui.main.movie.detail.fragment.RecommendationFragment"/>
+        <variable
+            name="vm"
+            type="com.movie_hub.android.ui.main.movie.detail.fragment.RecommendationFragmentViewModel"/>
+
+        <import type="android.view.View"/>
+    </data>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/bg_app">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_recommendation"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/_12sdp"/>
+
+    </FrameLayout>
+
+</layout>

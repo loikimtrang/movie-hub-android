@@ -6,9 +6,11 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Rect;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -136,6 +138,14 @@ public abstract class BaseActivity<B extends ViewDataBinding, V extends BaseView
         }
     }
 
+    public void showLoading() {
+        viewModel.showLoading();
+    }
+
+    public void hideLoading() {
+        viewModel.hideLoading();
+    }
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -174,14 +184,17 @@ public abstract class BaseActivity<B extends ViewDataBinding, V extends BaseView
     }
 
     public void hideKeyboard() {
-        View view = this.getCurrentFocus();
-        if (view != null) {
-            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-            if (imm != null) {
+        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        View view = getCurrentFocus();
+        if (imm != null) {
+            if (view != null) {
                 imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+            } else {
+                imm.hideSoftInputFromWindow(getWindow().getDecorView().getWindowToken(), 0);
             }
         }
     }
+
 
     private void performDataBinding() {
         viewBinding = DataBindingUtil.setContentView(this, getLayoutId());
@@ -257,4 +270,21 @@ public abstract class BaseActivity<B extends ViewDataBinding, V extends BaseView
         Context context = LocaleHelper.setLocale(newBase, langCode);
         super.attachBaseContext(context);
     }
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        if (ev.getAction() == MotionEvent.ACTION_DOWN) {
+            View view = getCurrentFocus();
+            if (view instanceof android.widget.EditText) {
+                Rect outRect = new Rect();
+                view.getGlobalVisibleRect(outRect);
+                if (!outRect.contains((int) ev.getRawX(), (int) ev.getRawY())) {
+                    view.clearFocus();
+                    hideKeyboard();
+                }
+            }
+        }
+        return super.dispatchTouchEvent(ev);
+    }
+
 }

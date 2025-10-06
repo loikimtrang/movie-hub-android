@@ -84,5 +84,20 @@
     <string name="permission_camera_required">Bạn cần cấp quyền để truy cập Camera</string>
     <string name="permission_storage_required">Bạn cần cấp quyền truy cập thư viện</string>
     <string name="upload_image_failed">Upload ảnh không thành công</string>
+    <string name="most_viewed">Được xem nhiều nhất</string>
+    <string name="delete">Xóa</string>
+    <string name="movie_list">Danh sách phim</string>
+    <string name="actor_list">Danh sách diễn viên</string>
+    <string name="fetch_data_failed">Lấy dữ liệu thất bại</string>
+    <string name="no_result">Không có kết quả</string>
+    <string name="watch_now">Xem ngay</string>
+    <string name="episode">Tập Phim</string>
+    <string name="cast">Diễn viên</string>
+    <string name="details">Chi tiết</string>
+    <string name="favorite">Yêu thích</string>
+    <string name="add">Thêm vào</string>
+    <string name="rating">Đánh giá</string>
+    <string name="comment">Bình luận</string>
+    <string name="share">Chia sẻ</string>
 
 </resources>

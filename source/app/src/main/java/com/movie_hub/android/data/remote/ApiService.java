@@ -1,14 +1,22 @@
 package com.movie_hub.android.data.remote;
 
 import io.reactivex.rxjava3.core.Observable;
+
+import com.movie_hub.android.data.model.api.ResponseListObj;
 import com.movie_hub.android.data.model.api.ResponseWrapper;
 import com.movie_hub.android.data.model.api.request.login.UserLoginRequest;
 import com.movie_hub.android.data.model.api.request.login.UserRegisterRequest;
 import com.movie_hub.android.data.model.api.request.user.UserChangePasswordRequest;
+import com.movie_hub.android.data.model.api.request.user.UserLoginGoogleRequest;
 import com.movie_hub.android.data.model.api.request.user.UserUpdateProfileRequest;
+import com.movie_hub.android.data.model.api.response.moviePerson.MoviePersonResponse;
+import com.movie_hub.android.data.model.api.response.person.PersonResponse;
 import com.movie_hub.android.data.model.api.response.login.UserLoginResponse;
+import com.movie_hub.android.data.model.api.response.movie.MovieResponse;
 import com.movie_hub.android.data.model.api.response.user.UserResponse;
 import com.movie_hub.android.data.model.api.response.user.UserUploadImageResponse;
+
+import java.util.Map;
 
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
@@ -20,6 +28,7 @@ import retrofit2.http.Multipart;
 import retrofit2.http.POST;
 import retrofit2.http.PUT;
 import retrofit2.http.Part;
+import retrofit2.http.QueryMap;
 
 public interface ApiService {
 
@@ -27,7 +36,9 @@ public interface ApiService {
     @POST("v1/user/login")
     @Headers({"IgnoreAuth: 1"})
     Observable<UserLoginResponse> userLogin(@Body UserLoginRequest request);
-
+    @POST("v1/user/auth/mobile-callback")
+    @Headers({"IgnoreAuth: 1"})
+    Observable<UserLoginResponse> userLoginGoogle(@Body UserLoginGoogleRequest request);
     @POST("v1/user/register")
     @Headers({"IgnoreAuth: 1"})
     Observable<ResponseWrapper> userRegister(@Body UserRegisterRequest request);
@@ -46,5 +57,21 @@ public interface ApiService {
             @Part MultipartBody.Part file,
             @Part("type") RequestBody type
     );
+
+
+    // MOVIE CONTROLLER
+    @GET("v1/movie/list")
+    Observable<ResponseWrapper<ResponseListObj<MovieResponse>>> getListMovie(@QueryMap Map<String, Object> query);
+//    Map<String, Object> query = RequestToMapConverter.convert(movieRequest);
+
+
+    // PERSION CONTROLLER
+    @GET("v1/person/list")
+    Observable<ResponseWrapper<ResponseListObj<PersonResponse>>> getListPerson(@QueryMap Map<String, Object> query);
+
+
+    // MOVIE PERSON
+    @GET("v1/movie-person/list")
+    Observable<ResponseWrapper<ResponseListObj<MoviePersonResponse>>> getListMoviePerson(@QueryMap Map<String, Object> query);
 
 }

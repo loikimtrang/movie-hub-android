@@ -16,6 +16,7 @@ import com.movie_hub.android.constant.Constants;
 import com.movie_hub.android.data.model.api.ResponseWrapper;
 import com.movie_hub.android.data.model.api.request.login.UserLoginRequest;
 import com.movie_hub.android.data.model.api.request.login.UserRegisterRequest;
+import com.movie_hub.android.data.model.api.request.user.UserLoginGoogleRequest;
 import com.movie_hub.android.data.model.api.response.login.UserLoginResponse;
 import com.movie_hub.android.data.model.api.response.user.UserResponse;
 import com.movie_hub.android.data.model.other.ToastMessage;
@@ -89,7 +90,8 @@ public class MainActivity extends BaseActivity<ActivityMainBinding, MainViewMode
         if (fm == null) fm = getSupportFragmentManager();
 
         if (homeFragment == null) homeFragment = new HomeFragment();
-        if (searchFragment == null) searchFragment = new SearchFragment();
+//        if (searchFragment == null) searchFragment = new SearchFragment();
+        searchFragment = new SearchFragment();
         if (scheduleFragment == null) scheduleFragment = new ScheduleFragment();
         if (accountFragment == null) accountFragment = new AccountFragment();
         if (unLoginAccountFragment == null) unLoginAccountFragment = new UnLoginAccountFragment();
@@ -200,6 +202,35 @@ public class MainActivity extends BaseActivity<ActivityMainBinding, MainViewMode
         }, request);
     }
 
+    public void userLoginGoogle(UserLoginGoogleRequest request, MainCallback<UserLoginResponse> callback) {
+        viewModel.userLoginGoogle(new MainCallback<UserLoginResponse>() {
+            @Override
+            public void doSuccess(UserLoginResponse object) {
+                callback.doSuccess(object);
+
+                runOnUiThread(() -> {
+                    new ToastMessage(ToastMessage.TYPE_NORMAL, getString(R.string.login_successful))
+                            .showMessage(MainActivity.this);
+                    viewBinding.bottomNav.setSelectedItemId(R.id.home);
+                });
+
+            }
+
+            @Override
+            public void doFail() {
+                callback.doFail();
+            }
+
+            @Override
+            public void doError(Throwable throwable) {
+                callback.doError(throwable);
+            }
+
+            @Override
+            public void doSuccess() {}
+        }, request);
+    }
+
     public void userRegister(UserRegisterRequest request, MainCallback<ResponseWrapper> callback) {
         viewModel.userRegister(new MainCallback<ResponseWrapper>() {
             @Override
@@ -237,6 +268,9 @@ public class MainActivity extends BaseActivity<ActivityMainBinding, MainViewMode
         viewModel.getUserProfile(new MainCallback<UserResponse>() {
             @Override
             public void doError(Throwable error) {
+
+                //Access token expired
+                viewModel.userSignOut();
 
             }
 

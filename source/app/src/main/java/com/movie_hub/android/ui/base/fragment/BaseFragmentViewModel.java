@@ -8,6 +8,8 @@ import com.movie_hub.android.MVVMApplication;
 import com.movie_hub.android.data.Repository;
 import com.movie_hub.android.data.model.other.ToastMessage;
 
+import java.util.Objects;
+
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
 import lombok.Setter;
 
@@ -51,5 +53,9 @@ public class BaseFragmentViewModel extends ViewModel {
 
     public void hideLoading(){
         mIsLoading.set(false);
+    }
+
+    public boolean isLogin() {
+        return repository.getToken() != null && !Objects.equals(repository.getToken(), "") && !Objects.equals(repository.getToken(), "NULL");
     }
 }

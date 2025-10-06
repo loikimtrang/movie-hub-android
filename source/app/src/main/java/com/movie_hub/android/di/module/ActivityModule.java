@@ -13,6 +13,8 @@ import com.movie_hub.android.ui.base.activity.BaseActivity;
 import com.movie_hub.android.ui.main.MainViewModel;
 import com.movie_hub.android.ui.main.account.language.LanguageViewModel;
 import com.movie_hub.android.ui.main.account.manage_account.ManageAccountViewModel;
+import com.movie_hub.android.ui.main.movie.detail.MovieDetailViewModel;
+import com.movie_hub.android.ui.main.movie.watch.WatchMovieViewModel;
 import com.movie_hub.android.ui.main.splash.SplashViewModel;
 import com.movie_hub.android.utils.GetInfo;
 
@@ -73,5 +75,21 @@ public class ActivityModule {
         Supplier<ManageAccountViewModel> supplier = () -> new ManageAccountViewModel(repository, (MVVMApplication)application);
         ViewModelProviderFactory<ManageAccountViewModel> factory = new ViewModelProviderFactory<>(ManageAccountViewModel.class, supplier);
         return new ViewModelProvider(activity, factory).get(ManageAccountViewModel.class);
+    }
+
+    @Provides
+    @ActivityScope
+    WatchMovieViewModel provideWatchMovieViewModel(Repository repository, Context application) {
+        Supplier<WatchMovieViewModel> supplier = () -> new WatchMovieViewModel(repository, (MVVMApplication)application);
+        ViewModelProviderFactory<WatchMovieViewModel> factory = new ViewModelProviderFactory<>(WatchMovieViewModel.class, supplier);
+        return new ViewModelProvider(activity, factory).get(WatchMovieViewModel.class);
+    }
+
+    @Provides
+    @ActivityScope
+    MovieDetailViewModel provideMovieDetailViewModel(Repository repository, Context application) {
+        Supplier<MovieDetailViewModel> supplier = () -> new MovieDetailViewModel(repository, (MVVMApplication)application);
+        ViewModelProviderFactory<MovieDetailViewModel> factory = new ViewModelProviderFactory<>(MovieDetailViewModel.class, supplier);
+        return new ViewModelProvider(activity, factory).get(MovieDetailViewModel.class);
     }
 }

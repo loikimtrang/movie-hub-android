@@ -1,5 +1,4 @@
 apply plugin: 'com.android.application'
-
 android {
     compileSdkVersion 33 // 31
     buildToolsVersion "30.0.3"
@@ -153,5 +152,12 @@ dependencies {
 
     implementation 'com.github.mmin18:RealtimeBlurView:82df3520b4'
     implementation 'com.github.yalantis:ucrop:2.2.8'
+    implementation 'com.google.android.flexbox:flexbox:3.0.0'
+
+// Media3 stable version tương thích với API 33
+    implementation 'androidx.media3:media3-exoplayer:1.1.1'
+    implementation 'androidx.media3:media3-ui:1.1.1'
+    implementation 'androidx.media3:media3-exoplayer-hls:1.1.1'
 
 }
+apply plugin: 'com.google.gms.google-services'

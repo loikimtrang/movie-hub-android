@@ -68,10 +68,10 @@
                 android:layout_marginTop="@dimen/_6sdp">
 
                 <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/username"
+                    android:id="@+id/email"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="@string/enter_your_username"
+                    android:hint="@string/enter_your_email"
                     style="@style/Text_12_Normal"
                     android:clickable="true"
                     android:paddingHorizontal="@dimen/_12sdp"

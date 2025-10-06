@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <variable
+            name="a"
+            type="com.movie_hub.android.ui.main.movie.detail.MovieDetailActivity" />
+        <variable
+            name="vm"
+            type="com.movie_hub.android.ui.main.movie.detail.MovieDetailViewModel" />
+        <import type="android.view.View" />
+    </data>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <androidx.coordinatorlayout.widget.CoordinatorLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/bg_app"
+            android:fitsSystemWindows="true">
+
+            <com.google.android.material.appbar.AppBarLayout
+                android:id="@+id/appBar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
+
+                <com.google.android.material.appbar.CollapsingToolbarLayout
+                    android:id="@+id/collapsing"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:layout_scrollFlags="scroll|exitUntilCollapsed"
+                    app:contentScrim="@color/account_header"
+                    app:statusBarScrim="@color/account_header"
+                    app:titleEnabled="true"
+                    app:expandedTitleTextAppearance="@style/Text_Transparent"
+                    app:collapsedTitleTextAppearance="@style/Text_14_Bold">
+
+                    <!-- Header lớn của phim (poster, info...) -->
+
+
+                    <com.movie_hub.android.ui.main.custom.RatioFrameLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        app:layout_collapseMode="parallax">
+
+                        <androidx.media3.ui.PlayerView
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent" />
+                    </com.movie_hub.android.ui.main.custom.RatioFrameLayout>
+
+
+
+                    <!-- Toolbar “nổi” chỉ có nút back lúc đầu -->
+                    <com.google.android.material.appbar.MaterialToolbar
+                        android:id="@+id/toolbar"
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/_40sdp"
+                        android:background="@android:color/transparent"
+                        app:layout_collapseMode="pin">
+
+                        <FrameLayout
+                            android:id="@+id/back"
+                            android:layout_width="@dimen/_36sdp"
+                            android:layout_height="@dimen/_40sdp"
+                            android:onClick="@{(v)->a.finish()}">
+                            <ImageView
+                                android:layout_width="@dimen/_12sdp"
+                                android:layout_height="@dimen/_12sdp"
+                                android:src="@drawable/ic_arrow_right"
+                                android:rotation="180"
+                                android:layout_gravity="center"/>
+                        </FrameLayout>
+
+                    </com.google.android.material.appbar.MaterialToolbar>
+
+
+
+                </com.google.android.material.appbar.CollapsingToolbarLayout>
+
+                <include
+                    layout="@layout/layout_movie_detail_header"
+                    android:id="@+id/includeMovieHeader"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:vm="@{vm}"
+                    app:a="@{a}"
+                    app:layout_scrollFlags="scroll|exitUntilCollapsed"
+                    />
+
+                <!-- Tabs vẫn nằm trong AppBar để cùng cuộn -->
+                <com.google.android.material.tabs.TabLayout
+                    android:id="@+id/subTabLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@color/account_header"
+                    app:layout_scrollFlags="enterAlways"
+                    app:tabIndicatorColor="@color/tab_select"
+                    app:tabSelectedTextColor="@color/tab_select"
+                    app:tabTextColor="@color/tab_un_select"
+                    app:tabTextAppearance="@style/Text_12_Normal"
+                    app:tabIndicatorFullWidth="false" />
+
+            </com.google.android.material.appbar.AppBarLayout>
+
+
+            <androidx.viewpager2.widget.ViewPager2
+                android:id="@+id/subViewPager"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:layout_behavior="@string/appbar_scrolling_view_behavior"
+                android:overScrollMode="never"
+                android:nestedScrollingEnabled="true" />
+
+        </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
+    </FrameLayout>
+
+</layout>
