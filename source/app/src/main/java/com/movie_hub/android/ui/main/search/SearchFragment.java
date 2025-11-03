@@ -95,6 +95,7 @@ public class SearchFragment extends BaseFragment<FragmentSearchBinding, SearchVi
                 String keyword = binding.search.getText().toString().trim();
                 if (!keyword.isEmpty()) {
                     viewModel.insertKeyWord(keyword);
+                    ((MainActivity) requireActivity()).hideLoading();
                     showResult(keyword);
                 }
                 return true;

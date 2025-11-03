@@ -15,14 +15,25 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:background="@color/account_header"
+        android:background="@color/bg_app"
         android:fitsSystemWindows="true">
 
-        <FrameLayout
-            android:id="@+id/contentView"
+        <com.google.android.material.tabs.TabLayout
+            android:id="@+id/tabLayout"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@color/white"/>
+            android:layout_height="@dimen/_40sdp"
+            app:tabGravity="fill"
+            app:tabIndicator="@null"
+            app:tabRippleColor="@null"
+            android:layout_margin="@dimen/_6sdp"
+            android:padding="@dimen/_2sdp"
+            android:background="@drawable/bg_tab_container_search_result"/>
+
+        <androidx.viewpager2.widget.ViewPager2
+            android:id="@+id/viewPager"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
 
     </LinearLayout>
 </layout>

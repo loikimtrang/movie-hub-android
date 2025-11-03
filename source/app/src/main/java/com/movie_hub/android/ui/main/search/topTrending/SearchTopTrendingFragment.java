@@ -107,6 +107,7 @@ public class SearchTopTrendingFragment extends BaseFragment<FragmentSearchTopTre
         viewModel.getListMovie(new MainCallback<List<MovieResponse>>() {
             @Override
             public void doError(Throwable throwable) {
+                ((MainActivity) requireActivity()).hideLoading();
                 if (!isAdded()) return;
 
                 if (throwable instanceof UnknownHostException || throwable instanceof SocketTimeoutException) {
@@ -120,6 +121,7 @@ public class SearchTopTrendingFragment extends BaseFragment<FragmentSearchTopTre
 
             @Override
             public void doFail() {
+                ((MainActivity) requireActivity()).hideLoading();
                 if (!isAdded()) return;
                 showError(getString(R.string.fetch_data_failed));
             }
@@ -157,9 +159,43 @@ public class SearchTopTrendingFragment extends BaseFragment<FragmentSearchTopTre
 
     @Override
     public void onMovieClick(MovieResponse movie) {
-        Intent intent = new Intent(getContext(), MovieDetailActivity.class);
-        intent.putExtra("movie_details", movie);
-        startActivity(intent);
+        if (movie != null) {
+            getMovie(movie);
+        }
+    }
+
+    public void getMovie(MovieResponse movie) {
+        if (!isAdded()) return;
+        ((MainActivity) requireActivity()).showLoading();
+
+        viewModel.getMovie(new MainCallback<MovieResponse>() {
+            @Override
+            public void doError(Throwable throwable) {
+                ((MainActivity) requireActivity()).hideLoading();
+                if (!isAdded()) return;
+                showError(getString(R.string.fetch_data_failed));
+            }
+
+            @Override
+            public void doFail() {
+                ((MainActivity) requireActivity()).hideLoading();
+                if (!isAdded()) return;
+                showError(getString(R.string.fetch_data_failed));
+            }
+
+            @Override
+            public void doSuccess(MovieResponse movieResponse) {
+                if (!isAdded()) return;
+
+                Intent intent = new Intent(getContext(), MovieDetailActivity.class);
+                intent.putExtra("movie_details", movieResponse);
+                startActivity(intent);
+            }
+
+            @Override
+            public void doSuccess() {
+            }
+        }, movie.getId());
     }
 
     @Override

@@ -17,7 +17,7 @@ public class CustomDialog {
         void onCancel();
     }
 
-    public static void show(Context context, int idStringMgs,DialogCallback callback) {
+    public static void show(Context context, int idStringMgs, DialogCallback callback) {
         Dialog dialog = new Dialog(context);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.setContentView(R.layout.layout_dialog);

@@ -62,7 +62,7 @@ public class MovieSuggestAdapter extends RecyclerView.Adapter<MovieSuggestAdapte
                 Animation animation = AnimationUtils.loadAnimation(holder.itemView.getContext(), R.anim.item_slide_in_right);
                 holder.itemView.startAnimation(animation);
                 holder.itemView.setAlpha(1f);
-            }, position * 100L);
+            }, 50L);
             lastPosition = position;
         }
     }

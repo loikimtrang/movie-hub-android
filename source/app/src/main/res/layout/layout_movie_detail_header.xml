@@ -8,6 +8,9 @@
         <variable
             name="a"
             type="com.movie_hub.android.ui.main.movie.detail.MovieDetailActivity" />
+
+        <import type="android.view.View" />
+
     </data>
     <LinearLayout
         android:layout_width="match_parent"
@@ -23,8 +26,40 @@
             app:layout_collapseMode="parallax">
 
             <androidx.media3.ui.PlayerView
+                android:id="@+id/trailer"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent" />
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:id="@+id/img_poster"/>
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/btn_close"
+                    android:layout_width="@dimen/_32sdp"
+                    android:layout_height="@dimen/_32sdp"
+                    app:cardCornerRadius="@dimen/_16sdp"
+                    app:cardBackgroundColor="@color/bg_close"
+                    app:cardElevation="0dp"
+                    android:layout_margin="@dimen/_6sdp"
+                    android:onClick="@{(v) -> a.onClick(v)}">
+
+                    <ImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:src="@drawable/ic_close"
+                        android:scaleType="centerInside"
+                        android:layout_margin="@dimen/_3sdp"/>
+            </androidx.cardview.widget.CardView>
+
+
+        </FrameLayout>
+
         </com.movie_hub.android.ui.main.custom.RatioFrameLayout>
 
         <LinearLayout
@@ -48,7 +83,8 @@
                     android:clickable="true"
                     android:focusable="true"
                     android:background="@drawable/bg_btn_yellow_radius_6sdp"
-                    android:layout_marginEnd="@dimen/_3sdp">
+                    android:layout_marginEnd="@dimen/_3sdp"
+                    android:onClick="@{(v) -> a.onClick(v)}">
 
                     <LinearLayout
                         android:layout_width="wrap_content"

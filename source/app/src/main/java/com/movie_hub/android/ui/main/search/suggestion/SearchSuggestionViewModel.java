@@ -12,11 +12,15 @@ import com.movie_hub.android.data.model.api.response.person.PersonResponse;
 import com.movie_hub.android.data.model.api.response.movie.MovieResponse;
 import com.movie_hub.android.ui.base.fragment.BaseFragmentViewModel;
 import com.movie_hub.android.ui.main.MainCallback;
+import com.movie_hub.android.utils.NetworkUtils;
 
 import java.util.List;
 import java.util.Map;
 
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.core.ObservableSource;
+import io.reactivex.rxjava3.functions.Function;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import timber.log.Timber;
 
@@ -42,6 +46,16 @@ public class SearchSuggestionViewModel extends BaseFragmentViewModel {
         compositeDisposable.add(repository.getApiService().getListMovie(query)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
+                .retryWhen(throwable ->
+                        throwable.flatMap((Function<Throwable, ObservableSource<?>>) throwable1 -> {
+                            if (NetworkUtils.checkNetworkError(throwable1)) {
+                                hideLoading();
+                                return application.showDialogNoInternetAccess();
+                            }else{
+                                return Observable.error(throwable1);
+                            }
+                        })
+                )
                 .subscribe(
                         response -> {
                             if (response.isResult()) {
@@ -63,6 +77,16 @@ public class SearchSuggestionViewModel extends BaseFragmentViewModel {
         compositeDisposable.add(repository.getApiService().getListPerson(query)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
+                .retryWhen(throwable ->
+                        throwable.flatMap((Function<Throwable, ObservableSource<?>>) throwable1 -> {
+                            if (NetworkUtils.checkNetworkError(throwable1)) {
+                                hideLoading();
+                                return application.showDialogNoInternetAccess();
+                            }else{
+                                return Observable.error(throwable1);
+                            }
+                        })
+                )
                 .subscribe(
                         response -> {
                             if (response.isResult()) {

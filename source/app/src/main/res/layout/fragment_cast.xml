@@ -30,19 +30,20 @@
             android:layout_height="match_parent"
             android:background="@color/bg_app"
             android:layout_marginTop="@dimen/_1sdp"
-            android:visibility="gone">
+            android:visibility="visible">
 
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:layout_gravity="center|top"
-                android:layout_marginTop="@dimen/_84sdp">
+                android:layout_marginTop="@dimen/_84sdp"
+                android:visibility="gone">
                 <ImageView
                     android:layout_width="@dimen/_60sdp"
                     android:layout_height="@dimen/_60sdp"
                     android:src="@drawable/ic_empty"
-                    />
+                    android:layout_gravity="center"/>
 
                 <TextView
                     android:layout_width="wrap_content"

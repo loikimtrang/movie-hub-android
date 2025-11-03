@@ -152,6 +152,7 @@ public abstract class BaseActivity<B extends ViewDataBinding, V extends BaseView
         LocalBroadcastManager.getInstance(this).registerReceiver(globalApplicationReceiver, filterGlobalApplication);
         updateCurrentAcitivity();
         applySystemBarColors();
+        hideLoading();
     }
 
     @Override
@@ -286,5 +287,4 @@ public abstract class BaseActivity<B extends ViewDataBinding, V extends BaseView
         }
         return super.dispatchTouchEvent(ev);
     }
-
 }

@@ -28,6 +28,7 @@ import retrofit2.http.Multipart;
 import retrofit2.http.POST;
 import retrofit2.http.PUT;
 import retrofit2.http.Part;
+import retrofit2.http.Path;
 import retrofit2.http.QueryMap;
 
 public interface ApiService {
@@ -62,6 +63,9 @@ public interface ApiService {
     // MOVIE CONTROLLER
     @GET("v1/movie/list")
     Observable<ResponseWrapper<ResponseListObj<MovieResponse>>> getListMovie(@QueryMap Map<String, Object> query);
+
+    @GET("v1/movie/get/{id}")
+    Observable<ResponseWrapper<MovieResponse>> getMovie(@Path("id") Long id);
 //    Map<String, Object> query = RequestToMapConverter.convert(movieRequest);
 
 

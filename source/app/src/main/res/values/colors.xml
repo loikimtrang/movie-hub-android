@@ -42,5 +42,5 @@
     <color name="text_cate">#A0A1AB</color>
     <color name="tab_select">#FBE089</color>
     <color name="tab_un_select">#A0A1AB</color>
-
+    <color name="bg_close">#80000000</color>
 </resources>

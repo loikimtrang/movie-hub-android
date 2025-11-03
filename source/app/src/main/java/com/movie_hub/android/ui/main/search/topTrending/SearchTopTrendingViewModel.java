@@ -15,11 +15,15 @@ import com.movie_hub.android.data.model.mapper.UserMapper;
 import com.movie_hub.android.data.model.room.SearchHistoryEntity;
 import com.movie_hub.android.ui.base.fragment.BaseFragmentViewModel;
 import com.movie_hub.android.ui.main.MainCallback;
+import com.movie_hub.android.utils.NetworkUtils;
 
 import java.util.List;
 import java.util.Map;
 
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.core.ObservableSource;
+import io.reactivex.rxjava3.functions.Function;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import timber.log.Timber;
 
@@ -77,23 +81,58 @@ public class SearchTopTrendingViewModel extends BaseFragmentViewModel {
         );
     }
     public void getListMovie(MainCallback<List<MovieResponse>> callback, MovieRequest request) {
-        showLoading();
         Map<String, Object> query = RequestToMapConverter.convert(request);
 
         compositeDisposable.add(repository.getApiService().getListMovie(query)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
+                .retryWhen(throwable ->
+                        throwable.flatMap((Function<Throwable, ObservableSource<?>>) throwable1 -> {
+                            if (NetworkUtils.checkNetworkError(throwable1)) {
+                                hideLoading();
+                                return application.showDialogNoInternetAccess();
+                            }else{
+                                return Observable.error(throwable1);
+                            }
+                        })
+                )
                 .subscribe(
                         response -> {
-                            hideLoading();
                             if (response.isResult()) {
                                 callback.doSuccess(response.getData().getContent());
                             } else {
                                 callback.doFail();
                             }
                         }, throwable -> {
-                            hideLoading();
                             Timber.e(throwable);
+                            callback.doError(throwable);
+                        }
+                )
+        );
+    }
+    public void getMovie(MainCallback<MovieResponse> callback, Long id) {
+        compositeDisposable.add(repository.getApiService().getMovie(id)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .retryWhen(throwable ->
+                        throwable.flatMap((Function<Throwable, ObservableSource<?>>) throwable1 -> {
+                            if (NetworkUtils.checkNetworkError(throwable1)) {
+                                return application.showDialogNoInternetAccess();
+                            }else{
+                                return Observable.error(throwable1);
+                            }
+                        })
+                )
+                .subscribe(
+                        response -> {
+                            if (response.isResult()) {
+                                callback.doSuccess(response.getData());
+                            } else {
+                                callback.doFail();
+                            }
+                        }, throwable -> {
+                            Timber.e(throwable);
+                            hideLoading();
                             callback.doError(throwable);
                         }
                 )

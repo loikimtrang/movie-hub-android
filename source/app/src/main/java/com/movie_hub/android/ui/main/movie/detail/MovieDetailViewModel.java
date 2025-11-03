@@ -17,7 +17,6 @@ public class MovieDetailViewModel extends BaseViewModel {
     public void setMovieDetails(MovieResponse movie) {
         movieDetails.setValue(movie);
     }
-
     public LiveData<MovieResponse> getMovieDetails() {
         return movieDetails;
     }
