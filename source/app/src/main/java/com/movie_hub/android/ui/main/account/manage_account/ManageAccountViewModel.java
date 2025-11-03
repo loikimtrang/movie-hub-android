@@ -18,11 +18,14 @@ import com.movie_hub.android.data.model.room.UserEntity;
 import com.movie_hub.android.data.remote.UploadApiService;
 import com.movie_hub.android.ui.base.activity.BaseViewModel;
 import com.movie_hub.android.ui.main.MainCallback;
+import com.movie_hub.android.utils.NetworkUtils;
 
 import java.io.File;
 
-import io.reactivex.Observable;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.core.ObservableSource;
+import io.reactivex.rxjava3.functions.Function;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
@@ -80,6 +83,16 @@ public class ManageAccountViewModel extends BaseViewModel {
         compositeDisposable.add(repository.getApiService().changeUserPassword(request)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
+                .retryWhen(throwable ->
+                        throwable.flatMap((Function<Throwable, ObservableSource<?>>) throwable1 -> {
+                            if (NetworkUtils.checkNetworkError(throwable1)) {
+                                hideLoading();
+                                return application.showDialogNoInternetAccess();
+                            }else{
+                                return Observable.error(throwable1);
+                            }
+                        })
+                )
                 .subscribe(
                         response -> {
                             hideLoading();
@@ -113,6 +126,16 @@ public class ManageAccountViewModel extends BaseViewModel {
         compositeDisposable.add(repository.getApiService().updateUserProfile(request)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
+                .retryWhen(throwable ->
+                        throwable.flatMap((Function<Throwable, ObservableSource<?>>) throwable1 -> {
+                            if (NetworkUtils.checkNetworkError(throwable1)) {
+                                hideLoading();
+                                return application.showDialogNoInternetAccess();
+                            }else{
+                                return Observable.error(throwable1);
+                            }
+                        })
+                )
                 .subscribe(
                         response -> {
                             hideLoading();
@@ -120,6 +143,16 @@ public class ManageAccountViewModel extends BaseViewModel {
                                 compositeDisposable.add(repository.getApiService().getUserProfile()
                                         .subscribeOn(Schedulers.io())
                                         .observeOn(AndroidSchedulers.mainThread())
+                                        .retryWhen(throwable ->
+                                                throwable.flatMap((Function<Throwable, ObservableSource<?>>) throwable1 -> {
+                                                    if (NetworkUtils.checkNetworkError(throwable1)) {
+                                                        hideLoading();
+                                                        return application.showDialogNoInternetAccess();
+                                                    }else{
+                                                        return Observable.error(throwable1);
+                                                    }
+                                                })
+                                        )
                                         .subscribe(
                                                 profile -> {
                                                     if (profile.isResult()) {

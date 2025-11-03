@@ -12,14 +12,77 @@
             type="com.movie_hub.android.ui.main.movie.watch.WatchMovieViewModel" />
         <import type="android.view.View"/>
     </data>
-    <LinearLayout
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
         android:gravity="center"
-        android:background="#15151F"
-        android:fitsSystemWindows="true">
+        android:background="@color/bg_app"
+        android:fitsSystemWindows="false">
 
-    </LinearLayout>
+
+        <androidx.media3.ui.PlayerView
+            android:id="@+id/video_movie"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/bg_app">
+
+            <ImageView
+                android:layout_width="@dimen/_12sdp"
+                android:layout_height="@dimen/_12sdp"
+                android:src="@drawable/ic_arrow_right"
+                android:rotation="180"/>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/_46sdp"
+                android:orientation="horizontal"
+                android:layout_gravity="top|left">
+
+                <FrameLayout
+                    android:id="@+id/btn_close"
+                    android:layout_width="@dimen/_36sdp"
+                    android:layout_height="@dimen/_40sdp"
+                    android:onClick="@{(v)->a.onClick(v)}"
+                    android:layout_gravity="center">
+                    <ImageView
+                        android:layout_width="@dimen/_12sdp"
+                        android:layout_height="@dimen/_12sdp"
+                        android:src="@drawable/ic_arrow_right"
+                        android:rotation="180"
+                        android:layout_gravity="center"/>
+                </FrameLayout>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    tools:ignore="RtlHardcoded"
+                    android:layout_margin="@dimen/_6sdp"
+                    android:layout_gravity="center">
+                    <TextView
+                        android:id="@+id/name_movie"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        style="@style/Text_14_Bold"
+                        android:text="Name"/>
+
+                    <TextView
+                        android:id="@+id/name_movie_original"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        style="@style/Text_12_Normal"
+                        android:text="Name"/>
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </FrameLayout>
+
+    </FrameLayout>
 </layout>
 

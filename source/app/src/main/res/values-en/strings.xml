@@ -99,4 +99,7 @@
     <string name="rating">Rating</string>
     <string name="comment">Comment</string>
     <string name="share">Share</string>
+
+    <string name="movie">Movie</string>
+    <string name="recommend">Recommend</string>
 </resources>

@@ -100,4 +100,7 @@
     <string name="comment">Bình luận</string>
     <string name="share">Chia sẻ</string>
 
+    <string name="movie">Phim</string>
+    <string name="recommend">Đề xuất</string>
+
 </resources>

@@ -1,12 +1,17 @@
 package com.movie_hub.android.ui.main.movie.detail;
 
+import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
+import com.bumptech.glide.Glide;
 import com.google.android.flexbox.AlignItems;
 import com.google.android.flexbox.FlexDirection;
 import com.google.android.flexbox.FlexWrap;
@@ -14,6 +19,7 @@ import com.google.android.flexbox.FlexboxLayoutManager;
 import com.google.android.flexbox.JustifyContent;
 import com.google.android.material.tabs.TabLayoutMediator;
 import com.movie_hub.android.R;
+import com.movie_hub.android.constant.Constants;
 import com.movie_hub.android.data.model.api.response.movie.MovieResponse;
 import com.movie_hub.android.databinding.ActivityMovieDetailBinding;
 import com.movie_hub.android.di.component.ActivityComponent;
@@ -24,6 +30,7 @@ import com.movie_hub.android.ui.main.movie.detail.adapter.TagCategoryAdapter;
 import com.movie_hub.android.ui.main.movie.detail.fragment.CastFragment;
 import com.movie_hub.android.ui.main.movie.detail.fragment.EpisodesFragment;
 import com.movie_hub.android.ui.main.movie.detail.fragment.RecommendationFragment;
+import com.movie_hub.android.ui.main.movie.watch.WatchMovieActivity;
 import com.movie_hub.android.ui.main.search.topTrending.FlexSpacingItemDecoration;
 import com.movie_hub.android.utils.HtmlUtils;
 
@@ -32,7 +39,7 @@ import java.util.List;
 
 import eu.davidea.flexibleadapter.databinding.BR;
 
-public class MovieDetailActivity extends BaseActivity<ActivityMovieDetailBinding, MovieDetailViewModel> implements SystemBarColorProvider {
+public class MovieDetailActivity extends BaseActivity<ActivityMovieDetailBinding, MovieDetailViewModel> implements SystemBarColorProvider, View.OnClickListener {
     private TagCategoryAdapter tagCategoryAdapter;
     private final List<Fragment> fragmentList = new ArrayList<>();
 
@@ -57,6 +64,12 @@ public class MovieDetailActivity extends BaseActivity<ActivityMovieDetailBinding
         viewModel.getMovieDetails().observe(this, movie -> {
             if (movie == null) return;
 
+            Glide.with(this)
+                    .load(Constants.MEDIA_URL + movie.getPosterUrl())
+                    .placeholder(R.drawable.place_holder_16_9)
+                    .error(R.drawable.place_holder_16_9)
+                    .into(viewBinding.includeMovieHeader.imgPoster);
+
             viewBinding.includeMovieHeader.nameMovie.setText(movie.getTitle());
             viewBinding.includeMovieHeader.nameMovieOriginal.setText(movie.getOriginalTitle());
             viewBinding.includeMovieHeader.description.setText(HtmlUtils.convertPtoStrong(movie.getDescription()));
@@ -76,22 +89,21 @@ public class MovieDetailActivity extends BaseActivity<ActivityMovieDetailBinding
             tagCategoryAdapter.setData(movie.getCategories());
         });
     }
-
-
-
     public void setUpTab(boolean isSeries) {
         List<String> tabTitles = new ArrayList<>();
         fragmentList.clear();
 
         if (isSeries) {
-            tabTitles.add("Tập phim");
+            tabTitles.add(getString(R.string.episode));
             fragmentList.add(new EpisodesFragment());
         }
 
-        tabTitles.add("Diễn viên");
+        tabTitles.add(getString(R.string.cast));
+        CastFragment.DISPLAY_FROM.setValue(CastFragment.TYPE_MOVIE_DETAIL);
         fragmentList.add(new CastFragment());
 
-        tabTitles.add("Đề xuất");
+        RecommendationFragment.DISPLAY_FROM.setValue(CastFragment.TYPE_MOVIE_DETAIL);
+        tabTitles.add(getString(R.string.recommend));
         fragmentList.add(new RecommendationFragment());
 
 
@@ -103,7 +115,6 @@ public class MovieDetailActivity extends BaseActivity<ActivityMovieDetailBinding
         ).attach();
 
     }
-
 
     @Override
     public int getLayoutId() {
@@ -134,4 +145,22 @@ public class MovieDetailActivity extends BaseActivity<ActivityMovieDetailBinding
     protected void onDestroy() {
         super.onDestroy();
     }
+
+    @SuppressLint("NonConstantResourceId")
+    @Override
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.btn_close:
+                this.finish();
+                break;
+            case R.id.watch_now:
+                Intent intent = new Intent(this, WatchMovieActivity.class);
+                intent.putExtra("movie_details", viewModel.getMovieDetails().getValue());
+                startActivity(intent);
+                break;
+            default:
+                break;
+        }
+    }
+
 }

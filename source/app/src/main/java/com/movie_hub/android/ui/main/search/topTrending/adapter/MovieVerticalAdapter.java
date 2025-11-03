@@ -65,7 +65,7 @@ public class MovieVerticalAdapter extends RecyclerView.Adapter<MovieVerticalAdap
                 Animation animation = AnimationUtils.loadAnimation(holder.itemView.getContext(), R.anim.item_slide_in_bottom);
                 holder.itemView.startAnimation(animation);
                 holder.itemView.setAlpha(1f);
-            }, position * 150L);
+            }, 50L);
             lastPosition = position;
         }
     }

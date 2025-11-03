@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -18,32 +19,37 @@ public class DialogUtils {
         //do not init
     }
 
-    public static AlertDialog dialogConfirm(Context context,
-                                            String msg,
-                                            String btnPositive,
-                                            DialogInterface.OnClickListener positive,
-                                            String btnNegative,
-                                            DialogInterface.OnClickListener negative) {
+    public static Dialog dialogConfirm(Context context,
+                                       String msg,
+                                       String btnPositive,
+                                       DialogInterface.OnClickListener positive,
+                                       String btnNegative,
+                                       DialogInterface.OnClickListener negative) {
+        Dialog dialog = new Dialog(context);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.layout_dialog);
+        dialog.setCancelable(false);
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        }
+        TextView messageView = dialog.findViewById(R.id.dialog_message);
+        messageView.setText(msg);
 
-        AlertDialog dialog = new AlertDialog.Builder(context)
-                .setMessage(msg)
-                .setPositiveButton(btnPositive, positive)
-                .setNegativeButton(btnNegative, negative)
-                .setIcon(android.R.drawable.ic_dialog_alert)
-                .show();
-        TextView message = dialog.findViewById(android.R.id.message);
-        if (message != null) {
-            message.setTextSize(context.getResources().getDimension(R.dimen._7ssp));
-        }
-        Button buttonPositive = dialog.getButton(DialogInterface.BUTTON_POSITIVE);
-        if (buttonPositive != null) {
-            buttonPositive.setTextSize(context.getResources().getDimension(R.dimen._6ssp));
-        }
+        TextView btnOk = dialog.findViewById(R.id.btn_ok);
+        btnOk.setText(btnPositive);
+        btnOk.setOnClickListener(v -> {
+            if (positive != null) positive.onClick(dialog, DialogInterface.BUTTON_POSITIVE);
+            dialog.dismiss();
+        });
 
-        Button buttonN = dialog.getButton(DialogInterface.BUTTON_NEGATIVE);
-        if (buttonN != null) {
-            buttonN.setTextSize(context.getResources().getDimension(R.dimen._6ssp));
-        }
+        TextView btnCancel = dialog.findViewById(R.id.btn_cancel);
+        btnCancel.setText(btnNegative);
+        btnCancel.setOnClickListener(v -> {
+            if (negative != null) negative.onClick(dialog, DialogInterface.BUTTON_NEGATIVE);
+            dialog.dismiss();
+        });
+
+        dialog.show();
         return dialog;
     }
 

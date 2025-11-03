@@ -71,6 +71,7 @@ public class MovieResponse implements Parcelable {
         releaseDate = in.readString();
         createdDate = in.readString();
         modifiedDate = in.readString();
+        categories = in.createTypedArrayList(CategoryResponse.CREATOR);
     }
 
     public static final Creator<MovieResponse> CREATOR = new Creator<MovieResponse>() {
@@ -134,6 +135,7 @@ public class MovieResponse implements Parcelable {
         parcel.writeString(releaseDate);
         parcel.writeString(createdDate);
         parcel.writeString(modifiedDate);
+        parcel.writeTypedList(categories);
     }
 }
 
