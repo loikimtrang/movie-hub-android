@@ -102,5 +102,8 @@
 
     <string name="movie">Phim</string>
     <string name="recommend">Đề xuất</string>
+    <string name="exit_confirm">Bạn có muốn thoát?</string>
+    <string name="unlock_screen">Nhấn vào đây để mở khóa</string>
+    <string name="find_movie">Tìm kiếm phim, diễn viên ...</string>
 
 </resources>

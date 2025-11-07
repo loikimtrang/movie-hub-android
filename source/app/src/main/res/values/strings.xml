@@ -103,5 +103,7 @@
 
     <string name="movie">Movie</string>
     <string name="recommend">Recommend</string>
-
+    <string name="exit_confirm">Do you want to exit?</string>
+    <string name="unlock_screen">Click here to unlock</string>
+    <string name="find_movie">Search movie, actor ...</string>
 </resources>

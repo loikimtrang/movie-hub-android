@@ -29,6 +29,7 @@ import com.movie_hub.android.ui.main.account.UnLoginAccountFragment;
 import com.movie_hub.android.ui.main.account.language.LanguageActivity;
 import com.movie_hub.android.ui.main.account.manage_account.ManageAccountActivity;
 import com.movie_hub.android.ui.main.home.HomeFragment;
+import com.movie_hub.android.ui.main.movie.watch.WatchMovieActivity;
 import com.movie_hub.android.ui.main.schedule.ScheduleFragment;
 import com.movie_hub.android.ui.main.search.SearchFragment;
 
@@ -62,6 +63,8 @@ public class MainActivity extends BaseActivity<ActivityMainBinding, MainViewMode
                     handleFragment(Constants.HOME);
                     return true;
                 case R.id.search:
+                    Intent intent = new Intent(this, WatchMovieActivity.class);
+                    startActivity(intent);
                     handleFragment(Constants.SEARCH);
                     return true;
                 case R.id.schedule:

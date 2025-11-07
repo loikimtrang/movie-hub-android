@@ -22,61 +22,463 @@
 
 
         <androidx.media3.ui.PlayerView
-            android:id="@+id/video_movie"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
-
-        <FrameLayout
+            android:id="@+id/playerView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@color/bg_app">
+            app:use_controller="false"/>
 
-            <ImageView
-                android:layout_width="@dimen/_12sdp"
-                android:layout_height="@dimen/_12sdp"
-                android:src="@drawable/ic_arrow_right"
-                android:rotation="180"/>
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="@dimen/_46sdp"
-                android:orientation="horizontal"
-                android:layout_gravity="top|left">
+        <FrameLayout
+            android:id="@+id/control_video"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone"
+            android:background="@drawable/bg_control_video">
+            <FrameLayout
+                android:id="@+id/button_control_video"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
 
                 <FrameLayout
-                    android:id="@+id/btn_close"
-                    android:layout_width="@dimen/_36sdp"
-                    android:layout_height="@dimen/_40sdp"
-                    android:onClick="@{(v)->a.onClick(v)}"
-                    android:layout_gravity="center">
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="top">
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="top"
+                        android:layout_margin="@dimen/_12sdp">
+                        <FrameLayout
+                            android:id="@+id/btn_close"
+                            android:layout_width="@dimen/_36sdp"
+                            android:layout_height="@dimen/_40sdp"
+                            android:layout_gravity="center"
+                            android:onClick="@{(v)->a.onClick(v)}"
+                            android:layout_alignParentStart="true"
+                            android:layout_alignParentTop="true">
+
+                            <ImageView
+                                android:layout_width="@dimen/_12sdp"
+                                android:layout_height="@dimen/_12sdp"
+                                android:layout_gravity="center"
+                                android:rotation="180"
+                                android:src="@drawable/ic_arrow_right" />
+                        </FrameLayout>
+
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:layout_marginHorizontal="@dimen/_6sdp"
+                            android:orientation="vertical"
+                            tools:ignore="RtlHardcoded"
+                            android:layout_toEndOf="@+id/btn_close"
+                            android:layout_centerVertical="true"
+                            android:layout_toStartOf="@id/btn_subtitle">
+
+                            <TextView
+                                android:id="@+id/name_movie"
+                                style="@style/Text_14_Bold"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:maxLines="2"
+                                android:text="Name" />
+
+                            <TextView
+                                android:id="@+id/name_movie_original"
+                                style="@style/Text_12_Normal"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:maxLines="2"
+                                android:text="Name" />
+                        </LinearLayout>
+
+                        <FrameLayout
+                            android:id="@+id/btn_subtitle"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="top|end"
+                            android:padding="@dimen/_4sdp"
+                            android:onClick="onClick"
+                            tools:ignore="UsingOnClickInXml"
+                            android:background="@drawable/bg_play_pause_circle"
+                            android:layout_centerVertical="true"
+                            android:layout_toStartOf="@id/btn_setting"
+                            android:layout_marginEnd="@dimen/_12sdp">
+
+                            <ImageView
+                                android:layout_width="@dimen/_22sdp"
+                                android:layout_height="@dimen/_22sdp"
+                                android:src="@drawable/ic_subtitle_off" />
+
+                        </FrameLayout>
+
+                        <FrameLayout
+                            android:id="@+id/btn_setting"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="top|end"
+                            android:padding="@dimen/_6sdp"
+                            android:onClick="onClick"
+                            tools:ignore="UsingOnClickInXml"
+                            android:background="@drawable/bg_play_pause_circle"
+                            android:layout_alignParentEnd="true"
+                            android:layout_centerVertical="true">
+
+                            <ImageView
+                                android:layout_width="@dimen/_20sdp"
+                                android:layout_height="@dimen/_20sdp"
+                                android:src="@drawable/ic_setting_video"/>
+
+                        </FrameLayout>
+                    </RelativeLayout>
+
+                </FrameLayout>
+
+                <LinearLayout
+                    android:id="@+id/layout_count_previous"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    tools:ignore="UsingOnClickInXml"
+                    android:layout_marginStart="@dimen/_60sdp"
+                    android:layout_gravity="center_vertical"
+                    android:visibility="gone">
+
                     <ImageView
-                        android:layout_width="@dimen/_12sdp"
-                        android:layout_height="@dimen/_12sdp"
-                        android:src="@drawable/ic_arrow_right"
-                        android:rotation="180"
-                        android:layout_gravity="center"/>
+                        android:layout_width="@dimen/_20sdp"
+                        android:layout_height="@dimen/_20sdp"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:src="@drawable/ic_previous"
+                        android:layout_margin="@dimen/_6sdp"/>
+
+                    <TextView
+                        android:id="@+id/tv_count_previous"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="- 10"
+                        android:layout_gravity="center"
+                        style="@style/Text_14_Bold"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/layout_count_forward"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    tools:ignore="UsingOnClickInXml"
+                    android:layout_marginEnd="@dimen/_60sdp"
+                    android:layout_gravity="center_vertical|end"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:id="@+id/tv_count_forward"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="+ 10"
+                        android:layout_gravity="center"
+                        style="@style/Text_14_Bold"/>
+
+                    <ImageView
+                        android:layout_width="@dimen/_20sdp"
+                        android:layout_height="@dimen/_20sdp"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:src="@drawable/ic_forward"
+                        android:layout_margin="@dimen/_6sdp"/>
+
+
+                </LinearLayout>
+
+                <FrameLayout
+                    android:id="@+id/btn_previous"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_play_pause_circle"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:onClick="onClick"
+                    tools:ignore="UsingOnClickInXml"
+                    android:layout_marginEnd="@dimen/_90sdp"
+                    android:layout_gravity="center">
+
+                    <ImageView
+                        android:layout_width="@dimen/_32sdp"
+                        android:layout_height="@dimen/_32sdp"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:src="@drawable/ic_previous_looping"
+                        android:layout_margin="@dimen/_6sdp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="10"
+                        android:layout_gravity="center"
+                        style="@style/Text_16_Bold"/>
+                </FrameLayout>
+
+                <FrameLayout
+                    android:id="@+id/btn_forward"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_play_pause_circle"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:onClick="onClick"
+                    tools:ignore="UsingOnClickInXml"
+                    android:layout_marginStart="@dimen/_90sdp"
+                    android:layout_gravity="center">
+
+                    <ImageView
+                        android:layout_width="@dimen/_32sdp"
+                        android:layout_height="@dimen/_32sdp"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:src="@drawable/ic_forward_looping"
+                        android:layout_margin="@dimen/_6sdp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="10"
+                        android:layout_gravity="center"
+                        style="@style/Text_16_Bold"/>
                 </FrameLayout>
 
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    tools:ignore="RtlHardcoded"
-                    android:layout_margin="@dimen/_6sdp"
-                    android:layout_gravity="center">
-                    <TextView
-                        android:id="@+id/name_movie"
-                        android:layout_width="match_parent"
+                    android:layout_gravity="center"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <FrameLayout
+                        android:id="@+id/btn_play_pause"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        style="@style/Text_14_Bold"
-                        android:text="Name"/>
+                        android:background="@drawable/bg_play_pause_circle"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:onClick="onClick"
+                        tools:ignore="UsingOnClickInXml">
+
+                        <ImageView
+                            android:id="@+id/ic_play_pause"
+                            android:layout_width="@dimen/_36sdp"
+                            android:layout_height="@dimen/_36sdp"
+                            android:background="?attr/selectableItemBackgroundBorderless"
+                            android:src="@drawable/ic_pause"
+                            android:layout_margin="@dimen/_6sdp"/>
+                    </FrameLayout>
+
+                    <FrameLayout
+                        android:id="@+id/btn_replay"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/bg_play_pause_circle"
+                        android:clickable="true"
+                        android:focusable="true"
+                        tools:ignore="UsingOnClickInXml"
+                        android:onClick="onClick"
+                        android:visibility="gone">
+
+                        <ImageView
+                            android:layout_width="@dimen/_36sdp"
+                            android:layout_height="@dimen/_36sdp"
+                            android:background="?attr/selectableItemBackgroundBorderless"
+                            android:src="@drawable/ic_replay"
+                            android:layout_margin="@dimen/_6sdp"/>
+                    </FrameLayout>
+
+                </LinearLayout>
+
+
+            </FrameLayout>
+
+            <FrameLayout
+                android:id="@+id/btn_lock_screen"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:padding="@dimen/_6sdp"
+                android:layout_margin="@dimen/_12sdp"
+                android:onClick="onClick"
+                tools:ignore="UsingOnClickInXml"
+                android:background="@drawable/bg_play_pause_circle">
+                
+                <ImageView
+                    android:id="@+id/ic_lock_screen"
+                    android:layout_width="@dimen/_28sdp"
+                    android:layout_height="@dimen/_28sdp"
+                    android:src="@drawable/ic_lock_screen"/>
+                
+            </FrameLayout>
+
+            <LinearLayout
+                android:id="@+id/l_un_lock_screen"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <FrameLayout
+                    android:id="@+id/btn_un_lock_screen"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:background="@drawable/bg_play_pause_circle"
+                    android:onClick="onClick"
+                    tools:ignore="UsingOnClickInXml">
+
+                    <ImageView
+                        android:id="@+id/ic_un_lock_screen"
+                        android:layout_width="@dimen/_28sdp"
+                        android:layout_height="@dimen/_28sdp"
+                        android:src="@drawable/ic_unlock_screen"
+                        android:layout_margin="@dimen/_6sdp"/>
+
+                </FrameLayout>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    style="@style/Text_12_Bold"
+                    android:layout_gravity="center_horizontal"
+                    android:text="@string/unlock_screen"
+                    android:layout_marginTop="@dimen/_3sdp"/>
+
+            </LinearLayout>
+
+        </FrameLayout>
+
+        <LinearLayout
+            android:id="@+id/layout_seek_bar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_gravity="bottom"
+            android:paddingHorizontal="@dimen/_12sdp"
+            android:paddingVertical="@dimen/_12sdp"
+            android:visibility="gone">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:id="@+id/tv_current_time"
+                    android:layout_width="@dimen/_70sdp"
+                    android:layout_height="wrap_content"
+                    android:text="00:00:00"
+                    style="@style/Text_14_Normal"
+                    android:textColor="@android:color/white"
+                    android:gravity="center"/>
+
+                <SeekBar
+                    android:id="@+id/seekBar"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:max="1000"
+                    android:progress="0"
+                    android:minHeight="@dimen/_3sdp"
+                    android:maxHeight="@dimen/_3sdp"
+                    android:progressDrawable="@drawable/seekbar_progress"
+                    android:thumb="@drawable/seekbar_thumb"
+                    android:layout_marginStart="@dimen/_12sdp"
+                    android:layout_marginEnd="@dimen/_12sdp"/>
+
+                <TextView
+                    android:id="@+id/tv_total_time"
+                    android:layout_width="@dimen/_70sdp"
+                    android:layout_height="wrap_content"
+                    android:text="00:00:00"
+                    style="@style/Text_14_Normal"
+                    android:textColor="@android:color/white"
+                    android:gravity="center"/>
+            </LinearLayout>
+        </LinearLayout>
+
+
+        <ProgressBar
+            android:id="@+id/loading_progress"
+            android:layout_width="@dimen/_60sdp"
+            android:layout_height="@dimen/_60sdp"
+            android:layout_gravity="center"
+            android:indeterminate="true"
+            android:visibility="gone"
+            style="@style/Widget.AppCompat.ProgressBar"
+            android:indeterminateDrawable="@drawable/loading_video_progress"
+            />
+
+        <FrameLayout
+            android:id="@+id/l_dialog_exit"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/bg_loading"
+            android:visibility="gone"
+            android:onClick="onClick"
+            tools:ignore="UsingOnClickInXml">
+            <LinearLayout
+                android:orientation="vertical"
+                android:padding="@dimen/_12sdp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_dialog"
+                android:gravity="center"
+                android:layout_marginHorizontal="@dimen/_20sdp"
+                android:layout_gravity="center">
+
+                <TextView
+                    android:id="@+id/dialog_message"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    style="@style/Text_12_Bold"
+                    android:gravity="center"
+                    android:text="@string/exit_confirm"
+                    android:maxLines="2"
+                    android:layout_marginBottom="@dimen/_12sdp"/>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:background="@color/account_header">
 
                     <TextView
-                        android:id="@+id/name_movie_original"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        style="@style/Text_12_Normal"
-                        android:text="Name"/>
+                        android:id="@+id/btn_ok"
+                        android:layout_width="@dimen/_80sdp"
+                        android:layout_height="@dimen/_25sdp"
+                        android:foreground="?attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:text="@string/confirm"
+                        style="@style/Text_10_Bold"
+                        android:background="@drawable/bg_btn_yellow_radius_6sdp"
+                        android:gravity="center"
+                        android:layout_marginStart="@dimen/_10sdp"
+                        android:layout_marginEnd="@dimen/_5sdp"
+                        android:textColor="@color/black"
+                        android:onClick="onClick"
+                        tools:ignore="UsingOnClickInXml"/>
+
+                    <TextView
+                        android:id="@+id/btn_cancel"
+                        android:layout_width="@dimen/_80sdp"
+                        android:layout_height="@dimen/_25sdp"
+                        android:foreground="?attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:text="@string/cancel"
+                        android:textColor="@color/black"
+                        style="@style/Text_10_Bold"
+                        android:background="@drawable/bg_btn_white_radius_6sdp"
+                        android:gravity="center"
+                        android:layout_marginStart="@dimen/_5sdp"
+                        android:layout_marginEnd="@dimen/_10sdp"
+                        android:onClick="onClick"
+                        tools:ignore="UsingOnClickInXml"/>
+
                 </LinearLayout>
 
             </LinearLayout>
