@@ -45,8 +45,8 @@ public class BaseBottomSheetDialog extends BottomSheetDialog {
             WindowInsetsController controller = window.getInsetsController();
             if (controller != null) {
                 controller.setSystemBarsBehavior(WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
-                controller.hide(WindowInsetsCompat.Type.statusBars());
-                controller.hide(WindowInsetsCompat.Type.navigationBars());
+//                controller.hide(WindowInsetsCompat.Type.statusBars());
+//                controller.hide(WindowInsetsCompat.Type.navigationBars());
                 Log.d("TRANSPARENT", "Hiding system bars (API 30+)");
             }
         } else {
