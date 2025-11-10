@@ -3,6 +3,7 @@ package com.movie_hub.android.ui.main.movie.watch;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.database.ContentObserver;
+import android.graphics.Color;
 import android.media.AudioManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -34,6 +35,7 @@ import androidx.media3.common.TrackSelectionParameters;
 import androidx.media3.common.Tracks;
 import androidx.media3.common.VideoSize;
 import androidx.media3.exoplayer.ExoPlayer;
+import androidx.media3.ui.AspectRatioFrameLayout;
 
 import com.google.common.collect.ImmutableList;
 import com.movie_hub.android.R;
@@ -580,6 +582,8 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
     public void hideSystemUI() {
         Window window = getWindow();
         WindowCompat.setDecorFitsSystemWindows(window, false);
+        window.setStatusBarColor(Color.TRANSPARENT);
+        window.setNavigationBarColor(Color.TRANSPARENT);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             getWindow().setDecorFitsSystemWindows(false);
             getWindow().getInsetsController().hide(WindowInsets.Type.systemBars());
@@ -669,7 +673,6 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
         });
     }
     private void showSettingsMoreOptionBottomSheet() {
-        toggleControls();
         MoreOptionBottomSheetDialog sheet = new MoreOptionBottomSheetDialog(this, viewModel.settingVideoModel, this);
         sheet.show();
         Objects.requireNonNull(sheet.getWindow()).getDecorView().post(sheet::setupTransparentWindow);
@@ -864,3 +867,11 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
         player.setTrackSelectionParameters(builder.build());
     }
 }
+//boolean zoomed = false;
+//viewBinding.playerView.setOnClickListener(v -> {
+//zoomed = !zoomed;
+//    viewBinding.playerView.setResizeMode(
+//        zoomed ? AspectRatioFrameLayout.RESIZE_MODE_ZOOM
+//        : AspectRatioFrameLayout.RESIZE_MODE_FIT
+//);
+//});

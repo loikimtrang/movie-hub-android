@@ -37,6 +37,7 @@ public class SettingBottomSheetDialog extends BaseBottomSheetDialog {
         binding = LayoutBottomSheetSettingsBinding.inflate(LayoutInflater.from(getContext()));
         setContentView(binding.getRoot());
         setUpView();
+        setupTransparentWindow();
 
         binding.layoutSetting.setOnClickListener(v -> dismiss());
         binding.btnQuality.setOnClickListener(v -> onQualityClicked());

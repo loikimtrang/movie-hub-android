@@ -35,7 +35,6 @@ public class MoreOptionBottomSheetDialog extends BaseBottomSheetDialog {
         binding = LayoutBottomSheetSettingsMoreOptionBinding.inflate(LayoutInflater.from(getContext()));
         setContentView(binding.getRoot());
         setUpView();
-
         binding.layoutSetting.setOnClickListener(v -> dismiss());
         binding.btnPlaySpeed.setOnClickListener(v -> onPlaySpeedClicked());
         binding.btnSubtitle.setOnClickListener(v -> onSubtitleClicked());

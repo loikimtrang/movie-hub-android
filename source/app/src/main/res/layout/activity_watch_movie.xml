@@ -31,7 +31,7 @@
             android:id="@+id/control_video"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:visibility="gone"
+            android:visibility="visible"
             android:background="@drawable/bg_control_video">
             <FrameLayout
                 android:id="@+id/button_control_video"
@@ -156,6 +156,143 @@
 
                         </FrameLayout>
                     </RelativeLayout>
+
+                </FrameLayout>
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom"
+                    android:paddingBottom="@dimen/_8sdp">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        android:orientation="horizontal"
+                        android:background="@drawable/bg_bottom_control"
+                        android:paddingHorizontal="@dimen/_6sdp"
+                        android:gravity="center"
+                        android:clickable="false"
+                        android:focusable="false">
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:gravity="center"
+                            android:paddingVertical="@dimen/_8sdp"
+                            android:paddingHorizontal="@dimen/_6sdp"
+                            android:layout_gravity="center">
+
+                            <ImageView
+                                android:id="@+id/ic_zoom_fit"
+                                android:layout_width="@dimen/_18sdp"
+                                android:layout_height="@dimen/_18sdp"
+                                android:src="@drawable/ic_fit"/>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                style="@style/Text_14_Normal"
+                                android:text="@string/fit_screen"
+                                android:layout_marginStart="@dimen/_6sdp"/>
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:gravity="center"
+                            android:paddingVertical="@dimen/_8sdp"
+                            android:paddingHorizontal="@dimen/_6sdp"
+                            android:layout_gravity="center">
+
+                        <ImageView
+                            android:layout_width="@dimen/_16sdp"
+                            android:layout_height="@dimen/_16sdp"
+                            android:src="@drawable/ic_microphone"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            style="@style/Text_14_Normal"
+                            android:text="@string/audio_language"
+                            android:layout_marginStart="@dimen/_6sdp"/>
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:gravity="center"
+                            android:paddingVertical="@dimen/_8sdp"
+                            android:paddingHorizontal="@dimen/_6sdp"
+                            android:layout_gravity="center">
+
+                            <ImageView
+                                android:layout_width="@dimen/_18sdp"
+                                android:layout_height="@dimen/_18sdp"
+                                android:src="@drawable/ic_subtitle_off"/>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                style="@style/Text_14_Normal"
+                                android:text="@string/subtitle"
+                                android:layout_marginStart="@dimen/_6sdp"/>
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:gravity="center"
+                            android:paddingVertical="@dimen/_8sdp"
+                            android:paddingHorizontal="@dimen/_6sdp"
+                            android:layout_gravity="center">
+
+                            <ImageView
+                                android:layout_width="@dimen/_18sdp"
+                                android:layout_height="@dimen/_18sdp"
+                                android:src="@drawable/ic_list_episode"/>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                style="@style/Text_14_Normal"
+                                android:text="@string/episodes"
+                                android:layout_marginStart="@dimen/_6sdp"/>
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:gravity="center"
+                            android:paddingVertical="@dimen/_8sdp"
+                            android:paddingHorizontal="@dimen/_6sdp"
+                            android:layout_gravity="center">
+
+                            <ImageView
+                                android:layout_width="@dimen/_18sdp"
+                                android:layout_height="@dimen/_18sdp"
+                                android:src="@drawable/ic_next_episode"/>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                style="@style/Text_14_Normal"
+                                android:text="@string/next_episode"
+                                android:layout_marginStart="@dimen/_6sdp"/>
+
+                        </LinearLayout>
+
+                    </LinearLayout>
 
                 </FrameLayout>
 
@@ -405,7 +542,8 @@
             android:layout_gravity="bottom"
             android:paddingHorizontal="@dimen/_12sdp"
             android:paddingVertical="@dimen/_12sdp"
-            android:visibility="gone">
+            android:visibility="gone"
+            android:layout_marginBottom="@dimen/_40sdp">
 
             <TextView
                 android:id="@+id/tv_current_time_second"

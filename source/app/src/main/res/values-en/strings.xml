@@ -123,4 +123,12 @@
     <string name="normal">Normal</string>
     <string name="current_quality">Current quality: </string>
     <string name="hold_playback_speed">Playback speed while holding</string>
+
+    <string name="fit_screen">Fit to screen</string>
+    <string name="zoom_out">Zoom out</string>
+    <string name="audio_language">Audio</string>
+    <string name="original_audio">Original audio</string>
+    <string name="dubbed_audio">Dubbed</string>
+    <string name="next_episode">Next episode</string>
+    <string name="episodes">Episodes</string>
 </resources>

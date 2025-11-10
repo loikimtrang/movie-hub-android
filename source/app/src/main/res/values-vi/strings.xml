@@ -123,4 +123,12 @@
     <string name="normal">Bình thường</string>
     <string name="current_quality">Chất lượng hiện tại: </string>
     <string name="hold_playback_speed">Tốc độ phát khi nhấn giữ</string>
+
+    <string name="fit_screen">Vừa màn hình</string>
+    <string name="zoom_out">Thu nhỏ</string>
+    <string name="audio_language">Âm thanh</string>
+    <string name="original_audio">Tiếng gốc</string>
+    <string name="dubbed_audio">Lồng tiếng</string>
+    <string name="next_episode">Tập tiếp theo</string>
+    <string name="episodes">Các tập</string>
 </resources>
