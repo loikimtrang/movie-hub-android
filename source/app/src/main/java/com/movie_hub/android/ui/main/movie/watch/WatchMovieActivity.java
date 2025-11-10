@@ -1,47 +1,78 @@
 package com.movie_hub.android.ui.main.movie.watch;
 
 import android.annotation.SuppressLint;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.Window;
 import android.view.WindowInsets;
 import android.view.WindowInsetsController;
+import android.widget.FrameLayout;
 import android.widget.SeekBar;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.lifecycle.MutableLiveData;
+import androidx.core.view.WindowCompat;
+import androidx.media3.common.C;
+import androidx.media3.common.Format;
 import androidx.media3.common.MediaItem;
+import androidx.media3.common.PlaybackParameters;
 import androidx.media3.common.Player;
+import androidx.media3.common.TrackGroup;
+import androidx.media3.common.TrackSelectionOverride;
+import androidx.media3.common.TrackSelectionParameters;
+import androidx.media3.common.Tracks;
+import androidx.media3.common.VideoSize;
 import androidx.media3.exoplayer.ExoPlayer;
+import androidx.media3.exoplayer.analytics.AnalyticsListener;
+import androidx.media3.exoplayer.source.TrackGroupArray;
+import androidx.media3.exoplayer.trackselection.TrackSelectionArray;
 
+import com.google.common.collect.ImmutableList;
 import com.movie_hub.android.R;
-import com.movie_hub.android.custom.CustomDialog;
 import com.movie_hub.android.data.model.api.response.movie.MovieResponse;
 import com.movie_hub.android.databinding.ActivityWatchMovieBinding;
 import com.movie_hub.android.di.component.ActivityComponent;
 import com.movie_hub.android.ui.base.activity.BaseActivity;
-import com.movie_hub.android.ui.main.account.language.model.LanguageItemModel;
+import com.movie_hub.android.ui.main.movie.watch.dialog.BaseBottomSheetDialog;
+import com.movie_hub.android.ui.main.movie.watch.dialog.PlaySpeedBottomSheetDialog;
+import com.movie_hub.android.ui.main.movie.watch.dialog.QualityBottomSheetDialog;
+import com.movie_hub.android.ui.main.movie.watch.dialog.SettingBottomSheetDialog;
+import com.movie_hub.android.ui.main.movie.watch.setting.SettingVideoModel;
+import com.movie_hub.android.ui.main.movie.watch.setting.VideoQuality;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Objects;
 
 import eu.davidea.flexibleadapter.databinding.BR;
 
-public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, WatchMovieViewModel> implements View.OnClickListener {
+public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, WatchMovieViewModel> implements View.OnClickListener,
+        SettingBottomSheetDialog.SettingBottomSheetCallback,
+        PlaySpeedBottomSheetDialog.PlaySpeedBottomSheetCallback,
+        QualityBottomSheetDialog .QualityBottomSheetCallback {
     private ExoPlayer player;
     private static final int AUTO_HIDE_DELAY_MILLIS = 3000;
     private static final int SEEK_DOUBLE_TAP_MILLIS = 10000;
     private Handler seekHandler = new Handler(Looper.getMainLooper());
-    private final Handler autoHideHandler = new Handler(Looper.getMainLooper());
+    private Handler autoHideHandler = new Handler(Looper.getMainLooper());
     private Runnable updateSeekBarRunnable;
     private boolean isUserSeeking = false;
     private boolean isBuffering = false;
     private boolean isLockScreen = false;
+    private boolean isVideoReadyWhenStartActivity = false;
 
+    private static final int DOUBLE_TAP_TIMEOUT = 800;
+    private int forwardCount = 0;
+    private int previousCount = 0;
+    private Handler countResetHandler = new Handler(Looper.getMainLooper());
+    private Runnable resetCountRunnable;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -66,7 +97,28 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
         player = new ExoPlayer.Builder(this).build();
         viewBinding.playerView.setPlayer(player);
         showLoadingVideo();
+
         MediaItem mediaItem = MediaItem.fromUri("https://files.vidstack.io/sprite-fight/hls/stream.m3u8");
+
+        player.addListener(new Player.Listener() {
+            @Override
+            public void onTracksChanged(Tracks tracks) {
+                extractAvailableQualities(tracks);
+            }
+
+            @Override
+            public void onVideoSizeChanged(VideoSize videoSize) {
+                runOnUiThread(() -> {
+                    VideoQuality current = new VideoQuality();
+                    current.height = videoSize.height;
+                    current.label = current.getQualityLabel(videoSize.height);
+                    SettingBottomSheetDialog.videoQuality.postValue(current);
+                    QualityBottomSheetDialog.videoQuality.postValue(current);
+                });
+            }
+
+        });
+
         player.setMediaItem(mediaItem);
         player.prepare();
         player.setPlayWhenReady(true);
@@ -74,6 +126,51 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
         setupSeekBar();
         setupGestureDetector();
     }
+
+    private void extractAvailableQualities(Tracks tracks) {
+        viewModel.settingVideoModel.getAvailableQualities().clear();
+
+        for (Tracks.Group group : tracks.getGroups()) {
+            if (group.getType() != C.TRACK_TYPE_VIDEO) continue;
+
+            TrackGroup mediaTrackGroup = group.getMediaTrackGroup();
+
+            for (int i = 0; i < group.length; i++) {
+                Format format = group.getTrackFormat(i);
+                int height = format.height;
+                int bitrate = format.bitrate;
+
+                if (height > 0) {
+                    VideoQuality quality = new VideoQuality(
+                            height,
+                            bitrate,
+                            mediaTrackGroup.id,
+                            i
+                    );
+                    viewModel.settingVideoModel.getAvailableQualities().add(quality);
+                }
+            }
+        }
+
+        Collections.sort(viewModel.settingVideoModel.getAvailableQualities(),
+                (q1, q2) -> Integer.compare(q2.height, q1.height));
+
+        VideoQuality auto = new VideoQuality();
+        auto.label = getString(R.string.auto);
+
+        if (viewModel.settingVideoModel.getQuality().isAuto()) {
+            auto.isCheck = true;
+        } else {
+            for (VideoQuality quality : viewModel.settingVideoModel.getAvailableQualities()) {
+                if (Objects.equals(quality.label, viewModel.settingVideoModel.getQuality().getResolution().label)) {
+                    quality.isCheck = true;
+                    break;
+                }
+            }
+        }
+        viewModel.settingVideoModel.getAvailableQualities().add(0, auto);
+    }
+
 
     public void setupSeekBar() {
         player.addListener(new Player.Listener() {
@@ -96,6 +193,7 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
                         int progress = (int) (1000 * current / duration);
                         viewBinding.seekBar.setProgress(progress);
                         viewBinding.tvCurrentTime.setText(formatTime(current));
+                        viewBinding.tvCurrentTimeSecond.setText(formatTime(current));
                     }
                 }
                 seekHandler.postDelayed(this, 500);
@@ -112,6 +210,7 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
                     long newPosition = (duration * progress) / 1000;
                     player.seekTo(newPosition);
                     viewBinding.tvCurrentTime.setText(formatTime(newPosition));
+                    viewBinding.tvCurrentTimeSecond.setText(formatTime(newPosition));
                 }
             }
 
@@ -120,44 +219,24 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
                 isUserSeeking = true;
                 autoHideHandler.removeCallbacks(hideControlsRunnable);
                 viewBinding.controlVideo.setVisibility(View.GONE);
+                viewBinding.tvCurrentTimeSecond.setVisibility(View.VISIBLE);
             }
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
                 isUserSeeking = false;
                 viewBinding.controlVideo.setVisibility(View.VISIBLE);
+                viewBinding.tvCurrentTimeSecond.setVisibility(View.GONE);
                 autoHideHandler.postDelayed(hideControlsRunnable, AUTO_HIDE_DELAY_MILLIS);
             }
         });
     }
-    private final Handler singleTapHandler = new Handler(Looper.getMainLooper());
-    private Runnable singleTapRunnable;
-    private boolean isDoubleTap = false;
-
     @SuppressLint("ClickableViewAccessibility")
     public void setupGestureDetector() {
         GestureDetector gestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
             @Override
-            public boolean onDown(MotionEvent e) {
-                // Bắt đầu đếm single tap
-                isDoubleTap = false;
-                singleTapRunnable = () -> {
-                    if (!isDoubleTap) {
-                        if (!isBuffering) {
-                            toggleControls();
-                        }
-                    }
-                };
-                singleTapHandler.postDelayed(singleTapRunnable, 300);
-                return true;
-            }
-
-            @Override
             public boolean onDoubleTap(@NonNull MotionEvent e) {
-                if (isLockScreen) return true;
-
-                isDoubleTap = true;
-                singleTapHandler.removeCallbacks(singleTapRunnable);
+                if (!isVideoReadyWhenStartActivity || isLockScreen) return true;
 
                 viewBinding.layoutSeekBar.setVisibility(View.VISIBLE);
                 viewBinding.controlVideo.setVisibility(View.GONE);
@@ -167,23 +246,59 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
 
                 return true;
             }
+
+            @Override
+            public boolean onSingleTapConfirmed(MotionEvent e) {
+                if (isVideoReadyWhenStartActivity) {
+                    toggleControls();
+                }
+                return true;
+            }
+
+            @Override
+            public void onLongPress(@NonNull MotionEvent e) {
+                if (player != null && player.isPlaying()) {
+                    player.setPlaybackParameters(new PlaybackParameters(2.0f));
+                    autoHideHandler.removeCallbacks(hideControlsRunnable);
+                    autoHideHandler.postDelayed(hideControlsRunnable, 0);
+
+                    runOnUiThread(() -> {
+                        viewBinding.tvSpeed.setText("2.0x");
+                        viewBinding.layoutSpeedPress.setVisibility(View.VISIBLE);
+                    });
+                }
+            }
         });
 
         viewBinding.playerView.setOnTouchListener((v, event) -> {
             gestureDetector.onTouchEvent(event);
             return true;
         });
+
+        viewBinding.playerView.setOnTouchListener((v, event) -> {
+            gestureDetector.onTouchEvent(event);
+
+            if (event.getAction() == MotionEvent.ACTION_UP || event.getAction() == MotionEvent.ACTION_CANCEL) {
+                if (player != null && player.isPlaying()) {
+                    player.setPlaybackParameters(new PlaybackParameters(viewModel.settingVideoModel.getPlaySpeed().getSpeed()));
+                    runOnUiThread(() -> viewBinding.layoutSpeedPress.setVisibility(View.GONE));
+                }
+            }
+            return true;
+        });
     }
 
     public void handleForwardAndPreviousVideo(boolean isForward) {
-        long seekToPosition;
+        if (!isVideoReadyWhenStartActivity) return;
+
         long currentPosition = player.getCurrentPosition();
-
-        seekToPosition = currentPosition + (isForward ? SEEK_DOUBLE_TAP_MILLIS : -SEEK_DOUBLE_TAP_MILLIS);
+        long seekToPosition = currentPosition + (isForward ? SEEK_DOUBLE_TAP_MILLIS : -SEEK_DOUBLE_TAP_MILLIS);
+        Log.d("SEE", String.valueOf(seekToPosition));
         seekToPosition = Math.max(0, Math.min(seekToPosition, player.getDuration()));
-
         player.seekTo(seekToPosition);
         showSeekPreview(seekToPosition, isForward);
+
+        showSeekCount(isForward, SEEK_DOUBLE_TAP_MILLIS);
     }
 
     private void showSeekPreview(long position, boolean isForward) {
@@ -193,8 +308,51 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
             viewBinding.seekBar.setProgress(progress);
         }
         viewBinding.tvCurrentTime.setText(formatTime(position));
+        viewBinding.tvCurrentTimeSecond.setText(formatTime(position));
         autoHideHandler.removeCallbacks(hideControlsRunnable);
-        autoHideHandler.postDelayed(hideControlsRunnable, 2000);
+
+        if (viewBinding.controlVideo.getVisibility() == View.VISIBLE) {
+            autoHideHandler.postDelayed(hideControlsRunnable, AUTO_HIDE_DELAY_MILLIS);
+        } else {
+            autoHideHandler.postDelayed(hideControlsRunnable, DOUBLE_TAP_TIMEOUT);
+        }
+
+    }
+
+    private void showSeekCount(boolean isForward, int seconds) {
+        viewBinding.tvCurrentTimeSecond.setVisibility(View.VISIBLE);
+        if (isForward) {
+            forwardCount += seconds / 1000; // +10s
+            previousCount = 0;
+            viewBinding.layoutCountForward.setVisibility(View.VISIBLE);
+            viewBinding.layoutCountPrevious.setVisibility(View.GONE);
+            viewBinding.tvCountForward.setText(String.format("+ %d", forwardCount));
+
+            if (player.getCurrentPosition() + SEEK_DOUBLE_TAP_MILLIS >= player.getDuration()) {
+                forwardCount = 0;
+            }
+        } else {
+            previousCount += seconds / 1000; // -10s
+            forwardCount = 0;
+            viewBinding.layoutCountPrevious.setVisibility(View.VISIBLE);
+            viewBinding.layoutCountForward.setVisibility(View.GONE);
+            viewBinding.tvCountPrevious.setText(String.format("- %d", previousCount));
+
+            if (player.getCurrentPosition() == 0) {
+                previousCount = 0;
+            }
+        }
+
+        // Reset counter sau 800ms nếu không có tap mới
+        countResetHandler.removeCallbacks(resetCountRunnable);
+        resetCountRunnable = () -> {
+            forwardCount = 0;
+            previousCount = 0;
+            viewBinding.layoutCountForward.setVisibility(View.GONE);
+            viewBinding.layoutCountPrevious.setVisibility(View.GONE);
+            viewBinding.tvCurrentTimeSecond.setVisibility(View.GONE);
+        };
+        countResetHandler.postDelayed(resetCountRunnable, DOUBLE_TAP_TIMEOUT);
     }
     private void setupPlayerListener() {
         player.addListener(new Player.Listener() {
@@ -204,6 +362,7 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
                     viewBinding.btnReplay.setVisibility(View.GONE);
                     showLoadingVideo();
                 } else if (state == Player.STATE_READY) {
+                    isVideoReadyWhenStartActivity = true;
                     viewBinding.btnReplay.setVisibility(View.GONE);
                     hideLoadingVideo();
                     if (player.getDuration() > 0) {
@@ -235,7 +394,6 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
             viewBinding.btnPlayPause.setVisibility(View.GONE);
         }
     }
-
     private void hideLoadingVideo() {
         if (isBuffering) {
             isBuffering = false;
@@ -304,13 +462,9 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
         buildComponent.inject(this);
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        hideSystemUI();
-    }
-
-    private void hideSystemUI() {
+    public void hideSystemUI() {
+        Window window = getWindow();
+        WindowCompat.setDecorFitsSystemWindows(window, false);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             getWindow().setDecorFitsSystemWindows(false);
             getWindow().getInsetsController().hide(WindowInsets.Type.systemBars());
@@ -318,7 +472,6 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
                     WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
             );
         } else {
-            // Android dưới R
             getWindow().getDecorView().setSystemUiVisibility(
                     View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
                             | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
@@ -366,34 +519,177 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
             case R.id.btn_previous:
                 handleForwardAndPreviousVideo(false);
                 break;
+            case R.id.btn_setting:
+                showSettingsBottomSheet();
+                break;
             default:
                 break;
         }
     }
+    private void showSettingsBottomSheet() {
+        toggleControls();
+        SettingBottomSheetDialog sheet = new SettingBottomSheetDialog(this, viewModel.settingVideoModel, this);
+        sheet.show();
+        Objects.requireNonNull(sheet.getWindow()).getDecorView().post(sheet::setupTransparentWindow);
+        sheet.setOnDismissListener(v -> {
+            hideSystemUI();
+        });
+    }
 
+    private void showSettingsPlaySpeedBottomSheet() {
+        PlaySpeedBottomSheetDialog sheet = new PlaySpeedBottomSheetDialog(this, viewModel.settingVideoModel, this);
+        sheet.show();
+        Objects.requireNonNull(sheet.getWindow()).getDecorView().post(sheet::setupTransparentWindow);
+        sheet.setOnDismissListener(v -> {
+            hideSystemUI();
+        });
+    }
+
+    private void showSettingsQualityBottomSheet() {
+        QualityBottomSheetDialog sheet = new QualityBottomSheetDialog(this, viewModel.settingVideoModel, this);
+        sheet.show();
+        Objects.requireNonNull(sheet.getWindow()).getDecorView().post(sheet::setupTransparentWindow);
+        sheet.setOnDismissListener(v -> {
+            hideSystemUI();
+        });
+    }
     public void handleLockScreen() {
         if (isLockScreen) {
             isLockScreen = false;
-            viewBinding.lUnLockScreen.setVisibility(View.GONE);
+            viewBinding.btnUnLockScreen.setVisibility(View.GONE);
             viewBinding.btnLockScreen.setVisibility(View.VISIBLE);
             viewBinding.buttonControlVideo.setVisibility(View.VISIBLE);
             viewBinding.layoutSeekBar.setVisibility(View.VISIBLE);
         } else {
             isLockScreen = true;
-            viewBinding.lUnLockScreen.setVisibility(View.VISIBLE);
+            viewBinding.btnUnLockScreen.setVisibility(View.VISIBLE);
             viewBinding.btnLockScreen.setVisibility(View.GONE);
             viewBinding.buttonControlVideo.setVisibility(View.GONE);
             viewBinding.layoutSeekBar.setVisibility(View.GONE);
+        }
+    }
+    private void startSeekBarUpdate() {
+        if (updateSeekBarRunnable != null) {
+            seekHandler.post(updateSeekBarRunnable);
+        }
+    }
+
+    private void stopSeekBarUpdate() {
+        if (seekHandler != null && updateSeekBarRunnable != null) {
+            seekHandler.removeCallbacks(updateSeekBarRunnable);
+        }
+    }
+    @Override
+    protected void onResume() {
+        super.onResume();
+        hideSystemUI();
+        startSeekBarUpdate();
+    }
+    @Override
+    protected void onPause() {
+        super.onPause();
+        stopSeekBarUpdate();
+
+        if (player != null) {
+            player.pause();
         }
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
+
         if (player != null) {
             player.release();
+            player = null;
         }
-        seekHandler.removeCallbacks(updateSeekBarRunnable);
-        autoHideHandler.removeCallbacks(hideControlsRunnable);
+
+        if (seekHandler != null && updateSeekBarRunnable != null) {
+            seekHandler.removeCallbacks(updateSeekBarRunnable);
+        }
+
+        if (autoHideHandler != null) {
+            autoHideHandler.removeCallbacks(hideControlsRunnable);
+        }
+
+        if (countResetHandler != null && resetCountRunnable != null) {
+            countResetHandler.removeCallbacks(resetCountRunnable);
+        }
+
+        seekHandler = null;
+        autoHideHandler = null;
+        countResetHandler = null;
+    }
+
+    @Override
+    public void onQualityClicked() {
+        showSettingsQualityBottomSheet();
+    }
+
+    @Override
+    public void onPlaybackSpeedClicked() {
+        showSettingsPlaySpeedBottomSheet();
+    }
+
+    @Override
+    public void onSubtitleClicked() {
+
+    }
+
+    @Override
+    public void onLockScreenClicked() {
+        handleLockScreen();
+    }
+
+    @Override
+    public void onMoreOptionsClicked() {
+
+    }
+
+    @Override
+    public void updatePlaySpeedVideo(float speed) {
+        viewModel.settingVideoModel.getPlaySpeed().setSpeed(speed);
+        if (player != null) {
+            PlaybackParameters params = new PlaybackParameters(viewModel.settingVideoModel.getPlaySpeed().getSpeed());
+            player.setPlaybackParameters(params);
+        }
+    }
+
+    @Override
+    public void updateQualityVideo(SettingVideoModel settingVideoModel) {
+        viewModel.settingVideoModel = settingVideoModel;
+        applyQualityFromSetting();
+    }
+
+    private void applyQualityFromSetting() {
+        if (player == null) return;
+
+        SettingVideoModel.Quality qualitySetting =  viewModel.settingVideoModel.getQuality();
+        TrackSelectionParameters.Builder builder = player.getTrackSelectionParameters().buildUpon();
+
+        if (qualitySetting.isAuto()) {
+            builder.clearOverridesOfType(C.TRACK_TYPE_VIDEO);
+        } else {
+            VideoQuality selected = qualitySetting.getResolution();
+            if (selected == null) return;
+
+            Tracks currentTracks = player.getCurrentTracks();
+
+            for (Tracks.Group group : currentTracks.getGroups()) {
+                if (group.getType() == C.TRACK_TYPE_VIDEO &&
+                        group.getMediaTrackGroup().id.equals(selected.groupIndex)) {
+
+                    TrackSelectionOverride override = new TrackSelectionOverride(
+                            group.getMediaTrackGroup(),
+                            ImmutableList.of(selected.trackIndex)
+                    );
+
+                    builder.clearOverridesOfType(C.TRACK_TYPE_VIDEO)
+                            .addOverride(override);
+                    break;
+                }
+            }
+        }
+        player.setTrackSelectionParameters(builder.build());
     }
 }

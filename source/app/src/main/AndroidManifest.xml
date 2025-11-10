@@ -60,24 +60,29 @@
 
         <activity android:name=".ui.main.MainActivity"
             android:windowSoftInputMode="adjustResize|stateHidden"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"
+            android:exported="true"/>
 
         <activity android:name=".ui.main.account.language.LanguageActivity"
             android:windowSoftInputMode="adjustResize"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"
+            android:exported="true"/>
 
         <activity android:name=".ui.main.account.manage_account.ManageAccountActivity"/>
         <activity android:name=".ui.main.movie.detail.MovieDetailActivity"
             android:screenOrientation="portrait"
-            />
+
+            android:exported="true"/>
         <activity android:name=".ui.main.movie.watch.WatchMovieActivity"
             android:screenOrientation="landscape"
-            />
+
+            android:exported="true"/>
 
         <activity
             android:name="com.yalantis.ucrop.UCropActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar"
+            android:exported="true"/>
 
         <provider
             android:name="androidx.core.content.FileProvider"

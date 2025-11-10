@@ -27,6 +27,18 @@
         <item name="android:navigationBarColor">@color/bg_app</item>
     </style>
 
+    <style name="TransparentBottomSheetDialog" parent="Theme.Design.BottomSheetDialog">
+        <item name="android:windowIsFloating">false</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="bottomSheetStyle">@style/TransparentBottomSheetStyle</item>
+    </style>
+
+    <style name="TransparentBottomSheetStyle" parent="Widget.Design.BottomSheet.Modal">
+        <item name="android:background">@android:color/transparent</item>
+    </style>
+
     <style name="Theme.MovieHub.NoActionBar" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <!-- Tùy chỉnh màu sắc splash -->
         <item name="android:windowBackground">@color/bg_app</item>
@@ -65,9 +77,6 @@
         <item name="android:textColor">@color/text</item>
         <item name="android:textStyle">bold</item>
     </style>
-
-
-
 
 
     <style name="Text_6_Normal" parent="BaseText_Inter">

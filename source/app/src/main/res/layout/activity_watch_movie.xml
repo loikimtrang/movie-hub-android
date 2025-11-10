@@ -135,57 +135,6 @@
 
                 </FrameLayout>
 
-                <LinearLayout
-                    android:id="@+id/layout_count_previous"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    tools:ignore="UsingOnClickInXml"
-                    android:layout_marginStart="@dimen/_60sdp"
-                    android:layout_gravity="center_vertical"
-                    android:visibility="gone">
-
-                    <ImageView
-                        android:layout_width="@dimen/_20sdp"
-                        android:layout_height="@dimen/_20sdp"
-                        android:background="?attr/selectableItemBackgroundBorderless"
-                        android:src="@drawable/ic_previous"
-                        android:layout_margin="@dimen/_6sdp"/>
-
-                    <TextView
-                        android:id="@+id/tv_count_previous"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="- 10"
-                        android:layout_gravity="center"
-                        style="@style/Text_14_Bold"/>
-                </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/layout_count_forward"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    tools:ignore="UsingOnClickInXml"
-                    android:layout_marginEnd="@dimen/_60sdp"
-                    android:layout_gravity="center_vertical|end"
-                    android:visibility="gone">
-
-                    <TextView
-                        android:id="@+id/tv_count_forward"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="+ 10"
-                        android:layout_gravity="center"
-                        style="@style/Text_14_Bold"/>
-
-                    <ImageView
-                        android:layout_width="@dimen/_20sdp"
-                        android:layout_height="@dimen/_20sdp"
-                        android:background="?attr/selectableItemBackgroundBorderless"
-                        android:src="@drawable/ic_forward"
-                        android:layout_margin="@dimen/_6sdp"/>
-
-
-                </LinearLayout>
 
                 <FrameLayout
                     android:id="@+id/btn_previous"
@@ -296,7 +245,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
-                android:padding="@dimen/_6sdp"
+                android:padding="@dimen/_8sdp"
                 android:layout_margin="@dimen/_12sdp"
                 android:onClick="onClick"
                 tools:ignore="UsingOnClickInXml"
@@ -304,48 +253,41 @@
                 
                 <ImageView
                     android:id="@+id/ic_lock_screen"
-                    android:layout_width="@dimen/_28sdp"
-                    android:layout_height="@dimen/_28sdp"
+                    android:layout_width="@dimen/_20sdp"
+                    android:layout_height="@dimen/_20sdp"
                     android:src="@drawable/ic_lock_screen"/>
                 
             </FrameLayout>
 
             <LinearLayout
-                android:id="@+id/l_un_lock_screen"
+                android:id="@+id/btn_un_lock_screen"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"
+                android:onClick="onClick"
+                tools:ignore="UsingOnClickInXml"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:background="@drawable/bg_btn_white_radius_6sdp"
+                android:padding="@dimen/_6sdp"
+                android:layout_gravity="center|bottom"
+                android:visibility="gone"
+                android:layout_marginBottom="@dimen/_50sdp">
 
-                android:orientation="vertical"
-                android:visibility="gone">
-
-                <FrameLayout
-                    android:id="@+id/btn_un_lock_screen"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal"
-                    android:background="@drawable/bg_play_pause_circle"
-                    android:onClick="onClick"
-                    tools:ignore="UsingOnClickInXml">
-
-                    <ImageView
-                        android:id="@+id/ic_un_lock_screen"
-                        android:layout_width="@dimen/_28sdp"
-                        android:layout_height="@dimen/_28sdp"
-                        android:src="@drawable/ic_unlock_screen"
-                        android:layout_margin="@dimen/_6sdp"/>
-
-                </FrameLayout>
-
+                <ImageView
+                    android:id="@+id/ic_un_lock_screen"
+                    android:layout_width="@dimen/_16sdp"
+                    android:layout_height="@dimen/_16sdp"
+                    android:src="@drawable/ic_unlock_screen"/>
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    style="@style/Text_12_Bold"
-                    android:layout_gravity="center_horizontal"
+                    style="@style/Text_14_Bold"
                     android:text="@string/unlock_screen"
-                    android:layout_marginTop="@dimen/_3sdp"/>
+                    android:textColor="@color/black"
+                    android:layout_marginStart="@dimen/_6sdp"/>
 
             </LinearLayout>
+
 
         </FrameLayout>
 
@@ -358,6 +300,19 @@
             android:paddingHorizontal="@dimen/_12sdp"
             android:paddingVertical="@dimen/_12sdp"
             android:visibility="gone">
+
+            <TextView
+                android:id="@+id/tv_current_time_second"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:text="00:00"
+                style="@style/Text_14_Normal"
+                android:textColor="@android:color/white"
+                android:background="@drawable/bg_tv_time_count"
+                android:paddingHorizontal="@dimen/_6sdp"
+                android:layout_gravity="center"
+                android:visibility="gone"
+                android:paddingBottom="@dimen/_1sdp"/>
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -383,8 +338,8 @@
                     android:progress="0"
                     android:minHeight="@dimen/_3sdp"
                     android:maxHeight="@dimen/_3sdp"
-                    android:progressDrawable="@drawable/seekbar_progress"
-                    android:thumb="@drawable/seekbar_thumb"
+                    android:progressDrawable="@drawable/seekbar_video_progress"
+                    android:thumb="@drawable/seekbar_video_thumb"
                     android:layout_marginStart="@dimen/_12sdp"
                     android:layout_marginEnd="@dimen/_12sdp"/>
 
@@ -399,6 +354,84 @@
             </LinearLayout>
         </LinearLayout>
 
+        <LinearLayout
+            android:id="@+id/layout_count_previous"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:ignore="UsingOnClickInXml"
+            android:layout_marginStart="@dimen/_60sdp"
+            android:layout_gravity="center_vertical"
+            android:visibility="gone">
+
+            <ImageView
+                android:layout_width="@dimen/_20sdp"
+                android:layout_height="@dimen/_20sdp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_previous"
+                android:layout_margin="@dimen/_6sdp"/>
+
+            <TextView
+                android:id="@+id/tv_count_previous"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="- 10"
+                android:layout_gravity="center"
+                style="@style/Text_14_Bold"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/layout_count_forward"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:ignore="UsingOnClickInXml"
+            android:layout_marginEnd="@dimen/_60sdp"
+            android:layout_gravity="center_vertical|end"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/tv_count_forward"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="+ 10"
+                android:layout_gravity="center"
+                style="@style/Text_14_Bold"/>
+
+            <ImageView
+                android:layout_width="@dimen/_20sdp"
+                android:layout_height="@dimen/_20sdp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_forward"
+                android:layout_margin="@dimen/_6sdp"/>
+
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="@dimen/_16sdp"
+            android:background="@drawable/bg_speed_press"
+            android:padding="@dimen/_3sdp"
+            android:gravity="center"
+            android:id="@+id/layout_speed_press"
+            android:visibility="visible">
+
+            <TextView
+                android:id="@+id/tv_speed"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/Text_8_Normal"
+                android:text="2.0x "
+                android:layout_marginEnd="@dimen/_3sdp"
+                android:layout_gravity="center"/>
+
+            <ImageView
+                android:layout_width="@dimen/_8sdp"
+                android:layout_height="@dimen/_8sdp"
+                android:src="@drawable/ic_speed_video"
+                android:layout_gravity="center"/>
+        </LinearLayout>
 
         <ProgressBar
             android:id="@+id/loading_progress"

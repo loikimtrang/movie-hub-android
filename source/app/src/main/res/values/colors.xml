@@ -46,4 +46,8 @@
     <color name="bg_close">#80000000</color>
     <color name="progress">#FED778</color>
     <color name="bg_progress">#4DFFFFFF</color>
+    <color name="text_setting">#A0A1AB</color>
+    <color name="bg_setting">#2D3038</color>
+    <color name="bg_tag_speed">#2A2A36</color>
+    <color name="bg_setting_speed_item">#51566C</color>  // 373737
 </resources>
