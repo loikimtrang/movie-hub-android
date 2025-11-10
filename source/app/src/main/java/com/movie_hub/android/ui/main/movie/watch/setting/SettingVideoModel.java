@@ -10,6 +10,7 @@ public class SettingVideoModel {
 
     private Quality quality = new Quality();
     private PlaySpeed playSpeed = new PlaySpeed();
+    private PlaySpeed playSpeedWhenPress = new PlaySpeed();
     private List<VideoQuality> availableQualities = new ArrayList<>();
     @Data
     public static class Quality {
@@ -25,5 +26,6 @@ public class SettingVideoModel {
     public void initSetting() {
         quality.setAuto(true);
         playSpeed.setSpeed(1.0f);
+        playSpeedWhenPress.setSpeed(2.0f);
     }
 }

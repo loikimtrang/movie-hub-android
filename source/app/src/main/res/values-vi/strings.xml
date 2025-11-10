@@ -122,5 +122,5 @@
     <string name="auto">Tự động</string>
     <string name="normal">Bình thường</string>
     <string name="current_quality">Chất lượng hiện tại: </string>
-
+    <string name="hold_playback_speed">Tốc độ phát khi nhấn giữ</string>
 </resources>

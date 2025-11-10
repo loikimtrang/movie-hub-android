@@ -2,6 +2,7 @@ package com.movie_hub.android.ui.main.movie.watch.dialog;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.view.HapticFeedbackConstants;
 import android.view.LayoutInflater;
 import android.widget.SeekBar;
 
@@ -15,22 +16,25 @@ public class PlaySpeedBottomSheetDialog extends BaseBottomSheetDialog {
     private LayoutBottomSheetSettingsPlaySpeedBinding binding;
     private SettingVideoModel settingVideoModel;
     private final PlaySpeedBottomSheetCallback callback;
-
+    public static final int TYPE_SPEED = 1;
+    public static final int TYPE_SPEED_PRESS = 2;
+    private int TYPE_SPEED_OPTION = 1;
     private static final float MIN_SPEED = 0.25f;
     private static final float MAX_SPEED = 2.00f;
     private static final float STEP = 0.05f;
     private static final int SEEKBAR_MAX = 100; // 0.25 → 2.0 → 175 steps → chia đều 100
 
     public interface PlaySpeedBottomSheetCallback {
-        void updatePlaySpeedVideo(float speed);
+        void updatePlaySpeedVideo(float speed, int typeSpeedOption);
     }
 
     public PlaySpeedBottomSheetDialog(@NonNull Context context,
                                       SettingVideoModel settingVideoModel,
-                                      PlaySpeedBottomSheetCallback callback) {
+                                      PlaySpeedBottomSheetCallback callback, int type) {
         super(context);
         this.settingVideoModel = settingVideoModel;
         this.callback = callback;
+        this.TYPE_SPEED_OPTION = type;
         init();
     }
 
@@ -44,7 +48,16 @@ public class PlaySpeedBottomSheetDialog extends BaseBottomSheetDialog {
     }
 
     private void setupView() {
-        float currentSpeed = settingVideoModel.getPlaySpeed().getSpeed();
+        float currentSpeed;
+        if (TYPE_SPEED_OPTION == TYPE_SPEED) {
+            currentSpeed = settingVideoModel.getPlaySpeed().getSpeed();
+        } else {
+            currentSpeed = settingVideoModel.getPlaySpeedWhenPress().getSpeed();
+        }
+        binding.seekBar.setHapticFeedbackEnabled(true);
+        binding.btnMinus.setHapticFeedbackEnabled(true);
+        binding.btnPlus.setHapticFeedbackEnabled(true);
+
         updateSpeedDisplay(currentSpeed);
         updateSeekBar(currentSpeed);
     }
@@ -56,6 +69,8 @@ public class PlaySpeedBottomSheetDialog extends BaseBottomSheetDialog {
                 if (fromUser) {
                     float speed = progressToSpeed(progress);
                     updateSpeed(speed);
+                    binding.seekBar.setHapticFeedbackEnabled(true);
+                    performHaptic();
                 }
             }
 
@@ -66,8 +81,14 @@ public class PlaySpeedBottomSheetDialog extends BaseBottomSheetDialog {
             }
         });
 
-        binding.btnPlus.setOnClickListener(v -> adjustSpeed(STEP));
-        binding.btnMinus.setOnClickListener(v -> adjustSpeed(-STEP));
+        binding.btnPlus.setOnClickListener(v -> {
+            adjustSpeed(STEP);
+            performHaptic();
+        });
+        binding.btnMinus.setOnClickListener(v -> {
+            adjustSpeed(-STEP);
+            performHaptic();
+        });
 
         binding.speed100.setOnClickListener(v -> setSpeed(1.00f));
         binding.speed125.setOnClickListener(v -> setSpeed(1.25f));
@@ -95,7 +116,12 @@ public class PlaySpeedBottomSheetDialog extends BaseBottomSheetDialog {
     // === ĐIỀU CHỈNH TỐC ĐỘ ===
 
     private void adjustSpeed(float delta) {
-        float current = settingVideoModel.getPlaySpeed().getSpeed();
+        float current;
+        if (TYPE_SPEED_OPTION == TYPE_SPEED) {
+            current = settingVideoModel.getPlaySpeed().getSpeed();
+        } else {
+            current = settingVideoModel.getPlaySpeedWhenPress().getSpeed();
+        }
         float newSpeed = Math.max(MIN_SPEED, Math.min(MAX_SPEED, current + delta));
         newSpeed = Math.round(newSpeed / STEP) * STEP;
         setSpeed(newSpeed);
@@ -103,11 +129,15 @@ public class PlaySpeedBottomSheetDialog extends BaseBottomSheetDialog {
 
     private void setSpeed(float speed) {
         updateSpeed(speed);
-        callback.updatePlaySpeedVideo(speed); // GỬI VỀ ACTIVITY
+        callback.updatePlaySpeedVideo(speed, TYPE_SPEED_OPTION); // GỬI VỀ ACTIVITY
     }
 
     private void updateSpeed(float speed) {
-        settingVideoModel.getPlaySpeed().setSpeed(speed);
+        if (TYPE_SPEED_OPTION == TYPE_SPEED) {
+            settingVideoModel.getPlaySpeed().setSpeed(speed);
+        } else {
+            settingVideoModel.getPlaySpeedWhenPress().setSpeed(speed);
+        }
         updateSpeedDisplay(speed);
         updateSeekBar(speed);
     }
@@ -121,5 +151,14 @@ public class PlaySpeedBottomSheetDialog extends BaseBottomSheetDialog {
 
     private void updateSeekBar(float speed) {
         binding.seekBar.setProgress(speedToProgress(speed));
+    }
+
+    private void performHaptic() {
+        binding.getRoot().performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
+    }
+
+    @Override
+    public void dismiss() {
+        super.dismiss();
     }
 }

@@ -415,7 +415,7 @@
             android:padding="@dimen/_3sdp"
             android:gravity="center"
             android:id="@+id/layout_speed_press"
-            android:visibility="visible">
+            android:visibility="gone">
 
             <TextView
                 android:id="@+id/tv_speed"

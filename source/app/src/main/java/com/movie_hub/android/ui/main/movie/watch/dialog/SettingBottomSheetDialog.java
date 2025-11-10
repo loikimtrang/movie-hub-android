@@ -77,7 +77,10 @@ public class SettingBottomSheetDialog extends BaseBottomSheetDialog {
         callback.onLockScreenClicked();
         dismiss();
     }
-    private void onMoreOptionClicked() { }
+    private void onMoreOptionClicked() {
+        callback.onMoreOptionsClicked();
+        dismiss();
+    }
     @SuppressLint("SetTextI18n")
     private final Observer<VideoQuality> qualityObserver = q -> {
         if (q != null) {

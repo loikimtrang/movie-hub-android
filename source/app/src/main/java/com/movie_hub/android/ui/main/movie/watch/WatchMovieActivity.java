@@ -8,6 +8,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 import android.view.GestureDetector;
+import android.view.HapticFeedbackConstants;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
@@ -41,6 +42,7 @@ import com.movie_hub.android.databinding.ActivityWatchMovieBinding;
 import com.movie_hub.android.di.component.ActivityComponent;
 import com.movie_hub.android.ui.base.activity.BaseActivity;
 import com.movie_hub.android.ui.main.movie.watch.dialog.BaseBottomSheetDialog;
+import com.movie_hub.android.ui.main.movie.watch.dialog.MoreOptionBottomSheetDialog;
 import com.movie_hub.android.ui.main.movie.watch.dialog.PlaySpeedBottomSheetDialog;
 import com.movie_hub.android.ui.main.movie.watch.dialog.QualityBottomSheetDialog;
 import com.movie_hub.android.ui.main.movie.watch.dialog.SettingBottomSheetDialog;
@@ -56,7 +58,8 @@ import eu.davidea.flexibleadapter.databinding.BR;
 public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, WatchMovieViewModel> implements View.OnClickListener,
         SettingBottomSheetDialog.SettingBottomSheetCallback,
         PlaySpeedBottomSheetDialog.PlaySpeedBottomSheetCallback,
-        QualityBottomSheetDialog .QualityBottomSheetCallback {
+        QualityBottomSheetDialog .QualityBottomSheetCallback,
+        MoreOptionBottomSheetDialog.MoreOptionBottomSheetCallback{
     private ExoPlayer player;
     private static final int AUTO_HIDE_DELAY_MILLIS = 3000;
     private static final int SEEK_DOUBLE_TAP_MILLIS = 10000;
@@ -255,15 +258,19 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
                 return true;
             }
 
+            @SuppressLint("DefaultLocale")
             @Override
             public void onLongPress(@NonNull MotionEvent e) {
-                if (player != null && player.isPlaying()) {
-                    player.setPlaybackParameters(new PlaybackParameters(2.0f));
+                if (player != null && player.isPlaying() && !isLockScreen) {
+                    viewBinding.playerView.setHapticFeedbackEnabled(true);
+                    viewBinding.playerView.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
+
+                    player.setPlaybackParameters(new PlaybackParameters(viewModel.settingVideoModel.getPlaySpeedWhenPress().getSpeed()));
                     autoHideHandler.removeCallbacks(hideControlsRunnable);
                     autoHideHandler.postDelayed(hideControlsRunnable, 0);
 
                     runOnUiThread(() -> {
-                        viewBinding.tvSpeed.setText("2.0x");
+                        viewBinding.tvSpeed.setText(String.format("%.2fx", viewModel.settingVideoModel.getPlaySpeedWhenPress().getSpeed()));
                         viewBinding.layoutSpeedPress.setVisibility(View.VISIBLE);
                     });
                 }
@@ -536,8 +543,8 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
         });
     }
 
-    private void showSettingsPlaySpeedBottomSheet() {
-        PlaySpeedBottomSheetDialog sheet = new PlaySpeedBottomSheetDialog(this, viewModel.settingVideoModel, this);
+    private void showSettingsPlaySpeedBottomSheet(int type) {
+        PlaySpeedBottomSheetDialog sheet = new PlaySpeedBottomSheetDialog(this, viewModel.settingVideoModel, this, type);
         sheet.show();
         Objects.requireNonNull(sheet.getWindow()).getDecorView().post(sheet::setupTransparentWindow);
         sheet.setOnDismissListener(v -> {
@@ -547,6 +554,15 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
 
     private void showSettingsQualityBottomSheet() {
         QualityBottomSheetDialog sheet = new QualityBottomSheetDialog(this, viewModel.settingVideoModel, this);
+        sheet.show();
+        Objects.requireNonNull(sheet.getWindow()).getDecorView().post(sheet::setupTransparentWindow);
+        sheet.setOnDismissListener(v -> {
+            hideSystemUI();
+        });
+    }
+    private void showSettingsMoreOptionBottomSheet() {
+        toggleControls();
+        MoreOptionBottomSheetDialog sheet = new MoreOptionBottomSheetDialog(this, viewModel.settingVideoModel, this);
         sheet.show();
         Objects.requireNonNull(sheet.getWindow()).getDecorView().post(sheet::setupTransparentWindow);
         sheet.setOnDismissListener(v -> {
@@ -627,8 +643,13 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
     }
 
     @Override
+    public void onPlaybackSpeedPressClicked() {
+        showSettingsPlaySpeedBottomSheet(PlaySpeedBottomSheetDialog.TYPE_SPEED_PRESS);
+    }
+
+    @Override
     public void onPlaybackSpeedClicked() {
-        showSettingsPlaySpeedBottomSheet();
+        showSettingsPlaySpeedBottomSheet(PlaySpeedBottomSheetDialog.TYPE_SPEED);
     }
 
     @Override
@@ -643,15 +664,19 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
 
     @Override
     public void onMoreOptionsClicked() {
-
+        showSettingsMoreOptionBottomSheet();
     }
 
     @Override
-    public void updatePlaySpeedVideo(float speed) {
-        viewModel.settingVideoModel.getPlaySpeed().setSpeed(speed);
-        if (player != null) {
-            PlaybackParameters params = new PlaybackParameters(viewModel.settingVideoModel.getPlaySpeed().getSpeed());
-            player.setPlaybackParameters(params);
+    public void updatePlaySpeedVideo(float speed, int typeSpeedOption) {
+        if (typeSpeedOption == PlaySpeedBottomSheetDialog.TYPE_SPEED) {
+            viewModel.settingVideoModel.getPlaySpeed().setSpeed(speed);
+            if (player != null) {
+                PlaybackParameters params = new PlaybackParameters(viewModel.settingVideoModel.getPlaySpeed().getSpeed());
+                player.setPlaybackParameters(params);
+            }
+        } else {
+            viewModel.settingVideoModel.getPlaySpeedWhenPress().setSpeed(speed);
         }
     }
 

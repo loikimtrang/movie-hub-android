@@ -123,5 +123,5 @@
     <string name="auto">Auto</string>
     <string name="normal">Normal</string>
     <string name="current_quality">Current quality: </string>
-
+    <string name="hold_playback_speed">Playback speed while holding</string>
 </resources>
