@@ -36,6 +36,7 @@
     <color name="bg_item_search">#272A3B</color>
     <color name="bg_delete_history">#51566C</color>
     <color name="line">#272635</color>
+    <color name="line_episode">#282828</color>
     <color name="text_empty">#727587</color>
 
     <color name="bg_tag_cate">#2A2A36</color>
@@ -50,4 +51,6 @@
     <color name="bg_setting">#2D3038</color>
     <color name="bg_tag_speed">#2A2A36</color>
     <color name="bg_setting_speed_item">#51566C</color>  // 373737
+    <color name="bg_setting_button">#40000000</color>
+    <color name="bg_list_episode">#80000000</color>
 </resources>

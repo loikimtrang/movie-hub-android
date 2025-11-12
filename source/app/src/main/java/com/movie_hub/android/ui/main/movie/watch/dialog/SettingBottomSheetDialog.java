@@ -12,6 +12,8 @@ import com.movie_hub.android.databinding.LayoutBottomSheetSettingsBinding;
 import com.movie_hub.android.ui.main.movie.watch.setting.SettingVideoModel;
 import com.movie_hub.android.ui.main.movie.watch.setting.VideoQuality;
 
+import java.util.Locale;
+
 public class SettingBottomSheetDialog extends BaseBottomSheetDialog {
 
     private LayoutBottomSheetSettingsBinding binding;
@@ -59,9 +61,9 @@ public class SettingBottomSheetDialog extends BaseBottomSheetDialog {
 
         if (settingVideoModel.getPlaySpeed().getSpeed() == 1.0f) {
             binding.tvPlaySpeed.setText(getContext().getString(R.string.normal) + " ("
-                                + String.format("%.2fx",settingVideoModel.getPlaySpeed().getSpeed()) + ")");
+                                + String.format(Locale.US, "%.2fx",settingVideoModel.getPlaySpeed().getSpeed()) + ")");
         } else {
-            binding.tvPlaySpeed.setText(String.format("%.2fx",settingVideoModel.getPlaySpeed().getSpeed()));
+            binding.tvPlaySpeed.setText(String.format(Locale.US, "%.2fx",settingVideoModel.getPlaySpeed().getSpeed()));
         }
     }
 

@@ -131,4 +131,5 @@
     <string name="dubbed_audio">Dubbed</string>
     <string name="next_episode">Next episode</string>
     <string name="episodes">Episodes</string>
+    <string name="season">Season</string>
 </resources>

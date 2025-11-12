@@ -14,6 +14,8 @@ import com.movie_hub.android.databinding.LayoutBottomSheetSettingsMoreOptionBind
 import com.movie_hub.android.ui.main.movie.watch.setting.SettingVideoModel;
 import com.movie_hub.android.ui.main.movie.watch.setting.VideoQuality;
 
+import java.util.Locale;
+
 public class MoreOptionBottomSheetDialog extends BaseBottomSheetDialog {
 
     private LayoutBottomSheetSettingsMoreOptionBinding binding;
@@ -43,7 +45,7 @@ public class MoreOptionBottomSheetDialog extends BaseBottomSheetDialog {
 
     @SuppressLint({"SetTextI18n", "DefaultLocale"})
     private void setUpView() {
-        binding.tvPlaySpeed.setText(String.format("%.2fx",settingVideoModel.getPlaySpeedWhenPress().getSpeed()));
+        binding.tvPlaySpeed.setText(String.format(Locale.US, "%.2fx",settingVideoModel.getPlaySpeedWhenPress().getSpeed()));
     }
     private void onPlaySpeedClicked() {
         callback.onPlaybackSpeedPressClicked();

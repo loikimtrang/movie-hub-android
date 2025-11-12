@@ -32,6 +32,9 @@ public class Constants {
 
     public static final String CLIENT_ID = "144532728035-sv194mjng41tf9cb9v7ol5jhaohjt17q.apps.googleusercontent.com";
     public static int PLATFORM_ANDROID = 1;
+    public static int TYPE_MOVIE_SINGLE = 2;
+    public static int TYPE_MOVIE_SERIES = 1;
+
     private Constants(){
 
     }

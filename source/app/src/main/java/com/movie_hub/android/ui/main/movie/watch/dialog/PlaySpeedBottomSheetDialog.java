@@ -11,6 +11,8 @@ import androidx.annotation.NonNull;
 import com.movie_hub.android.databinding.LayoutBottomSheetSettingsPlaySpeedBinding;
 import com.movie_hub.android.ui.main.movie.watch.setting.SettingVideoModel;
 
+import java.util.Locale;
+
 public class PlaySpeedBottomSheetDialog extends BaseBottomSheetDialog {
 
     private LayoutBottomSheetSettingsPlaySpeedBinding binding;
@@ -146,7 +148,7 @@ public class PlaySpeedBottomSheetDialog extends BaseBottomSheetDialog {
 
     @SuppressLint("SetTextI18n")
     private void updateSpeedDisplay(float speed) {
-        binding.tvSpeed.setText(String.format("%.2fx", speed));
+        binding.tvSpeed.setText(String.format(Locale.US, "%.2fx", speed));
     }
 
     private void updateSeekBar(float speed) {

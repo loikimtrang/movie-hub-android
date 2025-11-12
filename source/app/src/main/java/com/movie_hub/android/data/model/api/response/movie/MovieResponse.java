@@ -6,6 +6,7 @@ import android.os.Parcelable;
 import androidx.annotation.NonNull;
 
 import com.movie_hub.android.data.model.api.response.category.CategoryResponse;
+import com.movie_hub.android.data.model.api.response.season.SeasonResponse;
 
 import java.util.List;
 
@@ -31,6 +32,7 @@ public class MovieResponse implements Parcelable {
     private String createdDate;
     private String modifiedDate;
     private List<CategoryResponse> categories;
+    private List<SeasonResponse> seasons; // 🔹 thêm field mới
 
     protected MovieResponse(Parcel in) {
         if (in.readByte() == 0) {
@@ -72,6 +74,7 @@ public class MovieResponse implements Parcelable {
         createdDate = in.readString();
         modifiedDate = in.readString();
         categories = in.createTypedArrayList(CategoryResponse.CREATOR);
+        seasons = in.createTypedArrayList(SeasonResponse.CREATOR); // 🔹 đọc thêm seasons
     }
 
     public static final Creator<MovieResponse> CREATOR = new Creator<MovieResponse>() {
@@ -136,6 +139,6 @@ public class MovieResponse implements Parcelable {
         parcel.writeString(createdDate);
         parcel.writeString(modifiedDate);
         parcel.writeTypedList(categories);
+        parcel.writeTypedList(seasons); // 🔹 ghi thêm seasons
     }
 }
-

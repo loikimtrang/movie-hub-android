@@ -8,6 +8,7 @@ import com.movie_hub.android.data.Repository;
 import com.movie_hub.android.data.model.api.response.movie.MovieResponse;
 import com.movie_hub.android.ui.base.activity.BaseViewModel;
 import com.movie_hub.android.ui.main.movie.watch.setting.SettingVideoModel;
+import com.movie_hub.android.ui.main.movie.watch.setting.VideoQuality;
 
 public class WatchMovieViewModel extends BaseViewModel {
     private final MutableLiveData<MovieResponse> movieDetails = new MutableLiveData<>();
@@ -33,5 +34,11 @@ public class WatchMovieViewModel extends BaseViewModel {
 
     public void setPlaying(boolean playing) {
         isPlaying.setValue(playing);
+    }
+
+    public void updateSettingWhenChangeEpisode() {
+        settingVideoModel.getQuality().setAuto(true);
+        settingVideoModel.getQuality().setResolution(new VideoQuality());
+        settingVideoModel.getAvailableQualities().clear();
     }
 }

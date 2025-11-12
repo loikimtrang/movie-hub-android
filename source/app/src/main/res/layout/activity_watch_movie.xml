@@ -31,7 +31,7 @@
             android:id="@+id/control_video"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:visibility="visible"
+            android:visibility="gone"
             android:background="@drawable/bg_control_video">
             <FrameLayout
                 android:id="@+id/button_control_video"
@@ -98,7 +98,7 @@
                             tools:ignore="RtlHardcoded"
                             android:layout_toEndOf="@+id/btn_lock_screen"
                             android:layout_centerVertical="true"
-                            android:layout_toStartOf="@id/btn_subtitle">
+                            android:layout_toStartOf="@id/btn_setting">
 
                             <TextView
                                 android:id="@+id/name_movie"
@@ -116,26 +116,6 @@
                                 android:maxLines="2"
                                 android:text="Name" />
                         </LinearLayout>
-
-                        <FrameLayout
-                            android:id="@+id/btn_subtitle"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="top|end"
-                            android:padding="@dimen/_4sdp"
-                            android:onClick="onClick"
-                            tools:ignore="UsingOnClickInXml"
-                            android:background="@drawable/bg_play_pause_circle"
-                            android:layout_centerVertical="true"
-                            android:layout_toStartOf="@id/btn_setting"
-                            android:layout_marginEnd="@dimen/_12sdp">
-
-                            <ImageView
-                                android:layout_width="@dimen/_22sdp"
-                                android:layout_height="@dimen/_22sdp"
-                                android:src="@drawable/ic_subtitle_off" />
-
-                        </FrameLayout>
 
                         <FrameLayout
                             android:id="@+id/btn_setting"
@@ -174,63 +154,50 @@
                         android:paddingHorizontal="@dimen/_6sdp"
                         android:gravity="center"
                         android:clickable="false"
-                        android:focusable="false">
+                        android:focusable="false"
+                        android:paddingVertical="@dimen/_6sdp">
 
                         <LinearLayout
+                            android:id="@+id/btn_audio"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:orientation="horizontal"
                             android:gravity="center"
                             android:paddingVertical="@dimen/_8sdp"
                             android:paddingHorizontal="@dimen/_6sdp"
-                            android:layout_gravity="center">
+                            android:layout_gravity="center"
+                            android:clickable="true"
+                            android:focusable="true"
+                            android:onClick="onClick"
+                            android:background="?attr/selectableItemBackgroundBorderless">
 
                             <ImageView
-                                android:id="@+id/ic_zoom_fit"
-                                android:layout_width="@dimen/_18sdp"
-                                android:layout_height="@dimen/_18sdp"
-                                android:src="@drawable/ic_fit"/>
+                                android:layout_width="@dimen/_16sdp"
+                                android:layout_height="@dimen/_16sdp"
+                                android:src="@drawable/ic_microphone"/>
 
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 style="@style/Text_14_Normal"
-                                android:text="@string/fit_screen"
+                                android:text="@string/audio_language"
                                 android:layout_marginStart="@dimen/_6sdp"/>
 
                         </LinearLayout>
 
                         <LinearLayout
+                            android:id="@+id/btn_subtitle"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:orientation="horizontal"
                             android:gravity="center"
                             android:paddingVertical="@dimen/_8sdp"
                             android:paddingHorizontal="@dimen/_6sdp"
-                            android:layout_gravity="center">
-
-                        <ImageView
-                            android:layout_width="@dimen/_16sdp"
-                            android:layout_height="@dimen/_16sdp"
-                            android:src="@drawable/ic_microphone"/>
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            style="@style/Text_14_Normal"
-                            android:text="@string/audio_language"
-                            android:layout_marginStart="@dimen/_6sdp"/>
-
-                        </LinearLayout>
-
-                        <LinearLayout
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:orientation="horizontal"
-                            android:gravity="center"
-                            android:paddingVertical="@dimen/_8sdp"
-                            android:paddingHorizontal="@dimen/_6sdp"
-                            android:layout_gravity="center">
+                            android:layout_gravity="center"
+                            android:clickable="true"
+                            android:focusable="true"
+                            android:onClick="onClick"
+                            android:background="?attr/selectableItemBackgroundBorderless">
 
                             <ImageView
                                 android:layout_width="@dimen/_18sdp"
@@ -247,13 +214,18 @@
                         </LinearLayout>
 
                         <LinearLayout
+                            android:id="@+id/btn_episodes"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:orientation="horizontal"
                             android:gravity="center"
                             android:paddingVertical="@dimen/_8sdp"
                             android:paddingHorizontal="@dimen/_6sdp"
-                            android:layout_gravity="center">
+                            android:layout_gravity="center"
+                            android:clickable="true"
+                            android:focusable="true"
+                            android:onClick="onClick"
+                            android:background="?attr/selectableItemBackgroundBorderless">
 
                             <ImageView
                                 android:layout_width="@dimen/_18sdp"
@@ -270,13 +242,18 @@
                         </LinearLayout>
 
                         <LinearLayout
+                            android:id="@+id/btn_next_episode"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:orientation="horizontal"
                             android:gravity="center"
                             android:paddingVertical="@dimen/_8sdp"
                             android:paddingHorizontal="@dimen/_6sdp"
-                            android:layout_gravity="center">
+                            android:layout_gravity="center"
+                            android:clickable="true"
+                            android:focusable="true"
+                            android:onClick="onClick"
+                            android:background="?attr/selectableItemBackgroundBorderless">
 
                             <ImageView
                                 android:layout_width="@dimen/_18sdp"
@@ -309,6 +286,7 @@
                     android:layout_gravity="center">
 
                     <ImageView
+                        android:id="@+id/ic_previous_looping"
                         android:layout_width="@dimen/_32sdp"
                         android:layout_height="@dimen/_32sdp"
                         android:background="?attr/selectableItemBackgroundBorderless"
@@ -336,6 +314,7 @@
                     android:layout_gravity="center">
 
                     <ImageView
+                        android:id="@+id/ic_forward_looping"
                         android:layout_width="@dimen/_32sdp"
                         android:layout_height="@dimen/_32sdp"
                         android:background="?attr/selectableItemBackgroundBorderless"
@@ -415,13 +394,13 @@
 
                 <ImageView
                     android:id="@+id/ic_un_lock_screen"
-                    android:layout_width="@dimen/_16sdp"
-                    android:layout_height="@dimen/_16sdp"
+                    android:layout_width="@dimen/_12sdp"
+                    android:layout_height="@dimen/_12sdp"
                     android:src="@drawable/ic_unlock_screen"/>
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    style="@style/Text_14_Bold"
+                    style="@style/Text_12_Normal"
                     android:text="@string/unlock_screen"
                     android:textColor="@color/black"
                     android:layout_marginStart="@dimen/_6sdp"/>
@@ -543,7 +522,7 @@
             android:paddingHorizontal="@dimen/_12sdp"
             android:paddingVertical="@dimen/_12sdp"
             android:visibility="gone"
-            android:layout_marginBottom="@dimen/_40sdp">
+            android:layout_marginBottom="@dimen/_52sdp">
 
             <TextView
                 android:id="@+id/tv_current_time_second"
@@ -602,11 +581,14 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             tools:ignore="UsingOnClickInXml"
-            android:layout_marginStart="@dimen/_60sdp"
+            android:paddingStart="@dimen/_60sdp"
             android:layout_gravity="center_vertical"
+            android:clipChildren="false"
+            android:clipToPadding="false"
             android:visibility="gone">
 
             <ImageView
+                android:id="@+id/ic_previous"
                 android:layout_width="@dimen/_20sdp"
                 android:layout_height="@dimen/_20sdp"
                 android:background="?attr/selectableItemBackgroundBorderless"
@@ -627,9 +609,11 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             tools:ignore="UsingOnClickInXml"
-            android:layout_marginEnd="@dimen/_60sdp"
             android:layout_gravity="center_vertical|end"
-            android:visibility="gone">
+            android:clipChildren="false"
+            android:clipToPadding="false"
+            android:visibility="gone"
+            android:paddingEnd="@dimen/_60sdp">
 
             <TextView
                 android:id="@+id/tv_count_forward"
@@ -640,6 +624,7 @@
                 style="@style/Text_14_Bold"/>
 
             <ImageView
+                android:id="@+id/ic_forward"
                 android:layout_width="@dimen/_20sdp"
                 android:layout_height="@dimen/_20sdp"
                 android:background="?attr/selectableItemBackgroundBorderless"
@@ -648,6 +633,15 @@
 
 
         </LinearLayout>
+
+        <include
+            layout="@layout/layout_list_episodes"
+            android:id="@+id/layout_list_episodes"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:vm="@{vm}"
+            app:a="@{a}"
+            />
 
         <LinearLayout
             android:layout_width="wrap_content"

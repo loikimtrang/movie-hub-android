@@ -9,6 +9,7 @@ import com.movie_hub.android.data.model.api.request.login.UserRegisterRequest;
 import com.movie_hub.android.data.model.api.request.user.UserChangePasswordRequest;
 import com.movie_hub.android.data.model.api.request.user.UserLoginGoogleRequest;
 import com.movie_hub.android.data.model.api.request.user.UserUpdateProfileRequest;
+import com.movie_hub.android.data.model.api.response.MovieItem.MovieItemResponse;
 import com.movie_hub.android.data.model.api.response.moviePerson.MoviePersonResponse;
 import com.movie_hub.android.data.model.api.response.person.PersonResponse;
 import com.movie_hub.android.data.model.api.response.login.UserLoginResponse;
@@ -78,4 +79,11 @@ public interface ApiService {
     @GET("v1/movie-person/list")
     Observable<ResponseWrapper<ResponseListObj<MoviePersonResponse>>> getListMoviePerson(@QueryMap Map<String, Object> query);
 
+    // MOVIE ITEM CONTROLLER
+    @GET("v1/movie-item/list")
+    Observable<ResponseWrapper<ResponseListObj<MovieItemResponse>>> getListMovieItem(@QueryMap Map<String, Object> query);
+
+    @GET("v1/movie-item/get/{id}")
+    Observable<ResponseWrapper<MovieItemResponse>> getMovieItem(@Path("id") Long id);
+//    Map<String, Object> query = RequestToMapConverter.convert(movieRequest);
 }

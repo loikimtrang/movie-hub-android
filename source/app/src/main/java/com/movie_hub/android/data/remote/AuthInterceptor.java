@@ -35,7 +35,7 @@ public class AuthInterceptor implements Interceptor {
 
         if ("1".equals(originalRequest.header("IgnoreAuth"))) {
             newRequest.removeHeader("IgnoreAuth");
-            newRequest.addHeader("X-tenant", "1234");
+            newRequest.addHeader("X-tenant", "moviehub");
             return chain.proceed(newRequest.build());
         }
 
@@ -55,7 +55,7 @@ public class AuthInterceptor implements Interceptor {
             }
         }
 
-        newRequest.addHeader("X-tenant", "1234");
+        newRequest.addHeader("X-tenant", "moviehub");
 
         Response response = chain.proceed(newRequest.build());
 

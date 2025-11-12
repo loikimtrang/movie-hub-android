@@ -63,8 +63,6 @@ public class MainActivity extends BaseActivity<ActivityMainBinding, MainViewMode
                     handleFragment(Constants.HOME);
                     return true;
                 case R.id.search:
-                    Intent intent = new Intent(this, WatchMovieActivity.class);
-                    startActivity(intent);
                     handleFragment(Constants.SEARCH);
                     return true;
                 case R.id.schedule:
