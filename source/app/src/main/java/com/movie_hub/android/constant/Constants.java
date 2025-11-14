@@ -27,14 +27,26 @@ public class Constants {
     public static final int GENDER_UNSPECIFIED = 3;
 
     public static final String MEDIA_URL = "https://media.moviehub.biz/v1/file/download";
+    public static final String MEDIA_URL_VTT = "https://media.moviehub.biz/v1/file/public-download"; // vtt,
+    public static final String MEDIA_URL_VIDEO = "https://media.moviehub.biz/v1/file/download-video-resource";
+
     public static final String ERROR = "ERROR";
     public static final int RC_SIGN_IN = 1001;
 
     public static final String CLIENT_ID = "144532728035-sv194mjng41tf9cb9v7ol5jhaohjt17q.apps.googleusercontent.com";
     public static int PLATFORM_ANDROID = 1;
-    public static int TYPE_MOVIE_SINGLE = 2;
-    public static int TYPE_MOVIE_SERIES = 1;
-
+    public static int TYPE_MOVIE_SINGLE = 1;
+    public static int TYPE_MOVIE_SERIES = 2;
+    public static int TYPE_MOVIE_TRAILER = 3;
+    public static int MOVIE_ITEM_KIND_SEASON = 1;
+    public static int MOVIE_ITEM_KIND_EPISODE = 2;
+    public static int MOVIE_ITEM_KIND_TRAILER = 3;
+    public static final int AGE_RATING_G = 1;
+    public static final int AGE_RATING_PG = 2;
+    public static final int AGE_RATING_PG13 = 3;
+    public static final int AGE_RATING_R = 4;
+    public static final int AGE_RATING_NC17 = 5;
+    public static final int AGE_RATING_18 = 6;
     private Constants(){
 
     }

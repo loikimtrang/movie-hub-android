@@ -32,6 +32,7 @@
     <string name="if_you_already_have_an_account">If you already have an account, </string>
     <string name="log_in_now">log in now</string>
     <string name="username">Username</string>
+    <string name="enter_your_name">Enter your name</string>
     <string name="enter_your_email">Enter your email</string>
     <string name="enter_your_password">Enter your password</string>
     <string name="confirm_your_password">Confirm your password</string>
@@ -44,6 +45,7 @@
     <string name="log_out">Log out</string>
     <string name="enter_your_username">Enter your username</string>
     <string name="incorrect_username_or_password">Incorrect username or password</string>
+    <string name="incorrect_email_or_password">Incorrect email or password</string>
     <string name="login_error_please_try_again">Login error. Please try again</string>
     <string name="register_error_please_try_again">Register error. Please try again</string>
     <string name="login_successful">Login successful</string>
@@ -133,5 +135,13 @@
     <string name="next_episode">Next episode</string>
     <string name="episodes">Episodes</string>
     <string name="season">Season</string>
-
+    <string name="hour">h</string>
+    <string name="minute">m</string>
+    <string name="episode_non_up">episode</string>
+    <string name="season_non_up">season</string>
+    <string name="replay">Replay</string>
+    <string name="an_error_occurred">An error occurred</string>
+    <string name="skip">Skip</string>
+    <string name="season_list">Season list</string>
+    <string name="close">Close</string>
 </resources>

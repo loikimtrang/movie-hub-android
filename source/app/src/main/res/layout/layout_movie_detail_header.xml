@@ -17,55 +17,80 @@
         android:layout_height="wrap_content"
         android:background="@color/account_header"
         android:orientation="vertical"
-        app:layout_scrollFlags="enterAlwaysCollapsed"
-        >
-
-        <com.movie_hub.android.ui.main.custom.RatioFrameLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:layout_collapseMode="parallax">
-
-            <androidx.media3.ui.PlayerView
-                android:id="@+id/trailer"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" />
-
-            <ImageView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:id="@+id/img_poster"/>
-
-            <FrameLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
-
-                <androidx.cardview.widget.CardView
-                    android:id="@+id/btn_close"
-                    android:layout_width="@dimen/_32sdp"
-                    android:layout_height="@dimen/_32sdp"
-                    app:cardCornerRadius="@dimen/_16sdp"
-                    app:cardBackgroundColor="@color/bg_close"
-                    app:cardElevation="0dp"
-                    android:layout_margin="@dimen/_6sdp"
-                    android:onClick="@{(v) -> a.onClick(v)}">
-
-                    <ImageView
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:src="@drawable/ic_close"
-                        android:scaleType="centerInside"
-                        android:layout_margin="@dimen/_3sdp"/>
-            </androidx.cardview.widget.CardView>
-
-
-        </FrameLayout>
-
-        </com.movie_hub.android.ui.main.custom.RatioFrameLayout>
+        app:layout_scrollFlags="enterAlwaysCollapsed">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/name_movie"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                style="@style/Text_16_Bold"
+                android:layout_marginHorizontal="@dimen/_12sdp"
+                android:layout_marginTop="@dimen/_12sdp"/>
+
+            <TextView
+                android:id="@+id/name_movie_original"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/_12sdp"
+                style="@style/Text_12_Normal"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/_12sdp">
+
+
+                <FrameLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_year"
+                    android:paddingHorizontal="@dimen/_3sdp"
+                    android:paddingVertical="@dimen/_1sdp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginEnd="@dimen/_6sdp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/date_release"
+                        style="@style/Text_10_Normal"
+                        android:layout_gravity="center_vertical"/>
+
+                </FrameLayout>
+
+                <FrameLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_age_rating"
+                    android:paddingHorizontal="@dimen/_3sdp"
+                    android:paddingVertical="@dimen/_1sdp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginEnd="@dimen/_6sdp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/age_rating"
+                        style="@style/Text_10_Normal"
+                        android:gravity="center"
+                        android:layout_gravity="center"/>
+
+                </FrameLayout>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/duration_episode_season"
+                    style="@style/Text_12_Normal"
+                    android:layout_marginEnd="@dimen/_3sdp"
+                    android:layout_gravity="center_vertical"/>
+
+            </LinearLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -78,11 +103,11 @@
                     android:id="@+id/watch_now"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
-                    android:layout_weight="3"
+                    android:layout_weight="5"
                     android:foreground="?attr/selectableItemBackground"
                     android:clickable="true"
                     android:focusable="true"
-                    android:background="@drawable/bg_btn_yellow_radius_6sdp"
+                    android:background="@drawable/bg_btn_yellow_radius_3sdp"
                     android:layout_marginEnd="@dimen/_3sdp"
                     android:onClick="@{(v) -> a.onClick(v)}">
 
@@ -110,56 +135,7 @@
 
                 </FrameLayout>
 
-                <FrameLayout
-                    android:id="@+id/list"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="2"
-                    android:foreground="?attr/selectableItemBackground"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:background="@drawable/bg_btn_white_radius_6sdp"
-                    android:layout_marginStart="@dimen/_3sdp">
-
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:layout_gravity="center">
-
-                        <ImageView
-                            android:layout_width="@dimen/_12sdp"
-                            android:layout_height="@dimen/_12sdp"
-                            android:src="@drawable/ic_list"
-                            android:layout_gravity="center"/>
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/episode"
-                            style="@style/Text_12_Bold"
-                            android:textColor="@color/black"
-                            android:gravity="center"
-                            android:layout_marginStart="@dimen/_12sdp"/>
-                    </LinearLayout>
-
-                </FrameLayout>
-
             </LinearLayout>
-
-            <TextView
-                android:id="@+id/name_movie"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/_12sdp"
-                style="@style/Text_14_Bold"/>
-
-            <TextView
-                android:id="@+id/name_movie_original"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/_12sdp"
-                style="@style/Text_12_Normal"/>
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/cate_list"
@@ -170,8 +146,7 @@
                 android:paddingTop="@dimen/_minus3sdp"
                 android:paddingBottom="@dimen/_minus3sdp"
                 android:layout_marginHorizontal="@dimen/_12sdp"
-                android:layout_marginTop="@dimen/_12sdp"/>
-
+                android:layout_marginTop="@dimen/_6sdp"/>
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -180,7 +155,7 @@
                 android:weightSum="5"
                 android:layout_marginHorizontal="@dimen/_12sdp"
                 android:layout_marginBottom="@dimen/_12sdp"
-                android:layout_marginVertical="@dimen/_20sdp">
+                android:layout_marginTop="@dimen/_6sdp">
 
                 <TextView
                     android:id="@+id/description"

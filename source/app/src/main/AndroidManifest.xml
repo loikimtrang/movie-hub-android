@@ -75,13 +75,22 @@
             android:exported="true"/>
         <activity android:name=".ui.main.movie.watch.WatchMovieActivity"
             android:screenOrientation="landscape"
-
             android:exported="true"/>
 
         <activity
             android:name="com.yalantis.ucrop.UCropActivity"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar"
+            android:exported="true"/>
+
+        <activity android:name=".ui.main.account.login.LoginActivity"
+            android:windowSoftInputMode="adjustResize"
+            android:screenOrientation="portrait"
+            android:exported="true"/>
+
+        <activity android:name=".ui.main.account.register.RegisterActivity"
+            android:windowSoftInputMode="adjustResize"
+            android:screenOrientation="portrait"
             android:exported="true"/>
 
         <provider

@@ -22,9 +22,11 @@ import com.movie_hub.android.ui.main.MainActivity;
 import com.movie_hub.android.ui.main.MainCallback;
 import com.movie_hub.android.ui.main.custom.GridSpacingItemDecoration;
 import com.movie_hub.android.ui.main.movie.detail.MovieDetailActivity;
+import com.movie_hub.android.ui.main.search.SearchFragment;
 import com.movie_hub.android.ui.main.search.topTrending.adapter.MovieVerticalAdapter;
 import com.movie_hub.android.ui.main.search.topTrending.adapter.SearchHistoryAdapter;
 import com.movie_hub.android.utils.GridUtil;
+import com.movie_hub.android.utils.GsonUtils;
 
 import java.net.ConnectException;
 import java.net.SocketTimeoutException;
@@ -188,7 +190,7 @@ public class SearchTopTrendingFragment extends BaseFragment<FragmentSearchTopTre
                 if (!isAdded()) return;
 
                 Intent intent = new Intent(getContext(), MovieDetailActivity.class);
-                intent.putExtra("movie_details", movieResponse);
+                intent.putExtra("movie_details", GsonUtils.toJson(movieResponse));
                 startActivity(intent);
             }
 
@@ -206,8 +208,9 @@ public class SearchTopTrendingFragment extends BaseFragment<FragmentSearchTopTre
             binding.searchHistory.setVisibility(View.GONE);
             viewModel.clearAllHistory();
         } else {
-
-//            viewModel.insertSearchKeyword(item.keyword);
+            if (getParentFragment() instanceof SearchFragment) {
+                ((SearchFragment) getParentFragment()).onHistoryItemClicked(item.keyword);
+            }
         }
     }
 

@@ -111,9 +111,7 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
     public void initMovie() {
         reset();
         setUpMovie();
-        viewModel.getIsPlaying().observe(this, playing -> {
-            updatePlayPauseIcons(playing);
-        });
+        viewModel.getIsPlaying().observe(this, this::updatePlayPauseIcons);
     }
     public void reset() {
         forwardCount = 0;

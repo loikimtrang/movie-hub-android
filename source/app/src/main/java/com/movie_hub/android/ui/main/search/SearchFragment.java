@@ -187,7 +187,7 @@ public class SearchFragment extends BaseFragment<FragmentSearchBinding, SearchVi
                 .commit();
     }
 
-    private void showResult(String keyword) {
+    public void showResult(String keyword) {
         resultFragment = new SearchResultFragment();
         Bundle bundle = new Bundle();
         bundle.putString("keyword", keyword);
@@ -196,6 +196,18 @@ public class SearchFragment extends BaseFragment<FragmentSearchBinding, SearchVi
         fragmentManager.beginTransaction()
                 .replace(R.id.contentView, resultFragment)
                 .commit();
+    }
+
+    public void onHistoryItemClicked(String keyword) {
+        binding.search.setText(keyword);
+        binding.search.setSelection(keyword.length());
+
+        animateClearIcon(false);
+        isClearIconVisible = false;
+        viewModel.insertKeyWord(keyword);
+        showResult(keyword);
+
+        ((MainActivity) requireActivity()).hideKeyboard();
     }
     private Drawable searchIcon;
     private Drawable clearIcon;

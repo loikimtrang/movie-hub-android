@@ -13,6 +13,7 @@ import lombok.Setter;
 
 public class MovieDetailViewModel extends BaseViewModel {
     private final MutableLiveData<MovieResponse> movieDetails = new MutableLiveData<>();
+    private MutableLiveData<Boolean> isPlaying = new MutableLiveData<>(true);
 
     public void setMovieDetails(MovieResponse movie) {
         movieDetails.setValue(movie);
@@ -23,5 +24,13 @@ public class MovieDetailViewModel extends BaseViewModel {
 
     public MovieDetailViewModel(Repository repository, MVVMApplication application) {
         super(repository, application);
+    }
+
+    public LiveData<Boolean> getIsPlaying() {
+        return isPlaying;
+    }
+
+    public void setPlaying(boolean playing) {
+        isPlaying.setValue(playing);
     }
 }

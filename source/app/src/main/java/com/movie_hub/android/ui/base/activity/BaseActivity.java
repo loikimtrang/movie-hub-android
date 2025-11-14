@@ -287,4 +287,8 @@ public abstract class BaseActivity<B extends ViewDataBinding, V extends BaseView
         }
         return super.dispatchTouchEvent(ev);
     }
+
+    public void showError(String message) {
+        new ToastMessage(ToastMessage.TYPE_WARNING, message).showMessage(this);
+    }
 }

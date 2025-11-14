@@ -1,15 +1,36 @@
 package com.movie_hub.android.ui.main.movie.detail;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.view.GestureDetector;
+import android.view.HapticFeedbackConstants;
+import android.view.MotionEvent;
+import android.view.ScaleGestureDetector;
 import android.view.View;
+import android.view.animation.AccelerateDecelerateInterpolator;
+import android.widget.ImageView;
+import android.widget.SeekBar;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
+import androidx.media3.common.MediaItem;
+import androidx.media3.common.PlaybackParameters;
+import androidx.media3.common.Player;
+import androidx.media3.common.Tracks;
+import androidx.media3.common.VideoSize;
+import androidx.media3.exoplayer.ExoPlayer;
+import androidx.media3.ui.AspectRatioFrameLayout;
 
 import com.bumptech.glide.Glide;
 import com.google.android.flexbox.AlignItems;
@@ -21,28 +42,44 @@ import com.google.android.material.tabs.TabLayoutMediator;
 import com.movie_hub.android.R;
 import com.movie_hub.android.constant.Constants;
 import com.movie_hub.android.data.model.api.response.movie.MovieResponse;
+import com.movie_hub.android.data.model.api.response.season.SeasonResponse;
 import com.movie_hub.android.databinding.ActivityMovieDetailBinding;
 import com.movie_hub.android.di.component.ActivityComponent;
 import com.movie_hub.android.ui.base.activity.BaseActivity;
 import com.movie_hub.android.ui.base.activity.SystemBarColorProvider;
 import com.movie_hub.android.ui.main.movie.detail.adapter.MovieDetailTabAdapter;
 import com.movie_hub.android.ui.main.movie.detail.adapter.TagCategoryAdapter;
+import com.movie_hub.android.ui.main.movie.detail.dialog.ChooseSeasonBottomSheetDialog;
 import com.movie_hub.android.ui.main.movie.detail.fragment.CastFragment;
 import com.movie_hub.android.ui.main.movie.detail.fragment.EpisodesFragment;
 import com.movie_hub.android.ui.main.movie.detail.fragment.RecommendationFragment;
 import com.movie_hub.android.ui.main.movie.watch.WatchMovieActivity;
+import com.movie_hub.android.ui.main.movie.watch.dialog.QualityBottomSheetDialog;
+import com.movie_hub.android.ui.main.movie.watch.dialog.SettingBottomSheetDialog;
+import com.movie_hub.android.ui.main.movie.watch.setting.VideoQuality;
 import com.movie_hub.android.ui.main.search.topTrending.FlexSpacingItemDecoration;
+import com.movie_hub.android.utils.DisplayUtils;
+import com.movie_hub.android.utils.GsonUtils;
 import com.movie_hub.android.utils.HtmlUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+import java.util.Objects;
 
 import eu.davidea.flexibleadapter.databinding.BR;
 
 public class MovieDetailActivity extends BaseActivity<ActivityMovieDetailBinding, MovieDetailViewModel> implements SystemBarColorProvider, View.OnClickListener {
     private TagCategoryAdapter tagCategoryAdapter;
     private final List<Fragment> fragmentList = new ArrayList<>();
-
+    private ExoPlayer player;
+    private static final int AUTO_HIDE_DELAY_MILLIS = 3000;
+    private Handler seekHandler = new Handler(Looper.getMainLooper());
+    private Handler autoHideHandler = new Handler(Looper.getMainLooper());
+    private boolean isUserSeeking = false;
+    private Runnable updateSeekBarRunnable;
+    private boolean isBuffering = false;
+    private boolean isMuted = true;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -50,29 +87,64 @@ public class MovieDetailActivity extends BaseActivity<ActivityMovieDetailBinding
         viewBinding.setA(this);
         viewBinding.setVm(viewModel);
 
-        MovieResponse movie = getIntent().getParcelableExtra("movie_details");
+        String json = getIntent().getStringExtra("movie_details");
+        MovieResponse movie = GsonUtils.fromJson(json, MovieResponse.class);
+
         if (movie != null) {
             viewModel.setMovieDetails(movie);
         }
 
         observeViewModel();
-        setUpTab(false);
     }
 
 
+    @SuppressLint("SetTextI18n")
     private void observeViewModel() {
         viewModel.getMovieDetails().observe(this, movie -> {
             if (movie == null) return;
+
+            for (SeasonResponse s: movie.getSeasons()) {
+                s.setSelect(false);
+            }
+            movie.getSeasons().get(movie.getSeasons().size() - 1).setSelect(true);
 
             Glide.with(this)
                     .load(Constants.MEDIA_URL + movie.getPosterUrl())
                     .placeholder(R.drawable.place_holder_16_9)
                     .error(R.drawable.place_holder_16_9)
-                    .into(viewBinding.includeMovieHeader.imgPoster);
+                    .into(viewBinding.imgPoster);
 
             viewBinding.includeMovieHeader.nameMovie.setText(movie.getTitle());
             viewBinding.includeMovieHeader.nameMovieOriginal.setText(movie.getOriginalTitle());
             viewBinding.includeMovieHeader.description.setText(HtmlUtils.convertPtoStrong(movie.getDescription()));
+            viewBinding.includeMovieHeader.ageRating.setText(DisplayUtils.displayAgeRating(movie.getAgeRating()));
+
+            if (movie.getType() == Constants.TYPE_MOVIE_SINGLE) {
+                viewBinding.includeMovieHeader.dateRelease.setText(DisplayUtils.getYearFromReleaseDate(movie.getReleaseDate()));
+                viewBinding.includeMovieHeader.durationEpisodeSeason.setText(DisplayUtils.displayTimeFromSeconds(this, movie.getSeasons().get(0).getVideo().getDuration()));
+            } if (movie.getType() == Constants.TYPE_MOVIE_SERIES) {
+                if (movie.getSeasons() != null && !movie.getSeasons().isEmpty()) {
+                    SeasonResponse lastSeason = movie.getSeasons().get(movie.getSeasons().size() - 1);
+                    viewBinding.includeMovieHeader.dateRelease.setText(DisplayUtils.getYearFromReleaseDate(lastSeason.getReleaseDate()));
+
+                    if (movie.getSeasons().size() == 1) {
+                        viewBinding.includeMovieHeader.durationEpisodeSeason.setText(movie.getSeasons().get(0).getEpisodes().size()
+                                + " " + getString(R.string.episode_non_up));
+                    } else {
+                        viewBinding.includeMovieHeader.durationEpisodeSeason.setText(movie.getSeasons().size()
+                                + " " + getString(R.string.season_non_up));
+                    }
+                }
+            }
+
+            if (movie.getSeasons() != null && !movie.getSeasons().isEmpty()) {
+                SeasonResponse lastSeason = movie.getSeasons().get(movie.getSeasons().size() - 1);
+                if (lastSeason.getTrailer() != null && lastSeason.getTrailer().getVideo().getContent() != null) {
+                    setUpTrailer(lastSeason.getTrailer().getVideo().getContent());
+                }
+            }
+
+            setUpTab(movie.getType() == Constants.TYPE_MOVIE_SERIES);
 
             tagCategoryAdapter = new TagCategoryAdapter();
             FlexboxLayoutManager layout = new FlexboxLayoutManager(this);
@@ -89,6 +161,7 @@ public class MovieDetailActivity extends BaseActivity<ActivityMovieDetailBinding
             tagCategoryAdapter.setData(movie.getCategories());
         });
     }
+
     public void setUpTab(boolean isSeries) {
         List<String> tabTitles = new ArrayList<>();
         fragmentList.clear();
@@ -99,13 +172,10 @@ public class MovieDetailActivity extends BaseActivity<ActivityMovieDetailBinding
         }
 
         tabTitles.add(getString(R.string.cast));
-        CastFragment.DISPLAY_FROM.setValue(CastFragment.TYPE_MOVIE_DETAIL);
-        fragmentList.add(new CastFragment());
+        fragmentList.add(CastFragment.newInstance(CastFragment.TYPE_MOVIE_DETAIL, null));
 
-        RecommendationFragment.DISPLAY_FROM.setValue(CastFragment.TYPE_MOVIE_DETAIL);
         tabTitles.add(getString(R.string.recommend));
-        fragmentList.add(new RecommendationFragment());
-
+        fragmentList.add(RecommendationFragment.newInstance(RecommendationFragment.TYPE_MOVIE_DETAIL, null, Objects.requireNonNull(viewModel.getMovieDetails().getValue()).getId()));
 
         MovieDetailTabAdapter tabAdapter = new MovieDetailTabAdapter(this, fragmentList);
         viewBinding.subViewPager.setAdapter(tabAdapter);
@@ -114,6 +184,188 @@ public class MovieDetailActivity extends BaseActivity<ActivityMovieDetailBinding
                 (tab, position) -> tab.setText(tabTitles.get(position))
         ).attach();
 
+    }
+
+    public void setUpTrailer(String uri) {
+        player = new ExoPlayer.Builder(this).build();
+        viewBinding.trailer.setPlayer(player);
+
+        if (uri == null || uri.isEmpty()) {
+            return;
+        }
+
+        viewModel.getIsPlaying().observe(this, this::updatePlayPauseIcons);
+
+        if (!uri.contains("http")) uri = Constants.MEDIA_URL_VIDEO + uri;
+
+        MediaItem mediaItem = MediaItem.fromUri(uri);
+
+        player.setMediaItem(mediaItem);
+        player.prepare();
+        player.setPlayWhenReady(true);
+        player.setVolume(0f);
+        player.addListener(new Player.Listener() {
+            @Override
+            public void onPlaybackStateChanged(int state) {
+                if (state == Player.STATE_BUFFERING) {
+                    showLoadingVideo();
+                } else if (state == Player.STATE_READY) {
+                    hideLoadingVideo();
+                    viewBinding.imgPoster.setVisibility(View.GONE);
+                    viewBinding.layoutReplay.setVisibility(View.GONE);
+                    viewBinding.layoutSeekBar.setVisibility(View.VISIBLE);
+                    viewBinding.btnMute.setVisibility(View.VISIBLE);
+
+                } else if (state == Player.STATE_ENDED) {
+                    handleEndVideo();
+                }
+            }
+
+            @Override
+            public void onIsPlayingChanged(boolean isPlaying) {
+                viewModel.setPlaying(isPlaying);
+                updatePlayPauseIcons(isPlaying);
+            }
+        });
+        viewBinding.seekBar.setThumb(null);
+        viewBinding.btnMute.findViewById(R.id.btn_mute).setOnClickListener(v -> toggleMute());
+        updateMuteIcon();
+        setupSeekBar();
+        setupGestureDetector();
+    }
+    private void toggleMute() {
+        isMuted = !isMuted;
+        player.setVolume(isMuted ? 0f : 1f);
+        updateMuteIcon();
+    }
+
+    private void updateMuteIcon() {
+        if (isMuted) {
+            viewBinding.icMute.setImageResource(R.drawable.ic_volume_mute);
+        } else {
+            viewBinding.icMute.setImageResource(R.drawable.ic_volume_high);
+        }
+
+    }
+    public void setupSeekBar() {
+        player.addListener(new Player.Listener() {
+            @Override
+            public void onPlaybackStateChanged(int state) {
+
+            }
+        });
+
+        updateSeekBarRunnable = new Runnable() {
+            @Override
+            public void run() {
+                if (player != null && player.isPlaying() && !isUserSeeking) {
+                    long current = player.getCurrentPosition();
+                    long duration = player.getDuration();
+
+                    if (duration > 0) {
+                        int progress = (int) (1000 * current / duration);
+                        viewBinding.seekBar.setProgress(progress);
+                    }
+
+                }
+                seekHandler.postDelayed(this, 500);
+            }
+        };
+
+        seekHandler.post(updateSeekBarRunnable);
+
+        viewBinding.seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if (fromUser && player != null) {
+                    long duration = player.getDuration();
+                    long newPosition = (duration * progress) / 1000;
+                    player.seekTo(newPosition);
+                }
+            }
+
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                isUserSeeking = true;
+                autoHideHandler.removeCallbacks(hideControlsRunnable);
+                viewBinding.controlVideo.setVisibility(View.GONE);
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                isUserSeeking = false;
+                autoHideHandler.postDelayed(hideControlsRunnable, AUTO_HIDE_DELAY_MILLIS);
+                viewBinding.controlVideo.setVisibility(View.VISIBLE);
+            }
+        });
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    public void setupGestureDetector() {
+        GestureDetector gestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
+            @Override
+            public boolean onSingleTapConfirmed(MotionEvent e) {
+                toggleControls();
+                return true;
+            }
+        });
+
+        viewBinding.trailer.setOnTouchListener((v, event) -> {
+            gestureDetector.onTouchEvent(event);
+            return true;
+        });
+    }
+
+    public void handleEndVideo() {
+        updatePlayPauseIcons(false);
+        viewModel.setPlaying(false);
+        viewBinding.imgPoster.setVisibility(View.VISIBLE);
+        viewBinding.layoutReplay.setVisibility(View.VISIBLE);
+        viewBinding.layoutSeekBar.setVisibility(View.GONE);
+        viewBinding.btnMute.setVisibility(View.GONE);
+    }
+
+    private void updatePlayPauseState(boolean isPlaying) {
+        if (player == null) return;
+        if (isPlaying) {
+            player.play();
+        } else {
+            player.pause();
+        }
+        viewModel.setPlaying(isPlaying);
+        updatePlayPauseIcons(isPlaying);
+    }
+    private void updatePlayPauseIcons(boolean isPlaying) {
+        viewBinding.icPlayPause.setImageResource(isPlaying ? R.drawable.ic_pause : R.drawable.ic_play);
+    }
+    @SuppressLint("UseCompatLoadingForDrawables")
+    private final Runnable hideControlsRunnable = () -> {
+        viewBinding.controlVideo.setVisibility(View.GONE);
+    };
+    @SuppressLint("UseCompatLoadingForDrawables")
+    private void toggleControls() {
+        boolean show = viewBinding.controlVideo.getVisibility() != View.VISIBLE;
+        viewBinding.controlVideo.setVisibility(show ? View.VISIBLE : View.GONE);
+        if (show) {
+            autoHideHandler.removeCallbacks(hideControlsRunnable);
+            autoHideHandler.postDelayed(hideControlsRunnable, AUTO_HIDE_DELAY_MILLIS);
+        }
+    }
+
+    private void showLoadingVideo() {
+        if (!isBuffering && viewBinding.imgPoster.getVisibility() == View.GONE) {
+            isBuffering = true;
+            viewBinding.loadingProgress.setVisibility(View.VISIBLE);
+            viewBinding.btnPlayPause.setVisibility(View.GONE);
+        }
+    }
+    private void hideLoadingVideo() {
+        if (isBuffering) {
+            isBuffering = false;
+            viewBinding.loadingProgress.setVisibility(View.GONE);
+            viewBinding.btnPlayPause.setVisibility(View.VISIBLE);
+        }
     }
 
     @Override
@@ -144,6 +396,18 @@ public class MovieDetailActivity extends BaseActivity<ActivityMovieDetailBinding
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        if (player != null) {
+            player.release();
+            player = null;
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (player != null) {
+            player.pause();
+        }
     }
 
     @SuppressLint("NonConstantResourceId")
@@ -155,12 +419,36 @@ public class MovieDetailActivity extends BaseActivity<ActivityMovieDetailBinding
                 break;
             case R.id.watch_now:
                 Intent intent = new Intent(this, WatchMovieActivity.class);
-                intent.putExtra("movie_details", viewModel.getMovieDetails().getValue());
+                intent.putExtra("movie_details", GsonUtils.toJson(viewModel.getMovieDetails().getValue()));
                 startActivity(intent);
+                break;
+            case R.id.btn_replay:
+                animateRotate(viewBinding.icReplay, false);
+                break;
+            case R.id.btn_play_pause:
+                updatePlayPauseState(!player.isPlaying());
                 break;
             default:
                 break;
         }
     }
+    private void animateRotate(View view, boolean isForward) {
+        float start = 0f;
+        float end = isForward ? 360f : -360f;
 
+        ObjectAnimator animator = ObjectAnimator.ofFloat(view, "rotation", start, end);
+        animator.setDuration(400);
+        animator.setInterpolator(new AccelerateDecelerateInterpolator());
+
+        animator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                super.onAnimationEnd(animation);
+                player.seekTo(0);
+                updatePlayPauseState(true);
+            }
+        });
+
+        animator.start();
+    }
 }

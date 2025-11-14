@@ -71,8 +71,6 @@ public class AccountFragment extends BaseFragment<FragmentAccountBinding, Accoun
         return R.color.bg_tab_bar;
     }
     public void setUpUser(UserResponse profile) {
-
-
         if (profile == null) return;
         Glide.with(this)
                 .load(Constants.MEDIA_URL + profile.getAvatarPath())

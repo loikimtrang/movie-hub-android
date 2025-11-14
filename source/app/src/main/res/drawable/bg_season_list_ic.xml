@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+
+
+    <item android:state_selected="true">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/bg_item_season_ic_select"/>
+            <corners android:radius="@dimen/_10sdp" />
+        </shape>
+    </item>
+
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="@color/bg_item_season_ic_no_select" />
+            <corners android:radius="@dimen/_10sdp" />
+        </shape>
+    </item>
+
+</selector>

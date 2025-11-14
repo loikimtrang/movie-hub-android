@@ -1,5 +1,6 @@
 package com.movie_hub.android.ui.main.movie.detail.fragment;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -21,11 +22,13 @@ import com.movie_hub.android.ui.main.custom.GridSpacingItemDecoration;
 import com.movie_hub.android.ui.main.movie.detail.MovieDetailActivity;
 import com.movie_hub.android.ui.main.search.topTrending.adapter.MovieVerticalAdapter;
 import com.movie_hub.android.utils.GridUtil;
+import com.movie_hub.android.utils.GsonUtils;
 
 import java.net.ConnectException;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.util.List;
+import java.util.Objects;
 
 import eu.davidea.flexibleadapter.databinding.BR;
 
@@ -34,28 +37,62 @@ public class RecommendationFragment extends BaseFragment<FragmentRecommendationB
     private boolean isLoaded = false;
     public static final int TYPE_SEARCH = 0;
     public static final int TYPE_MOVIE_DETAIL = 1;
-    public static MutableLiveData<Integer> DISPLAY_FROM = new MutableLiveData<>();
-    public static MutableLiveData<String> KEY_WORD = new MutableLiveData<>();
+
+    private static final String ARG_DISPLAY_FROM = "display_from";
+    private static final String ARG_KEYWORD = "keyword";
+    private static final String ARG_ID_MOVIE = "id_movie";
+
+    private int displayFrom;
+    private String keyword;
+    private Long idMovie;
 
     @Override
     protected void performDataBinding() {
         binding.setF(this);
         binding.setVm(viewModel);
-        setUpAdapter();
 
+        if (!isLoaded) {
+            if (displayFrom == TYPE_MOVIE_DETAIL) {
+                getListMovieTypeMovieDetail();
+            } else {
+                getListMovieTypeSearch();
+            }
+            isLoaded = true;
+        }
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if (getArguments() != null) {
+            displayFrom = getArguments().getInt(ARG_DISPLAY_FROM, TYPE_MOVIE_DETAIL);
+            keyword = getArguments().getString(ARG_KEYWORD);
+            idMovie = getArguments().getLong(ARG_ID_MOVIE, 0L);
+        }
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        setUpAdapter();
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        if (!isLoaded) {
-            if (DISPLAY_FROM.getValue() == TYPE_MOVIE_DETAIL) {
-                getListMovieTypeMovieDetail();
-            } else {
-                getListMovieTypeSearch();
-            }
-        }
+
     }
+
+    public static RecommendationFragment newInstance(int displayFrom, String keyword, Long idMovie) {
+        RecommendationFragment fragment = new RecommendationFragment();
+        Bundle args = new Bundle();
+        args.putInt(ARG_DISPLAY_FROM, displayFrom);
+        args.putString(ARG_KEYWORD, keyword);
+        args.putLong(ARG_ID_MOVIE, idMovie);
+        fragment.setArguments(args);
+        return fragment;
+    }
+
     public void setUpAdapter() {
         movieAdapter = new MovieVerticalAdapter(this);
         int spacing = requireContext().getResources().getDimensionPixelSize(R.dimen._8sdp);
@@ -68,26 +105,28 @@ public class RecommendationFragment extends BaseFragment<FragmentRecommendationB
     }
 
     public void getListMovieTypeMovieDetail() {
-        ((MovieDetailActivity) requireActivity()).showLoading();
+        showLoading();
         viewModel.getListMovie(new MainCallback<List<MovieResponse>>() {
             @Override
             public void doError(Throwable throwable) {
-                ((MovieDetailActivity) requireActivity()).hideLoading();
+                hideLoading();
                 if (!isAdded()) return;
                 showError(getString(R.string.fetch_data_failed));
             }
 
             @Override
             public void doFail() {
-                ((MovieDetailActivity) requireActivity()).hideLoading();
+                hideLoading();
                 if (!isAdded()) return;
                 showError(getString(R.string.fetch_data_failed));
             }
 
+            @SuppressLint("NewApi")
             @Override
             public void doSuccess(List<MovieResponse> list) {
-                ((MovieDetailActivity) requireActivity()).hideLoading();
+                hideLoading();
                 if (!isAdded()) return;
+                list.removeIf(movie -> Objects.equals(movie.getId(), idMovie));
                 movieAdapter.setData(list);
                 isLoaded = true;
             }
@@ -98,39 +137,41 @@ public class RecommendationFragment extends BaseFragment<FragmentRecommendationB
         }, new MovieRequest());
     }
     public void getListMovieTypeSearch() {
+        if (keyword == null || keyword.isEmpty()) return;
+
         ((MainActivity) requireActivity()).showLoading();
         MovieRequest request = new MovieRequest();
-        if (KEY_WORD.getValue() != null) {
-            request.setTitle(KEY_WORD.getValue());
-            viewModel.getListMovie(new MainCallback<List<MovieResponse>>() {
-                @Override
-                public void doError(Throwable throwable) {
-                    ((MainActivity) requireActivity()).hideLoading();
-                    if (!isAdded()) return;
-                    showError(getString(R.string.fetch_data_failed));
-                }
+        request.setTitle(keyword);
 
-                @Override
-                public void doFail() {
-                    ((MainActivity) requireActivity()).hideLoading();
-                    if (!isAdded()) return;
-                    showError(getString(R.string.fetch_data_failed));
-                }
+        viewModel.getListMovie(new MainCallback<List<MovieResponse>>() {
+            @Override
+            public void doError(Throwable throwable) {
+                ((MainActivity) requireActivity()).hideLoading();
+                if (!isAdded()) return;
+                showError(getString(R.string.fetch_data_failed));
+            }
 
-                @Override
-                public void doSuccess(List<MovieResponse> list) {
-                    ((MainActivity) requireActivity()).hideLoading();
-                    if (!isAdded()) return;
-                    movieAdapter.setData(list);
-                    isLoaded = true;
-                }
+            @Override
+            public void doFail() {
+                ((MainActivity) requireActivity()).hideLoading();
 
-                @Override
-                public void doSuccess() {
-                }
-            }, request);
+                if (!isAdded()) return;
+                showError(getString(R.string.fetch_data_failed));
+            }
 
-        }
+            @Override
+            public void doSuccess(List<MovieResponse> list) {
+                ((MainActivity) requireActivity()).hideLoading();
+
+                if (!isAdded()) return;
+                movieAdapter.setData(list);
+                isLoaded = true;
+            }
+
+            @Override
+            public void doSuccess() {
+            }
+        }, request);
     }
 
 
@@ -158,19 +199,19 @@ public class RecommendationFragment extends BaseFragment<FragmentRecommendationB
 
     public void getMovie(MovieResponse movie) {
         if (!isAdded()) return;
-        ((MainActivity) requireActivity()).showLoading();
+        showLoading();
 
         viewModel.getMovie(new MainCallback<MovieResponse>() {
             @Override
             public void doError(Throwable throwable) {
-                ((MainActivity) requireActivity()).hideLoading();
+                hideLoading();
                 if (!isAdded()) return;
                 showError(getString(R.string.fetch_data_failed));
             }
 
             @Override
             public void doFail() {
-                ((MainActivity) requireActivity()).hideLoading();
+                hideLoading();
                 if (!isAdded()) return;
                 showError(getString(R.string.fetch_data_failed));
             }
@@ -178,9 +219,8 @@ public class RecommendationFragment extends BaseFragment<FragmentRecommendationB
             @Override
             public void doSuccess(MovieResponse movieResponse) {
                 if (!isAdded()) return;
-
                 Intent intent = new Intent(getContext(), MovieDetailActivity.class);
-                intent.putExtra("movie_details", movieResponse);
+                intent.putExtra("movie_details", GsonUtils.toJson(movieResponse));
                 startActivity(intent);
             }
 
@@ -189,11 +229,23 @@ public class RecommendationFragment extends BaseFragment<FragmentRecommendationB
             }
         }, movie.getId());
     }
+    private void showLoading() {
+        if (displayFrom == TYPE_SEARCH && requireActivity() instanceof MainActivity) {
+            ((MainActivity) requireActivity()).showLoading();
+        } else if (requireActivity() instanceof MovieDetailActivity) {
+            ((MovieDetailActivity) requireActivity()).showLoading();
+        }
+    }
 
+    private void hideLoading() {
+        if (displayFrom == TYPE_SEARCH && requireActivity() instanceof MainActivity) {
+            ((MainActivity) requireActivity()).hideLoading();
+        } else if (requireActivity() instanceof MovieDetailActivity) {
+            ((MovieDetailActivity) requireActivity()).hideLoading();
+        }
+    }
     @Override
     public void onDestroy() {
         super.onDestroy();
-        DISPLAY_FROM.setValue(null);
-        KEY_WORD.setValue(null);
     }
 }

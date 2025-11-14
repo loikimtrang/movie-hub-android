@@ -12,7 +12,9 @@ import com.movie_hub.android.di.scope.ActivityScope;
 import com.movie_hub.android.ui.base.activity.BaseActivity;
 import com.movie_hub.android.ui.main.MainViewModel;
 import com.movie_hub.android.ui.main.account.language.LanguageViewModel;
+import com.movie_hub.android.ui.main.account.login.LoginViewModel;
 import com.movie_hub.android.ui.main.account.manage_account.ManageAccountViewModel;
+import com.movie_hub.android.ui.main.account.register.RegisterViewModel;
 import com.movie_hub.android.ui.main.movie.detail.MovieDetailViewModel;
 import com.movie_hub.android.ui.main.movie.watch.WatchMovieViewModel;
 import com.movie_hub.android.ui.main.splash.SplashViewModel;
@@ -91,5 +93,21 @@ public class ActivityModule {
         Supplier<MovieDetailViewModel> supplier = () -> new MovieDetailViewModel(repository, (MVVMApplication)application);
         ViewModelProviderFactory<MovieDetailViewModel> factory = new ViewModelProviderFactory<>(MovieDetailViewModel.class, supplier);
         return new ViewModelProvider(activity, factory).get(MovieDetailViewModel.class);
+    }
+
+    @Provides
+    @ActivityScope
+    LoginViewModel provideLoginViewModel(Repository repository, Context application) {
+        Supplier<LoginViewModel> supplier = () -> new LoginViewModel(repository, (MVVMApplication)application);
+        ViewModelProviderFactory<LoginViewModel> factory = new ViewModelProviderFactory<>(LoginViewModel.class, supplier);
+        return new ViewModelProvider(activity, factory).get(LoginViewModel.class);
+    }
+
+    @Provides
+    @ActivityScope
+    RegisterViewModel provideRegisterViewModel(Repository repository, Context application) {
+        Supplier<RegisterViewModel> supplier = () -> new RegisterViewModel(repository, (MVVMApplication)application);
+        ViewModelProviderFactory<RegisterViewModel> factory = new ViewModelProviderFactory<>(RegisterViewModel.class, supplier);
+        return new ViewModelProvider(activity, factory).get(RegisterViewModel.class);
     }
 }

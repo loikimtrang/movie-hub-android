@@ -27,11 +27,13 @@ import com.movie_hub.android.ui.base.activity.SystemBarColorProvider;
 import com.movie_hub.android.ui.main.account.AccountFragment;
 import com.movie_hub.android.ui.main.account.UnLoginAccountFragment;
 import com.movie_hub.android.ui.main.account.language.LanguageActivity;
+import com.movie_hub.android.ui.main.account.login.LoginActivity;
 import com.movie_hub.android.ui.main.account.manage_account.ManageAccountActivity;
 import com.movie_hub.android.ui.main.home.HomeFragment;
 import com.movie_hub.android.ui.main.movie.watch.WatchMovieActivity;
 import com.movie_hub.android.ui.main.schedule.ScheduleFragment;
 import com.movie_hub.android.ui.main.search.SearchFragment;
+import com.movie_hub.android.ui.main.splash.SplashActivity;
 
 
 public class MainActivity extends BaseActivity<ActivityMainBinding, MainViewModel> implements SystemBarColorProvider {
@@ -49,9 +51,9 @@ public class MainActivity extends BaseActivity<ActivityMainBinding, MainViewMode
         viewBinding.setVm(viewModel);
         setUpFragment();
 
-        if (viewModel.isLogin()) {
-            getUserProfile();
-        }
+//        if (viewModel.isLogin()) {
+//            getUserProfile();
+//        }
     }
 
     @SuppressLint("NonConstantResourceId")
@@ -174,121 +176,30 @@ public class MainActivity extends BaseActivity<ActivityMainBinding, MainViewMode
     public int getNavigationBarColor() {
         return R.color.bg_tab_bar;
     }
-    public void userLogin(UserLoginRequest request, MainCallback<UserLoginResponse> callback) {
-        viewModel.userLogin(new MainCallback<UserLoginResponse>() {
-            @Override
-            public void doSuccess(UserLoginResponse object) {
-                callback.doSuccess(object);
-
-                runOnUiThread(() -> {
-                    new ToastMessage(ToastMessage.TYPE_NORMAL, getString(R.string.login_successful))
-                            .showMessage(MainActivity.this);
-                    viewBinding.bottomNav.setSelectedItemId(R.id.home);
-                });
-
-            }
-
-            @Override
-            public void doFail() {
-                callback.doFail();
-            }
-
-            @Override
-            public void doError(Throwable throwable) {
-                callback.doError(throwable);
-            }
-
-            @Override
-            public void doSuccess() {}
-        }, request);
-    }
-
-    public void userLoginGoogle(UserLoginGoogleRequest request, MainCallback<UserLoginResponse> callback) {
-        viewModel.userLoginGoogle(new MainCallback<UserLoginResponse>() {
-            @Override
-            public void doSuccess(UserLoginResponse object) {
-                callback.doSuccess(object);
-
-                runOnUiThread(() -> {
-                    new ToastMessage(ToastMessage.TYPE_NORMAL, getString(R.string.login_successful))
-                            .showMessage(MainActivity.this);
-                    viewBinding.bottomNav.setSelectedItemId(R.id.home);
-                });
-
-            }
-
-            @Override
-            public void doFail() {
-                callback.doFail();
-            }
-
-            @Override
-            public void doError(Throwable throwable) {
-                callback.doError(throwable);
-            }
-
-            @Override
-            public void doSuccess() {}
-        }, request);
-    }
-
-    public void userRegister(UserRegisterRequest request, MainCallback<ResponseWrapper> callback) {
-        viewModel.userRegister(new MainCallback<ResponseWrapper>() {
-            @Override
-            public void doSuccess(ResponseWrapper object) {
-                if (object.isResult()) {
-                    new ToastMessage(ToastMessage.TYPE_NORMAL, getString(R.string.your_account_has_been_successfully_registered)).showMessage(MainActivity.this);
-                }
-                callback.doSuccess(object);
-            }
-            @Override
-            public void doFail() {
-                callback.doFail();
-            }
-
-            @Override
-            public void doError(Throwable throwable) {
-                callback.doError(throwable);
-            }
-
-            @Override
-            public void doSuccess() {}
-
-        }, request);
-    }
     public void userSignOut() {
         viewModel.showLoading();
-        new Handler(Looper.getMainLooper()).postDelayed(() -> {
-            viewModel.userSignOut();
-            handleFragment(Constants.ACCOUNT_UN_LOGIN);
-            viewModel.hideLoading();
-        }, 1000);
-    }
-
-    public void getUserProfile() {
-        viewModel.getUserProfile(new MainCallback<UserResponse>() {
+        viewModel.userSignOut(new MainCallback<Void>() {
             @Override
-            public void doError(Throwable error) {
+            public void doSuccess(Void unused) {
+                startActivity(new Intent(MainActivity.this, SplashActivity.class));
+                finish();
+            }
 
-                //Access token expired
-                viewModel.userSignOut();
+            @Override
+            public void doError(Throwable throwable) {
+                new ToastMessage(ToastMessage.TYPE_WARNING, getString(R.string.an_error_occurred)).showMessage(MainActivity.this);
+            }
 
+            @Override
+            public void doFail() {
+                new ToastMessage(ToastMessage.TYPE_WARNING, getString(R.string.an_error_occurred)).showMessage(MainActivity.this);
             }
 
             @Override
             public void doSuccess() {
-
-            }
-
-            @Override
-            public void doFail() {
-
+                startActivity(new Intent(MainActivity.this, SplashActivity.class));
+                finish();
             }
         });
-    }
-
-    public void navigateToManageAccount() {
-        Intent it = new Intent(this, ManageAccountActivity.class);
-        startActivity(it);
     }
 }

@@ -14,7 +14,6 @@ import com.movie_hub.android.R;
 import com.movie_hub.android.databinding.FragmentSearchResultBinding;
 import com.movie_hub.android.di.component.FragmentComponent;
 import com.movie_hub.android.ui.base.fragment.BaseFragment;
-import com.movie_hub.android.ui.main.movie.detail.adapter.MovieDetailTabAdapter;
 import com.movie_hub.android.ui.main.movie.detail.fragment.CastFragment;
 import com.movie_hub.android.ui.main.movie.detail.fragment.RecommendationFragment;
 import com.movie_hub.android.ui.main.search.result.adpter.SearchResultTabAdapter;
@@ -42,15 +41,11 @@ public class SearchResultFragment extends BaseFragment<FragmentSearchResultBindi
         List<String> tabTitles = new ArrayList<>();
         fragmentList.clear();
 
-        RecommendationFragment.DISPLAY_FROM.setValue(CastFragment.TYPE_SEARCH);
-        RecommendationFragment.KEY_WORD.setValue(keyword);
         tabTitles.add(getString(R.string.movie));
-        fragmentList.add(new RecommendationFragment());
+        fragmentList.add(RecommendationFragment.newInstance(RecommendationFragment.TYPE_SEARCH, keyword, 0L));
 
         tabTitles.add(getString(R.string.cast));
-        CastFragment.DISPLAY_FROM.setValue(CastFragment.TYPE_SEARCH);
-        CastFragment.KEY_WORD.setValue(keyword);
-        fragmentList.add(new CastFragment());
+        fragmentList.add(CastFragment.newInstance(CastFragment.TYPE_SEARCH, keyword));
 
         SearchResultTabAdapter tabAdapter = new SearchResultTabAdapter(requireActivity(), fragmentList);
         binding.viewPager.setAdapter(tabAdapter);

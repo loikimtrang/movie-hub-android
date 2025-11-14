@@ -32,6 +32,7 @@
     <string name="if_you_already_have_an_account">Nếu bạn đã có tài khoản, </string>
     <string name="log_in_now">đăng nhập ngay</string>
     <string name="username">Tên đăng nhập</string>
+    <string name="enter_your_name">Nhập tên của bạn</string>
     <string name="enter_your_email">Nhập email của bạn</string>
     <string name="enter_your_password">Nhập mật khẩu</string>
     <string name="confirm_your_password">Nhập lại mật Khẩu</string>
@@ -39,11 +40,12 @@
     <string name="sign_up_now">đăng kí ngay</string>
     <string name="forgot_password">Quên mật khẩu</string>
     <string name="signing_in_with_google">Đăng nhập bằng Google</string>
-    <string name="name">Name</string>
+    <string name="name">Tên</string>
     <string name="manage_account">Quản lý tài khoản</string>
     <string name="log_out">Đăng xuất</string>
     <string name="enter_your_username">Tên đăng nhập</string>
     <string name="incorrect_username_or_password">Tài khoản hoặc mật khẩu không đúng</string>
+    <string name="incorrect_email_or_password">Email hoặc mật khẩu không đúng</string>
     <string name="login_error_please_try_again">Lỗi đăng nhập. Vui lòng thử lại</string>
     <string name="register_error_please_try_again">Lỗi đăng ký. Vui lòng thử lại</string>
     <string name="login_successful">Đăng nhập thành công</string>
@@ -132,4 +134,14 @@
     <string name="next_episode">Tập tiếp theo</string>
     <string name="episodes">Các tập</string>
     <string name="season">Mùa</string>
+    <string name="hour">g</string>
+    <string name="minute">p</string>
+    <string name="episode_non_up">tập</string>
+    <string name="season_non_up">mùa</string>
+    <string name="replay">Phát lại</string>
+    <string name="an_error_occurred">Đã xảy ra lỗi</string>
+    <string name="skip">Bỏ qua</string>
+    <string name="season_list">Danh sách mùa</string>
+    <string name="close">Đóng</string>
+
 </resources>

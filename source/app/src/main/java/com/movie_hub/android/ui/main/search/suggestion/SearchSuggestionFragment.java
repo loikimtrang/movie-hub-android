@@ -1,5 +1,6 @@
 package com.movie_hub.android.ui.main.search.suggestion;
 
+import android.content.Intent;
 import android.view.View;
 
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -16,8 +17,10 @@ import com.movie_hub.android.ui.base.fragment.BaseFragment;
 import com.movie_hub.android.ui.main.MainActivity;
 import com.movie_hub.android.ui.main.MainCallback;
 import com.movie_hub.android.ui.main.custom.HorizontalSpacingItemDecoration;
+import com.movie_hub.android.ui.main.movie.detail.MovieDetailActivity;
 import com.movie_hub.android.ui.main.search.suggestion.adapter.ActorAdapter;
 import com.movie_hub.android.ui.main.search.suggestion.adapter.MovieSuggestAdapter;
+import com.movie_hub.android.utils.GsonUtils;
 
 import java.net.ConnectException;
 import java.net.SocketTimeoutException;
@@ -156,7 +159,42 @@ public class SearchSuggestionFragment extends BaseFragment<FragmentSearchSuggest
 
     @Override
     public void onMovieClick(MovieResponse movie) {
+        if (movie != null) {
+            getMovie(movie);
+        }
+    }
+    public void getMovie(MovieResponse movie) {
+        if (!isAdded()) return;
+        ((MainActivity) requireActivity()).showLoading();
 
+        viewModel.getMovie(new MainCallback<MovieResponse>() {
+            @Override
+            public void doError(Throwable throwable) {
+                ((MainActivity) requireActivity()).hideLoading();
+                if (!isAdded()) return;
+                showError(getString(R.string.fetch_data_failed));
+            }
+
+            @Override
+            public void doFail() {
+                ((MainActivity) requireActivity()).hideLoading();
+                if (!isAdded()) return;
+                showError(getString(R.string.fetch_data_failed));
+            }
+
+            @Override
+            public void doSuccess(MovieResponse movieResponse) {
+                if (!isAdded()) return;
+
+                Intent intent = new Intent(getContext(), MovieDetailActivity.class);
+                intent.putExtra("movie_details", GsonUtils.toJson(movieResponse));
+                startActivity(intent);
+            }
+
+            @Override
+            public void doSuccess() {
+            }
+        }, movie.getId());
     }
 
 }

@@ -4,7 +4,9 @@ import com.movie_hub.android.di.module.ActivityModule;
 import com.movie_hub.android.di.scope.ActivityScope;
 import com.movie_hub.android.ui.main.MainActivity;
 import com.movie_hub.android.ui.main.account.language.LanguageActivity;
+import com.movie_hub.android.ui.main.account.login.LoginActivity;
 import com.movie_hub.android.ui.main.account.manage_account.ManageAccountActivity;
+import com.movie_hub.android.ui.main.account.register.RegisterActivity;
 import com.movie_hub.android.ui.main.movie.detail.MovieDetailActivity;
 import com.movie_hub.android.ui.main.movie.watch.WatchMovieActivity;
 import com.movie_hub.android.ui.main.splash.SplashActivity;
@@ -20,5 +22,7 @@ public interface ActivityComponent {
     void inject(ManageAccountActivity activity);
     void inject(WatchMovieActivity activity);
     void inject(MovieDetailActivity activity);
+    void inject(LoginActivity activity);
+    void inject(RegisterActivity activity);
 }
 
