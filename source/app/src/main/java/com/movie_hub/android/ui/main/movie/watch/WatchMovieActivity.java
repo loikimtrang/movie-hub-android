@@ -1,8 +1,5 @@
 package com.movie_hub.android.ui.main.movie.watch;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
-import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -13,10 +10,10 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.HapticFeedbackConstants;
-import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
@@ -35,6 +32,8 @@ import androidx.core.view.WindowCompat;
 import androidx.media3.common.C;
 import androidx.media3.common.Format;
 import androidx.media3.common.MediaItem;
+import androidx.media3.common.MimeTypes;
+import androidx.media3.common.PlaybackException;
 import androidx.media3.common.PlaybackParameters;
 import androidx.media3.common.Player;
 import androidx.media3.common.TrackGroup;
@@ -42,23 +41,40 @@ import androidx.media3.common.TrackSelectionOverride;
 import androidx.media3.common.TrackSelectionParameters;
 import androidx.media3.common.Tracks;
 import androidx.media3.common.VideoSize;
+import androidx.media3.exoplayer.DefaultRenderersFactory;
 import androidx.media3.exoplayer.ExoPlayer;
+import androidx.media3.exoplayer.mediacodec.MediaCodecInfo;
+import androidx.media3.exoplayer.mediacodec.MediaCodecSelector;
+import androidx.media3.exoplayer.mediacodec.MediaCodecUtil;
+import androidx.media3.exoplayer.trackselection.DefaultTrackSelector;
 import androidx.media3.ui.AspectRatioFrameLayout;
+import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.google.common.collect.ImmutableList;
 import com.movie_hub.android.R;
+import com.movie_hub.android.constant.Constants;
+import com.movie_hub.android.data.model.api.response.MovieItem.MovieItemResponse;
 import com.movie_hub.android.data.model.api.response.movie.MovieResponse;
+import com.movie_hub.android.data.model.api.response.season.SeasonResponse;
+import com.movie_hub.android.data.model.api.response.video.VideoResponse;
 import com.movie_hub.android.databinding.ActivityWatchMovieBinding;
 import com.movie_hub.android.di.component.ActivityComponent;
 import com.movie_hub.android.ui.base.activity.BaseActivity;
+import com.movie_hub.android.ui.main.movie.detail.adapter.EpisodeItemListAdapter;
+import com.movie_hub.android.ui.main.movie.watch.adapter.EpisodeItemListHoriAdapter;
+import com.movie_hub.android.ui.main.movie.watch.adapter.SeasonItemAdapter;
 import com.movie_hub.android.ui.main.movie.watch.dialog.MoreOptionBottomSheetDialog;
 import com.movie_hub.android.ui.main.movie.watch.dialog.PlaySpeedBottomSheetDialog;
 import com.movie_hub.android.ui.main.movie.watch.dialog.QualityBottomSheetDialog;
 import com.movie_hub.android.ui.main.movie.watch.dialog.SettingBottomSheetDialog;
 import com.movie_hub.android.ui.main.movie.watch.setting.SettingVideoModel;
 import com.movie_hub.android.ui.main.movie.watch.setting.VideoQuality;
+import com.movie_hub.android.utils.DeviceUtils;
+import com.movie_hub.android.utils.GsonUtils;
+import com.movie_hub.android.utils.NetworkUtils;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
@@ -68,7 +84,9 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
         SettingBottomSheetDialog.SettingBottomSheetCallback,
         PlaySpeedBottomSheetDialog.PlaySpeedBottomSheetCallback,
         QualityBottomSheetDialog .QualityBottomSheetCallback,
-        MoreOptionBottomSheetDialog.MoreOptionBottomSheetCallback{
+        MoreOptionBottomSheetDialog.MoreOptionBottomSheetCallback,
+        SeasonItemAdapter.OnSeasonClickListener,
+        EpisodeItemListHoriAdapter.OnEpisodeClickListener {
     private ExoPlayer player;
     private static final int AUTO_HIDE_DELAY_MILLIS = 3000;
     private static final int SEEK_DOUBLE_TAP_MILLIS = 10000;
@@ -89,6 +107,8 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
     private AudioManager audioManager;
     private int maxVolume;
     private int currentVolume;
+    private SeasonItemAdapter seasonItemAdapter;
+    private EpisodeItemListHoriAdapter episodeItemListHoriAdapter;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -97,36 +117,101 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
         viewBinding.setVm(viewModel);
         hideSystemUI();
 
-        MovieResponse movie = getIntent().getParcelableExtra("movie_details");
-        if (movie != null) {
-            viewModel.setMovieDetails(movie);
-            setUpView();
-//            setUpMovie();
-        }
+        String json = getIntent().getStringExtra("movie_details");
+        MovieResponse movie = GsonUtils.fromJson(json, MovieResponse.class);
 
-        initMovie();
+        if (movie != null) {
+            viewModel.movieDetails = movie;
+            if (viewModel.movieDetails.getType() == Constants.TYPE_MOVIE_SINGLE) {
+                viewModel.nowVideoPlay = viewModel.movieDetails.getSeasons().get(viewModel.movieDetails.getSeasons().size() - 1).getVideo();
+                setUpViewForSingleMovie();
+            } else if (viewModel.movieDetails.getType() == Constants.TYPE_MOVIE_SERIES) {
+                String jsonEpisode = getIntent().getStringExtra("episode");
+                viewModel.nowEpisodePlay = GsonUtils.fromJson(jsonEpisode, MovieItemResponse.class);
+                assert viewModel.nowEpisodePlay != null;
+                viewModel.nowVideoPlay = viewModel.nowEpisodePlay.getVideo();
+                setUpAdapterEpisode();
+                setUpViewForSeriesMovie();
+            }
+            initMovie();
+        }
     }
 
     //region === Init Movie ===
     public void initMovie() {
         reset();
-        setUpMovie();
+        viewModel.nowUriPlay = getVideoUri(viewModel.nowVideoPlay);
+        setUpMovie(viewModel.nowUriPlay);
         viewModel.getIsPlaying().observe(this, this::updatePlayPauseIcons);
     }
+
+    public void setUpViewForSingleMovie() {
+        viewBinding.nameMovie.setText(Objects.requireNonNull(viewModel.movieDetails.getTitle()));
+        viewBinding.nameMovieOriginal.setText(Objects.requireNonNull(viewModel.movieDetails.getOriginalTitle()));
+        viewBinding.btnNextEpisode.setVisibility(View.GONE);
+        viewBinding.btnEpisodes.setVisibility(View.GONE);
+    }
+
+    @SuppressLint("SetTextI18n")
+    public void setUpViewForSeriesMovie() {
+        viewBinding.nameMovie.setText(viewModel.nowEpisodePlay.getTitle());
+        viewBinding.nameMovieOriginal.setText(viewModel.movieDetails.getTitle() + findLabelSeason());
+
+        if (isLastEpisode()) {
+            viewBinding.btnNextEpisode.setVisibility(View.GONE);
+            Log.d("LAST", "true");
+        } else {
+            viewBinding.btnNextEpisode.setVisibility(View.VISIBLE);
+            Log.d("LAST", "fa");
+
+        }
+    }
+
     public void reset() {
         forwardCount = 0;
         previousCount = 0;
         isVideoReadyWhenStartActivity = false;
         viewBinding.seekBar.setProgress(0);
     }
-    @SuppressLint("ClickableViewAccessibility")
-    public void setUpMovie() {
-        player = new ExoPlayer.Builder(this).build();
+    public void setUpMovie(String uri) {
+        if (!uri.contains("http")) {
+            uri = Constants.MEDIA_URL_VIDEO + uri;
+        }
+
+        // TẠO PLAYER BUILDER
+        ExoPlayer.Builder playerBuilder = new ExoPlayer.Builder(this);
+
+        // === RENDERERS FACTORY ===
+        DefaultRenderersFactory renderersFactory = new DefaultRenderersFactory(this)
+                .setEnableDecoderFallback(true)
+                .setMediaCodecSelector(getCustomCodecSelector());
+
+        if (DeviceUtils.isLowEndDevice(this)) {
+            renderersFactory.setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_OFF);
+        }
+
+        playerBuilder.setRenderersFactory(renderersFactory);
+
+        // === TRACK SELECTOR (thay thế setForceLowestBitrate) ===
+        DefaultTrackSelector trackSelector = new DefaultTrackSelector(this);
+        DefaultTrackSelector.Parameters.Builder paramsBuilder = trackSelector.buildUponParameters();
+
+        if (DeviceUtils.isLowEndDevice(this)) {
+            paramsBuilder
+                    .setMaxVideoBitrate(600_000)     // 600kbps
+                    .setMaxVideoSize(854, 480)       // 480p
+                    .setForceLowestBitrate(true);    // Ép chọn bitrate thấp nhất
+        }
+
+        trackSelector.setParameters(paramsBuilder.build());
+        playerBuilder.setTrackSelector(trackSelector);
+
+        // TẠO PLAYER
+        player = playerBuilder.build();
         viewBinding.playerView.setPlayer(player);
         showLoadingVideo();
 
-        MediaItem mediaItem = MediaItem.fromUri("https://files.vidstack.io/sprite-fight/hls/stream.m3u8");
-
+        MediaItem mediaItem = MediaItem.fromUri(uri);
         player.setMediaItem(mediaItem);
         player.prepare();
         player.setPlayWhenReady(true);
@@ -136,6 +221,68 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
         setupGestureDetector();
         setupSeekBarBrightNess();
         setupSeekBarVolume();
+    }
+
+    private String getVideoUri(VideoResponse videoResponse) {
+        if (videoResponse != null) {
+            if (!videoResponse.getContent().contains("http")) videoResponse.setContent(Constants.MEDIA_URL_VIDEO + videoResponse.getContent());
+            return videoResponse.getContent();
+        }
+        return "";
+    }
+
+    //region === SetUp for Device ===
+
+    @SuppressLint("VisibleForTests")
+    private MediaCodecSelector getCustomCodecSelector() {
+        return (mimeType, requiresSecureDecoder, requiresTunnelingDecoder) -> {
+            if (MimeTypes.VIDEO_H264.equals(mimeType) && DeviceUtils.isQualcommOldChipset()) {
+                try {
+                    // Tìm decoder software-only cho H.264
+                    List<MediaCodecInfo> decoders = MediaCodecUtil.getDecoderInfos(
+                            mimeType, requiresSecureDecoder, requiresTunnelingDecoder
+                    );
+
+                    for (MediaCodecInfo decoder : decoders) {
+                        if (decoder.softwareOnly && decoder.name.contains("google")) {
+                            return ImmutableList.of(decoder);
+                        }
+                    }
+                } catch (Exception e) {
+                    // ignore
+                }
+            }
+
+            // Mặc định: dùng hệ thống
+            return MediaCodecSelector.DEFAULT.getDecoderInfos(mimeType, requiresSecureDecoder, requiresTunnelingDecoder);
+        };
+    }
+
+    private void autoSelectQualityOnStart() {
+        if (!viewModel.settingVideoModel.getQuality().isAuto()) return;
+
+        DeviceUtils.DeviceTier tier = DeviceUtils.getDeviceTier(this);
+        int maxHeight;
+
+        if (tier == DeviceUtils.DeviceTier.LOW_END) {
+            maxHeight = 480;
+        } else if (tier == DeviceUtils.DeviceTier.MID_RANGE) {
+            maxHeight = 720;
+        } else {
+            maxHeight = 1080;
+        }
+
+        VideoQuality best = null;
+        for (VideoQuality q : viewModel.settingVideoModel.getAvailableQualities()) {
+            if (q.height <= maxHeight && (best == null || q.height > best.height)) {
+                best = q;
+            }
+        }
+
+        if (best != null) {
+            viewModel.settingVideoModel.getQuality().setResolution(best);
+            applyQualityFromSetting();
+        }
     }
 
     //region === Get Quality Video ===
@@ -211,6 +358,7 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
             @Override
             public void onTracksChanged(Tracks tracks) {
                 extractAvailableQualities(tracks);
+                autoSelectQualityOnStart();
             }
 
             @Override
@@ -223,6 +371,36 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
                     QualityBottomSheetDialog.videoQuality.postValue(current);
                 });
             }
+            @Override
+            public void onPlayerError(PlaybackException error) {
+                handlePlaybackError(error);
+            }
+        });
+    }
+
+    private void handlePlaybackError(PlaybackException error) {
+        hideLoadingVideo();
+        boolean isNetworkAvailable = NetworkUtils.isNetworkAvailable(getApplication());
+        String mgs = getString(R.string.an_error_occurred);
+        if (!isNetworkAvailable) {
+            mgs = getString(R.string.network_error_please_check_your_internet_connection);
+        }
+        String finalMgs = mgs;
+        runOnUiThread(() -> {
+            viewBinding.lDialogErrorVideo.setVisibility(View.VISIBLE);
+            viewBinding.dialogErrorVideoMessage.setText(finalMgs);
+
+            viewBinding.btnRetryErrorVideo.setOnClickListener(v -> {
+                viewBinding.lDialogErrorVideo.setVisibility(View.GONE);
+                reset();
+                setUpMovie(viewModel.nowUriPlay);
+            });
+
+            viewBinding.btnExitErrorVideo.setOnClickListener(v -> {
+                viewBinding.lDialogErrorVideo.setVisibility(View.GONE);
+                finish();
+            });
+
         });
     }
     private void updatePlayPauseState(boolean isPlaying) {
@@ -423,14 +601,14 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
         }
         viewBinding.tvCurrentTime.setText(formatTime(position));
         viewBinding.tvCurrentTimeSecond.setText(formatTime(position));
-        autoHideHandler.removeCallbacks(hideControlsRunnable);
 
-        if (viewBinding.controlVideo.getVisibility() == View.VISIBLE) {
-            autoHideHandler.postDelayed(hideControlsRunnable, AUTO_HIDE_DELAY_MILLIS);
-        } else {
-            autoHideHandler.postDelayed(hideControlsRunnable, DOUBLE_TAP_TIMEOUT);
+        if (autoHideHandler != null) {
+            autoHideHandler.removeCallbacks(hideControlsRunnable);
+            long delay = viewBinding.controlVideo.getVisibility() == View.VISIBLE
+                    ? AUTO_HIDE_DELAY_MILLIS
+                    : DOUBLE_TAP_TIMEOUT;
+            autoHideHandler.postDelayed(hideControlsRunnable, delay);
         }
-
     }
     private void showSeekCount(boolean isForward, int seconds) {
         viewBinding.tvCurrentTimeSecond.setVisibility(View.VISIBLE);
@@ -566,17 +744,14 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
         if (!isLockScreen) viewBinding.layoutSeekBar.setVisibility(show ? View.VISIBLE : View.GONE);
         if (!isLockScreen) viewBinding.layoutBrightness.setVisibility(show ? View.VISIBLE : View.GONE);
         if (!isLockScreen) viewBinding.layoutVolume.setVisibility(show ? View.VISIBLE : View.GONE);
-        if (show) {
+
+        if (show && autoHideHandler != null) {
             autoHideHandler.removeCallbacks(hideControlsRunnable);
             autoHideHandler.postDelayed(hideControlsRunnable, AUTO_HIDE_DELAY_MILLIS);
         }
     }
 
     // region === Set Up View ===
-    public void setUpView() {
-        viewBinding.nameMovie.setText(Objects.requireNonNull(viewModel.getMovieDetails().getValue()).getTitle());
-        viewBinding.nameMovieOriginal.setText(Objects.requireNonNull(viewModel.getMovieDetails().getValue()).getOriginalTitle());
-    }
     public void hideSystemUI() {
         Window window = getWindow();
         WindowCompat.setDecorFitsSystemWindows(window, false);
@@ -752,7 +927,7 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
         };
 
         getContentResolver().registerContentObserver(
-                android.provider.Settings.System.CONTENT_URI,
+                Settings.System.CONTENT_URI,
                 true,
                 volumeObserver
         );
@@ -792,22 +967,24 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
             player = null;
         }
 
-        if (seekHandler != null && updateSeekBarRunnable != null) {
-            seekHandler.removeCallbacks(updateSeekBarRunnable);
+        // XÓA TẤT CẢ RUNNABLE TRƯỚC KHI HỦY
+        if (seekHandler != null) {
+            seekHandler.removeCallbacksAndMessages(null);
         }
-
         if (autoHideHandler != null) {
-            autoHideHandler.removeCallbacks(hideControlsRunnable);
+            autoHideHandler.removeCallbacksAndMessages(null);
+        }
+        if (countResetHandler != null) {
+            countResetHandler.removeCallbacksAndMessages(null);
         }
 
-        if (countResetHandler != null && resetCountRunnable != null) {
-            countResetHandler.removeCallbacks(resetCountRunnable);
-        }
-
-        seekHandler = null;
-        autoHideHandler = null;
-        countResetHandler = null;
+        stopSeekBarUpdate();
         stopVolumeObserver();
+
+        // KHÔNG set = null nữa!
+        // seekHandler = null;
+        // autoHideHandler = null;
+        // countResetHandler = null;
     }
 
     // region === Click ===
@@ -857,7 +1034,8 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
                 break;
 
             case R.id.btn_next_episode:
-                changeEpisode("https://demo.unified-streaming.com/k8s/features/stable/video/tears-of-steel/tears-of-steel.ism/.m3u8");
+//                https://files.vidstack.io/sprite-fight/hls/stream.m3u8
+                onNextEpisodeClick();
                 break;
 
             case R.id.btn_episodes:
@@ -866,6 +1044,8 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
 
             case R.id.btn_close_episodes:
                 viewBinding.layoutListEpisodes.listEpisode.setVisibility(View.GONE);
+                toggleControls();
+                player.play();
                 break;
             default:
                 break;
@@ -896,10 +1076,6 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
         showSettingsMoreOptionBottomSheet();
     }
 
-    public void showListEpisode() {
-        toggleControls();
-        viewBinding.layoutListEpisodes.listEpisode.setVisibility(View.VISIBLE);
-    }
     // region === Handle Setting ===
     @Override
     public void updatePlaySpeedVideo(float speed, int typeSpeedOption) {
@@ -954,6 +1130,8 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
     private void changeEpisode(String newUri) {
         if (player == null) return;
 
+        viewModel.nowUriPlay = newUri;
+
         toggleControls();
         viewModel.updateSettingWhenChangeEpisode();
         showLoadingVideo();
@@ -969,6 +1147,154 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
         player.setMediaItem(newItem);
         player.prepare();
         player.setPlayWhenReady(true);
+    }
+
+    public Boolean isLastEpisode() {
+        if (viewModel.movieDetails == null || viewModel.nowEpisodePlay == null) {
+            return true;
+        }
+
+        if (viewModel.movieDetails.getType() != Constants.TYPE_MOVIE_SERIES) {
+            return true; // Phim lẻ
+        }
+
+        List<SeasonResponse> seasons = viewModel.movieDetails.getSeasons();
+        if (seasons == null || seasons.isEmpty()) {
+            return true;
+        }
+
+        // Tìm season hiện tại
+        SeasonResponse currentSeason = findCurrentSeason();
+        if (currentSeason == null || currentSeason.getEpisodes() == null || currentSeason.getEpisodes().isEmpty()) {
+            return true;
+        }
+
+        // Lấy tập cuối của mùa hiện tại
+        MovieItemResponse lastInCurrentSeason = currentSeason.getEpisodes()
+                .get(currentSeason.getEpisodes().size() - 1);
+
+        // Nếu tập hiện tại là tập cuối của mùa hiện tại → kiểm tra có mùa sau không
+        if (viewModel.nowEpisodePlay.getId().equals(lastInCurrentSeason.getId())) {
+            int currentSeasonIndex = seasons.indexOf(currentSeason);
+            return currentSeasonIndex == seasons.size() - 1; // Không còn mùa sau
+        }
+
+        return false; // Còn tập trong mùa hiện tại
+    }
+
+    private SeasonResponse findCurrentSeason() {
+        for (SeasonResponse season : viewModel.movieDetails.getSeasons()) {
+            if (season.getEpisodes() != null) {
+                for (MovieItemResponse episode : season.getEpisodes()) {
+                    if (episode.getId().equals(viewModel.nowEpisodePlay.getId())) {
+                        return season;
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    private String findLabelSeason() {
+        SeasonResponse currentSeason = findCurrentSeason();
+        if (currentSeason == null) {
+            return "";
+        }
+
+        List<SeasonResponse> seasons = viewModel.movieDetails.getSeasons();
+        if (seasons == null) return "";
+
+        int seasonIndex = seasons.indexOf(currentSeason);
+        if (seasonIndex == -1) return "";
+
+        return " (" + getString(R.string.season) + " " + (seasonIndex + 1) + ")";
+    }
+
+    public MovieItemResponse getNextEpisode() {
+        if (viewModel.movieDetails == null || viewModel.nowEpisodePlay == null) {
+            return null;
+        }
+
+        List<SeasonResponse> seasons = viewModel.movieDetails.getSeasons();
+        if (seasons == null || seasons.isEmpty()) {
+            return null;
+        }
+
+        SeasonResponse currentSeason = findCurrentSeason();
+        if (currentSeason == null || currentSeason.getEpisodes() == null || currentSeason.getEpisodes().isEmpty()) {
+            return null;
+        }
+
+        List<MovieItemResponse> episodes = currentSeason.getEpisodes();
+        int currentIndex = -1;
+
+        // Tìm vị trí tập hiện tại
+        for (int i = 0; i < episodes.size(); i++) {
+            if (episodes.get(i).getId().equals(viewModel.nowEpisodePlay.getId())) {
+                currentIndex = i;
+                break;
+            }
+        }
+
+        if (currentIndex == -1) return null;
+
+        // 1. Còn tập trong mùa hiện tại → trả về tập kế
+        if (currentIndex < episodes.size() - 1) {
+            return episodes.get(currentIndex + 1);
+        }
+
+        // 2. Là tập cuối mùa → tìm mùa tiếp theo
+        int currentSeasonIndex = seasons.indexOf(currentSeason);
+        if (currentSeasonIndex == -1 || currentSeasonIndex == seasons.size() - 1) {
+            return null; // Không có mùa sau
+        }
+
+        SeasonResponse nextSeason = seasons.get(currentSeasonIndex + 1);
+        if (nextSeason.getEpisodes() == null || nextSeason.getEpisodes().isEmpty()) {
+            return null;
+        }
+
+        return nextSeason.getEpisodes().get(0); // Tập đầu của mùa sau
+    }
+
+    public void onNextEpisodeClick() {
+        viewModel.nowEpisodePlay = getNextEpisode();
+        viewModel.nowVideoPlay = viewModel.nowEpisodePlay.getVideo();
+        setUpViewForSeriesMovie();
+        changeEpisode(getVideoUri(viewModel.nowVideoPlay));
+    }
+
+    public void setUpAdapterEpisode() {
+        seasonItemAdapter = new SeasonItemAdapter(this, this);
+        viewBinding.layoutListEpisodes.rvSeason.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+        viewBinding.layoutListEpisodes.rvSeason.setAdapter(seasonItemAdapter);
+
+        episodeItemListHoriAdapter = new EpisodeItemListHoriAdapter(this, this);
+        viewBinding.layoutListEpisodes.rvEpisode.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+        viewBinding.layoutListEpisodes.rvEpisode.setAdapter(episodeItemListHoriAdapter);
+    }
+    @SuppressLint("NotifyDataSetChanged")
+    public void showListEpisode() {
+        toggleControls();
+        player.pause();
+        viewModel.movieDetails.setSeasonAndEpisodeSelectedAndPlaying(viewModel.nowEpisodePlay.getId());
+        seasonItemAdapter.setData(viewModel.movieDetails.getSeasons());
+        episodeItemListHoriAdapter.setData(viewModel.movieDetails.getSelectedSeasonEpisodes(), viewBinding.layoutListEpisodes.rvEpisode);
+        viewBinding.layoutListEpisodes.listEpisode.setVisibility(View.VISIBLE);
+    }
+    @Override
+    public void onEpisodeClick(MovieItemResponse season) {
+        viewBinding.layoutListEpisodes.listEpisode.setVisibility(View.GONE);
+        viewModel.nowEpisodePlay = season;
+        viewModel.nowVideoPlay = viewModel.nowEpisodePlay.getVideo();
+        setUpViewForSeriesMovie();
+        changeEpisode(getVideoUri(viewModel.nowVideoPlay));
+        toggleControls();
+    }
+
+    @Override
+    public void onSeasonClick(SeasonResponse season) {
+        episodeItemListHoriAdapter.setData(viewModel.movieDetails.getSeasonEpisodesById(season.getId()), viewBinding.layoutListEpisodes.rvEpisode);
     }
 }
 

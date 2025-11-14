@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.movie_hub.android.R;
@@ -40,7 +41,7 @@ public class SeasonItemListAdapter extends RecyclerView.Adapter<SeasonItemListAd
         return new SeasonItemListViewHolder(binding);
     }
 
-    @SuppressLint("SetTextI18n")
+    @SuppressLint({"SetTextI18n", "ResourceAsColor"})
     @Override
     public void onBindViewHolder(@NonNull SeasonItemListViewHolder holder, @SuppressLint("RecyclerView") int position) {
         SeasonResponse season = seasonList.get(position);
@@ -55,9 +56,15 @@ public class SeasonItemListAdapter extends RecyclerView.Adapter<SeasonItemListAd
         if (season.isSelect()) {
             holder.binding.icSeason.setImageResource(R.drawable.ic_season_select);
             holder.binding.layoutIcSeason.setSelected(true);
+            holder.binding.tvSeason.setTextColor(
+                    ContextCompat.getColor(context, R.color.bg_item_season_ic_select)
+            );
         } else {
             holder.binding.icSeason.setImageResource(R.drawable.ic_season_no_select);
             holder.binding.layoutIcSeason.setSelected(false);
+            holder.binding.tvSeason.setTextColor(
+                    ContextCompat.getColor(context, R.color.text_season)
+            );
         }
 
         holder.binding.getRoot().setOnClickListener(v -> {

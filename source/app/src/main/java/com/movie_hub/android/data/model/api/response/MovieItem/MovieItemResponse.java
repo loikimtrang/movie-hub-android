@@ -20,5 +20,6 @@ public class MovieItemResponse {
     private String modifiedDate;
     private MovieResponse movie;
     private VideoResponse video;
+    private boolean isPlaying = false;
 }
 

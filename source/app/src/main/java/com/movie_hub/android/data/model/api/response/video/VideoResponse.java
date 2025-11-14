@@ -26,4 +26,5 @@ public class VideoResponse {
     private Integer status;
     private String createdDate;
     private String modifiedDate;
+    private boolean isPlaying;
 }

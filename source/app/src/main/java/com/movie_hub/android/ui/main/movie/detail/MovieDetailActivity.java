@@ -3,34 +3,22 @@ package com.movie_hub.android.ui.main.movie.detail;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
-import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.GestureDetector;
-import android.view.HapticFeedbackConstants;
 import android.view.MotionEvent;
-import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
-import android.widget.ImageView;
 import android.widget.SeekBar;
-import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
 import androidx.media3.common.MediaItem;
-import androidx.media3.common.PlaybackParameters;
 import androidx.media3.common.Player;
-import androidx.media3.common.Tracks;
-import androidx.media3.common.VideoSize;
 import androidx.media3.exoplayer.ExoPlayer;
-import androidx.media3.ui.AspectRatioFrameLayout;
 
 import com.bumptech.glide.Glide;
 import com.google.android.flexbox.AlignItems;
@@ -41,22 +29,20 @@ import com.google.android.flexbox.JustifyContent;
 import com.google.android.material.tabs.TabLayoutMediator;
 import com.movie_hub.android.R;
 import com.movie_hub.android.constant.Constants;
+import com.movie_hub.android.data.model.api.response.MovieItem.MovieItemResponse;
 import com.movie_hub.android.data.model.api.response.movie.MovieResponse;
 import com.movie_hub.android.data.model.api.response.season.SeasonResponse;
+import com.movie_hub.android.data.model.api.response.video.VideoResponse;
 import com.movie_hub.android.databinding.ActivityMovieDetailBinding;
 import com.movie_hub.android.di.component.ActivityComponent;
 import com.movie_hub.android.ui.base.activity.BaseActivity;
 import com.movie_hub.android.ui.base.activity.SystemBarColorProvider;
 import com.movie_hub.android.ui.main.movie.detail.adapter.MovieDetailTabAdapter;
 import com.movie_hub.android.ui.main.movie.detail.adapter.TagCategoryAdapter;
-import com.movie_hub.android.ui.main.movie.detail.dialog.ChooseSeasonBottomSheetDialog;
 import com.movie_hub.android.ui.main.movie.detail.fragment.CastFragment;
 import com.movie_hub.android.ui.main.movie.detail.fragment.EpisodesFragment;
 import com.movie_hub.android.ui.main.movie.detail.fragment.RecommendationFragment;
 import com.movie_hub.android.ui.main.movie.watch.WatchMovieActivity;
-import com.movie_hub.android.ui.main.movie.watch.dialog.QualityBottomSheetDialog;
-import com.movie_hub.android.ui.main.movie.watch.dialog.SettingBottomSheetDialog;
-import com.movie_hub.android.ui.main.movie.watch.setting.VideoQuality;
 import com.movie_hub.android.ui.main.search.topTrending.FlexSpacingItemDecoration;
 import com.movie_hub.android.utils.DisplayUtils;
 import com.movie_hub.android.utils.GsonUtils;
@@ -64,7 +50,6 @@ import com.movie_hub.android.utils.HtmlUtils;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Objects;
 
 import eu.davidea.flexibleadapter.databinding.BR;
@@ -91,75 +76,77 @@ public class MovieDetailActivity extends BaseActivity<ActivityMovieDetailBinding
         MovieResponse movie = GsonUtils.fromJson(json, MovieResponse.class);
 
         if (movie != null) {
-            viewModel.setMovieDetails(movie);
+            viewModel.movieDetails = movie;
+            setUpView();
         }
 
-        observeViewModel();
     }
 
 
     @SuppressLint("SetTextI18n")
-    private void observeViewModel() {
-        viewModel.getMovieDetails().observe(this, movie -> {
-            if (movie == null) return;
+    private void setUpView() {
+        if (viewModel.movieDetails == null) return;
 
-            for (SeasonResponse s: movie.getSeasons()) {
-                s.setSelect(false);
-            }
-            movie.getSeasons().get(movie.getSeasons().size() - 1).setSelect(true);
+        for (SeasonResponse s: viewModel.movieDetails.getSeasons()) {
+            s.setSelect(false);
+        }
+        viewModel.movieDetails.getSeasons().get(viewModel.movieDetails.getSeasons().size() - 1).setSelect(true);
 
-            Glide.with(this)
-                    .load(Constants.MEDIA_URL + movie.getPosterUrl())
-                    .placeholder(R.drawable.place_holder_16_9)
-                    .error(R.drawable.place_holder_16_9)
-                    .into(viewBinding.imgPoster);
+        Glide.with(this)
+                .load(Constants.MEDIA_URL + viewModel.movieDetails.getPosterUrl())
+                .placeholder(R.drawable.place_holder_16_9)
+                .error(R.drawable.place_holder_16_9)
+                .into(viewBinding.imgPoster);
 
-            viewBinding.includeMovieHeader.nameMovie.setText(movie.getTitle());
-            viewBinding.includeMovieHeader.nameMovieOriginal.setText(movie.getOriginalTitle());
-            viewBinding.includeMovieHeader.description.setText(HtmlUtils.convertPtoStrong(movie.getDescription()));
-            viewBinding.includeMovieHeader.ageRating.setText(DisplayUtils.displayAgeRating(movie.getAgeRating()));
+        viewBinding.includeMovieHeader.nameMovie.setText(viewModel.movieDetails.getTitle());
+        viewBinding.includeMovieHeader.nameMovieOriginal.setText(viewModel.movieDetails.getOriginalTitle());
+        viewBinding.includeMovieHeader.description.setText(HtmlUtils.convertPtoStrong(viewModel.movieDetails.getDescription()));
+        viewBinding.includeMovieHeader.ageRating.setText(DisplayUtils.displayAgeRating(viewModel.movieDetails.getAgeRating()));
 
-            if (movie.getType() == Constants.TYPE_MOVIE_SINGLE) {
-                viewBinding.includeMovieHeader.dateRelease.setText(DisplayUtils.getYearFromReleaseDate(movie.getReleaseDate()));
-                viewBinding.includeMovieHeader.durationEpisodeSeason.setText(DisplayUtils.displayTimeFromSeconds(this, movie.getSeasons().get(0).getVideo().getDuration()));
-            } if (movie.getType() == Constants.TYPE_MOVIE_SERIES) {
-                if (movie.getSeasons() != null && !movie.getSeasons().isEmpty()) {
-                    SeasonResponse lastSeason = movie.getSeasons().get(movie.getSeasons().size() - 1);
-                    viewBinding.includeMovieHeader.dateRelease.setText(DisplayUtils.getYearFromReleaseDate(lastSeason.getReleaseDate()));
+        if (viewModel.movieDetails.getType() == Constants.TYPE_MOVIE_SINGLE) {
+            viewBinding.includeMovieHeader.dateRelease.setText(DisplayUtils.getYearFromReleaseDate(viewModel.movieDetails.getReleaseDate()));
+            viewBinding.includeMovieHeader.durationEpisodeSeason.setText(DisplayUtils.displayTimeFromSeconds(this, viewModel.movieDetails.getSeasons().get(0).getVideo().getDuration()));
+        } if (viewModel.movieDetails.getType() == Constants.TYPE_MOVIE_SERIES) {
+            if (viewModel.movieDetails.getSeasons() != null && !viewModel.movieDetails.getSeasons().isEmpty()) {
+                SeasonResponse lastSeason = viewModel.movieDetails.getSeasons().get(viewModel.movieDetails.getSeasons().size() - 1);
+                viewBinding.includeMovieHeader.dateRelease.setText(DisplayUtils.getYearFromReleaseDate(lastSeason.getReleaseDate()));
 
-                    if (movie.getSeasons().size() == 1) {
-                        viewBinding.includeMovieHeader.durationEpisodeSeason.setText(movie.getSeasons().get(0).getEpisodes().size()
-                                + " " + getString(R.string.episode_non_up));
-                    } else {
-                        viewBinding.includeMovieHeader.durationEpisodeSeason.setText(movie.getSeasons().size()
-                                + " " + getString(R.string.season_non_up));
-                    }
+                if (viewModel.movieDetails.getSeasons().size() == 1) {
+                    viewBinding.includeMovieHeader.durationEpisodeSeason.setText(viewModel.movieDetails.getSeasons().get(0).getEpisodes().size()
+                            + " " + getString(R.string.episode_non_up));
+                } else {
+                    viewBinding.includeMovieHeader.durationEpisodeSeason.setText(viewModel.movieDetails.getSeasons().size()
+                            + " " + getString(R.string.season_non_up));
                 }
             }
+        }
 
-            if (movie.getSeasons() != null && !movie.getSeasons().isEmpty()) {
-                SeasonResponse lastSeason = movie.getSeasons().get(movie.getSeasons().size() - 1);
-                if (lastSeason.getTrailer() != null && lastSeason.getTrailer().getVideo().getContent() != null) {
-                    setUpTrailer(lastSeason.getTrailer().getVideo().getContent());
+        if (viewModel.movieDetails.getSeasons() != null && !viewModel.movieDetails.getSeasons().isEmpty()) {
+            SeasonResponse lastSeason = viewModel.movieDetails.getSeasons().get(viewModel.movieDetails.getSeasons().size() - 1);
+
+            if (lastSeason.getTrailer() != null) {
+                VideoResponse video = lastSeason.getTrailer().getVideo();
+                if (video != null && video.getContent() != null) {
+                    setUpTrailer(video.getContent());
                 }
             }
+        }
 
-            setUpTab(movie.getType() == Constants.TYPE_MOVIE_SERIES);
+        setUpTab(viewModel.movieDetails.getType() == Constants.TYPE_MOVIE_SERIES);
 
-            tagCategoryAdapter = new TagCategoryAdapter();
-            FlexboxLayoutManager layout = new FlexboxLayoutManager(this);
-            layout.setFlexDirection(FlexDirection.ROW);
-            layout.setFlexWrap(FlexWrap.WRAP);
-            layout.setJustifyContent(JustifyContent.FLEX_START);
-            layout.setAlignItems(AlignItems.FLEX_START);
+        tagCategoryAdapter = new TagCategoryAdapter();
+        FlexboxLayoutManager layout = new FlexboxLayoutManager(this);
+        layout.setFlexDirection(FlexDirection.ROW);
+        layout.setFlexWrap(FlexWrap.WRAP);
+        layout.setJustifyContent(JustifyContent.FLEX_START);
+        layout.setAlignItems(AlignItems.FLEX_START);
 
-            viewBinding.includeMovieHeader.cateList.setLayoutManager(layout);
-            int a = getResources().getDimensionPixelSize(R.dimen._6sdp);
-            viewBinding.includeMovieHeader.cateList.addItemDecoration(new FlexSpacingItemDecoration(a));
-            viewBinding.includeMovieHeader.cateList.setAdapter(tagCategoryAdapter);
+        viewBinding.includeMovieHeader.cateList.setLayoutManager(layout);
+        int a = getResources().getDimensionPixelSize(R.dimen._6sdp);
+        viewBinding.includeMovieHeader.cateList.addItemDecoration(new FlexSpacingItemDecoration(a));
+        viewBinding.includeMovieHeader.cateList.setAdapter(tagCategoryAdapter);
 
-            tagCategoryAdapter.setData(movie.getCategories());
-        });
+        tagCategoryAdapter.setData(viewModel.movieDetails.getCategories());
     }
 
     public void setUpTab(boolean isSeries) {
@@ -175,7 +162,7 @@ public class MovieDetailActivity extends BaseActivity<ActivityMovieDetailBinding
         fragmentList.add(CastFragment.newInstance(CastFragment.TYPE_MOVIE_DETAIL, null));
 
         tabTitles.add(getString(R.string.recommend));
-        fragmentList.add(RecommendationFragment.newInstance(RecommendationFragment.TYPE_MOVIE_DETAIL, null, Objects.requireNonNull(viewModel.getMovieDetails().getValue()).getId()));
+        fragmentList.add(RecommendationFragment.newInstance(RecommendationFragment.TYPE_MOVIE_DETAIL, null, Objects.requireNonNull(viewModel.movieDetails.getId())));
 
         MovieDetailTabAdapter tabAdapter = new MovieDetailTabAdapter(this, fragmentList);
         viewBinding.subViewPager.setAdapter(tabAdapter);
@@ -211,7 +198,7 @@ public class MovieDetailActivity extends BaseActivity<ActivityMovieDetailBinding
                     showLoadingVideo();
                 } else if (state == Player.STATE_READY) {
                     hideLoadingVideo();
-                    viewBinding.imgPoster.setVisibility(View.GONE);
+                    viewBinding.layoutPoster.setVisibility(View.GONE);
                     viewBinding.layoutReplay.setVisibility(View.GONE);
                     viewBinding.layoutSeekBar.setVisibility(View.VISIBLE);
                     viewBinding.btnMute.setVisibility(View.VISIBLE);
@@ -320,7 +307,7 @@ public class MovieDetailActivity extends BaseActivity<ActivityMovieDetailBinding
     public void handleEndVideo() {
         updatePlayPauseIcons(false);
         viewModel.setPlaying(false);
-        viewBinding.imgPoster.setVisibility(View.VISIBLE);
+        viewBinding.layoutPoster.setVisibility(View.VISIBLE);
         viewBinding.layoutReplay.setVisibility(View.VISIBLE);
         viewBinding.layoutSeekBar.setVisibility(View.GONE);
         viewBinding.btnMute.setVisibility(View.GONE);
@@ -418,8 +405,12 @@ public class MovieDetailActivity extends BaseActivity<ActivityMovieDetailBinding
                 this.finish();
                 break;
             case R.id.watch_now:
+                showLoading();
                 Intent intent = new Intent(this, WatchMovieActivity.class);
-                intent.putExtra("movie_details", GsonUtils.toJson(viewModel.getMovieDetails().getValue()));
+                intent.putExtra("movie_details", GsonUtils.toJson(viewModel.movieDetails));
+                if (viewModel.movieDetails.getType() == Constants.TYPE_MOVIE_SERIES) {
+                    intent.putExtra("episode", GsonUtils.toJson(viewModel.movieDetails.getSeasons().get(0).getEpisodes().get(0)));
+                }
                 startActivity(intent);
                 break;
             case R.id.btn_replay:
@@ -431,6 +422,15 @@ public class MovieDetailActivity extends BaseActivity<ActivityMovieDetailBinding
             default:
                 break;
         }
+    }
+    public void navigateToWatchMovieActivity(MovieItemResponse episode) {
+        viewModel.showLoading();
+        Intent intent = new Intent(this, WatchMovieActivity.class);
+        intent.putExtra("movie_details", GsonUtils.toJson(viewModel.movieDetails));
+        if (viewModel.movieDetails.getType() == Constants.TYPE_MOVIE_SERIES) {
+            intent.putExtra("episode", GsonUtils.toJson(episode));
+        }
+        startActivity(intent);
     }
     private void animateRotate(View view, boolean isForward) {
         float start = 0f;

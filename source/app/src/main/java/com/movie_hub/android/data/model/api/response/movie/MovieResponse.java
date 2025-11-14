@@ -1,5 +1,6 @@
 package com.movie_hub.android.data.model.api.response.movie;
 
+import com.movie_hub.android.data.model.api.response.MovieItem.MovieItemResponse;
 import com.movie_hub.android.data.model.api.response.category.CategoryResponse;
 import com.movie_hub.android.data.model.api.response.season.SeasonResponse;
 
@@ -28,4 +29,63 @@ public class MovieResponse {
     private String modifiedDate;
     private List<CategoryResponse> categories;
     private List<SeasonResponse> seasons;
+    public void setSeasonAndEpisodeSelectedAndPlaying(Long episodeId) {
+        if (episodeId == null || seasons == null) {
+            return;
+        }
+
+        boolean found = false;
+
+        for (SeasonResponse season : seasons) {
+            boolean seasonHasEpisode = false;
+
+            if (season.getEpisodes() != null) {
+                for (MovieItemResponse episode : season.getEpisodes()) {
+                    if (episode.getId() != null && episode.getId().equals(episodeId)) {
+                        seasonHasEpisode = true;
+                        found = true;
+                        episode.setPlaying(true);
+                    } else {
+                        episode.setPlaying(false);
+                    }
+                }
+            }
+
+            season.setSelect(seasonHasEpisode);
+        }
+
+        if (!found) {
+            setAllSeasonSelectFalse();
+            for (SeasonResponse s : seasons) {
+                s.setAllEpisodePlayingFalse();
+            }
+        }
+    }
+    public List<MovieItemResponse> getSelectedSeasonEpisodes() {
+        if (seasons == null) return null;
+
+        for (SeasonResponse season : seasons) {
+            if (season.isSelect() && season.getEpisodes() != null) {
+                return season.getEpisodes();
+            }
+        }
+        return null;
+    }
+
+    public List<MovieItemResponse> getSeasonEpisodesById(Long seasonId) {
+        if (seasons == null) return null;
+
+        for (SeasonResponse season : seasons) {
+            if (season.getId().equals(seasonId)) {
+                return season.getEpisodes();
+            }
+        }
+        return null;
+    }
+    public void setAllSeasonSelectFalse() {
+        if (seasons == null) return;
+        for (SeasonResponse s : seasons) {
+            s.setSelect(false);
+        }
+    }
 }

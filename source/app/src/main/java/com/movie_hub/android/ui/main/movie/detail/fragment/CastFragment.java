@@ -102,7 +102,7 @@ public class CastFragment extends BaseFragment<FragmentCastBinding, CastFragment
 
     public void getListMoviePersonTypeMovieDetail() {
         sharedViewModel = new ViewModelProvider(requireActivity()).get(MovieDetailViewModel.class);
-        MovieResponse movie = sharedViewModel.getMovieDetails().getValue();
+        MovieResponse movie = sharedViewModel.movieDetails;
         if (movie == null || movie.getId() == 0) return;
 
         MoviePersonRequest request = new MoviePersonRequest();

@@ -42,7 +42,7 @@ public class ActorAdapter extends RecyclerView.Adapter<ActorAdapter.ActorViewHol
     public void onBindViewHolder(@NonNull ActorViewHolder holder, @SuppressLint("RecyclerView") int position) {
         PersonResponse actor = movieList.get(position);
 
-        holder.binding.name.setText(actor.getName());
+        holder.binding.name.setText(actor.getOtherName());
 
         Glide.with(holder.binding.getRoot().getContext())
                 .load(Constants.MEDIA_URL + actor.getAvatarPath())

@@ -5,8 +5,6 @@
     <item>
         <shape android:shape="oval">
             <solid android:color="@color/bg_setting_button" />
-            <stroke android:color="@color/progress"
-                android:width="@dimen/_1sdp"/>
         </shape>
     </item>
 

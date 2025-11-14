@@ -3,10 +3,11 @@
     <string name="msg_loading">Xin chờ...</string>
 
     <!--Network error-->
-    <string name="newtwork_error">Không thể kết nối, vui lòng kiểm tra kết nối mạng của bạn.</string>
+    <string name="newtwork_error">Unable to connect, please check your network connection.</string>
     <string name="newtwork_error_button_retry">Thử lại</string>
     <string name="newtwork_error_button_exit">Thoát</string>
-
+    <string name="retry">Retry</string>
+    <string name="exit">Exit</string>
     <string name="en">English</string>
     <string name="vi">Vietnamese</string>
 
