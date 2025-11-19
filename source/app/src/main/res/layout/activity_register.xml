@@ -204,7 +204,7 @@
                 <FrameLayout
                     android:id="@+id/btn_register"
                     android:layout_width="match_parent"
-                    android:layout_height="@dimen/_36sdp"
+                    android:layout_height="wrap_content"
                     android:layout_marginHorizontal="@dimen/_12sdp"
                     android:layout_marginTop="@dimen/_16sdp"
                     android:layout_marginBottom="@dimen/_40sdp"
@@ -221,7 +221,7 @@
                         style="@style/Text_12_Bold"
                         android:textColor="@color/black"
                         android:gravity="center"
-                        />
+                        android:paddingVertical="@dimen/_12sdp"/>
 
                     <ProgressBar
                         android:id="@+id/register_loading"

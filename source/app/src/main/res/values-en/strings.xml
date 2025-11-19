@@ -4,8 +4,8 @@
 
     <!--Network error-->
     <string name="newtwork_error">Unable to connect, please check your network connection.</string>
-    <string name="newtwork_error_button_retry">Thử lại</string>
-    <string name="newtwork_error_button_exit">Thoát</string>
+    <string name="newtwork_error_button_retry">Retry</string>
+    <string name="newtwork_error_button_exit">Exit</string>
     <string name="retry">Retry</string>
     <string name="exit">Exit</string>
     <string name="en">English</string>

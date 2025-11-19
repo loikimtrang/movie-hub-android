@@ -48,7 +48,7 @@ public class EpisodesWatchMovieAdapter extends RecyclerView.Adapter<EpisodesWatc
         holder.binding.description.setText(movie.getVideo().getDescription());
 
         Glide.with(holder.binding.getRoot().getContext())
-                .load(Constants.MEDIA_URL + movie.getVideo().getThumbnailUrl())
+                .load(movie.getVideo().getThumbnailUrl())
                 .placeholder(R.drawable.place_holder_2_3)
                 .error(R.drawable.place_holder_2_3)
                 .into(holder.binding.image);

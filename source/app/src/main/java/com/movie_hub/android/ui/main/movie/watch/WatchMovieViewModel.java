@@ -39,4 +39,7 @@ public class WatchMovieViewModel extends BaseViewModel {
         settingVideoModel.getQuality().setResolution(new VideoQuality());
         settingVideoModel.getAvailableQualities().clear();
     }
+    public String getTokenVideo() {
+        return "Bearer " + repository.getSharedPreferences().getToken();
+    }
 }

@@ -5,6 +5,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.database.ContentObserver;
 import android.graphics.Color;
+import android.graphics.Rect;
 import android.media.AudioManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -41,11 +42,13 @@ import androidx.media3.common.TrackSelectionOverride;
 import androidx.media3.common.TrackSelectionParameters;
 import androidx.media3.common.Tracks;
 import androidx.media3.common.VideoSize;
+import androidx.media3.datasource.DefaultHttpDataSource;
 import androidx.media3.exoplayer.DefaultRenderersFactory;
 import androidx.media3.exoplayer.ExoPlayer;
 import androidx.media3.exoplayer.mediacodec.MediaCodecInfo;
 import androidx.media3.exoplayer.mediacodec.MediaCodecSelector;
 import androidx.media3.exoplayer.mediacodec.MediaCodecUtil;
+import androidx.media3.exoplayer.source.DefaultMediaSourceFactory;
 import androidx.media3.exoplayer.trackselection.DefaultTrackSelector;
 import androidx.media3.ui.AspectRatioFrameLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -61,6 +64,7 @@ import com.movie_hub.android.databinding.ActivityWatchMovieBinding;
 import com.movie_hub.android.di.component.ActivityComponent;
 import com.movie_hub.android.ui.base.activity.BaseActivity;
 import com.movie_hub.android.ui.main.movie.detail.adapter.EpisodeItemListAdapter;
+import com.movie_hub.android.ui.main.movie.watch.Provider.SpriteThumbnailManager;
 import com.movie_hub.android.ui.main.movie.watch.adapter.EpisodeItemListHoriAdapter;
 import com.movie_hub.android.ui.main.movie.watch.adapter.SeasonItemAdapter;
 import com.movie_hub.android.ui.main.movie.watch.dialog.MoreOptionBottomSheetDialog;
@@ -109,7 +113,7 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
     private int currentVolume;
     private SeasonItemAdapter seasonItemAdapter;
     private EpisodeItemListHoriAdapter episodeItemListHoriAdapter;
-
+    private SpriteThumbnailManager thumbnailManager;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -122,6 +126,9 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
 
         if (movie != null) {
             viewModel.movieDetails = movie;
+
+            thumbnailManager = new SpriteThumbnailManager(this, viewBinding.ivThumbnailPreview, viewBinding.thumbnailPreviewContainer);
+
             if (viewModel.movieDetails.getType() == Constants.TYPE_MOVIE_SINGLE) {
                 viewModel.nowVideoPlay = viewModel.movieDetails.getSeasons().get(viewModel.movieDetails.getSeasons().size() - 1).getVideo();
                 setUpViewForSingleMovie();
@@ -138,6 +145,16 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
     }
 
     //region === Init Movie ===
+
+    public void loadVtt() {
+        if (viewModel.nowVideoPlay != null) {
+            String sprite = viewModel.nowVideoPlay.getSpriteUrl();
+            String vtt = viewModel.nowVideoPlay.getVttUrl();
+            if (sprite != null && vtt != null) {
+                thumbnailManager.load(vtt, sprite);
+            }
+        }
+    }
     public void initMovie() {
         reset();
         viewModel.nowUriPlay = getVideoUri(viewModel.nowVideoPlay);
@@ -150,13 +167,14 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
         viewBinding.nameMovieOriginal.setText(Objects.requireNonNull(viewModel.movieDetails.getOriginalTitle()));
         viewBinding.btnNextEpisode.setVisibility(View.GONE);
         viewBinding.btnEpisodes.setVisibility(View.GONE);
+        loadVtt();
     }
 
     @SuppressLint("SetTextI18n")
     public void setUpViewForSeriesMovie() {
         viewBinding.nameMovie.setText(viewModel.nowEpisodePlay.getTitle());
         viewBinding.nameMovieOriginal.setText(viewModel.movieDetails.getTitle() + findLabelSeason());
-
+        loadVtt();
         if (isLastEpisode()) {
             viewBinding.btnNextEpisode.setVisibility(View.GONE);
             Log.d("LAST", "true");
@@ -178,8 +196,15 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
             uri = Constants.MEDIA_URL_VIDEO + uri;
         }
 
-        // TẠO PLAYER BUILDER
-        ExoPlayer.Builder playerBuilder = new ExoPlayer.Builder(this);
+        String token = viewModel.getTokenVideo();
+
+        DefaultHttpDataSource.Factory httpFactory = new DefaultHttpDataSource.Factory()
+                .setDefaultRequestProperties(
+                        Collections.singletonMap("Authorization", token)
+                );
+
+        ExoPlayer.Builder playerBuilder = new ExoPlayer.Builder(this)
+                .setMediaSourceFactory(new DefaultMediaSourceFactory(httpFactory));
 
         // === RENDERERS FACTORY ===
         DefaultRenderersFactory renderersFactory = new DefaultRenderersFactory(this)
@@ -349,10 +374,17 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
                     handleEndVideo();
                 }
             }
+
             @Override
             public void onIsPlayingChanged(boolean isPlaying) {
                 viewModel.setPlaying(isPlaying);
                 updatePlayPauseIcons(isPlaying);
+
+                if (isPlaying) {
+                    getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+                } else {
+                    getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+                }
             }
 
             @Override
@@ -454,12 +486,18 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
         viewBinding.seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                if (fromUser && player != null) {
-                    long duration = player.getDuration();
-                    long newPosition = (duration * progress) / 1000;
-                    player.seekTo(newPosition);
-                    viewBinding.tvCurrentTime.setText(formatTime(newPosition));
-                    viewBinding.tvCurrentTimeSecond.setText(formatTime(newPosition));
+                if (!fromUser || player == null) return;
+
+                long duration = player.getDuration();
+                if (duration <= 0) return;
+
+                long newPosition = (duration * progress) / 1000;
+                player.seekTo(newPosition);
+                viewBinding.tvCurrentTime.setText(formatTime(newPosition));
+                viewBinding.tvCurrentTimeSecond.setText(formatTime(newPosition));
+
+                if (thumbnailManager != null) {
+                    thumbnailManager.showPreviewAt(newPosition);
                 }
             }
 
@@ -471,6 +509,7 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
                 viewBinding.layoutBrightness.setVisibility(View.GONE);
                 viewBinding.layoutVolume.setVisibility(View.GONE);
                 viewBinding.tvCurrentTimeSecond.setVisibility(View.VISIBLE);
+                viewBinding.loadingProgress.setVisibility(View.GONE);
             }
 
             @Override
@@ -480,10 +519,16 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
                 viewBinding.layoutBrightness.setVisibility(View.VISIBLE);
                 viewBinding.layoutVolume.setVisibility(View.VISIBLE);
                 viewBinding.tvCurrentTimeSecond.setVisibility(View.GONE);
+                viewBinding.loadingProgress.setVisibility(View.VISIBLE);
+                if (thumbnailManager != null) {
+                    thumbnailManager.hidePreview();
+                }
+
                 autoHideHandler.postDelayed(hideControlsRunnable, AUTO_HIDE_DELAY_MILLIS);
             }
         });
     }
+
     private String formatTime(long millis) {
         if (millis < 0) return "00:00";
 
@@ -796,7 +841,12 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
     private void showLoadingVideo() {
         if (!isBuffering) {
             isBuffering = true;
-            viewBinding.loadingProgress.setVisibility(View.VISIBLE);
+            if (isUserSeeking) {
+                viewBinding.loadingProgress.setVisibility(View.GONE);
+            } else {
+                viewBinding.loadingProgress.setVisibility(View.VISIBLE);
+
+            }
             viewBinding.btnPlayPause.setVisibility(View.GONE);
         }
     }
@@ -1148,7 +1198,6 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
         player.prepare();
         player.setPlayWhenReady(true);
     }
-
     public Boolean isLastEpisode() {
         if (viewModel.movieDetails == null || viewModel.nowEpisodePlay == null) {
             return true;

@@ -5,6 +5,8 @@ import android.os.Parcel;
 
 import androidx.annotation.NonNull;
 
+import com.movie_hub.android.constant.Constants;
+
 import lombok.Data;
 
 @Data
@@ -27,4 +29,16 @@ public class VideoResponse {
     private String createdDate;
     private String modifiedDate;
     private boolean isPlaying;
+
+    public String getSpriteUrl() {
+        return Constants.MEDIA_URL_VTT + spriteUrl;
+    }
+
+    public String getThumbnailUrl() {
+        return Constants.MEDIA_URL + thumbnailUrl;
+    }
+
+    public String getVttUrl() {
+        return Constants.MEDIA_URL_VTT + vttUrl;
+    }
 }

@@ -141,7 +141,7 @@
                 <FrameLayout
                     android:id="@+id/btn_login"
                     android:layout_width="match_parent"
-                    android:layout_height="@dimen/_36sdp"
+                    android:layout_height="wrap_content"
                     android:layout_marginHorizontal="@dimen/_12sdp"
                     android:layout_marginTop="@dimen/_16sdp"
                     android:layout_marginBottom="@dimen/_20sdp"
@@ -159,7 +159,7 @@
                         style="@style/Text_12_Bold"
                         android:textColor="@color/black"
                         android:gravity="center"
-                        />
+                        android:paddingVertical="@dimen/_12sdp"/>
 
                     <ProgressBar
                         android:id="@+id/login_loading"
@@ -184,7 +184,7 @@
                 <FrameLayout
                     android:id="@+id/login_google"
                     android:layout_width="match_parent"
-                    android:layout_height="@dimen/_36sdp"
+                    android:layout_height="wrap_content"
                     android:layout_marginHorizontal="@dimen/_12sdp"
                     android:layout_marginBottom="@dimen/_40sdp"
                     android:foreground="?attr/selectableItemBackground"
@@ -198,7 +198,7 @@
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
                         android:layout_gravity="center"
-                        >
+                        android:gravity="center">
 
                         <ImageView
                             android:layout_width="@dimen/_16sdp"
@@ -206,12 +206,13 @@
                             android:src="@drawable/ic_google"
                             android:layout_marginEnd="@dimen/_6sdp"/>
                         <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
                             android:text="@string/signing_in_with_google"
                             style="@style/Text_12_Bold"
                             android:gravity="center"
-                            android:layout_marginStart="@dimen/_6sdp"/>
+                            android:layout_marginStart="@dimen/_6sdp"
+                            android:paddingVertical="@dimen/_12sdp"/>
                     </LinearLayout>
 
                 </FrameLayout>

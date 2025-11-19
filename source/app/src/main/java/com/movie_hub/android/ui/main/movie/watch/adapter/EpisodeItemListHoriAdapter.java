@@ -59,7 +59,7 @@ public class EpisodeItemListHoriAdapter extends RecyclerView.Adapter<EpisodeItem
 
         holder.binding.duration.setText(DisplayUtils.displayTimeFromSeconds(context ,item.getVideo().getDuration()));
         Glide.with(holder.binding.getRoot().getContext())
-                .load(Constants.MEDIA_URL + item.getVideo().getThumbnailUrl())
+                .load(item.getVideo().getThumbnailUrl())
                 .placeholder(R.drawable.place_holder_16_9)
                 .error(R.drawable.place_holder_16_9)
                 .into(holder.binding.image);

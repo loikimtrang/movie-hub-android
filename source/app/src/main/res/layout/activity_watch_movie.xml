@@ -510,6 +510,19 @@
 
         </RelativeLayout>
 
+        <FrameLayout
+            android:id="@+id/thumbnail_preview_container"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clipChildren="false"
+            android:visibility="gone">
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/iv_thumbnail_preview"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"/>
+        </FrameLayout>
+
         <LinearLayout
             android:id="@+id/layout_seek_bar"
             android:layout_width="match_parent"

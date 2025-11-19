@@ -8,7 +8,7 @@
     android:id="@+id/layout_setting">
 
     <LinearLayout
-        android:layout_width="@dimen/_280sdp"
+        android:layout_width="@dimen/_320sdp"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:background="@drawable/bg_setting_video"
