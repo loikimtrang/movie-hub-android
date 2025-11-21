@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.view.View;
 
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -36,7 +37,7 @@ import com.movie_hub.android.ui.main.search.SearchFragment;
 import com.movie_hub.android.ui.main.splash.SplashActivity;
 
 
-public class MainActivity extends BaseActivity<ActivityMainBinding, MainViewModel> implements SystemBarColorProvider {
+public class MainActivity extends BaseActivity<ActivityMainBinding, MainViewModel> implements SystemBarColorProvider, View.OnClickListener {
     private Fragment active;
     private FragmentManager fm;
     private HomeFragment homeFragment;
@@ -201,5 +202,25 @@ public class MainActivity extends BaseActivity<ActivityMainBinding, MainViewMode
                 finish();
             }
         });
+    }
+
+    @Override
+    public void onBackPressed() {
+        viewBinding.lDialogExit.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.btn_cancel:
+            case R.id.l_dialog_exit:
+                viewBinding.lDialogExit.setVisibility(View.GONE);
+                break;
+            case R.id.btn_ok:
+                finish();
+                break;
+            default:
+                break;
+        }
     }
 }

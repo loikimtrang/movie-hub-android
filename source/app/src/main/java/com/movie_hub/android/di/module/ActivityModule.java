@@ -15,6 +15,7 @@ import com.movie_hub.android.ui.main.account.language.LanguageViewModel;
 import com.movie_hub.android.ui.main.account.login.LoginViewModel;
 import com.movie_hub.android.ui.main.account.manage_account.ManageAccountViewModel;
 import com.movie_hub.android.ui.main.account.register.RegisterViewModel;
+import com.movie_hub.android.ui.main.account.verifyotp.VerifyOtpViewModel;
 import com.movie_hub.android.ui.main.movie.detail.MovieDetailViewModel;
 import com.movie_hub.android.ui.main.movie.watch.WatchMovieViewModel;
 import com.movie_hub.android.ui.main.splash.SplashViewModel;
@@ -109,5 +110,13 @@ public class ActivityModule {
         Supplier<RegisterViewModel> supplier = () -> new RegisterViewModel(repository, (MVVMApplication)application);
         ViewModelProviderFactory<RegisterViewModel> factory = new ViewModelProviderFactory<>(RegisterViewModel.class, supplier);
         return new ViewModelProvider(activity, factory).get(RegisterViewModel.class);
+    }
+
+    @Provides
+    @ActivityScope
+    VerifyOtpViewModel provideVerifyOtpViewModel(Repository repository, Context application) {
+        Supplier<VerifyOtpViewModel> supplier = () -> new VerifyOtpViewModel(repository, (MVVMApplication)application);
+        ViewModelProviderFactory<VerifyOtpViewModel> factory = new ViewModelProviderFactory<>(VerifyOtpViewModel.class, supplier);
+        return new ViewModelProvider(activity, factory).get(VerifyOtpViewModel.class);
     }
 }

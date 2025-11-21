@@ -1,0 +1,280 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+        <variable
+            name="a"
+            type="com.movie_hub.android.ui.main.account.verifyotp.VerifyOtpActivity" />
+
+        <variable
+            name="vm"
+            type="com.movie_hub.android.ui.main.account.verifyotp.VerifyOtpViewModel" />
+
+        <import type="android.view.View" />
+    </data>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/bg_app"
+        android:fitsSystemWindows="true"
+        android:clickable="true"
+        android:focusable="true"
+        android:id="@+id/contentView">
+
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fillViewport="true"
+            android:id="@+id/scrollView">
+
+            <LinearLayout
+                android:id="@+id/layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="@color/bg_app">
+
+                <ImageView
+                    android:layout_width="@dimen/_50sdp"
+                    android:layout_height="@dimen/_50sdp"
+                    android:src="@drawable/logo"
+                    android:layout_marginTop="@dimen/_36sdp"
+                    android:layout_gravity="center_horizontal"
+                    />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/mgs_otp"
+                    style="@style/Text_12_Normal"
+                    android:textColor="@color/text_gray"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="@dimen/_12sdp"/>
+                <TextView
+                    android:id="@+id/email"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    style="@style/Text_12_Normal"
+                    android:textColor="@color/btn_login"
+                    android:layout_marginStart="@dimen/_3sdp"
+                    android:paddingVertical="@dimen/_6sdp"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginBottom="@dimen/_20sdp"/>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/_64sdp"
+                    android:paddingHorizontal="@dimen/_6sdp"
+                    android:orientation="horizontal">
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="0dp"
+                        android:layout_height="@dimen/_50sdp"
+                        style="@style/CustomOutlinedBoxOtp"
+                        android:layout_marginHorizontal="@dimen/_6sdp"
+                        android:layout_weight="1"
+                        android:padding="0dp">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/otp_1"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:gravity="center"
+                            android:textAlignment="center"
+                            style="@style/Text_14_Normal"
+                            android:background="@null"
+                            android:inputType="number"
+                            android:maxLength="1"/>
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="0dp"
+                        android:layout_height="@dimen/_50sdp"
+                        style="@style/CustomOutlinedBoxOtp"
+                        android:layout_marginHorizontal="@dimen/_6sdp"
+                        android:layout_weight="1"
+                        android:padding="0dp">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/otp_2"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:gravity="center"
+                            android:textAlignment="center"
+                            style="@style/Text_14_Normal"
+                            android:background="@null"
+                            android:inputType="number"
+                            android:maxLength="1"/>
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="0dp"
+                        android:layout_height="@dimen/_50sdp"
+                        style="@style/CustomOutlinedBoxOtp"
+                        android:layout_marginHorizontal="@dimen/_6sdp"
+                        android:layout_weight="1"
+                        android:padding="0dp">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/otp_3"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:gravity="center"
+                            android:textAlignment="center"
+                            style="@style/Text_14_Normal"
+                            android:background="@null"
+                            android:inputType="number"
+                            android:maxLength="1"/>
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="0dp"
+                        android:layout_height="@dimen/_50sdp"
+                        style="@style/CustomOutlinedBoxOtp"
+                        android:layout_marginHorizontal="@dimen/_6sdp"
+                        android:layout_weight="1"
+                        android:padding="0dp">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/otp_4"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:gravity="center"
+                            android:textAlignment="center"
+                            style="@style/Text_14_Normal"
+                            android:background="@null"
+                            android:inputType="number"
+                            android:maxLength="1"/>
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="0dp"
+                        android:layout_height="@dimen/_50sdp"
+                        style="@style/CustomOutlinedBoxOtp"
+                        android:layout_marginHorizontal="@dimen/_6sdp"
+                        android:layout_weight="1"
+                        android:padding="0dp">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/otp_5"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:gravity="center"
+                            android:textAlignment="center"
+                            style="@style/Text_14_Normal"
+                            android:background="@null"
+                            android:inputType="number"
+                            android:maxLength="1"/>
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="0dp"
+                        android:layout_height="@dimen/_50sdp"
+                        style="@style/CustomOutlinedBoxOtp"
+                        android:layout_marginHorizontal="@dimen/_6sdp"
+                        android:layout_weight="1"
+                        android:padding="0dp">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/otp_6"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:gravity="center"
+                            android:textAlignment="center"
+                            style="@style/Text_14_Normal"
+                            android:background="@null"
+                            android:inputType="number"
+                            android:maxLength="1"/>
+                    </com.google.android.material.textfield.TextInputLayout>
+                </LinearLayout>
+                
+                <FrameLayout
+                    android:id="@+id/btn_send"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="@dimen/_12sdp"
+                    android:layout_marginTop="@dimen/_32sdp"
+                    android:onClick="onClick"
+                    android:foreground="?attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true">
+
+                    <TextView
+                        android:id="@+id/send"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="@drawable/bg_btn_yellow_radius_3sdp"
+                        android:text="@string/send"
+                        style="@style/Text_12_Bold"
+                        android:textColor="@color/black"
+                        android:gravity="center"
+                        android:paddingVertical="@dimen/_12sdp"/>
+
+                    <ProgressBar
+                        android:id="@+id/send_loading"
+                        android:layout_width="@dimen/_20sdp"
+                        android:layout_height="@dimen/_20sdp"
+                        android:layout_gravity="center"
+                        android:visibility="invisible"
+                        android:indeterminate="true"
+                        android:indeterminateTint="@color/black" />
+                </FrameLayout>
+
+                <TextView
+                    android:id="@+id/btn_resend"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    style="@style/Text_12_Normal"
+                    android:textColor="@color/btn_login"
+                    android:layout_marginStart="@dimen/_3sdp"
+                    android:padding="@dimen/_6sdp"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="@dimen/_16sdp"
+                    android:onClick="onClick"/>
+                
+
+            </LinearLayout>
+
+        </ScrollView>
+
+        <FrameLayout
+            android:id="@+id/back"
+            android:layout_width="@dimen/_36sdp"
+            android:layout_height="@dimen/_40sdp"
+            android:onClick="@{(v)->a.finish()}"
+            android:layout_gravity="top|start"
+            android:visibility="gone">
+            <ImageView
+                android:layout_width="@dimen/_12sdp"
+                android:layout_height="@dimen/_12sdp"
+                android:src="@drawable/ic_arrow_right"
+                android:rotation="180"
+                android:layout_gravity="center"/>
+        </FrameLayout>
+
+        <com.google.android.material.progressindicator.LinearProgressIndicator
+            android:id="@+id/bottom_loading_bar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:indeterminate="true"
+            android:visibility="gone"
+            app:trackThickness="1dp"
+            app:indicatorColor="@color/ic_tab_bar_tint"
+            app:trackColor="@android:color/transparent"
+            style="@style/Widget.MaterialComponents.LinearProgressIndicator"
+            android:layout_marginBottom="@dimen/_25sdp"/>
+
+        <FrameLayout
+            android:id="@+id/loading_overlay"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@android:color/transparent"
+            android:visibility="gone"
+            android:clickable="true"
+            android:focusable="true"/>
+    </FrameLayout>
+</layout>

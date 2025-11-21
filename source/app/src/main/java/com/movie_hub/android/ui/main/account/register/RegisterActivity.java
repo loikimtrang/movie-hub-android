@@ -1,5 +1,6 @@
 package com.movie_hub.android.ui.main.account.register;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.InputType;
 import android.util.Patterns;
@@ -16,7 +17,9 @@ import com.movie_hub.android.di.component.ActivityComponent;
 import com.movie_hub.android.ui.base.activity.BaseActivity;
 import com.movie_hub.android.ui.base.activity.SystemBarColorProvider;
 import com.movie_hub.android.ui.main.MainCallback;
+import com.movie_hub.android.ui.main.account.verifyotp.VerifyOtpActivity;
 import com.movie_hub.android.utils.ClickUtils;
+import com.movie_hub.android.utils.GsonUtils;
 
 import java.net.ConnectException;
 import java.util.Objects;
@@ -54,7 +57,7 @@ public class RegisterActivity extends BaseActivity<ActivityRegisterBinding, Regi
                 @Override
                 public void doSuccess(ResponseWrapper object) {
                     if (object.isResult()) {
-                        navigateToLoginActivity();
+                        navigateToVerifyOtp();
                     } else {
                         if (Objects.equals(object.getCode(), "ERROR-ACCOUNT-ERROR-0002"))
                             showRegisterError(getString(R.string.the_username_already_exists_or_is_invalid));
@@ -153,7 +156,14 @@ public class RegisterActivity extends BaseActivity<ActivityRegisterBinding, Regi
             viewBinding.rePassword.setSelection(Objects.requireNonNull(viewBinding.rePassword.getText()).length());
         });
     }
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
 
+        if (requestCode == 999 && resultCode == RESULT_OK) {
+            finish();
+        }
+    }
     @Override
     public int getLayoutId() {
         return R.layout.activity_register;
@@ -177,6 +187,12 @@ public class RegisterActivity extends BaseActivity<ActivityRegisterBinding, Regi
     @Override
     public int getNavigationBarColor() {
         return R.color.bg_app;
+    }
+    public void navigateToVerifyOtp() {
+        Intent it = new Intent(this, VerifyOtpActivity.class);
+        it.putExtra("email", viewBinding.email.getText().toString().trim());
+        startActivity(it);
+        finish();
     }
 
     @Override

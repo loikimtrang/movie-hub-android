@@ -180,11 +180,9 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding, LoginViewM
     public void handleLoginSuccess() {
         Intent intent = new Intent(LoginActivity.this, SplashActivity.class);
         intent.putExtra("login_success", true);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
         finish();
-
-        Intent mainIntent = new Intent(LoginActivity.this, MainActivity.class);
-        mainIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
     }
 
     private void onRegisterNowClick() {

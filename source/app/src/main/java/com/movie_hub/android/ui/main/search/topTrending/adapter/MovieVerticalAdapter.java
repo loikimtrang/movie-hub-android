@@ -51,7 +51,7 @@ public class MovieVerticalAdapter extends RecyclerView.Adapter<MovieVerticalAdap
         holder.binding.subtitle.setText(movie.getOriginalTitle());
 
         Glide.with(holder.binding.getRoot().getContext())
-                .load(Constants.MEDIA_URL + movie.getThumbnailUrl())
+                .load(Constants.MEDIA_URL + movie.getPosterUrl())
                 .placeholder(R.drawable.place_holder_2_3)
                 .error(R.drawable.place_holder_2_3)
                 .into(holder.binding.image);

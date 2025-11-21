@@ -52,8 +52,9 @@ public class EpisodeItemListHoriAdapter extends RecyclerView.Adapter<EpisodeItem
     public void onBindViewHolder(@NonNull EpisodeItemListHoriViewHolder holder, @SuppressLint("RecyclerView") int position) {
         MovieItemResponse item = items.get(position);
         if (item.getVideo() == null) return;
+        String title = context.getString(R.string.episode_index) + " " + item.getLabel() + "."  + " " + item.getTitle();
 
-        holder.binding.title.setText(item.getTitle());
+        holder.binding.title.setText(title);
         holder.binding.description.setText(
                 HtmlUtils.convertPtoStrong(item.getDescription()));
 

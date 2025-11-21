@@ -70,6 +70,14 @@
         <item name="android:textColorHint">@color/text_gray</item>
         <item name="iconEndPadding">12dp</item>
     </style>
+
+    <style name="CustomOutlinedBoxOtp" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+        <item name="boxStrokeWidth">1dp</item>
+        <item name="boxStrokeWidthFocused">2dp</item>
+        <item name="boxStrokeColor">@color/custom_box_stroke_color</item>
+        <item name="hintTextColor">@color/tx_select</item>
+        <item name="android:textColorHint">@color/text_gray</item>
+    </style>
     <!-- Style cơ bản dùng Inter Regular -->
     <style name="BaseText_Inter">
         <item name="android:fontFamily">@font/inter</item>

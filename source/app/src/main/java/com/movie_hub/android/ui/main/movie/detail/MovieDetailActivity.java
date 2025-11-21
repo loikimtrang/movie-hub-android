@@ -18,7 +18,9 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.media3.common.MediaItem;
 import androidx.media3.common.Player;
+import androidx.media3.datasource.DefaultHttpDataSource;
 import androidx.media3.exoplayer.ExoPlayer;
+import androidx.media3.exoplayer.source.DefaultMediaSourceFactory;
 
 import com.bumptech.glide.Glide;
 import com.google.android.flexbox.AlignItems;
@@ -49,6 +51,7 @@ import com.movie_hub.android.utils.GsonUtils;
 import com.movie_hub.android.utils.HtmlUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -93,7 +96,7 @@ public class MovieDetailActivity extends BaseActivity<ActivityMovieDetailBinding
         viewModel.movieDetails.getSeasons().get(viewModel.movieDetails.getSeasons().size() - 1).setSelect(true);
 
         Glide.with(this)
-                .load(Constants.MEDIA_URL + viewModel.movieDetails.getPosterUrl())
+                .load(Constants.MEDIA_URL + viewModel.movieDetails.getThumbnailUrl())
                 .placeholder(R.drawable.place_holder_16_9)
                 .error(R.drawable.place_holder_16_9)
                 .into(viewBinding.imgPoster);
@@ -174,23 +177,35 @@ public class MovieDetailActivity extends BaseActivity<ActivityMovieDetailBinding
     }
 
     public void setUpTrailer(String uri) {
-        player = new ExoPlayer.Builder(this).build();
-        viewBinding.trailer.setPlayer(player);
+        if (uri == null || uri.isEmpty()) return;
 
-        if (uri == null || uri.isEmpty()) {
-            return;
-        }
+        String token = viewModel.getTokenVideo();
+
+        DefaultHttpDataSource.Factory httpFactory = new DefaultHttpDataSource.Factory()
+                .setDefaultRequestProperties(
+                        Collections.singletonMap("Authorization", token)
+                );
+
+        DefaultMediaSourceFactory mediaSourceFactory =
+                new DefaultMediaSourceFactory(httpFactory);
+
+        // tạo player có token
+        player = new ExoPlayer.Builder(this)
+                .setMediaSourceFactory(mediaSourceFactory)
+                .build();
+
+        viewBinding.trailer.setPlayer(player);
 
         viewModel.getIsPlaying().observe(this, this::updatePlayPauseIcons);
 
         if (!uri.contains("http")) uri = Constants.MEDIA_URL_VIDEO + uri;
-
         MediaItem mediaItem = MediaItem.fromUri(uri);
 
         player.setMediaItem(mediaItem);
         player.prepare();
         player.setPlayWhenReady(true);
         player.setVolume(0f);
+
         player.addListener(new Player.Listener() {
             @Override
             public void onPlaybackStateChanged(int state) {
@@ -214,12 +229,14 @@ public class MovieDetailActivity extends BaseActivity<ActivityMovieDetailBinding
                 updatePlayPauseIcons(isPlaying);
             }
         });
+
         viewBinding.seekBar.setThumb(null);
-        viewBinding.btnMute.findViewById(R.id.btn_mute).setOnClickListener(v -> toggleMute());
+        viewBinding.btnMute.setOnClickListener(v -> toggleMute());
         updateMuteIcon();
         setupSeekBar();
         setupGestureDetector();
     }
+
     private void toggleMute() {
         isMuted = !isMuted;
         player.setVolume(isMuted ? 0f : 1f);

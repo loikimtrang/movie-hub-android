@@ -95,6 +95,7 @@
     <string name="no_result">Không có kết quả</string>
     <string name="watch_now">Xem ngay</string>
     <string name="episode">Tập Phim</string>
+    <string name="episode_index">Tập</string>
     <string name="cast">Diễn viên</string>
     <string name="details">Chi tiết</string>
     <string name="favorite">Yêu thích</string>
@@ -144,5 +145,12 @@
     <string name="skip">Bỏ qua</string>
     <string name="season_list">Danh sách mùa</string>
     <string name="close">Đóng</string>
+    <string name="mgs_otp">Chúng tôi đã gửi mã xác minh tới email của bạn</string>
+    <string name="send">Gửi</string>
+    <string name="resend_otp">Gửi lại mã</string>
+    <string name="resend_limit">Đã đạt đến giới hạn gửi lại</string>
+    <string name="enter_otp">Vui lòng nhập đầy đủ mã OTP</string>
+    <string name="otp_not_match">Mã OTP không khớp</string>
+    <string name="otp_error_please_try_again">Lỗi xác minh OTP. Vui lòng thử lại.</string>
 
 </resources>

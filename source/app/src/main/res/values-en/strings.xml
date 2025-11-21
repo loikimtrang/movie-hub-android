@@ -95,6 +95,7 @@
     <string name="no_result">No result</string>
     <string name="watch_now">Watch Now</string>
     <string name="episode">Episode</string>
+    <string name="episode_index">Episode</string>
     <string name="cast">Cast</string>
     <string name="details">Details</string>
     <string name="favorite">Favorite</string>
@@ -144,5 +145,12 @@
     <string name="skip">Skip</string>
     <string name="season_list">Season list</string>
     <string name="close">Close</string>
+    <string name="mgs_otp">We have sent the verification code to your email</string>
+    <string name="send">Send</string>
+    <string name="resend_otp">Resend OTP</string>
+    <string name="resend_limit">Resend limit reached</string>
+    <string name="enter_otp">Please enter the full OTP code</string>
+    <string name="otp_not_match">OTP code does not match</string>
+    <string name="otp_error_please_try_again">OTP verification error. Please try again.</string>
 
 </resources>

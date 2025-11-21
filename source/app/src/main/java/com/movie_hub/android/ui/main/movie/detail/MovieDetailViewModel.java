@@ -26,4 +26,7 @@ public class MovieDetailViewModel extends BaseViewModel {
     public void setPlaying(boolean playing) {
         isPlaying.setValue(playing);
     }
+    public String getTokenVideo() {
+        return "Bearer " + repository.getSharedPreferences().getToken();
+    }
 }

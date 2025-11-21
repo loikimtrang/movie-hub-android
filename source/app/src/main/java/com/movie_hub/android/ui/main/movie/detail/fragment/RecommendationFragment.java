@@ -7,7 +7,6 @@ import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.lifecycle.MutableLiveData;
 import androidx.recyclerview.widget.GridLayoutManager;
 
 import com.movie_hub.android.R;
@@ -24,9 +23,6 @@ import com.movie_hub.android.ui.main.search.topTrending.adapter.MovieVerticalAda
 import com.movie_hub.android.utils.GridUtil;
 import com.movie_hub.android.utils.GsonUtils;
 
-import java.net.ConnectException;
-import java.net.SocketTimeoutException;
-import java.net.UnknownHostException;
 import java.util.List;
 import java.util.Objects;
 

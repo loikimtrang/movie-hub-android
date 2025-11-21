@@ -6,6 +6,7 @@ import com.movie_hub.android.data.model.api.ResponseListObj;
 import com.movie_hub.android.data.model.api.ResponseWrapper;
 import com.movie_hub.android.data.model.api.request.login.UserLoginRequest;
 import com.movie_hub.android.data.model.api.request.login.UserRegisterRequest;
+import com.movie_hub.android.data.model.api.request.otp.VerifyOtpRequest;
 import com.movie_hub.android.data.model.api.request.user.UserChangePasswordRequest;
 import com.movie_hub.android.data.model.api.request.user.UserLoginGoogleRequest;
 import com.movie_hub.android.data.model.api.request.user.UserUpdateProfileRequest;
@@ -50,6 +51,12 @@ public interface ApiService {
 
     @PUT("v1/user/update-profile")
     Observable<ResponseWrapper> updateUserProfile(@Body UserUpdateProfileRequest request);
+
+    @POST("v1/user/verify-otp")
+    Observable<ResponseWrapper> verifyOtp(@Body VerifyOtpRequest request);
+
+    @POST("v1/user/resend-otp")
+    Observable<ResponseWrapper> resendOtp(@Body VerifyOtpRequest request);
 
     @PUT("v1/user/change-password")
     Observable<ResponseWrapper> changeUserPassword(@Body UserChangePasswordRequest request);

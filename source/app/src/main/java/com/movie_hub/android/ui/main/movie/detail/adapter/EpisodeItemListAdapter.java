@@ -48,7 +48,9 @@ public class EpisodeItemListAdapter extends RecyclerView.Adapter<EpisodeItemList
         MovieItemResponse item = items.get(position);
         if (item.getVideo() == null) return;
 
-        holder.binding.tvTitle.setText(item.getTitle());
+        String title = context.getString(R.string.episode_index) + " " + item.getLabel() + "."  + " " + item.getTitle();
+
+        holder.binding.tvTitle.setText(title);
         holder.binding.tvDescription.setText(
                 HtmlUtils.convertPtoStrong(item.getDescription()));
 

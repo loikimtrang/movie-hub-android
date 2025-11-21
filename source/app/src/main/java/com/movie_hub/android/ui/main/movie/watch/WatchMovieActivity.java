@@ -172,15 +172,14 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
 
     @SuppressLint("SetTextI18n")
     public void setUpViewForSeriesMovie() {
-        viewBinding.nameMovie.setText(viewModel.nowEpisodePlay.getTitle());
+        viewBinding.nameMovie.setText(getString(R.string.episode_index) + " " + viewModel.nowEpisodePlay.getLabel()
+                + ". " + viewModel.nowEpisodePlay.getTitle());
         viewBinding.nameMovieOriginal.setText(viewModel.movieDetails.getTitle() + findLabelSeason());
         loadVtt();
         if (isLastEpisode()) {
             viewBinding.btnNextEpisode.setVisibility(View.GONE);
-            Log.d("LAST", "true");
         } else {
             viewBinding.btnNextEpisode.setVisibility(View.VISIBLE);
-            Log.d("LAST", "fa");
 
         }
     }

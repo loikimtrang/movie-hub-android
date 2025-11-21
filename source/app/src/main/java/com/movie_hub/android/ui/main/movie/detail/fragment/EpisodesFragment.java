@@ -2,6 +2,7 @@ package com.movie_hub.android.ui.main.movie.detail.fragment;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.widget.Toast;
 
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -56,11 +57,37 @@ public class EpisodesFragment extends BaseFragment<FragmentEpisodeBinding, Episo
     }
     public void showSeasonListBottomSheet() {
         ClickUtils.debounceClick(binding.btnChooseSeason);
-        if (movieDetail.getType() == Constants.TYPE_MOVIE_SINGLE || movieDetail.getType() == Constants.TYPE_MOVIE_TRAILER) return;
-        ChooseSeasonBottomSheetDialog sheet = new ChooseSeasonBottomSheetDialog(Objects.requireNonNull(getContext()), this, GsonUtils.toJson(Objects.requireNonNull(sharedViewModel.movieDetails.getSeasons())));
+
+        if (movieDetail == null) return;
+        int type = movieDetail.getType();
+        if (type == Constants.TYPE_MOVIE_SINGLE || type == Constants.TYPE_MOVIE_TRAILER)
+            return;
+
+        // Lấy seasons, nếu null thì cho list rỗng
+        List<SeasonResponse> seasons = null;
+        if (sharedViewModel.movieDetails != null) {
+            seasons = sharedViewModel.movieDetails.getSeasons();
+        }
+
+        if (seasons == null || seasons.isEmpty()) {
+            Toast.makeText(getContext(), "Không có season để hiển thị", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        ChooseSeasonBottomSheetDialog sheet =
+                new ChooseSeasonBottomSheetDialog(
+                        requireContext(),
+                        this,
+                        GsonUtils.toJson(seasons)
+                );
+
         sheet.show();
-        Objects.requireNonNull(sheet.getWindow()).getDecorView().post(sheet::setupWindow);
+
+        if (sheet.getWindow() != null) {
+            sheet.getWindow().getDecorView().post(sheet::setupWindow);
+        }
     }
+
 
     @Override
     public int getBindingVariable() {
