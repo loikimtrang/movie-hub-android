@@ -55,8 +55,17 @@ public class EpisodeItemListAdapter extends RecyclerView.Adapter<EpisodeItemList
                 HtmlUtils.convertPtoStrong(item.getDescription()));
 
         holder.binding.tvDuration.setText(DisplayUtils.displayTimeFromSeconds(context ,item.getVideo().getDuration()));
+
+        String img = "";
+
+        if (item.getThumbnailUrl() != null) {
+            img = item.getThumbnailUrl();
+        } else {
+            img = item.getVideo().getThumbnailUrl();
+        }
+
         Glide.with(holder.binding.getRoot().getContext())
-                .load(item.getVideo().getThumbnailUrl())
+                .load(img)
                 .placeholder(R.drawable.place_holder_16_9)
                 .error(R.drawable.place_holder_16_9)
                 .into(holder.binding.image);
@@ -74,14 +83,18 @@ public class EpisodeItemListAdapter extends RecyclerView.Adapter<EpisodeItemList
         holder.itemView.clearAnimation();
     }
 
+    @SuppressLint("NewApi")
     public void setData(List<MovieItemResponse> newData) {
         items.clear();
-        if (!newData.isEmpty()) {
-            items.addAll(newData);
+
+        if (newData != null) {
+            newData.stream()
+                    .filter(item -> item.getVideo() != null)
+                    .forEach(items::add);
         }
+
         notifyDataSetChanged();
     }
-
 
     @Override
     public int getItemCount() {

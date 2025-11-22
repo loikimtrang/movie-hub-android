@@ -33,8 +33,8 @@ public class Constants {
     public static final String ERROR = "ERROR";
     public static final int RC_SIGN_IN = 1001;
 
-    public static final String CLIENT_ID = "144532728035-sv194mjng41tf9cb9v7ol5jhaohjt17q.apps.googleusercontent.com";
-    public static int PLATFORM_ANDROID = 1;
+    public static final String CLIENT_ID = "144532728035-rbu66k0hirdckcp1ato2kff2m83uta4g.apps.googleusercontent.com";
+    public static int PLATFORM_ANDROID = 2;
     public static int TYPE_MOVIE_SINGLE = 1;
     public static int TYPE_MOVIE_SERIES = 2;
     public static int TYPE_MOVIE_TRAILER = 3;

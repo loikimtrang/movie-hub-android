@@ -83,6 +83,7 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding, LoginViewM
     }
 
     public void onLoginGoogleClick() {
+        showLoading();
         mGoogleSignInClient.signOut().addOnCompleteListener(task -> {
             Intent signInIntent = mGoogleSignInClient.getSignInIntent();
             startActivityForResult(signInIntent, Constants.RC_SIGN_IN);
@@ -90,7 +91,7 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding, LoginViewM
     }
     private void setUpGoogleSignIn() {
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken("144532728035-rbu66k0hirdckcp1ato2kff2m83uta4g.apps.googleusercontent.com")
+                .requestIdToken(Constants.CLIENT_ID)
                 .requestEmail()
                 .build();
 
@@ -112,7 +113,6 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding, LoginViewM
 
                 String idToken = account.getIdToken();
 
-
                 UserLoginGoogleRequest request = new UserLoginGoogleRequest();
                 request.setIdToken(idToken);
                 request.setPlatform(Constants.PLATFORM_ANDROID);
@@ -120,15 +120,18 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding, LoginViewM
                 viewModel.userLoginGoogle(new MainCallback<UserLoginResponse>() {
                     @Override
                     public void doSuccess(UserLoginResponse object) {
+                        hideLoading();
                         handleLoginSuccess();
                     }
                     @Override
                     public void doFail() {
+                        hideLoading();
                         showLoginError(getString(R.string.login_error_please_try_again));
                     }
 
                     @Override
                     public void doError(Throwable throwable) {
+                        hideLoading();
                         if (throwable instanceof ConnectException) {
                             showLoginError(getString(R.string.cannot_connect_to_the_server_please_try_again));
                         } else {

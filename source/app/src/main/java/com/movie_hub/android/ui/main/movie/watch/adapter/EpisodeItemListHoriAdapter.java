@@ -59,8 +59,17 @@ public class EpisodeItemListHoriAdapter extends RecyclerView.Adapter<EpisodeItem
                 HtmlUtils.convertPtoStrong(item.getDescription()));
 
         holder.binding.duration.setText(DisplayUtils.displayTimeFromSeconds(context ,item.getVideo().getDuration()));
+
+        String img = "";
+
+        if (item.getThumbnailUrl() != null) {
+            img = item.getThumbnailUrl();
+        } else {
+            img = item.getVideo().getThumbnailUrl();
+        }
+
         Glide.with(holder.binding.getRoot().getContext())
-                .load(item.getVideo().getThumbnailUrl())
+                .load(img)
                 .placeholder(R.drawable.place_holder_16_9)
                 .error(R.drawable.place_holder_16_9)
                 .into(holder.binding.image);
@@ -88,7 +97,11 @@ public class EpisodeItemListHoriAdapter extends RecyclerView.Adapter<EpisodeItem
     public void setData(List<MovieItemResponse> newData, RecyclerView recyclerView) {
         items.clear();
         if (newData != null && !newData.isEmpty()) {
-            items.addAll(newData);
+            for (MovieItemResponse item : newData) {
+                if (item.getVideo() != null) {
+                    items.add(item);
+                }
+            }
         }
         notifyDataSetChanged();
 

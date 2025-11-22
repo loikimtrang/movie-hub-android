@@ -246,7 +246,7 @@
             android:layout_height="@dimen/_40sdp"
             android:onClick="@{(v)->a.finish()}"
             android:layout_gravity="top|start"
-            android:visibility="gone">
+            android:visibility="visible">
             <ImageView
                 android:layout_width="@dimen/_12sdp"
                 android:layout_height="@dimen/_12sdp"

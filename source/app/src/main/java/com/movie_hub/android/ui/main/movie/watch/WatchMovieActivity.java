@@ -369,6 +369,7 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
                     if (player.getDuration() > 0) {
                         viewBinding.tvTotalTime.setText(formatTime(player.getDuration()));
                     }
+                    viewBinding.loadingProgress.setVisibility(View.GONE);
                 } else if (state == Player.STATE_ENDED) {
                     handleEndVideo();
                 }
@@ -445,6 +446,7 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
         updatePlayPauseIcons(isPlaying);
     }
     public void handleEndVideo() {
+        hideLoadingVideo();
         updatePlayPauseIcons(false);
         viewModel.setPlaying(false);
         viewBinding.btnPlayPause.setVisibility(View.GONE);
@@ -473,7 +475,6 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
                         int progress = (int) (1000 * current / duration);
                         viewBinding.seekBar.setProgress(progress);
                         viewBinding.tvCurrentTime.setText(formatTime(current));
-                        viewBinding.tvCurrentTimeSecond.setText(formatTime(current));
                     }
                 }
                 seekHandler.postDelayed(this, 500);
@@ -493,10 +494,10 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
                 long newPosition = (duration * progress) / 1000;
                 player.seekTo(newPosition);
                 viewBinding.tvCurrentTime.setText(formatTime(newPosition));
-                viewBinding.tvCurrentTimeSecond.setText(formatTime(newPosition));
 
                 if (thumbnailManager != null) {
                     thumbnailManager.showPreviewAt(newPosition);
+                    updateThumbnailPosition(progress);
                 }
             }
 
@@ -507,8 +508,11 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
                 viewBinding.controlVideo.setVisibility(View.GONE);
                 viewBinding.layoutBrightness.setVisibility(View.GONE);
                 viewBinding.layoutVolume.setVisibility(View.GONE);
-                viewBinding.tvCurrentTimeSecond.setVisibility(View.VISIBLE);
                 viewBinding.loadingProgress.setVisibility(View.GONE);
+
+                viewBinding.thumbnailPreviewContainer.setVisibility(View.VISIBLE);
+
+                updateThumbnailPosition(seekBar.getProgress());
             }
 
             @Override
@@ -517,16 +521,56 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
                 viewBinding.controlVideo.setVisibility(View.VISIBLE);
                 viewBinding.layoutBrightness.setVisibility(View.VISIBLE);
                 viewBinding.layoutVolume.setVisibility(View.VISIBLE);
-                viewBinding.tvCurrentTimeSecond.setVisibility(View.GONE);
                 viewBinding.loadingProgress.setVisibility(View.VISIBLE);
                 if (thumbnailManager != null) {
                     thumbnailManager.hidePreview();
                 }
-
+                viewBinding.thumbnailPreviewContainer.setVisibility(View.GONE);
                 autoHideHandler.postDelayed(hideControlsRunnable, AUTO_HIDE_DELAY_MILLIS);
             }
         });
     }
+
+    private void updateThumbnailPosition(int progress) {
+        viewBinding.seekBar.post(() -> {
+            View container = viewBinding.thumbnailPreviewContainer;
+            SeekBar seekBar = viewBinding.seekBar;
+
+            int seekBarWidth = seekBar.getWidth();
+
+            int max = seekBar.getMax(); // 1000
+            float percent = progress / (float) max;
+
+            int paddingLeft = seekBar.getPaddingLeft();
+            int paddingRight = seekBar.getPaddingRight();
+
+            int usableWidth = seekBarWidth - paddingLeft - paddingRight;
+
+            // Vị trí thumb chính xác trong toàn view
+            float thumbCenterX = seekBar.getX() + paddingLeft + usableWidth * percent;
+
+            int containerWidth = container.getWidth();
+            float translationX = thumbCenterX - containerWidth / 2f;
+            float layOutWidth = viewBinding.layoutSeekBar.getWidth() - containerWidth - viewBinding.layoutSeekBar.getPaddingRight() - viewBinding.layoutSeekBar.getPaddingLeft();
+            Log.d("THUMB_DEBUG", "translationX: " + translationX);
+            Log.d("THUMB_DEBUG", "translationX2: " + layOutWidth);
+
+            // Clamp
+            translationX = Math.max(0, Math.min(translationX, layOutWidth));
+
+            // 🪵 Log ra thông tin debug
+            Log.d("THUMB_DEBUG", "Progress: " + progress);
+            Log.d("THUMB_DEBUG", "seekBarWidth: " + seekBarWidth);
+            Log.d("THUMB_DEBUG", "usableWidth: " + usableWidth);
+            Log.d("THUMB_DEBUG", "thumbCenterX: " + thumbCenterX);
+            Log.d("THUMB_DEBUG", "containerWidth: " + containerWidth);
+            Log.d("THUMB_DEBUG", "translationX: " + translationX);
+
+            container.setTranslationX(translationX);
+        });
+    }
+
+
 
     private String formatTime(long millis) {
         if (millis < 0) return "00:00";
@@ -644,7 +688,6 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
             viewBinding.seekBar.setProgress(progress);
         }
         viewBinding.tvCurrentTime.setText(formatTime(position));
-        viewBinding.tvCurrentTimeSecond.setText(formatTime(position));
 
         if (autoHideHandler != null) {
             autoHideHandler.removeCallbacks(hideControlsRunnable);
@@ -655,7 +698,6 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
         }
     }
     private void showSeekCount(boolean isForward, int seconds) {
-        viewBinding.tvCurrentTimeSecond.setVisibility(View.VISIBLE);
         if (isForward) {
             forwardCount += seconds / 1000; // +10s
             previousCount = 0;
@@ -685,7 +727,6 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
             previousCount = 0;
             viewBinding.layoutCountForward.setVisibility(View.GONE);
             viewBinding.layoutCountPrevious.setVisibility(View.GONE);
-            viewBinding.tvCurrentTimeSecond.setVisibility(View.GONE);
         };
         countResetHandler.postDelayed(resetCountRunnable, DOUBLE_TAP_TIMEOUT);
     }
@@ -837,6 +878,7 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
             viewBinding.layoutVolume.setVisibility(View.GONE);
         }
     }
+
     private void showLoadingVideo() {
         if (!isBuffering) {
             isBuffering = true;

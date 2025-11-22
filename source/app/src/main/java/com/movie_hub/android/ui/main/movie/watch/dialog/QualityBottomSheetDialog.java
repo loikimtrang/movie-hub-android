@@ -63,7 +63,7 @@ public class QualityBottomSheetDialog extends BaseBottomSheetDialog implements Q
             if (settingVideoModel.getQuality().isAuto()) {
                 binding.tvCurrentQuality.setText(getContext().getString(R.string.current_quality) + " " + getContext().getString(R.string.auto) + "(" + q.label +")") ;
             } else {
-                binding.tvCurrentQuality.setText(getContext().getString(R.string.current_quality) + settingVideoModel.getQuality().getResolution().label);
+                binding.tvCurrentQuality.setText(getContext().getString(R.string.current_quality) + " " + settingVideoModel.getQuality().getResolution().label);
             }
         }
     };
