@@ -53,7 +53,6 @@ public class RecommendationFragment extends BaseFragment<FragmentRecommendationB
             } else {
                 getListMovieTypeSearch();
             }
-            isLoaded = true;
         }
     }
 
@@ -158,7 +157,6 @@ public class RecommendationFragment extends BaseFragment<FragmentRecommendationB
             @Override
             public void doSuccess(List<MovieResponse> list) {
                 ((MainActivity) requireActivity()).hideLoading();
-
                 if (!isAdded()) return;
                 movieAdapter.setData(list);
                 isLoaded = true;

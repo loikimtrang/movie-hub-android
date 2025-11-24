@@ -58,7 +58,8 @@
                     android:scaleType="centerCrop"
                     app:shapeAppearanceOverlay="@style/roundImg"
                     android:src="@drawable/logo"
-                    android:layout_gravity="center"/>
+                    android:layout_gravity="center"
+                    android:layout_marginBottom="@dimen/_20sdp"/>
 
                 <TextView
                     android:id="@+id/name"
@@ -88,6 +89,7 @@
                     android:background="@drawable/bg_tab_search_result"
                     android:clickable="true"
                     android:focusable="true"
+                    android:onClick="onClick"
                     android:layout_marginEnd="@dimen/_1sdp">
 
                     <TextView
@@ -109,6 +111,7 @@
                     android:background="@drawable/bg_tab_search_result"
                     android:clickable="true"
                     android:focusable="true"
+                    android:onClick="onClick"
                     android:layout_marginStart="@dimen/_1sdp">
 
                     <TextView

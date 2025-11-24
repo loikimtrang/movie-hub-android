@@ -35,11 +35,11 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         style="@style/Text_12_Normal"
-                        android:text="@string/country"
+                        android:text="@string/other_name_display"
                         android:layout_marginEnd="@dimen/_6sdp"/>
 
                     <TextView
-                        android:id="@+id/country"
+                        android:id="@+id/other_name"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         style="@style/Text_12_Normal"

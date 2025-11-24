@@ -11,6 +11,7 @@ import com.movie_hub.android.constant.Constants;
 
 import java.text.ParseException;
 import java.util.Date;
+import java.util.Locale;
 
 public class DisplayUtils {
 
@@ -125,6 +126,37 @@ public class DisplayUtils {
         }
 
         return sb.toString().trim();
+    }
+
+    @SuppressLint("NewApi")
+    public static String displayShortDate(String rawDate) {
+        if (rawDate == null || rawDate.isEmpty()) return "";
+
+        try {
+            // Chuỗi đầu vào có giờ: "27/01/1969 00:00:00"
+            SimpleDateFormat inputFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault());
+            Date date = inputFormat.parse(rawDate);
+
+            // Định dạng cần xuất: "27/01/1969"
+            SimpleDateFormat outputFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+            return outputFormat.format(date);
+        } catch (ParseException e) {
+            e.printStackTrace();
+            return "";
+        }
+    }
+
+    public static String displayGender(Context context, int gender) {
+        switch (gender) {
+            case Constants.GENDER_MALE:
+                return context.getString(R.string.male);
+            case Constants.GENDER_FEMALE:
+                return context.getString(R.string.female);
+            case Constants.GENDER_UNSPECIFIED:
+                return context.getString(R.string.unspecified);
+            default:
+                return context.getString(R.string.updating);
+        }
     }
 
 }

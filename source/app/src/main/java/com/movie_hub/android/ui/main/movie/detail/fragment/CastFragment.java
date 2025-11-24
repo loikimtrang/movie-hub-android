@@ -60,7 +60,6 @@ public class CastFragment extends BaseFragment<FragmentCastBinding, CastFragment
             } else {
                 getListMoviePersonTypeSearch();
             }
-            isLoaded = true;
         }
     }
     @Override
@@ -118,6 +117,7 @@ public class CastFragment extends BaseFragment<FragmentCastBinding, CastFragment
                 if (data != null && !data.isEmpty()) {
                     moviePersonAdapter.setData(data);
                     binding.layoutEmpty.setVisibility(View.GONE);
+                    isLoaded = true;
                 } else {
                     binding.layoutEmpty.setVisibility(View.VISIBLE);
                 }
@@ -150,6 +150,7 @@ public class CastFragment extends BaseFragment<FragmentCastBinding, CastFragment
                 if (data != null && !data.isEmpty()) {
                     personAdapter.setData(data);
                     binding.layoutEmpty.setVisibility(View.GONE);
+                    isLoaded = true;
                 } else {
                     binding.layoutEmpty.setVisibility(View.VISIBLE);
                 }

@@ -122,6 +122,7 @@ public class AccountFragment extends BaseFragment<FragmentAccountBinding, Accoun
                 break;
             case R.string.menu_language:
                 ((MainActivity) requireActivity()).navigateToLanguage();
+                break;
             case R.string.check_for_update:
                 ((MainActivity) requireActivity()).navigateToCheckUpdate();
                 break;

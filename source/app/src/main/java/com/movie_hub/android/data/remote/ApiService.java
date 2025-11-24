@@ -85,6 +85,7 @@ public interface ApiService {
     @GET("v1/person/get/{id}")
     Observable<ResponseWrapper<PersonResponse>> getPerson(@Path("id") Long id);
     // MOVIE PERSON
+
     @GET("v1/movie-person/list")
     Observable<ResponseWrapper<ResponseListObj<MoviePersonResponse>>> getListMoviePerson(@QueryMap Map<String, Object> query);
 
