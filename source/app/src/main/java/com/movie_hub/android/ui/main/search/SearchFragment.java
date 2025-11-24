@@ -240,7 +240,7 @@ public class SearchFragment extends BaseFragment<FragmentSearchBinding, SearchVi
 
     @Override
     public int getStatusBarColor() {
-        return R.color.account_header;
+        return R.color.header_app;
     }
     @Override
     public int getNavigationBarColor() {

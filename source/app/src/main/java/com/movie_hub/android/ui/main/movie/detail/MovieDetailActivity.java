@@ -391,7 +391,7 @@ public class MovieDetailActivity extends BaseActivity<ActivityMovieDetailBinding
 
     @Override
     public int getStatusBarColor() {
-        return R.color.account_header;
+        return R.color.header_app;
     }
 
     @Override

@@ -2,7 +2,6 @@ package com.movie_hub.android.ui.main.account;
 
 import android.annotation.SuppressLint;
 
-import androidx.lifecycle.MutableLiveData;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.bumptech.glide.Glide;
@@ -63,7 +62,7 @@ public class AccountFragment extends BaseFragment<FragmentAccountBinding, Accoun
     }
     @Override
     public int getStatusBarColor() {
-        return R.color.account_header;
+        return R.color.header_app;
     }
 
     @Override

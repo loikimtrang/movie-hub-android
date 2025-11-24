@@ -15,14 +15,14 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:background="@color/account_header"
+        android:background="@color/header_app"
         android:fitsSystemWindows="true"
         >
 
         <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/account_header">
+            android:background="@color/header_app">
 
             <EditText
                 android:id="@+id/search"

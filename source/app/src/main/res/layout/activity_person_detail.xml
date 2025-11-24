@@ -48,7 +48,20 @@
             <FrameLayout
                 android:id="@+id/bg_header"
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/_180sdp">
+                android:layout_height="@dimen/_200sdp">
+
+                <ImageView
+                    android:id="@+id/bg_blur"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="centerCrop"
+                    android:alpha="0.7" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/bg_bottom_gradient"/>
+
 
 
                 <com.google.android.material.imageview.ShapeableImageView
@@ -59,7 +72,7 @@
                     app:shapeAppearanceOverlay="@style/roundImg"
                     android:src="@drawable/logo"
                     android:layout_gravity="center"
-                    android:layout_marginBottom="@dimen/_20sdp"/>
+                    android:layout_marginBottom="@dimen/_10sdp"/>
 
                 <TextView
                     android:id="@+id/name"
@@ -68,7 +81,7 @@
                     style="@style/Text_16_Bold"
                     android:text="@string/cast"
                     android:layout_gravity="center_horizontal|bottom"
-                    android:layout_marginBottom="@dimen/_12sdp"/>
+                    android:layout_marginBottom="@dimen/_6sdp"/>
 
             </FrameLayout>
 

@@ -21,7 +21,7 @@
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/account_header"
+            android:background="@color/header_app"
             android:paddingVertical="@dimen/_14sdp"
             android:paddingHorizontal="@dimen/_10sdp">
 
@@ -45,7 +45,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:background="@color/account_header"
+            android:background="@color/header_app"
             android:weightSum="2"
             android:paddingVertical="@dimen/_14sdp">
 

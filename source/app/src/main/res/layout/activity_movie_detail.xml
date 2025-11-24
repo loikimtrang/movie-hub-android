@@ -128,7 +128,7 @@
                         android:id="@+id/layout_poster"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:background="@color/account_header">
+                        android:background="@color/header_app">
                         <ImageView
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
@@ -243,7 +243,7 @@
                         android:id="@+id/subTabLayout"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:background="@color/account_header"
+                        android:background="@color/header_app"
                         app:layout_scrollFlags="enterAlways"
                         app:tabIndicatorColor="@color/tab_select"
                         app:tabIndicatorFullWidth="false"

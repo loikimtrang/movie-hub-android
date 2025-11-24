@@ -42,7 +42,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:background="@color/account_header">
+                android:background="@color/header_app">
 
                 <TextView
                     android:id="@+id/btn_ok"

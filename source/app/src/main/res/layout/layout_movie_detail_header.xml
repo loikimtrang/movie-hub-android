@@ -15,7 +15,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/account_header"
+        android:background="@color/header_app"
         android:orientation="vertical"
         app:layout_scrollFlags="enterAlwaysCollapsed">
 
@@ -175,7 +175,9 @@
                     android:layout_gravity="center"
                     android:onClick="onClick"
                     android:clickable="true"
-                    android:focusable="true">
+                    android:focusable="true"
+                    android:paddingVertical="@dimen/_6sdp"
+                    android:background="@drawable/bg_btn_press">
 
                     <LinearLayout
                         android:layout_width="wrap_content"
@@ -208,11 +210,16 @@
                 android:orientation="horizontal">
 
                 <LinearLayout
+                    android:id="@+id/btn_favourite"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:gravity="center"
-                    android:layout_weight="1">
+                    android:layout_weight="1"
+                    android:paddingVertical="@dimen/_6sdp"
+                    android:onClick="onClick"
+                    android:focusable="true"
+                    android:clickable="true">
 
                     <ImageView
                         android:layout_width="@dimen/_14sdp"
@@ -229,11 +236,16 @@
                 </LinearLayout>
 
                 <LinearLayout
+                    android:id="@+id/btn_playlist"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:gravity="center"
-                    android:layout_weight="1">
+                    android:layout_weight="1"
+                    android:paddingVertical="@dimen/_6sdp"
+                    android:onClick="onClick"
+                    android:focusable="true"
+                    android:clickable="true">
 
                     <ImageView
                         android:layout_width="@dimen/_14sdp"
@@ -250,11 +262,16 @@
                 </LinearLayout>
 
                 <LinearLayout
+                    android:id="@+id/btn_rating"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:gravity="center"
-                    android:layout_weight="1">
+                    android:layout_weight="1"
+                    android:paddingVertical="@dimen/_6sdp"
+                    android:onClick="onClick"
+                    android:focusable="true"
+                    android:clickable="true">
 
                     <ImageView
                         android:layout_width="@dimen/_14sdp"
@@ -271,11 +288,16 @@
                 </LinearLayout>
 
                 <LinearLayout
+                    android:id="@+id/btn_cmt"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:gravity="center"
-                    android:layout_weight="1">
+                    android:layout_weight="1"
+                    android:paddingVertical="@dimen/_6sdp"
+                    android:onClick="onClick"
+                    android:focusable="true"
+                    android:clickable="true">
 
                     <ImageView
                         android:layout_width="@dimen/_14sdp"
@@ -292,11 +314,16 @@
                 </LinearLayout>
 
                 <LinearLayout
+                    android:id="@+id/btn_share"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:gravity="center"
-                    android:layout_weight="1">
+                    android:layout_weight="1"
+                    android:paddingVertical="@dimen/_6sdp"
+                    android:onClick="onClick"
+                    android:focusable="true"
+                    android:clickable="true">
 
                     <ImageView
                         android:layout_width="@dimen/_14sdp"

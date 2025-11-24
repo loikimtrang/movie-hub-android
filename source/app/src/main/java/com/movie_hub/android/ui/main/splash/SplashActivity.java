@@ -22,15 +22,17 @@ import com.movie_hub.android.data.model.other.ToastMessage;
 import com.movie_hub.android.databinding.ActivitySplashBinding;
 import com.movie_hub.android.di.component.ActivityComponent;
 import com.movie_hub.android.ui.base.activity.BaseActivity;
+import com.movie_hub.android.ui.base.activity.SystemBarColorProvider;
 import com.movie_hub.android.ui.main.MainActivity;
 import com.movie_hub.android.ui.main.MainCallback;
 import com.movie_hub.android.ui.main.account.login.LoginActivity;
 import com.movie_hub.android.ui.main.account.updateapp.UpdateManager;
+import com.movie_hub.android.ui.main.account.updateapp.dialog.UpdateVersionBottomSheetDialog;
 
 import java.net.ConnectException;
 
 @SuppressLint("CustomSplashScreen")
-public class SplashActivity extends BaseActivity<ActivitySplashBinding, SplashViewModel> implements View.OnClickListener {
+public class SplashActivity extends BaseActivity<ActivitySplashBinding, SplashViewModel> implements View.OnClickListener, SystemBarColorProvider, UpdateVersionBottomSheetDialog.UpdateVersionBottomSheetCallback {
     private static final int REQUEST_STORAGE_PERMISSION = 123;
 
     @Override
@@ -42,7 +44,6 @@ public class SplashActivity extends BaseActivity<ActivitySplashBinding, SplashVi
     }
 
     public void handleCheckUpdate() {
-        viewBinding.layoutDialogConfirm.dialogMessage.setText(getString(R.string.please_update));
         checkUpdate();
     }
 
@@ -152,14 +153,6 @@ public class SplashActivity extends BaseActivity<ActivitySplashBinding, SplashVi
             case R.id.btn_skip:
                 navigateToMainActivity();
                 break;
-            case R.id.btn_ok:
-                viewBinding.layoutDialogConfirm.lDialog.setVisibility(View.GONE);
-                checkAndRequestPermission();
-                break;
-            case R.id.btn_cancel:
-            case R.id.l_dialog:
-                System.exit(0);
-                break;
             default:
                 break;
         }
@@ -187,11 +180,7 @@ public class SplashActivity extends BaseActivity<ActivitySplashBinding, SplashVi
                     viewModel.checkAppVersionResponse = response.getData();
 
                     if (viewModel.checkAppVersionResponse.getUpdateRequired()) {
-                        if (viewModel.checkAppVersionResponse.getForceUpdate()) {
-                            viewBinding.layoutDialogConfirm.lDialog.setVisibility(View.VISIBLE);
-                        } else {
-                            handleLogin();
-                        }
+                        showUpdateVersionBottomSheet();
                     } else {
                         handleLogin();
                     }
@@ -208,6 +197,20 @@ public class SplashActivity extends BaseActivity<ActivitySplashBinding, SplashVi
         }, request);
     }
 
+    public void showUpdateVersionBottomSheet() {
+        UpdateVersionBottomSheetDialog sheet =
+                new UpdateVersionBottomSheetDialog(
+                        this,
+                        this,
+                        viewModel.checkAppVersionResponse
+                );
+
+        sheet.show();
+
+        if (sheet.getWindow() != null) {
+            sheet.getWindow().getDecorView().post(sheet::setupWindow);
+        }
+    }
     private void checkAndRequestPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
@@ -221,7 +224,6 @@ public class SplashActivity extends BaseActivity<ActivitySplashBinding, SplashVi
             startUpdate();
         }
     }
-
     @SuppressLint("MissingSuperCall")
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
@@ -229,11 +231,10 @@ public class SplashActivity extends BaseActivity<ActivitySplashBinding, SplashVi
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 startUpdate();
             } else {
-                System.exit(0);
+                new ToastMessage(ToastMessage.TYPE_WARNING, getString(R.string.no_memory_permission)).showMessage(this);
             }
         }
     }
-
     private void startUpdate() {
         if (viewModel.checkAppVersionResponse != null) {
             new ToastMessage(ToastMessage.TYPE_NORMAL, getString(R.string.app_will_update)).showMessage(getApplicationContext());
@@ -241,4 +242,28 @@ public class SplashActivity extends BaseActivity<ActivitySplashBinding, SplashVi
         }
     }
 
+    @Override
+    public int getStatusBarColor() {
+        return R.color.bg_app;
+    }
+
+    @Override
+    public int getNavigationBarColor() {
+        return R.color.bg_app;
+    }
+
+    @Override
+    public void onUpdateClicked() {
+        startUpdate();
+    }
+
+    @Override
+    public void onSkipClicked() {
+        if (viewModel.checkAppVersionResponse.getForceUpdate()) {
+            finishAffinity();
+            android.os.Process.killProcess(android.os.Process.myPid());
+        } else {
+            handleLogin();
+        }
+    }
 }

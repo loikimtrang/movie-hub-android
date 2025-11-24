@@ -157,7 +157,7 @@
     <string name="current_version">Phiên bản hiện tại</string>
     <string name="prompt_update">Bạn có muốn cập nhật</string>
     <string name="new_update_available">Đã có bản cập nhật mới, bạn có muốn cập nhật?</string>
-    <string name="no_memory_permission">Không có quyền đọc bộ nhớ, không thể cập nhật!</string>
+    <string name="no_memory_permission">Không có quyền đọc bộ nhớ, không thể cập nhật.</string>
     <string name="loading_update">Đang tải bản cập nhật…</string>
     <string name="app_will_auto">App sẽ tự động cài sau khi tải xong.</string>
     <string name="current_version_is_lasted">Phiên bản hiện tại là phiên bản mới nhất.</string>
@@ -185,4 +185,9 @@
     <string name="info_display">Thông tin</string>
     <string name="acted_display">Phim đã đóng</string>
     <string name="updating">Đang cập nhật</string>
+    <string name="update_title">Bản cập nhật mới</string>
+    <string name="whats_new">Có gì mới?</string>
+    <string name="update_now">Cập nhật ngay</string>
+    <string name="status">Trạng thái: </string>
+    <string name="obligatory">Bắt buộc</string>
 </resources>

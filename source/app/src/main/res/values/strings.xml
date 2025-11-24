@@ -186,5 +186,9 @@
     <string name="info_display">Information</string>
     <string name="acted_display">Appeared in</string>
     <string name="updating">Updating</string>
-
+    <string name="update_title">New Update Available</string>
+    <string name="whats_new">What’s New?</string>
+    <string name="update_now">Update Now</string>
+    <string name="status">Status: </string>
+    <string name="obligatory">Obligatory</string>
 </resources>

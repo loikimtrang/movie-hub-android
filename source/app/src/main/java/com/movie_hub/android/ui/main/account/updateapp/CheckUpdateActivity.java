@@ -6,7 +6,6 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 
@@ -21,10 +20,10 @@ import com.movie_hub.android.databinding.ActivityCheckUpdateBinding;
 import com.movie_hub.android.di.component.ActivityComponent;
 import com.movie_hub.android.ui.base.activity.BaseActivity;
 import com.movie_hub.android.ui.base.activity.SystemBarColorProvider;
-import com.movie_hub.android.ui.main.MainActivity;
 import com.movie_hub.android.ui.main.MainCallback;
+import com.movie_hub.android.ui.main.account.updateapp.dialog.UpdateVersionBottomSheetDialog;
 
-public class CheckUpdateActivity extends BaseActivity<ActivityCheckUpdateBinding, CheckUpdateViewModel> implements SystemBarColorProvider, View.OnClickListener {
+public class CheckUpdateActivity extends BaseActivity<ActivityCheckUpdateBinding, CheckUpdateViewModel> implements SystemBarColorProvider, View.OnClickListener, UpdateVersionBottomSheetDialog.UpdateVersionBottomSheetCallback {
     private int versionCode;
     private String currentVersion;
     private static final int REQUEST_STORAGE_PERMISSION = 123;
@@ -41,7 +40,6 @@ public class CheckUpdateActivity extends BaseActivity<ActivityCheckUpdateBinding
         currentVersion = BuildConfig.VERSION_NAME;
         versionCode = BuildConfig.VERSION_CODE;
 
-        viewBinding.layoutDialogConfirm.dialogMessage.setText(getString(R.string.new_update_available));
         viewBinding.tvCurrentVersion.setText(getString(R.string.current_version) + ": " + currentVersion);
     }
 
@@ -62,7 +60,7 @@ public class CheckUpdateActivity extends BaseActivity<ActivityCheckUpdateBinding
 
     @Override
     public int getStatusBarColor() {
-        return R.color.account_header;
+        return R.color.header_app;
     }
 
     @Override
@@ -76,14 +74,6 @@ public class CheckUpdateActivity extends BaseActivity<ActivityCheckUpdateBinding
         switch (view.getId()) {
             case R.id.btn_check_update:
                 checkUpdate();
-                break;
-            case R.id.btn_ok:
-                viewBinding.layoutDialogConfirm.lDialog.setVisibility(View.GONE);
-                checkAndRequestPermission();
-                break;
-            case R.id.btn_cancel:
-            case R.id.l_dialog:
-                viewBinding.layoutDialogConfirm.lDialog.setVisibility(View.GONE);
                 break;
             default:
                 break;
@@ -111,7 +101,7 @@ public class CheckUpdateActivity extends BaseActivity<ActivityCheckUpdateBinding
                 if (response.isResult()) {
                     viewModel.checkAppVersionResponse = response.getData();
                     if (viewModel.checkAppVersionResponse.getUpdateRequired()) {
-                        viewBinding.layoutDialogConfirm.lDialog.setVisibility(View.VISIBLE);
+                        showUpdateVersionBottomSheet();
                     } else {
                         showMgs(ToastMessage.TYPE_NORMAL, getString(R.string.current_version_is_lasted));
                     }
@@ -127,7 +117,6 @@ public class CheckUpdateActivity extends BaseActivity<ActivityCheckUpdateBinding
             }
         }, request);
     }
-
     private void checkAndRequestPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
@@ -141,7 +130,6 @@ public class CheckUpdateActivity extends BaseActivity<ActivityCheckUpdateBinding
             startUpdate();
         }
     }
-
     @SuppressLint("MissingSuperCall")
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
@@ -149,15 +137,42 @@ public class CheckUpdateActivity extends BaseActivity<ActivityCheckUpdateBinding
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 startUpdate();
             } else {
-                new ToastMessage(ToastMessage.TYPE_ERROR, getString(R.string.no_memory_permission)).showMessage(this);
+                new ToastMessage(ToastMessage.TYPE_WARNING, getString(R.string.no_memory_permission)).showMessage(this);
             }
         }
     }
-
     private void startUpdate() {
         if (viewModel.checkAppVersionResponse != null) {
             new ToastMessage(ToastMessage.TYPE_NORMAL, getString(R.string.app_will_update)).showMessage(getApplicationContext());
             new UpdateManager(this).downloadAndInstallApk(viewModel.checkAppVersionResponse.getLatestVersion().getUrl());
+        }
+    }
+
+    public void showUpdateVersionBottomSheet() {
+        UpdateVersionBottomSheetDialog sheet =
+                new UpdateVersionBottomSheetDialog(
+                        this,
+                        this,
+                        viewModel.checkAppVersionResponse
+                );
+
+        sheet.show();
+
+        if (sheet.getWindow() != null) {
+            sheet.getWindow().getDecorView().post(sheet::setupWindow);
+        }
+    }
+
+    @Override
+    public void onUpdateClicked() {
+        startUpdate();
+    }
+
+    @Override
+    public void onSkipClicked() {
+        if (viewModel.checkAppVersionResponse.getForceUpdate()) {
+            finishAffinity();
+            android.os.Process.killProcess(android.os.Process.myPid());
         }
     }
 }

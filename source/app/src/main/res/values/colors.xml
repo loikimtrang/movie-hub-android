@@ -20,7 +20,7 @@
     <color name="logo">#15151F</color>
     <color name="text">#FAF9FC</color> // ic
 
-    <color name="account_header">#0F1015</color>
+    <color name="header_app">#0F1015</color>
     <color name="bg_dialog">#0F1015</color>
     <color name="btn_login">#FFF09B</color>
     <color name="btn_login_google">#2D3038</color>
@@ -64,5 +64,5 @@
     <color name="bg_tag_season_item">#2D3038</color>
     <color name="bg_skip_intro">#80000000</color>
     <color name="bg_skip_intro_press">#99000000</color>
-
+    <color name="bg_select_icon">#F9D57B</color>
 </resources>

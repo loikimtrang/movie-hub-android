@@ -3,11 +3,9 @@ package com.movie_hub.android.ui.main.account.manage_account;
 import android.annotation.SuppressLint;
 import android.net.Uri;
 import android.os.Bundle;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.lifecycle.MutableLiveData;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.bumptech.glide.Glide;
@@ -129,7 +127,7 @@ public class ManageAccountActivity extends BaseActivity<ActivityManageAccountBin
 
     @Override
     public int getStatusBarColor() {
-        return R.color.account_header;
+        return R.color.header_app;
     }
 
     @Override

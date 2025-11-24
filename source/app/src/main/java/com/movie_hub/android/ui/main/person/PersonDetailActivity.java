@@ -47,11 +47,19 @@ public class PersonDetailActivity extends BaseActivity<ActivityPersonDetailBindi
     public void setUpView() {
         viewBinding.name.setText(viewModel.person.getName());
 
+        String imageUrl = Constants.MEDIA_URL + viewModel.person.getAvatarPath();
+
         Glide.with(this)
-                .load(Constants.MEDIA_URL + viewModel.person.getAvatarPath())
+                .load(imageUrl)
+                .transform(new jp.wasabeef.glide.transformations.BlurTransformation(25, 3)) // radius=25, sampling=3
+                .into(viewBinding.bgBlur);
+
+        Glide.with(this)
+                .load(imageUrl)
                 .placeholder(R.drawable.place_holder_2_3)
                 .error(R.drawable.place_holder_2_3)
                 .into(viewBinding.image);
+
         
         setUpTab();
     }
@@ -108,7 +116,7 @@ public class PersonDetailActivity extends BaseActivity<ActivityPersonDetailBindi
 
     @Override
     public int getStatusBarColor() {
-        return R.color.account_header;
+        return R.color.header_app;
     }
 
     @Override
