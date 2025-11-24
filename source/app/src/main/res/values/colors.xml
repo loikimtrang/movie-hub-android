@@ -62,5 +62,7 @@
     <color name="bg_press">#1AFFFFFF</color>
 
     <color name="bg_tag_season_item">#2D3038</color>
+    <color name="bg_skip_intro">#80000000</color>
+    <color name="bg_skip_intro_press">#99000000</color>
 
 </resources>

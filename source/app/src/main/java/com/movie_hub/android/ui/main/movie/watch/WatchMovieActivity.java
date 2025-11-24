@@ -26,6 +26,7 @@ import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageView;
 import android.widget.SeekBar;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -53,6 +54,7 @@ import androidx.media3.exoplayer.trackselection.DefaultTrackSelector;
 import androidx.media3.ui.AspectRatioFrameLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import com.bumptech.glide.Glide;
 import com.google.common.collect.ImmutableList;
 import com.movie_hub.android.R;
 import com.movie_hub.android.constant.Constants;
@@ -114,6 +116,9 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
     private SeasonItemAdapter seasonItemAdapter;
     private EpisodeItemListHoriAdapter episodeItemListHoriAdapter;
     private SpriteThumbnailManager thumbnailManager;
+
+    boolean isSeries = false;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -128,6 +133,9 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
             viewModel.movieDetails = movie;
 
             thumbnailManager = new SpriteThumbnailManager(this, viewBinding.ivThumbnailPreview, viewBinding.thumbnailPreviewContainer);
+
+            isSeries = viewModel.movieDetails != null &&
+                    viewModel.movieDetails.getType() == Constants.TYPE_MOVIE_SERIES;
 
             if (viewModel.movieDetails.getType() == Constants.TYPE_MOVIE_SINGLE) {
                 viewModel.nowVideoPlay = viewModel.movieDetails.getSeasons().get(viewModel.movieDetails.getSeasons().size() - 1).getVideo();
@@ -180,7 +188,7 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
             viewBinding.btnNextEpisode.setVisibility(View.GONE);
         } else {
             viewBinding.btnNextEpisode.setVisibility(View.VISIBLE);
-
+            setUpNextEpisodeLayout();
         }
     }
 
@@ -445,13 +453,56 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
         viewModel.setPlaying(isPlaying);
         updatePlayPauseIcons(isPlaying);
     }
+
+    private int countdown = 5;
+    private Handler nextEpisodeHandler = new Handler(Looper.getMainLooper());
+    private Runnable nextEpisodeRunnable;
+
     public void handleEndVideo() {
         hideLoadingVideo();
         updatePlayPauseIcons(false);
         viewModel.setPlaying(false);
         viewBinding.btnPlayPause.setVisibility(View.GONE);
         viewBinding.btnReplay.setVisibility(View.VISIBLE);
+
+        if (!isLastEpisode() && isSeries) {
+            toggleControls();
+            viewBinding.layoutNextEpisode.layoutNextEpisode.setVisibility(View.VISIBLE);
+            countdown = 5;
+            updateNextEpisodeButtonText();
+            startNextEpisodeCountdown();
+        }
     }
+
+    private void startNextEpisodeCountdown() {
+        nextEpisodeRunnable = new Runnable() {
+            @Override
+            public void run() {
+                countdown--;
+                if (countdown > 0) {
+                    updateNextEpisodeButtonText();
+                    nextEpisodeHandler.postDelayed(this, 1000);
+                } else {
+                    viewBinding.layoutNextEpisode.layoutNextEpisode.setVisibility(View.GONE);
+                    onNextEpisodeClick();
+                    stopNextEpisodeCountdown();
+                }
+            }
+        };
+        nextEpisodeHandler.postDelayed(nextEpisodeRunnable, 1000);
+    }
+
+    private void stopNextEpisodeCountdown() {
+        if (nextEpisodeHandler != null && nextEpisodeRunnable != null) {
+            nextEpisodeHandler.removeCallbacks(nextEpisodeRunnable);
+        }
+    }
+
+    @SuppressLint("SetTextI18n")
+    private void updateNextEpisodeButtonText() {
+        viewBinding.layoutNextEpisode.tvCountDown.setText(getString(R.string.next_episode) + " (" + countdown + ")");
+    }
+
 
     // region === Set Up Seek Bar Video ===
     public void setupSeekBar() {
@@ -476,7 +527,48 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
                         viewBinding.seekBar.setProgress(progress);
                         viewBinding.tvCurrentTime.setText(formatTime(current));
                     }
+
+                    if (viewModel.nowVideoPlay != null) {
+                        Long introStart = viewModel.nowVideoPlay.getIntroStart();
+                        Long introEnd = viewModel.nowVideoPlay.getIntroEnd();
+
+                        if (introStart != null && introEnd != null) {
+                            long introStartMs = introStart * 1000L;
+                            long introEndMs = introEnd * 1000L;
+
+                             if (current >= introStartMs && current < introEndMs && viewBinding.layoutSeekBar.getVisibility() != View.VISIBLE) {
+                                if (viewBinding.btnSkipIntro.getVisibility() != View.VISIBLE) {
+                                    viewBinding.btnSkipIntro.setVisibility(View.VISIBLE);
+                                }
+                            } else {
+                                if (viewBinding.btnSkipIntro.getVisibility() == View.VISIBLE) {
+                                    viewBinding.btnSkipIntro.setVisibility(View.GONE);
+                                }
+                            }
+                        }
+                    }
+
+                    if (viewModel.nowVideoPlay != null && isSeries && !isLastEpisode()) {
+                        Long outroStart = viewModel.nowVideoPlay.getOutroStart();
+
+                        if (outroStart != null && player != null) {
+                            long outroStartMs = outroStart * 1000L;
+                            long outroEndMs = player.getDuration();
+
+                            if (current >= outroStartMs && current < outroEndMs && viewBinding.layoutSeekBar.getVisibility() != View.VISIBLE) {
+                                if (viewBinding.btnSkipOutro.getVisibility() != View.VISIBLE) {
+                                    viewBinding.btnSkipOutro.setVisibility(View.VISIBLE);
+                                }
+                            } else {
+                                if (viewBinding.btnSkipOutro.getVisibility() == View.VISIBLE) {
+                                    viewBinding.btnSkipOutro.setVisibility(View.GONE);
+                                }
+                            }
+                        }
+                    }
                 }
+
+
                 seekHandler.postDelayed(this, 500);
             }
         };
@@ -594,6 +686,8 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
             @Override
             public boolean onDoubleTap(@NonNull MotionEvent e) {
                 if (!isVideoReadyWhenStartActivity || isLockScreen) return true;
+                viewBinding.btnSkipOutro.setVisibility(View.GONE);
+                viewBinding.btnSkipIntro.setVisibility(View.GONE);
                 viewBinding.layoutSeekBar.setVisibility(View.VISIBLE);
                 viewBinding.controlVideo.setVisibility(View.GONE);
                 viewBinding.layoutBrightness.setVisibility(View.GONE);
@@ -643,6 +737,7 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
 
             @Override
             public boolean onScale(ScaleGestureDetector detector) {
+                if (isLockScreen) return true;
                 float scale = detector.getCurrentSpan() / startSpan;
                 if (scale > 1.1f && !isZoomed) {
                     isZoomed = true;
@@ -656,6 +751,7 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
                 return true;
             }
         });
+
         viewBinding.playerView.setOnTouchListener((v, event) -> {
             gestureDetector.onTouchEvent(event);
             scaleGestureDetector.onTouchEvent(event);
@@ -771,6 +867,8 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
+                viewBinding.btnSkipOutro.setVisibility(View.GONE);
+                viewBinding.btnSkipIntro.setVisibility(View.GONE);
                 viewBinding.controlVideo.setVisibility(View.VISIBLE);
                 viewBinding.layoutSeekBar.setVisibility(View.VISIBLE);
                 viewBinding.layoutVolume.setVisibility(View.VISIBLE);
@@ -807,6 +905,8 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
+                viewBinding.btnSkipOutro.setVisibility(View.GONE);
+                viewBinding.btnSkipIntro.setVisibility(View.GONE);
                 viewBinding.controlVideo.setVisibility(View.VISIBLE);
                 viewBinding.layoutSeekBar.setVisibility(View.VISIBLE);
                 viewBinding.layoutBrightness.setVisibility(View.VISIBLE);
@@ -825,6 +925,10 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
     };
     private void toggleControls() {
         boolean show = viewBinding.controlVideo.getVisibility() != View.VISIBLE;
+        if (show) {
+            viewBinding.btnSkipOutro.setVisibility(View.GONE);
+            viewBinding.btnSkipIntro.setVisibility(View.GONE);
+        }
         viewBinding.controlVideo.setVisibility(show ? View.VISIBLE : View.GONE);
         if (!isLockScreen) viewBinding.layoutSeekBar.setVisibility(show ? View.VISIBLE : View.GONE);
         if (!isLockScreen) viewBinding.layoutBrightness.setVisibility(show ? View.VISIBLE : View.GONE);
@@ -862,6 +966,8 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
     public void handleLockScreen() {
         if (isLockScreen) {
             isLockScreen = false;
+            viewBinding.btnSkipOutro.setVisibility(View.GONE);
+            viewBinding.btnSkipIntro.setVisibility(View.GONE);
             viewBinding.btnUnLockScreen.setVisibility(View.GONE);
             viewBinding.btnLockScreen.setVisibility(View.VISIBLE);
             viewBinding.buttonControlVideo.setVisibility(View.VISIBLE);
@@ -1069,6 +1175,10 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
             countResetHandler.removeCallbacksAndMessages(null);
         }
 
+        if (nextEpisodeHandler != null) {
+            nextEpisodeHandler.removeCallbacksAndMessages(null);
+        }
+
         stopSeekBarUpdate();
         stopVolumeObserver();
 
@@ -1138,10 +1248,45 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
                 toggleControls();
                 player.play();
                 break;
+            case R.id.btn_skip_intro:
+                handleSkipIntro();
+                break;
+
+            case R.id.btn_skip_outro:
+                handleSkipOutro();
+                break;
+
+            case R.id.btn_close_next_episode:
+                viewBinding.layoutNextEpisode.layoutNextEpisode.setVisibility(View.GONE);
+                stopNextEpisodeCountdown();
+                break;
+            case R.id.btn_layout_next_episode:
+                viewBinding.layoutNextEpisode.layoutNextEpisode.setVisibility(View.GONE);
+                stopNextEpisodeCountdown();
+                onNextEpisodeClick();
+                break;
             default:
                 break;
         }
     }
+    private void handleSkipIntro() {
+        if (viewModel.nowVideoPlay != null && viewModel.nowVideoPlay.getIntroEnd() != null) {
+            long introEndMs = viewModel.nowVideoPlay.getIntroEnd() * 1000L;
+            player.seekTo(introEndMs);
+            viewBinding.btnSkipIntro.setVisibility(View.GONE);
+        }
+    }
+
+    private void handleSkipOutro() {
+        if (viewModel.nowVideoPlay == null) return;
+
+        if (isSeries && !isLastEpisode()) {
+            viewBinding.btnSkipOutro.setVisibility(View.GONE);
+            onNextEpisodeClick();
+        }
+    }
+
+
     @Override
     public void onQualityClicked() {
         showSettingsQualityBottomSheet();
@@ -1380,6 +1525,24 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
         setUpViewForSeriesMovie();
         changeEpisode(getVideoUri(viewModel.nowVideoPlay));
         toggleControls();
+    }
+
+    public void setUpNextEpisodeLayout() {
+        if (getNextEpisode() == null) return;
+
+        String img = "";
+
+        if (getNextEpisode().getThumbnailUrl() != null) {
+            img = getNextEpisode().getThumbnailUrl();
+        } else {
+            img = getNextEpisode().getVideo().getThumbnailUrl();
+        }
+
+        Glide.with(this)
+                .load(img)
+                .placeholder(R.drawable.place_holder_16_9)
+                .error(R.drawable.place_holder_16_9)
+                .into(viewBinding.layoutNextEpisode.image);
     }
 
     @Override

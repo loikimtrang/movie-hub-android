@@ -5,7 +5,8 @@
     android:layout_height="wrap_content"
     android:background="@drawable/bg_dialog"
     android:gravity="center"
-    android:layout_marginHorizontal="@dimen/_20sdp">
+    android:layout_marginHorizontal="@dimen/_20sdp"
+    android:id="@+id/layout_dialog">
 
     <TextView
         android:id="@+id/dialog_message"
@@ -31,11 +32,12 @@
             android:focusable="true"
             android:text="@string/confirm"
             style="@style/Text_10_Bold"
-            android:background="@drawable/bg_btn_yellow_radius_6sdp"
+            android:background="@drawable/bg_btn_yellow_radius_3sdp"
             android:gravity="center"
             android:layout_marginStart="@dimen/_10sdp"
             android:layout_marginEnd="@dimen/_5sdp"
-            android:textColor="@color/black"/>
+            android:textColor="@color/black"
+            android:onClick="onClick"/>
 
         <TextView
             android:id="@+id/btn_cancel"
@@ -47,10 +49,11 @@
             android:text="@string/cancel"
             android:textColor="@color/black"
             style="@style/Text_10_Bold"
-            android:background="@drawable/bg_btn_white_radius_6sdp"
+            android:background="@drawable/bg_btn_white_radius_3sdp"
             android:gravity="center"
             android:layout_marginStart="@dimen/_5sdp"
-            android:layout_marginEnd="@dimen/_10sdp"/>
+            android:layout_marginEnd="@dimen/_10sdp"
+            android:onClick="onClick"/>
 
     </LinearLayout>
 

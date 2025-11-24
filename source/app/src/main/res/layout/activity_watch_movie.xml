@@ -506,9 +506,47 @@
                 </FrameLayout>
             </LinearLayout>
 
-
-
         </RelativeLayout>
+
+        <FrameLayout
+            android:id="@+id/btn_skip_intro"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:layout_marginBottom="@dimen/_50sdp"
+            android:layout_marginStart="@dimen/_24sdp"
+            android:padding="@dimen/_6sdp"
+            android:background="@drawable/bg_btn_skip_intro"
+            android:visibility="gone"
+            android:clickable="true"
+            android:focusable="true"
+            android:onClick="onClick">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/skip_intro"
+                style="@style/Text_12_Normal"/>
+        </FrameLayout>
+
+        <FrameLayout
+            android:id="@+id/btn_skip_outro"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_marginBottom="@dimen/_50sdp"
+            android:layout_marginEnd="@dimen/_24sdp"
+            android:padding="@dimen/_6sdp"
+            android:background="@drawable/bg_btn_skip_intro"
+            android:visibility="gone"
+            android:clickable="true"
+            android:focusable="true"
+            android:onClick="onClick">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/next_episode"
+                style="@style/Text_12_Normal"/>
+        </FrameLayout>
 
         <LinearLayout
             android:id="@+id/layout_seek_bar"
@@ -525,7 +563,7 @@
                 android:id="@+id/thumbnail_preview_container"
                 android:layout_width="@dimen/_200sdp"
                 android:layout_height="wrap_content"
-                android:visibility="gone"
+                android:visibility="visible"
                 android:clipChildren="false"
                 android:clipToPadding="false"
                 android:background="@android:color/transparent"
@@ -663,6 +701,15 @@
             app:a="@{a}"
             />
 
+        <include
+            layout="@layout/layout_next_episode"
+            android:id="@+id/layout_next_episode"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:vm="@{vm}"
+            app:a="@{a}"
+            />
+
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -744,7 +791,7 @@
                         android:focusable="true"
                         android:text="@string/confirm"
                         style="@style/Text_10_Bold"
-                        android:background="@drawable/bg_btn_yellow_radius_6sdp"
+                        android:background="@drawable/bg_btn_yellow_radius_3sdp"
                         android:gravity="center"
                         android:layout_marginStart="@dimen/_10sdp"
                         android:layout_marginEnd="@dimen/_5sdp"
@@ -762,7 +809,7 @@
                         android:text="@string/cancel"
                         android:textColor="@color/black"
                         style="@style/Text_10_Bold"
-                        android:background="@drawable/bg_btn_white_radius_6sdp"
+                        android:background="@drawable/bg_btn_white_radius_3sdp"
                         android:gravity="center"
                         android:layout_marginStart="@dimen/_5sdp"
                         android:layout_marginEnd="@dimen/_10sdp"

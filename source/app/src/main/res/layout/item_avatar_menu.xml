@@ -2,8 +2,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="@dimen/_45sdp"
-    android:background="@color/bg_app"
-    android:foreground="?attr/selectableItemBackground"
+    android:background="@drawable/bg_person_item"
     android:clickable="true"
     android:focusable="true"
     android:paddingHorizontal="@dimen/_12sdp">

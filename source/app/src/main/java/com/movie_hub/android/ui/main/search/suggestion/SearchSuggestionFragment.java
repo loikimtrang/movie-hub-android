@@ -18,6 +18,7 @@ import com.movie_hub.android.ui.main.MainActivity;
 import com.movie_hub.android.ui.main.MainCallback;
 import com.movie_hub.android.ui.main.custom.HorizontalSpacingItemDecoration;
 import com.movie_hub.android.ui.main.movie.detail.MovieDetailActivity;
+import com.movie_hub.android.ui.main.person.PersonDetailActivity;
 import com.movie_hub.android.ui.main.search.suggestion.adapter.ActorAdapter;
 import com.movie_hub.android.ui.main.search.suggestion.adapter.MovieSuggestAdapter;
 import com.movie_hub.android.utils.GsonUtils;
@@ -67,6 +68,7 @@ public class SearchSuggestionFragment extends BaseFragment<FragmentSearchSuggest
 
         PersonRequest personRequest = new PersonRequest();
         personRequest.setName(keyWord);
+        personRequest.setKind(1);
         getListActor(personRequest);
     }
 
@@ -154,7 +156,41 @@ public class SearchSuggestionFragment extends BaseFragment<FragmentSearchSuggest
 
     @Override
     public void onActorClick(PersonResponse actor) {
+        getPerson(actor.getId());
+    }
 
+    public void getPerson(Long id) {
+        ((MainActivity) requireActivity()).showLoading();
+        viewModel.getPerson(new MainCallback<PersonResponse>() {
+            @Override
+            public void doError(Throwable error) {
+                ((MainActivity) requireActivity()).hideLoading();
+                showError(getString(R.string.an_error_occurred));
+            }
+
+            @Override
+            public void doSuccess() {
+                ((MainActivity) requireActivity()).hideLoading();
+            }
+
+            @Override
+            public void doSuccess(PersonResponse data) {
+                ((MainActivity) requireActivity()).hideLoading();
+                navigateToPersonDetail(data);
+            }
+
+            @Override
+            public void doFail() {
+                showError(getString(R.string.an_error_occurred));
+                ((MainActivity) requireActivity()).hideLoading();
+            }
+        }, id);
+    }
+
+    public void navigateToPersonDetail(PersonResponse data) {
+        Intent intent = new Intent(getContext(), PersonDetailActivity.class);
+        intent.putExtra("person", GsonUtils.toJson(data));
+        startActivity(intent);
     }
 
     @Override

@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Rổ Phim Clone</string>
+    <string name="app_name">Movie Hub</string>
     <string name="msg_loading">Xin chờ...</string>
 
     <!--Network error-->
@@ -152,5 +152,37 @@
     <string name="enter_otp">Vui lòng nhập đầy đủ mã OTP</string>
     <string name="otp_not_match">Mã OTP không khớp</string>
     <string name="otp_error_please_try_again">Lỗi xác minh OTP. Vui lòng thử lại.</string>
-
+    <string name="skip_intro">Bỏ qua giới thiệu</string>
+    <string name="check_for_update">Kiểm tra bản cập nhật</string>
+    <string name="current_version">Phiên bản hiện tại</string>
+    <string name="prompt_update">Bạn có muốn cập nhật</string>
+    <string name="new_update_available">Đã có bản cập nhật mới, bạn có muốn cập nhật?</string>
+    <string name="no_memory_permission">Không có quyền đọc bộ nhớ, không thể cập nhật!</string>
+    <string name="loading_update">Đang tải bản cập nhật…</string>
+    <string name="app_will_auto">App sẽ tự động cài sau khi tải xong.</string>
+    <string name="current_version_is_lasted">Phiên bản hiện tại là phiên bản mới nhất.</string>
+    <string name="app_will_update">Đang tải xuống, ứng dụng sẽ được cập nhật khi hoàn tất.</string>
+    <string name="download_failed">Tải thất bại</string>
+    <string name="please_update">Phiên bản mới đã có sẵn, vui lòng cập nhật</string>
+    <string name="movie_info">Thông tin phim</string>
+    <string name="introduction">Giới thiệu:</string>
+    <string name="director">Đạo diễn:</string>
+    <string name="duration">Thời lượng:</string>
+    <string name="country">Quốc gia:</string>
+    <string name="release_year">Năm sản xuất:</string>
+    <string name="age_rating">Độ tuổi:</string>
+    <string name="episode_if">Tập:</string>
+    <string name="season_if">Mùa:</string>
+    <string name="age_rating_age18">Phân loại theo quy định địa phương</string>
+    <string name="age_rating_g">Dành cho mọi lứa tuổi</string>
+    <string name="age_rating_nc17">Cấm khán giả 17 tuổi trở xuống</string>
+    <string name="age_rating_pg">Khuyến nghị có sự hướng dẫn của phụ huynh</string>
+    <string name="age_rating_pg13">Không dành cho trẻ dưới 13 tuổi</string>
+    <string name="age_rating_r">Hạn chế (dưới 17 tuổi cần có người lớn đi kèm)</string>
+    <string name="other_name_display">Tên gọi khác:</string>
+    <string name="gender_display">Giới tính:</string>
+    <string name="birthday_display">Ngày sinh:</string>
+    <string name="info_display">Thông tin</string>
+    <string name="acted_display">Phim đã đóng</string>
+    <string name="updating">Đang cập nhật</string>
 </resources>

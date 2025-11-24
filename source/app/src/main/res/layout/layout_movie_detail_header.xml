@@ -168,10 +168,14 @@
                     android:ellipsize="end"/>
 
                 <FrameLayout
+                    android:id="@+id/btn_movie_details"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:layout_gravity="center">
+                    android:layout_gravity="center"
+                    android:onClick="onClick"
+                    android:clickable="true"
+                    android:focusable="true">
 
                     <LinearLayout
                         android:layout_width="wrap_content"

@@ -291,4 +291,8 @@ public abstract class BaseActivity<B extends ViewDataBinding, V extends BaseView
     public void showError(String message) {
         new ToastMessage(ToastMessage.TYPE_WARNING, message).showMessage(this);
     }
+
+    public void showMgs(int type, String mgs) {
+        new ToastMessage(type,mgs).showMessage(this);
+    }
 }

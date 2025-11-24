@@ -36,7 +36,8 @@ public class UnLoginAccountFragment extends BaseFragment<FragmentUnLoginAccountB
                 new MenuItemModel(R.drawable.ic_heart, R.string.menu_favorites),
                 new MenuItemModel(R.drawable.ic_policy, R.string.menu_privacy_policy),
                 new MenuItemModel(R.drawable.ic_question_contact, R.string.menu_contact),
-                new MenuItemModel(R.drawable.ic_language, R.string.menu_language)
+                new MenuItemModel(R.drawable.ic_language, R.string.menu_language),
+                new MenuItemModel(R.drawable.ic_update_app, R.string.check_for_update)
         );
 
         adapter = new AccountMenuAdapter(menuItems, this);
@@ -74,10 +75,9 @@ public class UnLoginAccountFragment extends BaseFragment<FragmentUnLoginAccountB
     public void onItemClick(MenuItemModel item) {
         switch (item.title) {
             case R.string.menu_watch_now:
-                break;
             case R.string.menu_my_movies:
-                break;
             case R.string.menu_favorites:
+                onLoginClick();
                 break;
             case R.string.menu_privacy_policy:
                 break;
@@ -85,6 +85,9 @@ public class UnLoginAccountFragment extends BaseFragment<FragmentUnLoginAccountB
                 break;
             case R.string.menu_language:
                 ((MainActivity) requireActivity()).navigateToLanguage();
+                break;
+            case R.string.check_for_update:
+                ((MainActivity) requireActivity()).navigateToCheckUpdate();
                 break;
         }
     }

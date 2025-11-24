@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
+    <data>
+        <variable
+            name="f"
+            type="com.movie_hub.android.ui.main.person.fragment.MoviesInvolvedFragment"/>
+        <variable
+            name="vm"
+            type="com.movie_hub.android.ui.main.person.fragment.MoviesInvolvedFragmentViewModel"/>
+
+        <import type="android.view.View"/>
+    </data>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/bg_app">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_movie"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/_12sdp"/>
+
+    </FrameLayout>
+
+</layout>

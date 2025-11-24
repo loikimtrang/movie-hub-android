@@ -223,6 +223,7 @@
                 android:background="@color/bg_app"
                 android:layout_below="@+id/layout_trailer_poster">
 
+
                 <com.google.android.material.appbar.AppBarLayout
                     android:id="@+id/appBar"
                     android:layout_width="match_parent"
@@ -230,14 +231,13 @@
                     android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
 
                     <include
-                        layout="@layout/layout_movie_detail_header"
                         android:id="@+id/includeMovieHeader"
+                        layout="@layout/layout_movie_detail_header"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        app:vm="@{vm}"
                         app:a="@{a}"
                         app:layout_scrollFlags="scroll|exitUntilCollapsed"
-                        />
+                        app:vm="@{vm}" />
 
                     <com.google.android.material.tabs.TabLayout
                         android:id="@+id/subTabLayout"
@@ -246,13 +246,12 @@
                         android:background="@color/account_header"
                         app:layout_scrollFlags="enterAlways"
                         app:tabIndicatorColor="@color/tab_select"
+                        app:tabIndicatorFullWidth="false"
                         app:tabSelectedTextColor="@color/tab_select"
-                        app:tabTextColor="@color/tab_un_select"
                         app:tabTextAppearance="@style/Text_12_Normal"
-                        app:tabIndicatorFullWidth="false" />
+                        app:tabTextColor="@color/tab_un_select" />
 
                 </com.google.android.material.appbar.AppBarLayout>
-
 
                 <androidx.viewpager2.widget.ViewPager2
                     android:id="@+id/subViewPager"

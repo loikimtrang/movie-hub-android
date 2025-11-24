@@ -12,5 +12,7 @@
 
     <!-- Dùng cho Environment.getExternalStorageDirectory() (deprecated từ Android Q) -->
     <external-path name="external_storage_root" path="." />
-
+    <external-path
+        name="download"
+        path="Download/" />
 </paths>

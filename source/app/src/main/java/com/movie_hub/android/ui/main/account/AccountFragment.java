@@ -92,7 +92,8 @@ public class AccountFragment extends BaseFragment<FragmentAccountBinding, Accoun
                 new MenuItemModel(R.drawable.ic_heart, R.string.menu_favorites),
                 new MenuItemModel(R.drawable.ic_policy, R.string.menu_privacy_policy),
                 new MenuItemModel(R.drawable.ic_question_contact, R.string.menu_contact),
-                new MenuItemModel(R.drawable.ic_language, R.string.menu_language)
+                new MenuItemModel(R.drawable.ic_language, R.string.menu_language),
+                new MenuItemModel(R.drawable.ic_update_app, R.string.check_for_update)
         );
 
         adapter = new AccountMenuAdapter(menuItems, this);
@@ -121,6 +122,8 @@ public class AccountFragment extends BaseFragment<FragmentAccountBinding, Accoun
                 break;
             case R.string.menu_language:
                 ((MainActivity) requireActivity()).navigateToLanguage();
+            case R.string.check_for_update:
+                ((MainActivity) requireActivity()).navigateToCheckUpdate();
                 break;
         }
     }

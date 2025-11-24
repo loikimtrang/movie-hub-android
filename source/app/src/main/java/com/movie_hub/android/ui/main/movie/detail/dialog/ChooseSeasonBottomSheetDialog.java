@@ -82,10 +82,6 @@ public class ChooseSeasonBottomSheetDialog extends BottomSheetDialog implements 
         window.setStatusBarColor(Color.TRANSPARENT);
         window.setNavigationBarColor(getContext().getColor(R.color.bg_season));
 
-        // Tự động đổi icon navigation bar thành trắng (phù hợp với nền tối)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
-        }
 
         View bottomSheet = findViewById(com.google.android.material.R.id.design_bottom_sheet);
         if (bottomSheet != null) {

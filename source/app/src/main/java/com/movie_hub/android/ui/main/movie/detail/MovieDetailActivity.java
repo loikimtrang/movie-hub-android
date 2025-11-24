@@ -41,11 +41,13 @@ import com.movie_hub.android.ui.base.activity.BaseActivity;
 import com.movie_hub.android.ui.base.activity.SystemBarColorProvider;
 import com.movie_hub.android.ui.main.movie.detail.adapter.MovieDetailTabAdapter;
 import com.movie_hub.android.ui.main.movie.detail.adapter.TagCategoryAdapter;
+import com.movie_hub.android.ui.main.movie.detail.dialog.InformationMovieBottomSheetDialog;
 import com.movie_hub.android.ui.main.movie.detail.fragment.CastFragment;
 import com.movie_hub.android.ui.main.movie.detail.fragment.EpisodesFragment;
 import com.movie_hub.android.ui.main.movie.detail.fragment.RecommendationFragment;
 import com.movie_hub.android.ui.main.movie.watch.WatchMovieActivity;
 import com.movie_hub.android.ui.main.search.topTrending.FlexSpacingItemDecoration;
+import com.movie_hub.android.utils.ClickUtils;
 import com.movie_hub.android.utils.DisplayUtils;
 import com.movie_hub.android.utils.GsonUtils;
 import com.movie_hub.android.utils.HtmlUtils;
@@ -436,10 +438,31 @@ public class MovieDetailActivity extends BaseActivity<ActivityMovieDetailBinding
             case R.id.btn_play_pause:
                 updatePlayPauseState(!player.isPlaying());
                 break;
+            case R.id.btn_movie_details:
+                showMovieDetailsBottomSheet();
+                break;
             default:
                 break;
         }
     }
+
+    public void showMovieDetailsBottomSheet() {
+        ClickUtils.debounceClick(viewBinding.includeMovieHeader.btnMovieDetails);
+        if (viewModel.movieDetails == null) return;
+
+        InformationMovieBottomSheetDialog sheet =
+                new InformationMovieBottomSheetDialog(
+                        this,
+                        viewModel.movieDetails
+                );
+
+        sheet.show();
+
+        if (sheet.getWindow() != null) {
+            sheet.getWindow().getDecorView().post(sheet::setupWindow);
+        }
+    }
+
     public void navigateToWatchMovieActivity(MovieItemResponse episode) {
         viewModel.showLoading();
         Intent intent = new Intent(this, WatchMovieActivity.class);

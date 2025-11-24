@@ -68,6 +68,16 @@
             android:screenOrientation="portrait"
             android:exported="true"/>
 
+        <activity android:name=".ui.main.person.PersonDetailActivity"
+            android:windowSoftInputMode="adjustResize"
+            android:screenOrientation="portrait"
+            android:exported="true"/>
+
+        <activity android:name=".ui.main.account.updateapp.CheckUpdateActivity"
+            android:windowSoftInputMode="adjustResize"
+            android:screenOrientation="portrait"
+            android:exported="true"/>
+
         <activity android:name=".ui.main.account.manage_account.ManageAccountActivity"/>
         <activity android:name=".ui.main.movie.detail.MovieDetailActivity"
             android:screenOrientation="portrait"
@@ -107,6 +117,8 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/provider_path" />
         </provider>
+
+
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />

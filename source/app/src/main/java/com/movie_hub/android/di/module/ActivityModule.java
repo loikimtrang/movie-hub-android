@@ -15,9 +15,11 @@ import com.movie_hub.android.ui.main.account.language.LanguageViewModel;
 import com.movie_hub.android.ui.main.account.login.LoginViewModel;
 import com.movie_hub.android.ui.main.account.manage_account.ManageAccountViewModel;
 import com.movie_hub.android.ui.main.account.register.RegisterViewModel;
+import com.movie_hub.android.ui.main.account.updateapp.CheckUpdateViewModel;
 import com.movie_hub.android.ui.main.account.verifyotp.VerifyOtpViewModel;
 import com.movie_hub.android.ui.main.movie.detail.MovieDetailViewModel;
 import com.movie_hub.android.ui.main.movie.watch.WatchMovieViewModel;
+import com.movie_hub.android.ui.main.person.PersonDetailViewModel;
 import com.movie_hub.android.ui.main.splash.SplashViewModel;
 import com.movie_hub.android.utils.GetInfo;
 
@@ -118,5 +120,21 @@ public class ActivityModule {
         Supplier<VerifyOtpViewModel> supplier = () -> new VerifyOtpViewModel(repository, (MVVMApplication)application);
         ViewModelProviderFactory<VerifyOtpViewModel> factory = new ViewModelProviderFactory<>(VerifyOtpViewModel.class, supplier);
         return new ViewModelProvider(activity, factory).get(VerifyOtpViewModel.class);
+    }
+
+    @Provides
+    @ActivityScope
+    CheckUpdateViewModel provideCheckUpdateViewModel(Repository repository, Context application) {
+        Supplier<CheckUpdateViewModel> supplier = () -> new CheckUpdateViewModel(repository, (MVVMApplication)application);
+        ViewModelProviderFactory<CheckUpdateViewModel> factory = new ViewModelProviderFactory<>(CheckUpdateViewModel.class, supplier);
+        return new ViewModelProvider(activity, factory).get(CheckUpdateViewModel.class);
+    }
+
+    @Provides
+    @ActivityScope
+    PersonDetailViewModel providePersonDetailViewModel(Repository repository, Context application) {
+        Supplier<PersonDetailViewModel> supplier = () -> new PersonDetailViewModel(repository, (MVVMApplication)application);
+        ViewModelProviderFactory<PersonDetailViewModel> factory = new ViewModelProviderFactory<>(PersonDetailViewModel.class, supplier);
+        return new ViewModelProvider(activity, factory).get(PersonDetailViewModel.class);
     }
 }

@@ -141,8 +141,12 @@
 
         </FrameLayout>
 
-
-
+        <include
+            layout="@layout/layout_dialog_confirm"
+            android:id="@+id/layout_dialog_confirm"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            />
 
     </RelativeLayout>
 </layout>

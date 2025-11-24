@@ -15,6 +15,7 @@ import com.movie_hub.android.BR;
 import com.movie_hub.android.R;
 import com.movie_hub.android.constant.Constants;
 import com.movie_hub.android.data.model.api.ResponseWrapper;
+import com.movie_hub.android.data.model.api.request.appversion.CheckAppVersionRequest;
 import com.movie_hub.android.data.model.api.request.login.UserLoginRequest;
 import com.movie_hub.android.data.model.api.request.login.UserRegisterRequest;
 import com.movie_hub.android.data.model.api.request.user.UserLoginGoogleRequest;
@@ -30,6 +31,7 @@ import com.movie_hub.android.ui.main.account.UnLoginAccountFragment;
 import com.movie_hub.android.ui.main.account.language.LanguageActivity;
 import com.movie_hub.android.ui.main.account.login.LoginActivity;
 import com.movie_hub.android.ui.main.account.manage_account.ManageAccountActivity;
+import com.movie_hub.android.ui.main.account.updateapp.CheckUpdateActivity;
 import com.movie_hub.android.ui.main.home.HomeFragment;
 import com.movie_hub.android.ui.main.movie.watch.WatchMovieActivity;
 import com.movie_hub.android.ui.main.schedule.ScheduleFragment;
@@ -133,11 +135,15 @@ public class MainActivity extends BaseActivity<ActivityMainBinding, MainViewMode
         }
         active = target;
     }
-
     public void navigateToLanguage() {
         Intent intent = new Intent(this, LanguageActivity.class);
         startActivityForResult(intent, Constants.REQUEST_LANGUAGE);
     }
+    public void navigateToCheckUpdate() {
+        Intent intent = new Intent(this, CheckUpdateActivity.class);
+        startActivityForResult(intent, Constants.REQUEST_LANGUAGE);
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);

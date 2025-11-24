@@ -1,5 +1,6 @@
 package com.movie_hub.android.ui.main.movie.detail.fragment;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 
@@ -24,6 +25,8 @@ import com.movie_hub.android.ui.main.movie.detail.MovieDetailActivity;
 import com.movie_hub.android.ui.main.movie.detail.MovieDetailViewModel;
 import com.movie_hub.android.ui.main.movie.detail.adapter.MoviePersonAdapter;
 import com.movie_hub.android.ui.main.movie.detail.adapter.PersonAdapter;
+import com.movie_hub.android.ui.main.person.PersonDetailActivity;
+import com.movie_hub.android.utils.GsonUtils;
 
 import java.net.ConnectException;
 import java.net.SocketTimeoutException;
@@ -139,6 +142,7 @@ public class CastFragment extends BaseFragment<FragmentCastBinding, CastFragment
         ((MainActivity) requireActivity()).showLoading();
         PersonRequest personRequest = new PersonRequest();
         personRequest.setName(keyword);
+        personRequest.setKind(1);
 
         viewModel.getListPerson(new MainCallback<List<PersonResponse>>() {
             @Override public void doSuccess(List<PersonResponse> data) {
@@ -182,7 +186,9 @@ public class CastFragment extends BaseFragment<FragmentCastBinding, CastFragment
 
     @Override
     public void onActorClick(MoviePersonResponse actor) {
-
+        if (actor.getPerson() != null) {
+            getPerson(actor.getPerson().getId());
+        }
     }
 
     @Override
@@ -192,7 +198,57 @@ public class CastFragment extends BaseFragment<FragmentCastBinding, CastFragment
 
     @Override
     public void onPersonClick(PersonResponse actor) {
+        getPerson(actor.getId());
+    }
 
+    public void getPerson(Long id) {
+        showLoading();
+        viewModel.getPerson(new MainCallback<PersonResponse>() {
+            @Override
+            public void doError(Throwable error) {
+                hideLoading();
+                showError(getString(R.string.an_error_occurred));
+            }
+
+            @Override
+            public void doSuccess() {
+                hideLoading();
+            }
+
+            @Override
+            public void doSuccess(PersonResponse data) {
+                hideLoading();
+                navigateToPersonDetail(data);
+            }
+
+            @Override
+            public void doFail() {
+                showError(getString(R.string.an_error_occurred));
+                hideLoading();
+            }
+        }, id);
+    }
+
+    public void navigateToPersonDetail(PersonResponse data) {
+        Intent intent = new Intent(getContext(), PersonDetailActivity.class);
+        intent.putExtra("person", GsonUtils.toJson(data));
+        startActivity(intent);
+    }
+
+    private void showLoading() {
+        if (displayFrom == TYPE_SEARCH && requireActivity() instanceof MainActivity) {
+            ((MainActivity) requireActivity()).showLoading();
+        } else if (requireActivity() instanceof MovieDetailActivity) {
+            ((MovieDetailActivity) requireActivity()).showLoading();
+        }
+    }
+
+    private void hideLoading() {
+        if (displayFrom == TYPE_SEARCH && requireActivity() instanceof MainActivity) {
+            ((MainActivity) requireActivity()).hideLoading();
+        } else if (requireActivity() instanceof MovieDetailActivity) {
+            ((MovieDetailActivity) requireActivity()).hideLoading();
+        }
     }
 }
 

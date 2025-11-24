@@ -88,7 +88,6 @@ public class EpisodesFragment extends BaseFragment<FragmentEpisodeBinding, Episo
         }
     }
 
-
     @Override
     public int getBindingVariable() {
         return BR.vm;

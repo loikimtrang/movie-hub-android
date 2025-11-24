@@ -202,8 +202,8 @@ public class SearchFragment extends BaseFragment<FragmentSearchBinding, SearchVi
         binding.search.setText(keyword);
         binding.search.setSelection(keyword.length());
 
-        animateClearIcon(false);
-        isClearIconVisible = false;
+        animateClearIcon(true);
+        isClearIconVisible = true;
         viewModel.insertKeyWord(keyword);
         showResult(keyword);
 

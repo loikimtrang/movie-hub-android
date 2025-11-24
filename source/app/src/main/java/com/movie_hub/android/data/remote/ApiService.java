@@ -11,6 +11,7 @@ import com.movie_hub.android.data.model.api.request.user.UserChangePasswordReque
 import com.movie_hub.android.data.model.api.request.user.UserLoginGoogleRequest;
 import com.movie_hub.android.data.model.api.request.user.UserUpdateProfileRequest;
 import com.movie_hub.android.data.model.api.response.MovieItem.MovieItemResponse;
+import com.movie_hub.android.data.model.api.response.appversion.CheckAppVersionResponse;
 import com.movie_hub.android.data.model.api.response.moviePerson.MoviePersonResponse;
 import com.movie_hub.android.data.model.api.response.person.PersonResponse;
 import com.movie_hub.android.data.model.api.response.login.UserLoginResponse;
@@ -81,7 +82,8 @@ public interface ApiService {
     @GET("v1/person/list")
     Observable<ResponseWrapper<ResponseListObj<PersonResponse>>> getListPerson(@QueryMap Map<String, Object> query);
 
-
+    @GET("v1/person/get/{id}")
+    Observable<ResponseWrapper<PersonResponse>> getPerson(@Path("id") Long id);
     // MOVIE PERSON
     @GET("v1/movie-person/list")
     Observable<ResponseWrapper<ResponseListObj<MoviePersonResponse>>> getListMoviePerson(@QueryMap Map<String, Object> query);
@@ -93,4 +95,8 @@ public interface ApiService {
     @GET("v1/movie-item/get/{id}")
     Observable<ResponseWrapper<MovieItemResponse>> getMovieItem(@Path("id") Long id);
 //    Map<String, Object> query = RequestToMapConverter.convert(movieRequest);
+
+    // APP
+    @GET("v1/app-version/check-version")
+    Observable<ResponseWrapper<CheckAppVersionResponse>> checkVersion(@QueryMap Map<String, Object> query);
 }

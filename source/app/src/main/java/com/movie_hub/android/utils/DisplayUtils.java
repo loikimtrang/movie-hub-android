@@ -73,6 +73,24 @@ public class DisplayUtils {
                 return "N/A";
         }
     }
+    public static String displayAgeRatingDescription(Context context, int ageRating) {
+        switch (ageRating) {
+            case Constants.AGE_RATING_G:
+                return context.getString(R.string.age_rating_g);
+            case Constants.AGE_RATING_PG:
+                return context.getString(R.string.age_rating_pg);
+            case Constants.AGE_RATING_PG13:
+                return context.getString(R.string.age_rating_pg13);
+            case Constants.AGE_RATING_R:
+                return context.getString(R.string.age_rating_r);
+            case Constants.AGE_RATING_NC17:
+                return context.getString(R.string.age_rating_nc17);
+            case Constants.AGE_RATING_18:
+                return context.getString(R.string.age_rating_age18);
+            default:
+                return "N/A";
+        }
+    }
 
     @SuppressLint("NewApi")
     public static String getYearFromReleaseDate(String releaseDate) {
