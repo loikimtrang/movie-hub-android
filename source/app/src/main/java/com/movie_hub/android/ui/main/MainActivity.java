@@ -28,9 +28,12 @@ import com.movie_hub.android.ui.base.activity.BaseActivity;
 import com.movie_hub.android.ui.base.activity.SystemBarColorProvider;
 import com.movie_hub.android.ui.main.account.AccountFragment;
 import com.movie_hub.android.ui.main.account.UnLoginAccountFragment;
+import com.movie_hub.android.ui.main.account.favourite.FavouriteActivity;
+import com.movie_hub.android.ui.main.account.history.HistoryActivity;
 import com.movie_hub.android.ui.main.account.language.LanguageActivity;
 import com.movie_hub.android.ui.main.account.login.LoginActivity;
 import com.movie_hub.android.ui.main.account.manage_account.ManageAccountActivity;
+import com.movie_hub.android.ui.main.account.playlist.PlayListActivity;
 import com.movie_hub.android.ui.main.account.updateapp.CheckUpdateActivity;
 import com.movie_hub.android.ui.main.home.HomeFragment;
 import com.movie_hub.android.ui.main.movie.watch.WatchMovieActivity;
@@ -141,7 +144,22 @@ public class MainActivity extends BaseActivity<ActivityMainBinding, MainViewMode
     }
     public void navigateToCheckUpdate() {
         Intent intent = new Intent(this, CheckUpdateActivity.class);
-        startActivityForResult(intent, Constants.REQUEST_LANGUAGE);
+        startActivity(intent);
+    }
+
+    public void navigateToPlayList() {
+        Intent intent = new Intent(this, PlayListActivity.class);
+        startActivity(intent);
+    }
+
+    public void navigateToHistory() {
+        Intent intent = new Intent(this, HistoryActivity.class);
+        startActivity(intent);
+    }
+
+    public void navigateToFavourite() {
+        Intent intent = new Intent(this, FavouriteActivity.class);
+        startActivity(intent);
     }
 
     @Override

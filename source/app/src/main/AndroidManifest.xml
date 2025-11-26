@@ -31,12 +31,6 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="28" />
 
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
-    <queries>
-        <intent>
-            <action android:name="android.intent.action.VIEW" />
-            <data android:mimeType="application/vnd.android.package-archive" />
-        </intent>
-    </queries>
     <application
         android:requestLegacyExternalStorage="true"
         android:name="com.movie_hub.android.MVVMApplication"
@@ -69,6 +63,21 @@
             android:exported="true"/>
 
         <activity android:name=".ui.main.account.language.LanguageActivity"
+            android:windowSoftInputMode="adjustResize"
+            android:screenOrientation="portrait"
+            android:exported="true"/>
+
+        <activity android:name=".ui.main.account.favourite.FavouriteActivity"
+            android:windowSoftInputMode="adjustResize"
+            android:screenOrientation="portrait"
+            android:exported="true"/>
+
+        <activity android:name=".ui.main.account.history.HistoryActivity"
+            android:windowSoftInputMode="adjustResize"
+            android:screenOrientation="portrait"
+            android:exported="true"/>
+
+        <activity android:name=".ui.main.account.playlist.PlayListActivity"
             android:windowSoftInputMode="adjustResize"
             android:screenOrientation="portrait"
             android:exported="true"/>

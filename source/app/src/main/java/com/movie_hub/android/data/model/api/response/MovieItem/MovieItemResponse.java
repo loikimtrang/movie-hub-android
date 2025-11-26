@@ -3,6 +3,7 @@ package com.movie_hub.android.data.model.api.response.MovieItem;
 
 import com.movie_hub.android.constant.Constants;
 import com.movie_hub.android.data.model.api.response.movie.MovieResponse;
+import com.movie_hub.android.data.model.api.response.season.SeasonResponse;
 import com.movie_hub.android.data.model.api.response.video.VideoResponse;
 
 import lombok.Data;
@@ -23,6 +24,7 @@ public class MovieItemResponse {
     private VideoResponse video;
     private boolean isPlaying = false;
     private String thumbnailUrl;
+    private SeasonResponse parent;
     public String getThumbnailUrl() {
         return (thumbnailUrl == null || thumbnailUrl.trim().isEmpty())
                 ? null

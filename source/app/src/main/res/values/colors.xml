@@ -47,6 +47,8 @@
     <color name="bg_close">#40000000</color>
     <color name="progress">#FED778</color>
     <color name="bg_progress">#4DFFFFFF</color>
+    <color name="bg_progress_history">#292E35</color>
+    <color name="progress_history">#A5A4A6</color>
     <color name="text_setting">#A0A1AB</color>
     <color name="bg_setting">#272A3B</color>
     <color name="bg_tag_speed">#2A2A36</color>
@@ -65,4 +67,8 @@
     <color name="bg_skip_intro">#80000000</color>
     <color name="bg_skip_intro_press">#99000000</color>
     <color name="bg_select_icon">#F9D57B</color>
+    <color name="text_favourite">#F9524B</color>
+    <color name="bg_btn_favourite">#452729</color>
+
+    <color name="shimmer_placeholder">#e0e0e0</color>
 </resources>

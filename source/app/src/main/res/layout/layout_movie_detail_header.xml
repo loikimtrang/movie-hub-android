@@ -219,14 +219,17 @@
                     android:paddingVertical="@dimen/_6sdp"
                     android:onClick="onClick"
                     android:focusable="true"
-                    android:clickable="true">
+                    android:clickable="true"
+                    android:background="@drawable/bg_btn_press">                    >
 
                     <ImageView
+                        android:id="@+id/ic_favourite"
                         android:layout_width="@dimen/_14sdp"
                         android:layout_height="@dimen/_14sdp"
                         android:src="@drawable/ic_heart"/>
 
                     <TextView
+                        android:id="@+id/tv_favourite"
                         style="@style/Text_10_Normal"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -245,7 +248,8 @@
                     android:paddingVertical="@dimen/_6sdp"
                     android:onClick="onClick"
                     android:focusable="true"
-                    android:clickable="true">
+                    android:clickable="true"
+                    android:background="@drawable/bg_btn_press">
 
                     <ImageView
                         android:layout_width="@dimen/_14sdp"
@@ -271,7 +275,8 @@
                     android:paddingVertical="@dimen/_6sdp"
                     android:onClick="onClick"
                     android:focusable="true"
-                    android:clickable="true">
+                    android:clickable="true"
+                    android:background="@drawable/bg_btn_press">
 
                     <ImageView
                         android:layout_width="@dimen/_14sdp"
@@ -297,7 +302,8 @@
                     android:paddingVertical="@dimen/_6sdp"
                     android:onClick="onClick"
                     android:focusable="true"
-                    android:clickable="true">
+                    android:clickable="true"
+                    android:background="@drawable/bg_btn_press">
 
                     <ImageView
                         android:layout_width="@dimen/_14sdp"
@@ -323,7 +329,8 @@
                     android:paddingVertical="@dimen/_6sdp"
                     android:onClick="onClick"
                     android:focusable="true"
-                    android:clickable="true">
+                    android:clickable="true"
+                    android:background="@drawable/bg_btn_press">
 
                     <ImageView
                         android:layout_width="@dimen/_14sdp"

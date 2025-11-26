@@ -14,7 +14,10 @@ import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.SeekBar;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.media3.common.MediaItem;
 import androidx.media3.common.Player;
@@ -31,14 +34,18 @@ import com.google.android.flexbox.JustifyContent;
 import com.google.android.material.tabs.TabLayoutMediator;
 import com.movie_hub.android.R;
 import com.movie_hub.android.constant.Constants;
+import com.movie_hub.android.data.model.api.request.favourite.CreateFavouriteRequest;
 import com.movie_hub.android.data.model.api.response.MovieItem.MovieItemResponse;
+import com.movie_hub.android.data.model.api.response.history.ListWatchHistoryResponse;
 import com.movie_hub.android.data.model.api.response.movie.MovieResponse;
 import com.movie_hub.android.data.model.api.response.season.SeasonResponse;
 import com.movie_hub.android.data.model.api.response.video.VideoResponse;
+import com.movie_hub.android.data.model.other.ToastMessage;
 import com.movie_hub.android.databinding.ActivityMovieDetailBinding;
 import com.movie_hub.android.di.component.ActivityComponent;
 import com.movie_hub.android.ui.base.activity.BaseActivity;
 import com.movie_hub.android.ui.base.activity.SystemBarColorProvider;
+import com.movie_hub.android.ui.main.account.login.LoginActivity;
 import com.movie_hub.android.ui.main.movie.detail.adapter.MovieDetailTabAdapter;
 import com.movie_hub.android.ui.main.movie.detail.adapter.TagCategoryAdapter;
 import com.movie_hub.android.ui.main.movie.detail.dialog.InformationMovieBottomSheetDialog;
@@ -70,6 +77,7 @@ public class MovieDetailActivity extends BaseActivity<ActivityMovieDetailBinding
     private Runnable updateSeekBarRunnable;
     private boolean isBuffering = false;
     private boolean isMuted = true;
+    private ActivityResultLauncher<Intent> loginLauncher;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -78,15 +86,71 @@ public class MovieDetailActivity extends BaseActivity<ActivityMovieDetailBinding
         viewBinding.setVm(viewModel);
 
         String json = getIntent().getStringExtra("movie_details");
-        MovieResponse movie = GsonUtils.fromJson(json, MovieResponse.class);
 
+        MovieResponse movie = GsonUtils.fromJson(json, MovieResponse.class);
         if (movie != null) {
             viewModel.movieDetails = movie;
+
+            if (viewModel.isLogin()) {
+                CreateFavouriteRequest request = new CreateFavouriteRequest();
+                request.setTargetId(viewModel.movieDetails.getId());
+                request.setType(CreateFavouriteRequest.FAVOURITE_TYPE_MOVIE);
+                viewModel.getFavourite(request);
+            }
+
             setUpView();
+
+            if (viewModel.isLogin()) {
+                String jsonTracking = getIntent().getStringExtra("movie_details_tracking");
+                List<ListWatchHistoryResponse> listTracking = GsonUtils.fromJsonToList(jsonTracking, ListWatchHistoryResponse.class);
+                if (listTracking != null) {
+                    viewModel.movieDetailsTracking.setValue(listTracking);
+                }
+            }
         }
+
+        viewModel.movieDetailsTracking.observe(this, response -> {
+            if (response != null) {
+
+            }
+        });
+
+        viewModel.favouriteResponseFirst.observe(this, response -> {
+            if (response != null) {
+                updateIconFavourite(true);
+                viewModel.isFavourite = true;
+            } else {
+                viewModel.isFavourite = false;
+                updateIconFavourite(false);
+            }
+        });
+
+        loginLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == RESULT_OK) {
+                        Intent data = result.getData();
+                        boolean loginSuccess = data != null && data.getBooleanExtra("login_success", false);
+                        if (loginSuccess) {
+                            new ToastMessage(ToastMessage.TYPE_NORMAL, getString(R.string.login_successful)).showMessage(this);
+                            CreateFavouriteRequest request = new CreateFavouriteRequest();
+                            request.setTargetId(viewModel.movieDetails.getId());
+                            request.setType(CreateFavouriteRequest.FAVOURITE_TYPE_MOVIE);
+                            viewModel.getFavourite(request);
+                        }
+                    }
+                }
+        );
 
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (viewModel.isLogin()) {
+            viewModel.getListMovieTracking(viewModel.movieDetails.getId());
+        }
+    }
 
     @SuppressLint("SetTextI18n")
     private void setUpView() {
@@ -95,10 +159,11 @@ public class MovieDetailActivity extends BaseActivity<ActivityMovieDetailBinding
         for (SeasonResponse s: viewModel.movieDetails.getSeasons()) {
             s.setSelect(false);
         }
+
         viewModel.movieDetails.getSeasons().get(viewModel.movieDetails.getSeasons().size() - 1).setSelect(true);
 
         Glide.with(this)
-                .load(Constants.MEDIA_URL + viewModel.movieDetails.getThumbnailUrl())
+                .load(viewModel.movieDetails.getThumbnailUrl())
                 .placeholder(R.drawable.place_holder_16_9)
                 .error(R.drawable.place_holder_16_9)
                 .into(viewBinding.imgPoster);
@@ -111,7 +176,7 @@ public class MovieDetailActivity extends BaseActivity<ActivityMovieDetailBinding
         if (viewModel.movieDetails.getType() == Constants.TYPE_MOVIE_SINGLE) {
             viewBinding.includeMovieHeader.dateRelease.setText(DisplayUtils.getYearFromReleaseDate(viewModel.movieDetails.getReleaseDate()));
             viewBinding.includeMovieHeader.durationEpisodeSeason.setText(DisplayUtils.displayTimeFromSeconds(this, viewModel.movieDetails.getSeasons().get(0).getVideo().getDuration()));
-        } if (viewModel.movieDetails.getType() == Constants.TYPE_MOVIE_SERIES) {
+        } else if (viewModel.movieDetails.getType() == Constants.TYPE_MOVIE_SERIES) {
             if (viewModel.movieDetails.getSeasons() != null && !viewModel.movieDetails.getSeasons().isEmpty()) {
                 SeasonResponse lastSeason = viewModel.movieDetails.getSeasons().get(viewModel.movieDetails.getSeasons().size() - 1);
                 viewBinding.includeMovieHeader.dateRelease.setText(DisplayUtils.getYearFromReleaseDate(lastSeason.getReleaseDate()));
@@ -427,6 +492,7 @@ public class MovieDetailActivity extends BaseActivity<ActivityMovieDetailBinding
                 showLoading();
                 Intent intent = new Intent(this, WatchMovieActivity.class);
                 intent.putExtra("movie_details", GsonUtils.toJson(viewModel.movieDetails));
+                intent.putExtra("movie_details_tracking", GsonUtils.toJson(viewModel.movieDetails));
                 if (viewModel.movieDetails.getType() == Constants.TYPE_MOVIE_SERIES) {
                     intent.putExtra("episode", GsonUtils.toJson(viewModel.movieDetails.getSeasons().get(0).getEpisodes().get(0)));
                 }
@@ -441,11 +507,51 @@ public class MovieDetailActivity extends BaseActivity<ActivityMovieDetailBinding
             case R.id.btn_movie_details:
                 showMovieDetailsBottomSheet();
                 break;
+            case R.id.btn_favourite:
+                if (viewModel.isLogin()) {
+                    if (viewModel.isFavourite) {
+                        viewModel.deleteFavorite(viewModel.favourite.getId());
+                    } else {
+                        addFavoriteMovie();
+                    }
+                    updateIconFavourite(!viewModel.isFavourite);
+                } else {
+                    Intent it = new Intent(this, LoginActivity.class);
+                    it.putExtra("login_from_other", "login_from_other");
+                    loginLauncher.launch(it);
+                }
+
             default:
                 break;
         }
     }
 
+    public void updateIconFavourite(Boolean isFavorite) {
+        viewModel.isFavourite = isFavorite;
+        if (isFavorite) {
+            viewBinding.includeMovieHeader.icFavourite.setImageDrawable(
+                    ContextCompat.getDrawable(this, R.drawable.ic_heart_select)
+            );
+            viewBinding.includeMovieHeader.tvFavourite.setTextColor(
+                    ContextCompat.getColor(this, R.color.bg_select_icon)
+            );
+        } else {
+            viewBinding.includeMovieHeader.icFavourite.setImageDrawable(
+                    ContextCompat.getDrawable(this, R.drawable.ic_heart)
+            );
+            viewBinding.includeMovieHeader.tvFavourite.setTextColor(
+                    ContextCompat.getColor(this, R.color.text)
+            );
+        }
+    }
+
+    public void addFavoriteMovie() {
+        CreateFavouriteRequest request = new CreateFavouriteRequest();
+        request.setType(CreateFavouriteRequest.FAVOURITE_TYPE_MOVIE);
+        request.setTargetId(viewModel.movieDetails.getId());
+
+        viewModel.createFavorite(request);
+    }
     public void showMovieDetailsBottomSheet() {
         ClickUtils.debounceClick(viewBinding.includeMovieHeader.btnMovieDetails);
         if (viewModel.movieDetails == null) return;

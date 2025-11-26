@@ -1,9 +1,15 @@
 package com.movie_hub.android.ui.main.person;
 
+import static com.movie_hub.android.ui.main.account.login.LoginActivity.REQUEST_CODE_LOGIN;
+
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
@@ -13,11 +19,16 @@ import com.bumptech.glide.Glide;
 import com.movie_hub.android.BR;
 import com.movie_hub.android.R;
 import com.movie_hub.android.constant.Constants;
+import com.movie_hub.android.data.model.api.ResponseWrapper;
+import com.movie_hub.android.data.model.api.request.favourite.CreateFavouriteRequest;
 import com.movie_hub.android.data.model.api.response.person.PersonResponse;
+import com.movie_hub.android.data.model.other.ToastMessage;
 import com.movie_hub.android.databinding.ActivityPersonDetailBinding;
 import com.movie_hub.android.di.component.ActivityComponent;
 import com.movie_hub.android.ui.base.activity.BaseActivity;
 import com.movie_hub.android.ui.base.activity.SystemBarColorProvider;
+import com.movie_hub.android.ui.main.MainCallback;
+import com.movie_hub.android.ui.main.account.login.LoginActivity;
 import com.movie_hub.android.ui.main.person.fragment.InformationFragment;
 import com.movie_hub.android.ui.main.person.fragment.MoviesInvolvedFragment;
 import com.movie_hub.android.ui.main.search.result.adpter.SearchResultTabAdapter;
@@ -28,7 +39,7 @@ import java.util.List;
 
 public class PersonDetailActivity extends BaseActivity<ActivityPersonDetailBinding, PersonDetailViewModel> implements SystemBarColorProvider, View.OnClickListener {
     private final List<Fragment> fragmentList = new ArrayList<>();
-
+    private ActivityResultLauncher<Intent> loginLauncher;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -40,8 +51,42 @@ public class PersonDetailActivity extends BaseActivity<ActivityPersonDetailBindi
 
         if (person!=null) {
             viewModel.person = person;
+            if (viewModel.isLogin()) {
+                CreateFavouriteRequest request = new CreateFavouriteRequest();
+                request.setTargetId(viewModel.person.getId());
+                request.setType(CreateFavouriteRequest.FAVOURITE_TYPE_PERSON);
+                viewModel.getFavourite(request);
+            }
+
             setUpView();
         }
+
+        viewModel.favouriteResponseFirst.observe(this, response -> {
+            if (response != null) {
+                updateIconFavourite(true);
+                viewModel.isFavourite = true;
+            } else {
+                viewModel.isFavourite = false;
+                updateIconFavourite(false);
+            }
+        });
+
+        loginLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == RESULT_OK) {
+                        Intent data = result.getData();
+                        boolean loginSuccess = data != null && data.getBooleanExtra("login_success", false);
+                        if (loginSuccess) {
+                            new ToastMessage(ToastMessage.TYPE_NORMAL, getString(R.string.login_successful)).showMessage(this);
+                            CreateFavouriteRequest request = new CreateFavouriteRequest();
+                            request.setTargetId(viewModel.person.getId());
+                            request.setType(CreateFavouriteRequest.FAVOURITE_TYPE_PERSON);
+                            viewModel.getFavourite(request);
+                        }
+                    }
+                }
+        );
     }
 
     public void setUpView() {
@@ -116,7 +161,7 @@ public class PersonDetailActivity extends BaseActivity<ActivityPersonDetailBindi
 
     @Override
     public int getStatusBarColor() {
-        return R.color.header_app;
+        return R.color.bg_app;
     }
 
     @Override
@@ -136,8 +181,47 @@ public class PersonDetailActivity extends BaseActivity<ActivityPersonDetailBindi
                 viewBinding.viewPager.setCurrentItem(1, true);
                 updateTabUI(false); // Movie selected
                 break;
+            case R.id.btn_favourite:
+                if (viewModel.isLogin()) {
+                    if (viewModel.isFavourite) {
+                        viewModel.deleteFavorite(viewModel.favourite.getId());
+                    } else {
+                        addFavoritePerson();
+                    }
+                    updateIconFavourite(!viewModel.isFavourite);
+                } else {
+                    Intent it = new Intent(this, LoginActivity.class);
+                    it.putExtra("login_from_other", "login_from_other");
+                    loginLauncher.launch(it);
+                }
             default:
                 break;
+        }
+    }
+
+    public void addFavoritePerson() {
+        CreateFavouriteRequest request = new CreateFavouriteRequest();
+        request.setType(CreateFavouriteRequest.FAVOURITE_TYPE_PERSON);
+        request.setTargetId(viewModel.person.getId());
+        viewModel.createFavorite(request);
+    }
+
+    public void updateIconFavourite(Boolean isFavorite) {
+        viewModel.isFavourite = isFavorite;
+        if (isFavorite) {
+            viewBinding.icFavourite.setImageDrawable(
+                    ContextCompat.getDrawable(this, R.drawable.ic_heart_select)
+            );
+            viewBinding.tvFavourite.setTextColor(
+                    ContextCompat.getColor(this, R.color.bg_select_icon)
+            );
+        } else {
+            viewBinding.icFavourite.setImageDrawable(
+                    ContextCompat.getDrawable(this, R.drawable.ic_heart)
+            );
+            viewBinding.tvFavourite.setTextColor(
+                    ContextCompat.getColor(this, R.color.text)
+            );
         }
     }
 }

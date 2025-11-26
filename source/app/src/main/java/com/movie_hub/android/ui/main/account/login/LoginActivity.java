@@ -180,13 +180,22 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding, LoginViewM
         });
     }
 
+    public static final int REQUEST_CODE_LOGIN = 1001;
     public void handleLoginSuccess() {
-        Intent intent = new Intent(LoginActivity.this, SplashActivity.class);
-        intent.putExtra("login_success", true);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        startActivity(intent);
-        finish();
+        if (Objects.equals(getIntent().getStringExtra("login_from_other"), "login_from_other")) {
+            Intent resultIntent = new Intent();
+            resultIntent.putExtra("login_success", true);
+            setResult(RESULT_OK, resultIntent);
+            finish();
+        } else {
+            Intent intent = new Intent(LoginActivity.this, SplashActivity.class);
+            intent.putExtra("login_success", true);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            finish();
+        }
     }
+
 
     private void onRegisterNowClick() {
         showLoading();

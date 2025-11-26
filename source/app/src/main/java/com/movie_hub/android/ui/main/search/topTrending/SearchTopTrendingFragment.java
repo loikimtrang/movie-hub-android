@@ -12,6 +12,7 @@ import com.google.android.flexbox.FlexboxLayoutManager;
 import com.google.android.flexbox.JustifyContent;
 import com.movie_hub.android.R;
 import com.movie_hub.android.data.model.api.request.movie.MovieRequest;
+import com.movie_hub.android.data.model.api.response.history.ListWatchHistoryResponse;
 import com.movie_hub.android.data.model.api.response.movie.MovieResponse;
 import com.movie_hub.android.data.model.other.ToastMessage;
 import com.movie_hub.android.data.model.room.SearchHistoryEntity;
@@ -189,8 +190,46 @@ public class SearchTopTrendingFragment extends BaseFragment<FragmentSearchTopTre
             public void doSuccess(MovieResponse movieResponse) {
                 if (!isAdded()) return;
 
+                if (viewModel.isLogin()) {
+                    getListMovieTracking(movieResponse);
+                } else {
+                    Intent intent = new Intent(getContext(), MovieDetailActivity.class);
+                    intent.putExtra("movie_details", GsonUtils.toJson(movieResponse));
+                    startActivity(intent);
+                }
+            }
+
+            @Override
+            public void doSuccess() {
+            }
+        }, movie.getId());
+    }
+    public void getListMovieTracking(MovieResponse movie) {
+        if (!isAdded()) return;
+        ((MainActivity) requireActivity()).showLoading();
+
+        viewModel.getListMovieTracking(new MainCallback<List<ListWatchHistoryResponse>>() {
+            @Override
+            public void doError(Throwable throwable) {
+                ((MainActivity) requireActivity()).hideLoading();
+                if (!isAdded()) return;
+                showError(getString(R.string.fetch_data_failed));
+            }
+
+            @Override
+            public void doFail() {
+                ((MainActivity) requireActivity()).hideLoading();
+                if (!isAdded()) return;
+                showError(getString(R.string.fetch_data_failed));
+            }
+
+            @Override
+            public void doSuccess(List<ListWatchHistoryResponse> list) {
+                if (!isAdded()) return;
+
                 Intent intent = new Intent(getContext(), MovieDetailActivity.class);
-                intent.putExtra("movie_details", GsonUtils.toJson(movieResponse));
+                intent.putExtra("movie_details", GsonUtils.toJson(movie));
+                intent.putExtra("movie_details_tracking", GsonUtils.toJson(list));
                 startActivity(intent);
             }
 
@@ -202,8 +241,6 @@ public class SearchTopTrendingFragment extends BaseFragment<FragmentSearchTopTre
 
     @Override
     public void onItemClick(SearchHistoryEntity item, int position) {
-
-
         if (getString(R.string.delete).equals(item.keyword)) {
             binding.searchHistory.setVisibility(View.GONE);
             viewModel.clearAllHistory();

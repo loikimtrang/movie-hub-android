@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.GridLayoutManager;
 
 import com.movie_hub.android.R;
 import com.movie_hub.android.data.model.api.request.movie.MovieRequest;
+import com.movie_hub.android.data.model.api.response.history.ListWatchHistoryResponse;
 import com.movie_hub.android.data.model.api.response.movie.MovieResponse;
 import com.movie_hub.android.databinding.FragmentRecommendationBinding;
 import com.movie_hub.android.di.component.FragmentComponent;
@@ -101,7 +102,7 @@ public class RecommendationFragment extends BaseFragment<FragmentRecommendationB
 
     public void getListMovieTypeMovieDetail() {
         showLoading();
-        viewModel.getListMovie(new MainCallback<List<MovieResponse>>() {
+        viewModel.getListMovieRecommendations(new MainCallback<List<MovieResponse>>() {
             @Override
             public void doError(Throwable throwable) {
                 hideLoading();
@@ -129,7 +130,7 @@ public class RecommendationFragment extends BaseFragment<FragmentRecommendationB
             @Override
             public void doSuccess() {
             }
-        }, new MovieRequest());
+        }, idMovie);
     }
     public void getListMovieTypeSearch() {
         if (keyword == null || keyword.isEmpty()) return;
@@ -213,8 +214,45 @@ public class RecommendationFragment extends BaseFragment<FragmentRecommendationB
             @Override
             public void doSuccess(MovieResponse movieResponse) {
                 if (!isAdded()) return;
+                if (viewModel.isLogin()) {
+                    getListMovieTracking(movieResponse);
+                } else {
+                    Intent intent = new Intent(getContext(), MovieDetailActivity.class);
+                    intent.putExtra("movie_details", GsonUtils.toJson(movieResponse));
+                    startActivity(intent);
+                }
+            }
+
+            @Override
+            public void doSuccess() {
+            }
+        }, movie.getId());
+    }
+    public void getListMovieTracking(MovieResponse movie) {
+        if (!isAdded()) return;
+        showLoading();
+        viewModel.getListMovieTracking(new MainCallback<List<ListWatchHistoryResponse>>() {
+            @Override
+            public void doError(Throwable throwable) {
+                hideLoading();
+                if (!isAdded()) return;
+                showError(getString(R.string.fetch_data_failed));
+            }
+
+            @Override
+            public void doFail() {
+                hideLoading();
+                if (!isAdded()) return;
+                showError(getString(R.string.fetch_data_failed));
+            }
+
+            @Override
+            public void doSuccess(List<ListWatchHistoryResponse> list) {
+                if (!isAdded()) return;
+
                 Intent intent = new Intent(getContext(), MovieDetailActivity.class);
-                intent.putExtra("movie_details", GsonUtils.toJson(movieResponse));
+                intent.putExtra("movie_details", GsonUtils.toJson(movie));
+                intent.putExtra("movie_details_tracking", GsonUtils.toJson(list));
                 startActivity(intent);
             }
 

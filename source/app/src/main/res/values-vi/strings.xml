@@ -190,4 +190,11 @@
     <string name="update_now">Cập nhật ngay</string>
     <string name="status">Trạng thái: </string>
     <string name="obligatory">Bắt buộc</string>
+    <string name="menu_my_play_list">Danh sách phim của tôi</string>
+    <string name="not_favorite">Bỏ thích</string>
+    <string name="episode_char">T</string>
+    <string name="season_char">M</string>
+    <string name="continue_watching">Tiếp tục xem</string>
+    <string name="watch_next">Xem tiếp</string>
+    <string name="remaining">còn</string>
 </resources>

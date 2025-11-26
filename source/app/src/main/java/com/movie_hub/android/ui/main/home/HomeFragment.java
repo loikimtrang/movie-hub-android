@@ -1,11 +1,11 @@
 package com.movie_hub.android.ui.main.home;
 
+import com.movie_hub.android.BR;
 import com.movie_hub.android.R;
 import com.movie_hub.android.databinding.FragmentHomeBinding;
 import com.movie_hub.android.di.component.FragmentComponent;
 import com.movie_hub.android.ui.base.fragment.BaseFragment;
 
-import eu.davidea.flexibleadapter.databinding.BR;
 
 public class HomeFragment extends BaseFragment<FragmentHomeBinding, HomeViewModel>  {
     @Override

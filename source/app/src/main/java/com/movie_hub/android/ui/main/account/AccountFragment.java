@@ -110,10 +110,13 @@ public class AccountFragment extends BaseFragment<FragmentAccountBinding, Accoun
     public void onItemClick(MenuItemModel item) {
         switch (item.title) {
             case R.string.menu_watch_now:
+                ((MainActivity) requireActivity()).navigateToHistory();
                 break;
             case R.string.menu_my_movies:
+                ((MainActivity) requireActivity()).navigateToPlayList();
                 break;
             case R.string.menu_favorites:
+                ((MainActivity) requireActivity()).navigateToFavourite();
                 break;
             case R.string.menu_privacy_policy:
                 break;

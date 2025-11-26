@@ -5,6 +5,7 @@ import com.movie_hub.android.di.module.FragmentModule;
 import com.movie_hub.android.di.scope.FragmentScope;
 import com.movie_hub.android.ui.main.account.AccountFragment;
 import com.movie_hub.android.ui.main.account.UnLoginAccountFragment;
+import com.movie_hub.android.ui.main.account.favourite.fragment.MovieFavoriteFragment;
 import com.movie_hub.android.ui.main.home.HomeFragment;
 import com.movie_hub.android.ui.main.movie.detail.fragment.CastFragment;
 import com.movie_hub.android.ui.main.movie.detail.fragment.EpisodesFragment;
@@ -37,5 +38,5 @@ public interface FragmentComponent {
     void inject(EpisodesFragment fragment);
     void inject(InformationFragment fragment);
     void inject(MoviesInvolvedFragment fragment);
-
+    void inject(MovieFavoriteFragment fragment);
 }

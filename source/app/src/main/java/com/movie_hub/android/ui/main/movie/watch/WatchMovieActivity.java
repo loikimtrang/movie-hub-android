@@ -5,7 +5,6 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.database.ContentObserver;
 import android.graphics.Color;
-import android.graphics.Rect;
 import android.media.AudioManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -26,7 +25,6 @@ import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageView;
 import android.widget.SeekBar;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -58,14 +56,15 @@ import com.bumptech.glide.Glide;
 import com.google.common.collect.ImmutableList;
 import com.movie_hub.android.R;
 import com.movie_hub.android.constant.Constants;
+import com.movie_hub.android.data.model.api.request.history.TrackingWatchHistoryRequest;
 import com.movie_hub.android.data.model.api.response.MovieItem.MovieItemResponse;
+import com.movie_hub.android.data.model.api.response.history.ListWatchHistoryResponse;
 import com.movie_hub.android.data.model.api.response.movie.MovieResponse;
 import com.movie_hub.android.data.model.api.response.season.SeasonResponse;
 import com.movie_hub.android.data.model.api.response.video.VideoResponse;
 import com.movie_hub.android.databinding.ActivityWatchMovieBinding;
 import com.movie_hub.android.di.component.ActivityComponent;
 import com.movie_hub.android.ui.base.activity.BaseActivity;
-import com.movie_hub.android.ui.main.movie.detail.adapter.EpisodeItemListAdapter;
 import com.movie_hub.android.ui.main.movie.watch.Provider.SpriteThumbnailManager;
 import com.movie_hub.android.ui.main.movie.watch.adapter.EpisodeItemListHoriAdapter;
 import com.movie_hub.android.ui.main.movie.watch.adapter.SeasonItemAdapter;
@@ -148,6 +147,15 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
                 setUpAdapterEpisode();
                 setUpViewForSeriesMovie();
             }
+
+            if (viewModel.isLogin()) {
+                String jsonTracking = getIntent().getStringExtra("movie_details_tracking");
+                List<ListWatchHistoryResponse> listTracking = GsonUtils.fromJsonToList(jsonTracking, ListWatchHistoryResponse.class);
+                if (listTracking != null) {
+                    viewModel.movieDetailsTracking.setValue(listTracking);
+                }
+            }
+
             initMovie();
         }
     }
@@ -1151,6 +1159,7 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
         stopSeekBarUpdate();
 
         if (player != null) {
+            updateVideoTracking();
             player.pause();
         }
         stopVolumeObserver();
@@ -1160,6 +1169,7 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
         super.onDestroy();
 
         if (player != null) {
+            updateVideoTracking();
             player.release();
             player = null;
         }
@@ -1548,6 +1558,21 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
     @Override
     public void onSeasonClick(SeasonResponse season) {
         episodeItemListHoriAdapter.setData(viewModel.movieDetails.getSeasonEpisodesById(season.getId()), viewBinding.layoutListEpisodes.rvEpisode);
+    }
+
+    public void updateVideoTracking() {
+        if (!viewModel.isLogin()) return;
+        TrackingWatchHistoryRequest request = new TrackingWatchHistoryRequest();
+
+        request.setLastWatchSeconds(player.getCurrentPosition() /1000);
+
+        if (viewModel.movieDetails.getType() == Constants.TYPE_MOVIE_SINGLE) {
+            request.setMovieItemId(viewModel.movieDetails.getSeasons().get(0).getId());
+        } else if (viewModel.movieDetails.getType() == Constants.TYPE_MOVIE_SERIES) {
+            request.setMovieItemId(viewModel.nowEpisodePlay.getId());
+        }
+
+        viewModel.updateTrackingMovie(request);
     }
 }
 

@@ -3,9 +3,12 @@ package com.movie_hub.android.di.component;
 import com.movie_hub.android.di.module.ActivityModule;
 import com.movie_hub.android.di.scope.ActivityScope;
 import com.movie_hub.android.ui.main.MainActivity;
+import com.movie_hub.android.ui.main.account.favourite.FavouriteActivity;
+import com.movie_hub.android.ui.main.account.history.HistoryActivity;
 import com.movie_hub.android.ui.main.account.language.LanguageActivity;
 import com.movie_hub.android.ui.main.account.login.LoginActivity;
 import com.movie_hub.android.ui.main.account.manage_account.ManageAccountActivity;
+import com.movie_hub.android.ui.main.account.playlist.PlayListActivity;
 import com.movie_hub.android.ui.main.account.register.RegisterActivity;
 import com.movie_hub.android.ui.main.account.updateapp.CheckUpdateActivity;
 import com.movie_hub.android.ui.main.account.verifyotp.VerifyOtpActivity;
@@ -31,5 +34,8 @@ public interface ActivityComponent {
     void inject(VerifyOtpActivity activity);
     void inject(CheckUpdateActivity activity);
     void inject(PersonDetailActivity activity);
+    void inject(FavouriteActivity activity);
+    void inject(PlayListActivity activity);
+    void inject(HistoryActivity activity);
 }
 

@@ -4,6 +4,7 @@ import io.reactivex.rxjava3.core.Observable;
 
 import com.movie_hub.android.data.model.api.ResponseListObj;
 import com.movie_hub.android.data.model.api.ResponseWrapper;
+import com.movie_hub.android.data.model.api.request.history.TrackingWatchHistoryRequest;
 import com.movie_hub.android.data.model.api.request.login.UserLoginRequest;
 import com.movie_hub.android.data.model.api.request.login.UserRegisterRequest;
 import com.movie_hub.android.data.model.api.request.otp.VerifyOtpRequest;
@@ -12,6 +13,10 @@ import com.movie_hub.android.data.model.api.request.user.UserLoginGoogleRequest;
 import com.movie_hub.android.data.model.api.request.user.UserUpdateProfileRequest;
 import com.movie_hub.android.data.model.api.response.MovieItem.MovieItemResponse;
 import com.movie_hub.android.data.model.api.response.appversion.CheckAppVersionResponse;
+import com.movie_hub.android.data.model.api.response.favourite.FavouriteResponse;
+import com.movie_hub.android.data.model.api.response.history.ListWatchHistoryResponse;
+import com.movie_hub.android.data.model.api.response.history.MovieHistoryResponse;
+import com.movie_hub.android.data.model.api.response.history.WatchHistoryResponse;
 import com.movie_hub.android.data.model.api.response.moviePerson.MoviePersonResponse;
 import com.movie_hub.android.data.model.api.response.person.PersonResponse;
 import com.movie_hub.android.data.model.api.response.login.UserLoginResponse;
@@ -19,12 +24,14 @@ import com.movie_hub.android.data.model.api.response.movie.MovieResponse;
 import com.movie_hub.android.data.model.api.response.user.UserResponse;
 import com.movie_hub.android.data.model.api.response.user.UserUploadImageResponse;
 
+import java.util.List;
 import java.util.Map;
 
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
+import retrofit2.http.DELETE;
 import retrofit2.http.GET;
 import retrofit2.http.Headers;
 import retrofit2.http.Multipart;
@@ -72,9 +79,14 @@ public interface ApiService {
     // MOVIE CONTROLLER
     @GET("v1/movie/list")
     Observable<ResponseWrapper<ResponseListObj<MovieResponse>>> getListMovie(@QueryMap Map<String, Object> query);
+    @GET("v1/movie/recommendations/{id}")
+    Observable<ResponseWrapper<List<MovieResponse>>> getListMovieRecommendation(@Path("id") Long id);
 
     @GET("v1/movie/get/{id}")
     Observable<ResponseWrapper<MovieResponse>> getMovie(@Path("id") Long id);
+
+    @GET("v1/movie/history")
+    Observable<ResponseWrapper<List<MovieHistoryResponse>>> getListMovieHistory();
 //    Map<String, Object> query = RequestToMapConverter.convert(movieRequest);
 
 
@@ -100,4 +112,24 @@ public interface ApiService {
     // APP
     @GET("v1/app-version/check-version")
     Observable<ResponseWrapper<CheckAppVersionResponse>> checkVersion(@QueryMap Map<String, Object> query);
+
+    // FAVOURITE CONTROLLER
+    @POST("v1/favourite/create")
+    Observable<ResponseWrapper<Long>> createFavourite(@Body Map<String, Object> body);
+
+    @DELETE("v1/favourite/delete/{id}")
+    Observable<ResponseWrapper> deleteFavourite(@Path("id") Long id);
+
+    @GET("v1/favourite/get")
+    Observable<ResponseWrapper<FavouriteResponse>> getFavourite(@QueryMap Map<String, Object> query);
+    @GET("v1/favourite/list")
+    Observable<ResponseWrapper<ResponseListObj<FavouriteResponse>>> getFavouriteList(@QueryMap Map<String, Object> query);
+
+    //Watch History Controller
+
+    @POST("v1/watch-history/tracking")
+    Observable<ResponseWrapper> updateHistory(@Body Map<String, Object> body);
+
+    @GET("v1/watch-history/list")
+    Observable<ResponseWrapper<ResponseListObj<ListWatchHistoryResponse>>> getListWatchHistory(@QueryMap Map<String, Object> query);
 }

@@ -43,6 +43,40 @@
                         android:rotation="180"
                         android:layout_gravity="center"/>
                 </FrameLayout>
+
+                <LinearLayout
+                    android:id="@+id/btn_favourite"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_alignParentEnd="true"
+                    android:orientation="horizontal"
+                    android:padding="@dimen/_6sdp"
+                    android:layout_marginEnd="@dimen/_6sdp"
+                    android:background="@drawable/bg_btn_press_tran"
+                    android:onClick="onClick"
+                    android:clickable="true"
+                    android:focusable="true">
+
+                    <ImageView
+                        android:id="@+id/ic_favourite"
+                        android:layout_width="@dimen/_14sdp"
+                        android:layout_height="@dimen/_14sdp"
+                        android:src="@drawable/ic_heart"
+                        android:layout_gravity="center"/>
+
+                    <TextView
+                        android:id="@+id/tv_favourite"
+                        style="@style/Text_12_Normal"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/favorite"
+                        android:gravity="center"
+                        android:layout_gravity="center"
+                        android:layout_marginStart="@dimen/_6sdp"
+                        android:padding="@dimen/_2sdp"/>
+
+                </LinearLayout>
             </RelativeLayout>
 
             <FrameLayout

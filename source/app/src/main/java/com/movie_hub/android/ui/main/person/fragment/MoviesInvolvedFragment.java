@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import com.movie_hub.android.BR;
 import com.movie_hub.android.R;
 import com.movie_hub.android.data.model.api.request.moviePerson.MoviePersonRequest;
+import com.movie_hub.android.data.model.api.response.history.ListWatchHistoryResponse;
 import com.movie_hub.android.data.model.api.response.movie.MovieResponse;
 import com.movie_hub.android.data.model.api.response.moviePerson.MoviePersonResponse;
 import com.movie_hub.android.databinding.FragmentMoviesInvolvedBinding;
@@ -154,9 +155,13 @@ public class MoviesInvolvedFragment extends BaseFragment<FragmentMoviesInvolvedB
             @Override
             public void doSuccess(MovieResponse movieResponse) {
                 if (!isAdded()) return;
-                Intent intent = new Intent(getContext(), MovieDetailActivity.class);
-                intent.putExtra("movie_details", GsonUtils.toJson(movieResponse));
-                startActivity(intent);
+                if (viewModel.isLogin()) {
+                    getListMovieTracking(movieResponse);
+                } else {
+                    Intent intent = new Intent(getContext(), MovieDetailActivity.class);
+                    intent.putExtra("movie_details", GsonUtils.toJson(movieResponse));
+                    startActivity(intent);
+                }
             }
 
             @Override
@@ -165,6 +170,39 @@ public class MoviesInvolvedFragment extends BaseFragment<FragmentMoviesInvolvedB
         }, movie.getId());
     }
 
+    public void getListMovieTracking(MovieResponse movie) {
+        if (!isAdded()) return;
+        showLoading();
+        viewModel.getListMovieTracking(new MainCallback<List<ListWatchHistoryResponse>>() {
+            @Override
+            public void doError(Throwable throwable) {
+                hideLoading();
+                if (!isAdded()) return;
+                showError(getString(R.string.fetch_data_failed));
+            }
+
+            @Override
+            public void doFail() {
+                hideLoading();
+                if (!isAdded()) return;
+                showError(getString(R.string.fetch_data_failed));
+            }
+
+            @Override
+            public void doSuccess(List<ListWatchHistoryResponse> list) {
+                if (!isAdded()) return;
+
+                Intent intent = new Intent(getContext(), MovieDetailActivity.class);
+                intent.putExtra("movie_details", GsonUtils.toJson(movie));
+                intent.putExtra("movie_details_tracking", GsonUtils.toJson(list));
+                startActivity(intent);
+            }
+
+            @Override
+            public void doSuccess() {
+            }
+        }, movie.getId());
+    }
     private void showLoading() {
         ((PersonDetailActivity) requireActivity()).showLoading();
     }

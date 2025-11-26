@@ -11,9 +11,12 @@ import com.movie_hub.android.data.Repository;
 import com.movie_hub.android.di.scope.ActivityScope;
 import com.movie_hub.android.ui.base.activity.BaseActivity;
 import com.movie_hub.android.ui.main.MainViewModel;
+import com.movie_hub.android.ui.main.account.favourite.FavouriteViewModel;
+import com.movie_hub.android.ui.main.account.history.HistoryViewModel;
 import com.movie_hub.android.ui.main.account.language.LanguageViewModel;
 import com.movie_hub.android.ui.main.account.login.LoginViewModel;
 import com.movie_hub.android.ui.main.account.manage_account.ManageAccountViewModel;
+import com.movie_hub.android.ui.main.account.playlist.PlayListViewModel;
 import com.movie_hub.android.ui.main.account.register.RegisterViewModel;
 import com.movie_hub.android.ui.main.account.updateapp.CheckUpdateViewModel;
 import com.movie_hub.android.ui.main.account.verifyotp.VerifyOtpViewModel;
@@ -136,5 +139,29 @@ public class ActivityModule {
         Supplier<PersonDetailViewModel> supplier = () -> new PersonDetailViewModel(repository, (MVVMApplication)application);
         ViewModelProviderFactory<PersonDetailViewModel> factory = new ViewModelProviderFactory<>(PersonDetailViewModel.class, supplier);
         return new ViewModelProvider(activity, factory).get(PersonDetailViewModel.class);
+    }
+
+    @Provides
+    @ActivityScope
+    FavouriteViewModel provideFavouriteViewModel(Repository repository, Context application) {
+        Supplier<FavouriteViewModel> supplier = () -> new FavouriteViewModel(repository, (MVVMApplication)application);
+        ViewModelProviderFactory<FavouriteViewModel> factory = new ViewModelProviderFactory<>(FavouriteViewModel.class, supplier);
+        return new ViewModelProvider(activity, factory).get(FavouriteViewModel.class);
+    }
+
+    @Provides
+    @ActivityScope
+    PlayListViewModel providePlayListViewModel(Repository repository, Context application) {
+        Supplier<PlayListViewModel> supplier = () -> new PlayListViewModel(repository, (MVVMApplication)application);
+        ViewModelProviderFactory<PlayListViewModel> factory = new ViewModelProviderFactory<>(PlayListViewModel.class, supplier);
+        return new ViewModelProvider(activity, factory).get(PlayListViewModel.class);
+    }
+
+    @Provides
+    @ActivityScope
+    HistoryViewModel provideHistoryViewModel(Repository repository, Context application) {
+        Supplier<HistoryViewModel> supplier = () -> new HistoryViewModel(repository, (MVVMApplication)application);
+        ViewModelProviderFactory<HistoryViewModel> factory = new ViewModelProviderFactory<>(HistoryViewModel.class, supplier);
+        return new ViewModelProvider(activity, factory).get(HistoryViewModel.class);
     }
 }

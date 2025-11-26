@@ -4,6 +4,8 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -41,6 +43,7 @@ public class EpisodeItemListAdapter extends RecyclerView.Adapter<EpisodeItemList
         ItemEpisodeBinding binding = ItemEpisodeBinding.inflate(inflater, parent, false);
         return new EpisodeItemListViewHolder(binding);
     }
+    private int lastPosition = -1;
 
     @SuppressLint({"SetTextI18n", "ResourceAsColor"})
     @Override
@@ -77,6 +80,16 @@ public class EpisodeItemListAdapter extends RecyclerView.Adapter<EpisodeItemList
                 }
             }
         });
+
+        if (position > lastPosition) {
+            holder.itemView.setAlpha(0f);
+            holder.itemView.postDelayed(() -> {
+                Animation animation = AnimationUtils.loadAnimation(holder.itemView.getContext(), R.anim.item_slide_in_bottom);
+                holder.itemView.startAnimation(animation);
+                holder.itemView.setAlpha(1f);
+            }, 50L);
+            lastPosition = position;
+        }
     }
     @Override
     public void onViewDetachedFromWindow(@NonNull EpisodeItemListViewHolder holder) {

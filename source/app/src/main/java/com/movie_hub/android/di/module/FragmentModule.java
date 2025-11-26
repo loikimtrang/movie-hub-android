@@ -13,6 +13,7 @@ import com.movie_hub.android.ui.base.fragment.BaseFragment;
 import com.movie_hub.android.ui.main.account.AccountViewModel;
 import com.movie_hub.android.ui.main.account.UnLoginAccountFragment;
 import com.movie_hub.android.ui.main.account.UnLoginAccountViewModel;
+import com.movie_hub.android.ui.main.account.favourite.fragment.MovieFavoriteViewModel;
 import com.movie_hub.android.ui.main.home.HomeViewModel;
 import com.movie_hub.android.ui.main.movie.detail.fragment.CastFragmentViewModel;
 import com.movie_hub.android.ui.main.movie.detail.fragment.EpisodesFragmentViewModel;
@@ -149,5 +150,13 @@ public class FragmentModule {
         Supplier<MoviesInvolvedFragmentViewModel> supplier = () -> new MoviesInvolvedFragmentViewModel(repository, (MVVMApplication)application);
         ViewModelProviderFactory<MoviesInvolvedFragmentViewModel> factory = new ViewModelProviderFactory<>(MoviesInvolvedFragmentViewModel.class, supplier);
         return new ViewModelProvider(fragment, factory).get(MoviesInvolvedFragmentViewModel.class);
+    }
+
+    @Provides
+    @FragmentScope
+    MovieFavoriteViewModel provideMovieFavoriteViewModel(Repository repository, Context application) {
+        Supplier<MovieFavoriteViewModel> supplier = () -> new MovieFavoriteViewModel(repository, (MVVMApplication)application);
+        ViewModelProviderFactory<MovieFavoriteViewModel> factory = new ViewModelProviderFactory<>(MovieFavoriteViewModel.class, supplier);
+        return new ViewModelProvider(fragment, factory).get(MovieFavoriteViewModel.class);
     }
 }

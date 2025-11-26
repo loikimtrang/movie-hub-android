@@ -190,4 +190,11 @@
     <string name="update_now">Update Now</string>
     <string name="status">Status: </string>
     <string name="obligatory">Obligatory</string>
+    <string name="menu_my_play_list">Play list</string>
+    <string name="not_favorite">Not favorite</string>
+    <string name="episode_char">E</string>
+    <string name="season_char">S</string>
+    <string name="continue_watching">Continue watching</string>
+    <string name="watch_next">Watch next</string>
+    <string name="remaining">remaining</string>
 </resources>

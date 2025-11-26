@@ -1,5 +1,6 @@
 package com.movie_hub.android.data.model.api.response.movie;
 
+import com.movie_hub.android.constant.Constants;
 import com.movie_hub.android.data.model.api.response.MovieItem.MovieItemResponse;
 import com.movie_hub.android.data.model.api.response.category.CategoryResponse;
 import com.movie_hub.android.data.model.api.response.season.SeasonResponse;
@@ -29,6 +30,12 @@ public class MovieResponse {
     private String modifiedDate;
     private List<CategoryResponse> categories;
     private List<SeasonResponse> seasons;
+    public String getPosterUrl() {
+        return Constants.MEDIA_URL + posterUrl;
+    }
+    public String getThumbnailUrl() {
+        return Constants.MEDIA_URL + thumbnailUrl;
+    }
     public void setSeasonAndEpisodeSelectedAndPlaying(Long episodeId) {
         if (episodeId == null || seasons == null) {
             return;

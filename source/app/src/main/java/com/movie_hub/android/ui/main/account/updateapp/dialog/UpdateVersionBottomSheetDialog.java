@@ -101,11 +101,5 @@ public class UpdateVersionBottomSheetDialog extends BottomSheetDialog  {
             BottomSheetBehavior.from(bottomSheet).setState(BottomSheetBehavior.STATE_EXPANDED);
             BottomSheetBehavior.from(bottomSheet).setSkipCollapsed(true);
         }
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            View decorView = getWindow().getDecorView();
-            RenderEffect blurEffect = RenderEffect.createBlurEffect(20f, 20f, Shader.TileMode.CLAMP);
-            decorView.setRenderEffect(blurEffect);
-        }
     }
 }
