@@ -57,6 +57,7 @@ import com.movie_hub.android.ui.main.movie.detail.fragment.RecommendationFragmen
 import com.movie_hub.android.ui.main.movie.watch.WatchMovieActivity;
 import com.movie_hub.android.ui.main.search.topTrending.FlexSpacingItemDecoration;
 import com.movie_hub.android.utils.ClickUtils;
+import com.movie_hub.android.utils.DialogUtils;
 import com.movie_hub.android.utils.DisplayUtils;
 import com.movie_hub.android.utils.GsonUtils;
 import com.movie_hub.android.utils.HtmlUtils;
@@ -614,6 +615,7 @@ public class MovieDetailActivity extends BaseActivity<ActivityMovieDetailBinding
                 showMovieDetailsBottomSheet();
                 break;
             case R.id.btn_favourite:
+                ClickUtils.debounceClick(viewBinding.includeMovieHeader.btnFavourite);
                 if (viewModel.isLogin()) {
                     if (viewModel.isFavourite) {
                         viewModel.deleteFavorite(viewModel.favourite.getId());
@@ -622,9 +624,7 @@ public class MovieDetailActivity extends BaseActivity<ActivityMovieDetailBinding
                     }
                     updateIconFavourite(!viewModel.isFavourite);
                 } else {
-                    Intent it = new Intent(this, LoginActivity.class);
-                    it.putExtra("login_from_other", "login_from_other");
-                    loginLauncher.launch(it);
+                    showLoginRequiredDialog();
                 }
                 break;
             case R.id.btn_cmt:
@@ -637,7 +637,20 @@ public class MovieDetailActivity extends BaseActivity<ActivityMovieDetailBinding
                 break;
         }
     }
-
+    public void showLoginRequiredDialog() {
+        DialogUtils.dialogConfirm(
+                this,
+                getString(R.string.not_login),
+                getString(R.string.login),
+                (dialog, which) -> {
+                    Intent it = new Intent(this, LoginActivity.class);
+                    it.putExtra("login_from_other", "login_from_other");
+                    loginLauncher.launch(it);
+                },
+                getString(R.string.cancel),
+                null
+        );
+    }
     public void updateIconFavourite(Boolean isFavorite) {
         viewModel.isFavourite = isFavorite;
         if (isFavorite) {

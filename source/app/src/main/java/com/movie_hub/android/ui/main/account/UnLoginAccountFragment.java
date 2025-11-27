@@ -1,6 +1,7 @@
 package com.movie_hub.android.ui.main.account;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 
 import androidx.recyclerview.widget.LinearLayoutManager;
 
@@ -14,6 +15,7 @@ import com.movie_hub.android.ui.main.account.adapter.AccountMenuAdapter;
 import com.movie_hub.android.ui.main.account.login.LoginActivity;
 import com.movie_hub.android.ui.main.account.model.MenuItemModel;
 import com.movie_hub.android.utils.ClickUtils;
+import com.movie_hub.android.utils.DialogUtils;
 
 import java.util.Arrays;
 import java.util.List;
@@ -93,7 +95,19 @@ public class UnLoginAccountFragment extends BaseFragment<FragmentUnLoginAccountB
     }
     public void onLoginClick() {
         ClickUtils.debounceClick(binding.login);
+        showLoginRequiredDialog();
+    }
 
-        ((MainActivity) requireActivity()).navigateToNewActivity(getContext(), LoginActivity.class);
+    public void showLoginRequiredDialog() {
+        DialogUtils.dialogConfirm(
+                getContext(),
+                getString(R.string.not_login),
+                getString(R.string.login),
+                (dialog, which) -> {
+                    ((MainActivity) requireActivity()).navigateToNewActivity(getContext(), LoginActivity.class);
+                },
+                getString(R.string.cancel),
+                null
+        );
     }
 }

@@ -20,4 +20,5 @@ public class CommentResponse {
     private UserResponse author;
     private MovieItemResponse movieItem;
     private CommentResponse parent;
+    private Boolean isOpenChildComment = false;
 }

@@ -86,7 +86,7 @@ public class RecommendationFragment extends BaseFragment<FragmentRecommendationB
                 int totalItemCount = lm.getItemCount();
                 int lastVisibleItemPosition = lm.findLastVisibleItemPosition();
 
-                if (!isLoading && !isLastPage && lastVisibleItemPosition >= totalItemCount - 5) {
+                if (!isLoading && !isLastPage && lastVisibleItemPosition >= totalItemCount - 1) {
                     isLoading = true;
                     getListMovieTypeSearch();
                 }

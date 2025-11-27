@@ -15,13 +15,13 @@
         <item name="cornerSize">50%</item>
     </style>
 
+    <!-- res/values/styles.xml -->
     <style name="TransparentActivity" parent="Theme.MaterialComponents.DayNight.NoActionBar">
-        <item name="android:backgroundDimEnabled">false</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:backgroundDimEnabled">false</item> <!-- TẮT MỜ MẶC ĐỊNH -->
         <item name="android:windowIsTranslucent">true</item>
-        <item name="android:windowBackground">@color/bg_comment_tran</item>
-        <item name="android:windowNoTitle">true</item>
-        <item name="android:windowIsFloating">false</item>
     </style>
+
     <style name="BottomSheetLikeTheme" parent="Theme.MaterialComponents.DayNight.Dialog">
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowAnimationStyle">@style/BottomSheetAnimation</item>

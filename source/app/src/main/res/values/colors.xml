@@ -75,5 +75,8 @@
     <color name="text_remaining">#515255</color>
     <color name="bg_comment_tran">#80000000</color>
     <color name="transparent">#00000000</color>
-
+    <color name="text_time_comment">#686C7B</color>
+    <color name="text_comment">#A5A5A5</color> // ic up 18D158 D33E1A
+    <color name="bg_input_comment">#363B51</color>
+    <color name="text_more_comment">#EDD59A</color>
 </resources>

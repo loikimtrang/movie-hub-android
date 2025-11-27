@@ -4,6 +4,8 @@ import io.reactivex.rxjava3.core.Observable;
 
 import com.movie_hub.android.data.model.api.ResponseListObj;
 import com.movie_hub.android.data.model.api.ResponseWrapper;
+import com.movie_hub.android.data.model.api.request.comment.CreateCommentReactionRequest;
+import com.movie_hub.android.data.model.api.request.comment.CreateCommentRequest;
 import com.movie_hub.android.data.model.api.request.history.TrackingWatchHistoryRequest;
 import com.movie_hub.android.data.model.api.request.login.UserLoginRequest;
 import com.movie_hub.android.data.model.api.request.login.UserRegisterRequest;
@@ -13,6 +15,7 @@ import com.movie_hub.android.data.model.api.request.user.UserLoginGoogleRequest;
 import com.movie_hub.android.data.model.api.request.user.UserUpdateProfileRequest;
 import com.movie_hub.android.data.model.api.response.MovieItem.MovieItemResponse;
 import com.movie_hub.android.data.model.api.response.appversion.CheckAppVersionResponse;
+import com.movie_hub.android.data.model.api.response.comment.CommentResponse;
 import com.movie_hub.android.data.model.api.response.favourite.FavouriteResponse;
 import com.movie_hub.android.data.model.api.response.history.ListWatchHistoryResponse;
 import com.movie_hub.android.data.model.api.response.history.MovieHistoryResponse;
@@ -35,6 +38,7 @@ import retrofit2.http.DELETE;
 import retrofit2.http.GET;
 import retrofit2.http.Headers;
 import retrofit2.http.Multipart;
+import retrofit2.http.PATCH;
 import retrofit2.http.POST;
 import retrofit2.http.PUT;
 import retrofit2.http.Part;
@@ -132,4 +136,15 @@ public interface ApiService {
 
     @GET("v1/watch-history/list")
     Observable<ResponseWrapper<ListWatchHistoryResponse>> getListWatchHistory(@QueryMap Map<String, Object> query);
+
+    //Comment controller
+
+    @GET("v1/comment/list")
+    Observable<ResponseWrapper<ResponseListObj<CommentResponse>>> getCommentList(@QueryMap Map<String, Object> query);
+
+    @POST("v1/comment/create")
+    Observable<ResponseWrapper> createComment(@Body CreateCommentRequest request);
+
+    @PATCH("v1/comment/vote")
+    Observable<ResponseWrapper> voteComment(@Body CreateCommentReactionRequest request);
 }

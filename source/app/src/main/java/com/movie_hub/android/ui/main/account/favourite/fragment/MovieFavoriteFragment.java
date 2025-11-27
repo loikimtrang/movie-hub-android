@@ -32,10 +32,11 @@ import java.util.List;
 
 public class MovieFavoriteFragment extends BaseFragment<FragmentMovieFavoriteBinding, MovieFavoriteViewModel> implements MovieFavouriteAdapter.OnMovieClickListener {
     private boolean isLoaded = false;
-    private boolean isLoading = false;
     int currentPage = 0;
     int pageSize = 8;
     boolean isLastPage = false;
+    private boolean isLoading = false;
+
     private MovieFavouriteAdapter movieFavouriteAdapter;
     private MovieFavoriteShimmerAdapter shimmerAdapter;
     @Override

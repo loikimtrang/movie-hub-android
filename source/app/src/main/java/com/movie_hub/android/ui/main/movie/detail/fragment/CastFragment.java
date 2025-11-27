@@ -66,7 +66,7 @@ public class CastFragment extends BaseFragment<FragmentCastBinding, CastFragment
     private String keyword;
 
     int currentPage = 0;
-    int pageSize = 8;
+    int pageSize = 16;
     boolean isLastPage = false;
 
     private PersonFavoriteShimmerAdapter shimmerAdapter;
@@ -96,7 +96,7 @@ public class CastFragment extends BaseFragment<FragmentCastBinding, CastFragment
                         int totalItemCount = lm.getItemCount();
                         int lastVisibleItemPosition = lm.findLastVisibleItemPosition();
 
-                        if (!isLoading && !isLastPage && lastVisibleItemPosition >= totalItemCount - 3) {
+                        if (!isLoading && !isLastPage && lastVisibleItemPosition >= totalItemCount - 1) {
                             isLoading = true;
                             getListFavoritePersonTypeFavourite();
                         }

@@ -2,7 +2,9 @@ package com.movie_hub.android.utils;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.icu.text.SimpleDateFormat;
+import java.text.SimpleDateFormat;
+import java.text.DateFormat;
+
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 
@@ -12,6 +14,8 @@ import com.movie_hub.android.constant.Constants;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.Locale;
+import java.util.TimeZone;
+import java.util.concurrent.TimeUnit;
 
 public class DisplayUtils {
 
@@ -200,5 +204,35 @@ public class DisplayUtils {
 
         return result.toString().trim();
     }
+    @SuppressLint("SimpleDateFormat")
+    public static String getTimeAgo(Context context, String rawTime) {
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault());
+            sdf.setTimeZone(TimeZone.getTimeZone("UTC")); // input là UTC
+            Date commentDate = sdf.parse(rawTime);
+
+            long utcTime = commentDate.getTime(); // giữ nguyên
+            long now = System.currentTimeMillis(); // local time của máy
+            long diff = now - utcTime;
+
+            long seconds = TimeUnit.MILLISECONDS.toSeconds(diff);
+            long minutes = TimeUnit.MILLISECONDS.toMinutes(diff);
+            long hours = TimeUnit.MILLISECONDS.toHours(diff);
+            long days = TimeUnit.MILLISECONDS.toDays(diff);
+            long weeks = days / 7;
+
+            if (seconds < 60) return context.getString(R.string.just_now);
+            if (minutes < 60) return minutes + " " + context.getString(R.string.minutes_ago);
+            if (hours < 24) return hours + " " + context.getString(R.string.hours_ago);
+            if (days < 7) return days + " " + context.getString(R.string.days_ago);
+            return weeks + " " + context.getString(R.string.weeks_ago);
+
+        } catch (ParseException e) {
+            e.printStackTrace();
+            return "";
+        }
+    }
+
+
 
 }
