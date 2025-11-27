@@ -13,6 +13,7 @@ import com.movie_hub.android.ui.main.account.register.RegisterActivity;
 import com.movie_hub.android.ui.main.account.updateapp.CheckUpdateActivity;
 import com.movie_hub.android.ui.main.account.verifyotp.VerifyOtpActivity;
 import com.movie_hub.android.ui.main.movie.detail.MovieDetailActivity;
+import com.movie_hub.android.ui.main.movie.detail.comment.CommentActivity;
 import com.movie_hub.android.ui.main.movie.watch.WatchMovieActivity;
 import com.movie_hub.android.ui.main.person.PersonDetailActivity;
 import com.movie_hub.android.ui.main.person.PersonDetailViewModel;
@@ -37,5 +38,6 @@ public interface ActivityComponent {
     void inject(FavouriteActivity activity);
     void inject(PlayListActivity activity);
     void inject(HistoryActivity activity);
+    void inject(CommentActivity activity);
 }
 

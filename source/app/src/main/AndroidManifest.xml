@@ -67,6 +67,14 @@
             android:screenOrientation="portrait"
             android:exported="true"/>
 
+        <activity
+            android:name=".ui.main.movie.detail.comment.CommentActivity"
+            android:theme="@style/TransparentActivity"
+            android:windowSoftInputMode="adjustResize"
+            android:screenOrientation="portrait"
+            android:exported="true"/>
+
+
         <activity android:name=".ui.main.account.favourite.FavouriteActivity"
             android:windowSoftInputMode="adjustResize"
             android:screenOrientation="portrait"

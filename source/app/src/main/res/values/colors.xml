@@ -58,6 +58,7 @@
     <color name="bg_age_rating">#51566C</color>
     <color name="bg_skip">#0F121A</color>
     <color name="bg_season">#272A3B</color>
+    <color name="bg_comment">#272A3B</color>
     <color name="bg_item_season_ic_no_select">#313445</color>
     <color name="bg_item_season_ic_select">#FED779</color>
     <color name="text_season">#A0A1AB</color>
@@ -71,4 +72,8 @@
     <color name="bg_btn_favourite">#452729</color>
 
     <color name="shimmer_placeholder">#e0e0e0</color>
+    <color name="text_remaining">#515255</color>
+    <color name="bg_comment_tran">#80000000</color>
+    <color name="transparent">#00000000</color>
+
 </resources>

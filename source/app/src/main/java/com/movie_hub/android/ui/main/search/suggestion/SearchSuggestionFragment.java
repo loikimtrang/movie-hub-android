@@ -241,7 +241,7 @@ public class SearchSuggestionFragment extends BaseFragment<FragmentSearchSuggest
         if (!isAdded()) return;
         ((MainActivity) requireActivity()).showLoading();
 
-        viewModel.getListMovieTracking(new MainCallback<List<ListWatchHistoryResponse>>() {
+        viewModel.getListMovieTracking(new MainCallback<ListWatchHistoryResponse>() {
             @Override
             public void doError(Throwable throwable) {
                 ((MainActivity) requireActivity()).hideLoading();
@@ -257,7 +257,7 @@ public class SearchSuggestionFragment extends BaseFragment<FragmentSearchSuggest
             }
 
             @Override
-            public void doSuccess(List<ListWatchHistoryResponse> list) {
+            public void doSuccess(ListWatchHistoryResponse list) {
                 if (!isAdded()) return;
 
                 Intent intent = new Intent(getContext(), MovieDetailActivity.class);

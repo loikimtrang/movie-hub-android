@@ -4,10 +4,7 @@ import lombok.Data;
 
 @Data
 public class CreateFavouriteRequest {
-
-    public static final int FAVOURITE_TYPE_MOVIE = 1;
-    public static final int FAVOURITE_TYPE_PERSON = 2;
-
-    private long targetId;
-    private int type;
+    private Long targetId;
+    private Integer type;
 }
+

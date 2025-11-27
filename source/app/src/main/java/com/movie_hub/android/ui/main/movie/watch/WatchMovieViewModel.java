@@ -39,7 +39,7 @@ public class WatchMovieViewModel extends BaseViewModel {
     public VideoResponse nowVideoPlay; // Single movie
 
     private MutableLiveData<Boolean> isPlaying = new MutableLiveData<>(true);
-    public MutableLiveData<List<ListWatchHistoryResponse>> movieDetailsTracking = new MutableLiveData<>();
+    public MutableLiveData<ListWatchHistoryResponse> movieDetailsTracking = new MutableLiveData<>();
 
     SettingVideoModel settingVideoModel = new SettingVideoModel();
     public WatchMovieViewModel(Repository repository, MVVMApplication application) {
@@ -119,7 +119,7 @@ public class WatchMovieViewModel extends BaseViewModel {
                 .subscribe(
                         response -> {
                             if (response.isResult()) {
-                                movieDetailsTracking.postValue(response.getData().getContent());
+                                movieDetailsTracking.postValue(response.getData());
                             }
                         }, throwable -> {
                             Timber.e(throwable);

@@ -173,7 +173,7 @@ public class MoviesInvolvedFragment extends BaseFragment<FragmentMoviesInvolvedB
     public void getListMovieTracking(MovieResponse movie) {
         if (!isAdded()) return;
         showLoading();
-        viewModel.getListMovieTracking(new MainCallback<List<ListWatchHistoryResponse>>() {
+        viewModel.getListMovieTracking(new MainCallback<ListWatchHistoryResponse>() {
             @Override
             public void doError(Throwable throwable) {
                 hideLoading();
@@ -189,7 +189,7 @@ public class MoviesInvolvedFragment extends BaseFragment<FragmentMoviesInvolvedB
             }
 
             @Override
-            public void doSuccess(List<ListWatchHistoryResponse> list) {
+            public void doSuccess(ListWatchHistoryResponse list) {
                 if (!isAdded()) return;
 
                 Intent intent = new Intent(getContext(), MovieDetailActivity.class);

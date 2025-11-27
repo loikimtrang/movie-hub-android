@@ -121,7 +121,6 @@ public class CastFragmentViewModel extends BaseFragmentViewModel {
         );
     }
     public void getFavoritePersonList(MainCallback<ResponseListObj<FavouriteResponse>> callback, FavouriteListRequest request) {
-        request.setType(CreateFavouriteRequest.FAVOURITE_TYPE_PERSON);
 
         Map<String, Object> query = RequestToMapConverter.convert(request);
         compositeDisposable.add(repository.getApiService().getFavouriteList(query)

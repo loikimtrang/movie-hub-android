@@ -111,7 +111,6 @@
                     android:layout_height="wrap_content"
                     style="@style/Text_10_Normal"
                     android:text="/"
-                    android:textColor="@color/bg_progress_history"
                     android:layout_marginHorizontal="@dimen/_3sdp"/>
 
                 <TextView
@@ -119,8 +118,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     style="@style/Text_12_Normal"
-                    android:text="1:55:41"
-                    android:textColor="@color/bg_progress_history"/>
+                    android:textColor="@color/text_remaining"/>
 
             </LinearLayout>
 

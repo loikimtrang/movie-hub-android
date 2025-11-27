@@ -3,9 +3,13 @@ package com.movie_hub.android.data.model.api.response.movie;
 import com.movie_hub.android.constant.Constants;
 import com.movie_hub.android.data.model.api.response.MovieItem.MovieItemResponse;
 import com.movie_hub.android.data.model.api.response.category.CategoryResponse;
+import com.movie_hub.android.data.model.api.response.history.ListWatchHistoryResponse;
+import com.movie_hub.android.data.model.api.response.history.WatchHistoryResponse;
 import com.movie_hub.android.data.model.api.response.season.SeasonResponse;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import lombok.Data;
 
@@ -93,6 +97,98 @@ public class MovieResponse {
         if (seasons == null) return;
         for (SeasonResponse s : seasons) {
             s.setSelect(false);
+        }
+    }
+
+    public MovieItemResponse getEpisodeById(Long movieItemId) {
+        if (seasons == null) return null;
+
+        for (int i = 0; i<seasons.size(); i++) {
+            for (MovieItemResponse e: seasons.get(i).getEpisodes()) {
+                if (e.getId().equals(movieItemId)) {
+                    e.getParent().setId(seasons.get(i).getId());
+                    e.getParent().setLabel(String.valueOf((i + 1)));
+
+                    return e;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    public boolean isLastEpisode(Long episodeId) {
+        if (seasons == null || episodeId == null) return false;
+
+        for (int i = seasons.size() - 1; i >= 0; i--) {
+            SeasonResponse season = seasons.get(i);
+            if (season.getEpisodes() != null && !season.getEpisodes().isEmpty()) {
+                List<MovieItemResponse> episodes = season.getEpisodes();
+                MovieItemResponse lastEp = episodes.get(episodes.size() - 1);
+                return episodeId.equals(lastEp.getId());
+            }
+        }
+
+        return false;
+    }
+
+    public MovieItemResponse getNextEpisode(Long episodeId) {
+        if (seasons == null || episodeId == null) return null;
+
+        for (int seasonIndex = 0; seasonIndex < seasons.size(); seasonIndex++) {
+            SeasonResponse season = seasons.get(seasonIndex);
+            List<MovieItemResponse> episodes = season.getEpisodes();
+            if (episodes == null || episodes.isEmpty()) continue;
+
+            for (int epIndex = 0; epIndex < episodes.size(); epIndex++) {
+                MovieItemResponse episode = episodes.get(epIndex);
+                if (episodeId.equals(episode.getId())) {
+                    // Nếu còn tập kế tiếp trong cùng mùa
+                    if (epIndex + 1 < episodes.size()) {
+                        return episodes.get(epIndex + 1);
+                    }
+
+                    // Nếu là tập cuối mùa, chuyển sang mùa kế
+                    for (int nextSeasonIndex = seasonIndex + 1; nextSeasonIndex < seasons.size(); nextSeasonIndex++) {
+                        SeasonResponse nextSeason = seasons.get(nextSeasonIndex);
+                        List<MovieItemResponse> nextEpisodes = nextSeason.getEpisodes();
+                        if (nextEpisodes != null && !nextEpisodes.isEmpty()) {
+                            return nextEpisodes.get(0); // Tập đầu mùa kế tiếp
+                        }
+                    }
+
+                    // Không có tập kế tiếp
+                    return null;
+                }
+            }
+        }
+
+        return null; // Không tìm thấy tập hiện tại
+    }
+
+    public void applyWatchHistory(ListWatchHistoryResponse historyResponse) {
+        if (historyResponse == null || historyResponse.getWatchHistories() == null || seasons == null)
+            return;
+
+        // Convert watch history thành HashMap để lookup O(1)
+        Map<Long, WatchHistoryResponse> map = new HashMap<>();
+        for (WatchHistoryResponse h : historyResponse.getWatchHistories()) {
+            if (h.getMovieItemId() != null) {
+                map.put(h.getMovieItemId(), h);
+            }
+        }
+
+        // Merge vào episode nhanh nhất
+        for (SeasonResponse season : seasons) {
+            if (season.getEpisodes() == null) continue;
+
+            for (MovieItemResponse episode : season.getEpisodes()) {
+                WatchHistoryResponse history = map.get(episode.getId());
+                if (history != null) {
+                    episode.setCompleted(history.isCompleted());
+                    episode.setLastWatchSeconds(history.getLastWatchSeconds());
+                }
+            }
         }
     }
 }

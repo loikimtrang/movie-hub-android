@@ -154,7 +154,7 @@ public class HistoryActivity extends BaseActivity<ActivityHistoryBinding, Histor
 
     public void getListMovieTracking(MovieResponse movie) {
         showLoading();
-        viewModel.getListMovieTracking(new MainCallback<List<ListWatchHistoryResponse>>() {
+        viewModel.getListMovieTracking(new MainCallback<ListWatchHistoryResponse>() {
             @Override
             public void doError(Throwable throwable) {
                 hideLoading();
@@ -168,7 +168,7 @@ public class HistoryActivity extends BaseActivity<ActivityHistoryBinding, Histor
             }
 
             @Override
-            public void doSuccess(List<ListWatchHistoryResponse> list) {
+            public void doSuccess(ListWatchHistoryResponse list) {
                 hideLoading();
                 navigateToMovieDetail(movie, list);
             }
@@ -180,7 +180,7 @@ public class HistoryActivity extends BaseActivity<ActivityHistoryBinding, Histor
         }, movie.getId());
     }
 
-    public void navigateToMovieDetail(MovieResponse movieResponse, List<ListWatchHistoryResponse> listWatchHistoryResponses) {
+    public void navigateToMovieDetail(MovieResponse movieResponse, ListWatchHistoryResponse listWatchHistoryResponses) {
         if (!viewModel.isLogin()) {
             Intent intent = new Intent(this, MovieDetailActivity.class);
             intent.putExtra("movie_details", GsonUtils.toJson(movieResponse));

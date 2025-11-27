@@ -114,7 +114,7 @@ public class RecommendationFragmentViewModel extends BaseFragmentViewModel {
         );
     }
 
-    public void getListMovieTracking(MainCallback<List<ListWatchHistoryResponse>> callback, long movieId) {
+    public void getListMovieTracking(MainCallback<ListWatchHistoryResponse> callback, long movieId) {
         ListWatchHistoryRequest request = new ListWatchHistoryRequest();
         request.setMovieId(movieId);
 
@@ -135,7 +135,7 @@ public class RecommendationFragmentViewModel extends BaseFragmentViewModel {
                 .subscribe(
                         response -> {
                             if (response.isResult()) {
-                                callback.doSuccess(response.getData().getContent());
+                                callback.doSuccess(response.getData());
                             } else {
                                 callback.doFail();
                             }

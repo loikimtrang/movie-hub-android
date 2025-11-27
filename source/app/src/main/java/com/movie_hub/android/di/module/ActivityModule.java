@@ -21,6 +21,7 @@ import com.movie_hub.android.ui.main.account.register.RegisterViewModel;
 import com.movie_hub.android.ui.main.account.updateapp.CheckUpdateViewModel;
 import com.movie_hub.android.ui.main.account.verifyotp.VerifyOtpViewModel;
 import com.movie_hub.android.ui.main.movie.detail.MovieDetailViewModel;
+import com.movie_hub.android.ui.main.movie.detail.comment.CommentViewModel;
 import com.movie_hub.android.ui.main.movie.watch.WatchMovieViewModel;
 import com.movie_hub.android.ui.main.person.PersonDetailViewModel;
 import com.movie_hub.android.ui.main.splash.SplashViewModel;
@@ -163,5 +164,13 @@ public class ActivityModule {
         Supplier<HistoryViewModel> supplier = () -> new HistoryViewModel(repository, (MVVMApplication)application);
         ViewModelProviderFactory<HistoryViewModel> factory = new ViewModelProviderFactory<>(HistoryViewModel.class, supplier);
         return new ViewModelProvider(activity, factory).get(HistoryViewModel.class);
+    }
+
+    @Provides
+    @ActivityScope
+    CommentViewModel provideCommentViewModel(Repository repository, Context application) {
+        Supplier<CommentViewModel> supplier = () -> new CommentViewModel(repository, (MVVMApplication)application);
+        ViewModelProviderFactory<CommentViewModel> factory = new ViewModelProviderFactory<>(CommentViewModel.class, supplier);
+        return new ViewModelProvider(activity, factory).get(CommentViewModel.class);
     }
 }

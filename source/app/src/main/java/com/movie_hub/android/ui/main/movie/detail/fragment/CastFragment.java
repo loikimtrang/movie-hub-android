@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.movie_hub.android.R;
+import com.movie_hub.android.constant.Constants;
 import com.movie_hub.android.data.model.api.ResponseListObj;
 import com.movie_hub.android.data.model.api.ResponseWrapper;
 import com.movie_hub.android.data.model.api.request.favourite.CreateFavouriteRequest;
@@ -211,7 +212,7 @@ public class CastFragment extends BaseFragment<FragmentCastBinding, CastFragment
         request.setPage(currentPage);
         request.setSize(pageSize);
         request.setPaged(true);
-        request.setType(CreateFavouriteRequest.FAVOURITE_TYPE_PERSON);
+        request.setType(Constants.FAVOURITE_TYPE_PERSON);
 
         viewModel.getFavoritePersonList(new MainCallback<ResponseListObj<FavouriteResponse>>() {
             @Override public void doSuccess(ResponseListObj<FavouriteResponse> data) {

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <variable
+            name="a"
+            type="com.movie_hub.android.ui.main.movie.detail.comment.CommentActivity" />
+
+        <variable
+            name="vm"
+            type="com.movie_hub.android.ui.main.movie.detail.comment.CommentViewModel" />
+
+        <import type="android.view.View" />
+    </data>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/transparent"
+        android:fitsSystemWindows="true"
+        android:onClick="@{(v) -> a.finish()}"
+        android:clickable="true"
+        android:focusable="true">
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="@dimen/_80sdp"
+            android:background="@drawable/bg_comment"
+            android:clickable="true"
+            android:focusable="true">
+            <com.google.android.material.progressindicator.LinearProgressIndicator
+                android:id="@+id/bottom_loading_bar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:indeterminate="true"
+                android:visibility="gone"
+                app:trackThickness="1dp"
+                app:indicatorColor="@color/ic_tab_bar_tint"
+                app:trackColor="@android:color/transparent"
+                style="@style/Widget.MaterialComponents.LinearProgressIndicator"
+                android:layout_marginBottom="@dimen/_25sdp"/>
+
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:id="@+id/rv_menu"
+                android:layout_marginTop="@dimen/_40sdp"
+                android:layout_marginBottom="@dimen/_25sdp"/>
+
+            <FrameLayout
+                android:id="@+id/loading_overlay"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@android:color/transparent"
+                android:visibility="gone"
+                android:clickable="true"
+                android:focusable="true"/>
+        </FrameLayout>
+
+    </FrameLayout>
+</layout>

@@ -10,6 +10,7 @@ import com.movie_hub.android.data.model.api.ResponseListObj;
 import com.movie_hub.android.data.model.api.ResponseWrapper;
 import com.movie_hub.android.data.model.api.request.favourite.CreateFavouriteRequest;
 import com.movie_hub.android.data.model.api.request.history.ListWatchHistoryRequest;
+import com.movie_hub.android.data.model.api.response.MovieItem.MovieItemResponse;
 import com.movie_hub.android.data.model.api.response.favourite.FavouriteResponse;
 import com.movie_hub.android.data.model.api.response.history.ListWatchHistoryResponse;
 import com.movie_hub.android.data.model.api.response.movie.MovieResponse;
@@ -31,7 +32,8 @@ import timber.log.Timber;
 
 public class MovieDetailViewModel extends BaseViewModel {
     public MovieResponse movieDetails;
-    public MutableLiveData<List<ListWatchHistoryResponse>> movieDetailsTracking = new MutableLiveData<>();
+    public MovieItemResponse remainingEpisode;
+    public MutableLiveData<ListWatchHistoryResponse> movieDetailsTracking = new MutableLiveData<>();
     private MutableLiveData<Boolean> isPlaying = new MutableLiveData<>(true);
     public Boolean isFavourite = false;
     public MutableLiveData<FavouriteResponse> favouriteResponseFirst = new MutableLiveData<>();
@@ -52,6 +54,13 @@ public class MovieDetailViewModel extends BaseViewModel {
     public String getTokenVideo() {
         return "Bearer " + repository.getSharedPreferences().getToken();
     }
+
+    public void applyWatchHistory(ListWatchHistoryResponse history) {
+        if (movieDetails != null) {
+            movieDetails.applyWatchHistory(history);
+        }
+    }
+
 
     public void createFavorite(CreateFavouriteRequest request) {
         Map<String, Object> query = RequestToMapConverter.convert(request);
@@ -151,7 +160,7 @@ public class MovieDetailViewModel extends BaseViewModel {
                 .subscribe(
                         response -> {
                             if (response.isResult()) {
-                                movieDetailsTracking.postValue(response.getData().getContent());
+                                movieDetailsTracking.postValue(response.getData());
                             }
                         }, throwable -> {
                             Timber.e(throwable);

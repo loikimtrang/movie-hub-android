@@ -131,5 +131,5 @@ public interface ApiService {
     Observable<ResponseWrapper> updateHistory(@Body Map<String, Object> body);
 
     @GET("v1/watch-history/list")
-    Observable<ResponseWrapper<ResponseListObj<ListWatchHistoryResponse>>> getListWatchHistory(@QueryMap Map<String, Object> query);
+    Observable<ResponseWrapper<ListWatchHistoryResponse>> getListWatchHistory(@QueryMap Map<String, Object> query);
 }

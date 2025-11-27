@@ -3,18 +3,20 @@ package com.movie_hub.android.ui.main.movie.detail.adapter;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.movie_hub.android.R;
-import com.movie_hub.android.constant.Constants;
 import com.movie_hub.android.data.model.api.response.MovieItem.MovieItemResponse;
 import com.movie_hub.android.databinding.ItemEpisodeBinding;
+import com.movie_hub.android.ui.main.movie.detail.diff.EpisodeDiffCallback;
 import com.movie_hub.android.utils.DisplayUtils;
 import com.movie_hub.android.utils.HtmlUtils;
 
@@ -51,7 +53,7 @@ public class EpisodeItemListAdapter extends RecyclerView.Adapter<EpisodeItemList
         MovieItemResponse item = items.get(position);
         if (item.getVideo() == null) return;
 
-        String title = context.getString(R.string.episode_index) + " " + item.getLabel() + "."  + " " + item.getTitle();
+        String title = item.getLabel() + "."  + " " + item.getTitle();
 
         holder.binding.tvTitle.setText(title);
         holder.binding.tvDescription.setText(
@@ -90,6 +92,24 @@ public class EpisodeItemListAdapter extends RecyclerView.Adapter<EpisodeItemList
             }, 50L);
             lastPosition = position;
         }
+
+        if ((item.getLastWatchSeconds() == null || item.getVideo() == null || item.getVideo().getDuration() == null)
+                && !item.isCompleted()) {
+            holder.binding.seekBar.setVisibility(View.GONE);
+        } else {
+            holder.binding.seekBar.setVisibility(View.VISIBLE);
+
+            if (item.isCompleted()) {
+                holder.binding.seekBar.setMax(100);
+                holder.binding.seekBar.setProgress(100);
+            } else {
+                int duration = item.getVideo().getDuration().intValue();
+                int progress = item.getLastWatchSeconds() != null ? item.getLastWatchSeconds().intValue() : 0;
+
+                holder.binding.seekBar.setMax(duration);
+                holder.binding.seekBar.setProgress(progress);
+            }
+        }
     }
     @Override
     public void onViewDetachedFromWindow(@NonNull EpisodeItemListViewHolder holder) {
@@ -97,17 +117,25 @@ public class EpisodeItemListAdapter extends RecyclerView.Adapter<EpisodeItemList
     }
 
     @SuppressLint("NewApi")
-    public void setData(List<MovieItemResponse> newData) {
-        items.clear();
+    public void setData(List<MovieItemResponse> newDataRaw) {
+        List<MovieItemResponse> filtered = new ArrayList<>();
 
-        if (newData != null) {
-            newData.stream()
+        if (newDataRaw != null) {
+            newDataRaw.stream()
                     .filter(item -> item.getVideo() != null)
-                    .forEach(items::add);
+                    .forEach(filtered::add);
         }
 
-        notifyDataSetChanged();
+        DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(
+                new EpisodeDiffCallback(this.items, filtered)
+        );
+
+        this.items.clear();
+        this.items.addAll(filtered);
+
+        diffResult.dispatchUpdatesTo(this);
     }
+
 
     @Override
     public int getItemCount() {

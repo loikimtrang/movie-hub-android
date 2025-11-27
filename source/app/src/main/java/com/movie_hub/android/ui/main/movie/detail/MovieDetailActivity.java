@@ -37,6 +37,7 @@ import com.movie_hub.android.constant.Constants;
 import com.movie_hub.android.data.model.api.request.favourite.CreateFavouriteRequest;
 import com.movie_hub.android.data.model.api.response.MovieItem.MovieItemResponse;
 import com.movie_hub.android.data.model.api.response.history.ListWatchHistoryResponse;
+import com.movie_hub.android.data.model.api.response.history.WatchHistoryResponse;
 import com.movie_hub.android.data.model.api.response.movie.MovieResponse;
 import com.movie_hub.android.data.model.api.response.season.SeasonResponse;
 import com.movie_hub.android.data.model.api.response.video.VideoResponse;
@@ -48,6 +49,7 @@ import com.movie_hub.android.ui.base.activity.SystemBarColorProvider;
 import com.movie_hub.android.ui.main.account.login.LoginActivity;
 import com.movie_hub.android.ui.main.movie.detail.adapter.MovieDetailTabAdapter;
 import com.movie_hub.android.ui.main.movie.detail.adapter.TagCategoryAdapter;
+import com.movie_hub.android.ui.main.movie.detail.comment.CommentActivity;
 import com.movie_hub.android.ui.main.movie.detail.dialog.InformationMovieBottomSheetDialog;
 import com.movie_hub.android.ui.main.movie.detail.fragment.CastFragment;
 import com.movie_hub.android.ui.main.movie.detail.fragment.EpisodesFragment;
@@ -78,6 +80,7 @@ public class MovieDetailActivity extends BaseActivity<ActivityMovieDetailBinding
     private boolean isBuffering = false;
     private boolean isMuted = true;
     private ActivityResultLauncher<Intent> loginLauncher;
+    @SuppressLint("SetTextI18n")
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -90,11 +93,10 @@ public class MovieDetailActivity extends BaseActivity<ActivityMovieDetailBinding
         MovieResponse movie = GsonUtils.fromJson(json, MovieResponse.class);
         if (movie != null) {
             viewModel.movieDetails = movie;
-
             if (viewModel.isLogin()) {
                 CreateFavouriteRequest request = new CreateFavouriteRequest();
                 request.setTargetId(viewModel.movieDetails.getId());
-                request.setType(CreateFavouriteRequest.FAVOURITE_TYPE_MOVIE);
+                request.setType(Constants.FAVOURITE_TYPE_MOVIE);
                 viewModel.getFavourite(request);
             }
 
@@ -102,7 +104,7 @@ public class MovieDetailActivity extends BaseActivity<ActivityMovieDetailBinding
 
             if (viewModel.isLogin()) {
                 String jsonTracking = getIntent().getStringExtra("movie_details_tracking");
-                List<ListWatchHistoryResponse> listTracking = GsonUtils.fromJsonToList(jsonTracking, ListWatchHistoryResponse.class);
+                ListWatchHistoryResponse listTracking = GsonUtils.fromJson(jsonTracking, ListWatchHistoryResponse.class);
                 if (listTracking != null) {
                     viewModel.movieDetailsTracking.setValue(listTracking);
                 }
@@ -110,9 +112,106 @@ public class MovieDetailActivity extends BaseActivity<ActivityMovieDetailBinding
         }
 
         viewModel.movieDetailsTracking.observe(this, response -> {
-            if (response != null) {
+            if (response == null || response.getWatchHistories() == null) return;
+            if (viewModel.movieDetails.getType() == Constants.TYPE_MOVIE_SINGLE) {
+                WatchHistoryResponse watchHistoryResponse = response.getWatchHistoryNoComplete();
 
+                if (watchHistoryResponse == null) {
+                    viewBinding.includeMovieHeader.layoutRemaining.setVisibility(View.GONE);
+                    viewBinding.includeMovieHeader.tvWatch.setText(getString(R.string.watch_now));
+                    return;
+                }
+
+                viewBinding.includeMovieHeader.tvWatch.setText(getString(R.string.continue_watching));
+                viewBinding.includeMovieHeader.tvTitleRemaining.setVisibility(View.GONE);
+                viewBinding.includeMovieHeader.layoutRemaining.setVisibility(View.VISIBLE);
+
+                Long currentTime = watchHistoryResponse.getLastWatchSeconds();
+                Long totalTime = viewModel.movieDetails.getSeasons().get(0).getVideo().getDuration();
+
+                viewBinding.includeMovieHeader.tvRemaining.setText(DisplayUtils.getRemainingTimeText(this,
+                        currentTime,
+                        totalTime));
+
+                viewBinding.includeMovieHeader.seekBarRemaining.setMax(totalTime.intValue());
+
+                viewBinding.includeMovieHeader.seekBarRemaining.setProgress(currentTime.intValue());
+
+            } else if (viewModel.movieDetails.getType() == Constants.TYPE_MOVIE_SERIES) {
+                WatchHistoryResponse watchHistoryResponse = response.getFirstWatchHistory();
+                if (watchHistoryResponse == null) {
+                    viewBinding.includeMovieHeader.layoutRemaining.setVisibility(View.GONE);
+                    viewBinding.includeMovieHeader.tvWatch.setText(getString(R.string.watch_now));
+                    viewModel.remainingEpisode = null;
+                    return;
+                }
+
+                MovieItemResponse remainingEpisode = new MovieItemResponse();
+                Long currentTime = 0L;
+
+
+                if (!watchHistoryResponse.isCompleted()) {
+                    remainingEpisode = viewModel.movieDetails.getEpisodeById(watchHistoryResponse.getMovieItemId());
+                    currentTime = watchHistoryResponse.getLastWatchSeconds();
+                } else {
+                    if (!viewModel.movieDetails.isLastEpisode(watchHistoryResponse.getMovieItemId())) {
+                        MovieItemResponse nextEpisode = viewModel.movieDetails.getNextEpisode(watchHistoryResponse.getMovieItemId());
+
+                        WatchHistoryResponse watchHistoryNoComplete = response.getWatchHistoryByMovieId(nextEpisode.getId());
+
+                        if (watchHistoryNoComplete == null) {
+                            remainingEpisode = viewModel.movieDetails.getEpisodeById(nextEpisode.getId());
+                            currentTime = 0L;
+                        } else {
+                            remainingEpisode = viewModel.movieDetails.getEpisodeById(watchHistoryNoComplete.getMovieItemId());
+                            currentTime = watchHistoryNoComplete.getLastWatchSeconds();
+                        }
+
+                    } else {
+
+                        WatchHistoryResponse watchHistoryNoComplete = response.getWatchHistoryNoComplete();
+
+                        if (watchHistoryNoComplete == null) {
+                            viewBinding.includeMovieHeader.layoutRemaining.setVisibility(View.GONE);
+                            viewBinding.includeMovieHeader.tvWatch.setText(getString(R.string.watch_now));
+                            viewModel.remainingEpisode = null;
+                            return;
+                        } else {
+                            remainingEpisode = viewModel.movieDetails.getEpisodeById(watchHistoryNoComplete.getMovieItemId());
+                            currentTime = watchHistoryNoComplete.getLastWatchSeconds();
+                        }
+                    }
+                }
+
+                String label = "";
+
+
+                if (viewModel.movieDetails.getSeasons().size() > 1) {
+                    label = getString(R.string.season_char) + remainingEpisode.getParent().getLabel() +
+                            ":" + getString(R.string.episode_char) + remainingEpisode.getLabel();
+                } else {
+                    label = getString(R.string.episode_char) + remainingEpisode.getLabel();
+                }
+
+                viewBinding.includeMovieHeader.tvWatch.setText(getString(R.string.watch_next) + " " + label);
+
+                viewBinding.includeMovieHeader.tvTitleRemaining.setText(label + ": " + remainingEpisode.getTitle());
+
+                Long totalTime = remainingEpisode.getVideo().getDuration();
+
+                viewBinding.includeMovieHeader.tvRemaining.setText(DisplayUtils.getRemainingTimeText(this,
+                        currentTime,
+                        totalTime));
+
+                viewBinding.includeMovieHeader.seekBarRemaining.setMax(totalTime.intValue());
+                viewBinding.includeMovieHeader.seekBarRemaining.setProgress(currentTime.intValue());
+
+                viewBinding.includeMovieHeader.tvTitleRemaining.setVisibility(View.VISIBLE);
+                viewBinding.includeMovieHeader.layoutRemaining.setVisibility(View.VISIBLE);
+
+                viewModel.remainingEpisode = remainingEpisode;
             }
+
         });
 
         viewModel.favouriteResponseFirst.observe(this, response -> {
@@ -135,7 +234,7 @@ public class MovieDetailActivity extends BaseActivity<ActivityMovieDetailBinding
                             new ToastMessage(ToastMessage.TYPE_NORMAL, getString(R.string.login_successful)).showMessage(this);
                             CreateFavouriteRequest request = new CreateFavouriteRequest();
                             request.setTargetId(viewModel.movieDetails.getId());
-                            request.setType(CreateFavouriteRequest.FAVOURITE_TYPE_MOVIE);
+                            request.setType(Constants.FAVOURITE_TYPE_MOVIE);
                             viewModel.getFavourite(request);
                         }
                     }
@@ -152,7 +251,7 @@ public class MovieDetailActivity extends BaseActivity<ActivityMovieDetailBinding
         }
     }
 
-    @SuppressLint("SetTextI18n")
+    @SuppressLint({"SetTextI18n", "ClickableViewAccessibility"})
     private void setUpView() {
         if (viewModel.movieDetails == null) return;
 
@@ -172,6 +271,7 @@ public class MovieDetailActivity extends BaseActivity<ActivityMovieDetailBinding
         viewBinding.includeMovieHeader.nameMovieOriginal.setText(viewModel.movieDetails.getOriginalTitle());
         viewBinding.includeMovieHeader.description.setText(HtmlUtils.convertPtoStrong(viewModel.movieDetails.getDescription()));
         viewBinding.includeMovieHeader.ageRating.setText(DisplayUtils.displayAgeRating(viewModel.movieDetails.getAgeRating()));
+        viewBinding.includeMovieHeader.seekBarRemaining.setOnTouchListener((v, event) -> true);
 
         if (viewModel.movieDetails.getType() == Constants.TYPE_MOVIE_SINGLE) {
             viewBinding.includeMovieHeader.dateRelease.setText(DisplayUtils.getYearFromReleaseDate(viewModel.movieDetails.getReleaseDate()));
@@ -492,9 +592,15 @@ public class MovieDetailActivity extends BaseActivity<ActivityMovieDetailBinding
                 showLoading();
                 Intent intent = new Intent(this, WatchMovieActivity.class);
                 intent.putExtra("movie_details", GsonUtils.toJson(viewModel.movieDetails));
-                intent.putExtra("movie_details_tracking", GsonUtils.toJson(viewModel.movieDetails));
+                intent.putExtra("movie_details_tracking", GsonUtils.toJson(viewModel.movieDetailsTracking.getValue()));
                 if (viewModel.movieDetails.getType() == Constants.TYPE_MOVIE_SERIES) {
-                    intent.putExtra("episode", GsonUtils.toJson(viewModel.movieDetails.getSeasons().get(0).getEpisodes().get(0)));
+
+                    if (viewModel.remainingEpisode == null) {
+                        intent.putExtra("episode", GsonUtils.toJson(viewModel.movieDetails.getSeasons().get(0).getEpisodes().get(0)));
+                    } else {
+                        intent.putExtra("episode", GsonUtils.toJson(viewModel.remainingEpisode));
+                    }
+
                 }
                 startActivity(intent);
                 break;
@@ -520,7 +626,13 @@ public class MovieDetailActivity extends BaseActivity<ActivityMovieDetailBinding
                     it.putExtra("login_from_other", "login_from_other");
                     loginLauncher.launch(it);
                 }
-
+                break;
+            case R.id.btn_cmt:
+                ClickUtils.debounceClick(viewBinding.includeMovieHeader.btnCmt);
+                Intent it = new Intent(this, CommentActivity.class);
+                it.putExtra("movie_details", GsonUtils.toJson(viewModel.movieDetails));
+                startActivity(it);
+                break;
             default:
                 break;
         }
@@ -547,7 +659,7 @@ public class MovieDetailActivity extends BaseActivity<ActivityMovieDetailBinding
 
     public void addFavoriteMovie() {
         CreateFavouriteRequest request = new CreateFavouriteRequest();
-        request.setType(CreateFavouriteRequest.FAVOURITE_TYPE_MOVIE);
+        request.setType(Constants.FAVOURITE_TYPE_MOVIE);
         request.setTargetId(viewModel.movieDetails.getId());
 
         viewModel.createFavorite(request);
@@ -573,6 +685,7 @@ public class MovieDetailActivity extends BaseActivity<ActivityMovieDetailBinding
         viewModel.showLoading();
         Intent intent = new Intent(this, WatchMovieActivity.class);
         intent.putExtra("movie_details", GsonUtils.toJson(viewModel.movieDetails));
+        intent.putExtra("movie_details_tracking", GsonUtils.toJson(viewModel.movieDetailsTracking.getValue()));
         if (viewModel.movieDetails.getType() == Constants.TYPE_MOVIE_SERIES) {
             intent.putExtra("episode", GsonUtils.toJson(episode));
         }

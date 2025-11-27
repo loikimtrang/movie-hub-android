@@ -599,7 +599,7 @@
                     android:id="@+id/tv_current_time"
                     android:layout_width="@dimen/_60sdp"
                     android:layout_height="wrap_content"
-                    android:text="00:00:00"
+                    android:text="00:00"
                     style="@style/Text_12_Normal"
                     android:textColor="@android:color/white"
                     android:gravity="center"/>
@@ -692,6 +692,17 @@
 
         </LinearLayout>
 
+        <ProgressBar
+            android:id="@+id/loading_progress"
+            android:layout_width="@dimen/_60sdp"
+            android:layout_height="@dimen/_60sdp"
+            android:layout_gravity="center"
+            android:indeterminate="true"
+            android:visibility="gone"
+            style="@style/Widget.AppCompat.ProgressBar"
+            android:indeterminateDrawable="@drawable/loading_video_progress"
+            />
+
         <include
             layout="@layout/layout_list_episodes"
             android:id="@+id/layout_list_episodes"
@@ -736,17 +747,6 @@
                 android:src="@drawable/ic_speed_video"
                 android:layout_gravity="center"/>
         </LinearLayout>
-
-        <ProgressBar
-            android:id="@+id/loading_progress"
-            android:layout_width="@dimen/_60sdp"
-            android:layout_height="@dimen/_60sdp"
-            android:layout_gravity="center"
-            android:indeterminate="true"
-            android:visibility="gone"
-            style="@style/Widget.AppCompat.ProgressBar"
-            android:indeterminateDrawable="@drawable/loading_video_progress"
-            />
 
         <FrameLayout
             android:id="@+id/l_dialog_exit"

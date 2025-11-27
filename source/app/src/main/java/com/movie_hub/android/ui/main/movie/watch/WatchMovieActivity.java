@@ -59,6 +59,7 @@ import com.movie_hub.android.constant.Constants;
 import com.movie_hub.android.data.model.api.request.history.TrackingWatchHistoryRequest;
 import com.movie_hub.android.data.model.api.response.MovieItem.MovieItemResponse;
 import com.movie_hub.android.data.model.api.response.history.ListWatchHistoryResponse;
+import com.movie_hub.android.data.model.api.response.history.WatchHistoryResponse;
 import com.movie_hub.android.data.model.api.response.movie.MovieResponse;
 import com.movie_hub.android.data.model.api.response.season.SeasonResponse;
 import com.movie_hub.android.data.model.api.response.video.VideoResponse;
@@ -115,8 +116,11 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
     private SeasonItemAdapter seasonItemAdapter;
     private EpisodeItemListHoriAdapter episodeItemListHoriAdapter;
     private SpriteThumbnailManager thumbnailManager;
-
+    public boolean isStartContinueWatch = false;
     boolean isSeries = false;
+    private Handler trackingHandler = new Handler(Looper.getMainLooper());
+    private Runnable trackingRunnable;
+    private static final long TRACKING_INTERVAL_MS = 5 * 60 * 1000L;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -150,9 +154,9 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
 
             if (viewModel.isLogin()) {
                 String jsonTracking = getIntent().getStringExtra("movie_details_tracking");
-                List<ListWatchHistoryResponse> listTracking = GsonUtils.fromJsonToList(jsonTracking, ListWatchHistoryResponse.class);
+                ListWatchHistoryResponse listTracking = GsonUtils.fromJson(jsonTracking, ListWatchHistoryResponse.class);
                 if (listTracking != null) {
-                    viewModel.movieDetailsTracking.setValue(listTracking);
+                    viewModel.movieDetailsTracking.postValue(listTracking);
                 }
             }
 
@@ -177,6 +181,49 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
         setUpMovie(viewModel.nowUriPlay);
         viewModel.getIsPlaying().observe(this, this::updatePlayPauseIcons);
     }
+
+    public void handleObserveTracking() {
+        viewModel.movieDetailsTracking.observe(this, response -> {
+            if (player == null || response == null || response.getWatchHistories() == null || isStartContinueWatch) return;
+
+            Long movieItemId = null;
+            if (viewModel.movieDetails.getType() == Constants.TYPE_MOVIE_SINGLE) {
+                movieItemId = viewModel.movieDetails.getSeasons().get(0).getId();
+            } else if (viewModel.movieDetails.getType() == Constants.TYPE_MOVIE_SERIES && viewModel.nowEpisodePlay != null) {
+                movieItemId = viewModel.nowEpisodePlay.getId();
+            }
+
+            if (movieItemId == null) return;
+
+            WatchHistoryResponse watchHistory = response.getWatchHistoryByMovieId(movieItemId);
+            if (watchHistory == null) return;
+
+            long seekTime = 0;
+
+            if (!Boolean.TRUE.equals(watchHistory.isCompleted()) && watchHistory.getLastWatchSeconds() != null) {
+                seekTime = watchHistory.getLastWatchSeconds() * 1000L;
+            }
+
+            // Nếu player đã sẵn sàng → seek liền, còn chưa thì chờ tới STATE_READY rồi mới seek
+            if (player.getPlaybackState() == Player.STATE_READY) {
+                player.seekTo(seekTime);
+                isStartContinueWatch = true;
+            } else {
+                long finalSeekTime = seekTime;
+                player.addListener(new Player.Listener() {
+                    @Override
+                    public void onPlaybackStateChanged(int state) {
+                        if (state == Player.STATE_READY) {
+                            player.seekTo(finalSeekTime);
+                            isStartContinueWatch = true;
+                            player.removeListener(this);
+                        }
+                    }
+                });
+            }
+        });
+    }
+
 
     public void setUpViewForSingleMovie() {
         viewBinding.nameMovie.setText(Objects.requireNonNull(viewModel.movieDetails.getTitle()));
@@ -261,6 +308,8 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
         setupGestureDetector();
         setupSeekBarBrightNess();
         setupSeekBarVolume();
+
+        handleObserveTracking();
     }
 
     private String getVideoUri(VideoResponse videoResponse) {
@@ -379,6 +428,11 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
                     viewBinding.btnReplay.setVisibility(View.GONE);
                     showLoadingVideo();
                 } else if (state == Player.STATE_READY) {
+
+                    if (isStartContinueWatch) {
+                        updateVideoTracking();
+                    }
+
                     isVideoReadyWhenStartActivity = true;
                     viewBinding.btnReplay.setVisibility(View.GONE);
                     hideLoadingVideo();
@@ -386,6 +440,7 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
                         viewBinding.tvTotalTime.setText(formatTime(player.getDuration()));
                     }
                     viewBinding.loadingProgress.setVisibility(View.GONE);
+
                 } else if (state == Player.STATE_ENDED) {
                     handleEndVideo();
                 }
@@ -467,6 +522,8 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
     private Runnable nextEpisodeRunnable;
 
     public void handleEndVideo() {
+        updateVideoTracking();
+
         hideLoadingVideo();
         updatePlayPauseIcons(false);
         viewModel.setPlaying(false);
@@ -627,6 +684,8 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
                 }
                 viewBinding.thumbnailPreviewContainer.setVisibility(View.GONE);
                 autoHideHandler.postDelayed(hideControlsRunnable, AUTO_HIDE_DELAY_MILLIS);
+
+                updateVideoTracking();
             }
         });
     }
@@ -646,25 +705,14 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
 
             int usableWidth = seekBarWidth - paddingLeft - paddingRight;
 
-            // Vị trí thumb chính xác trong toàn view
             float thumbCenterX = seekBar.getX() + paddingLeft + usableWidth * percent;
 
             int containerWidth = container.getWidth();
             float translationX = thumbCenterX - containerWidth / 2f;
             float layOutWidth = viewBinding.layoutSeekBar.getWidth() - containerWidth - viewBinding.layoutSeekBar.getPaddingRight() - viewBinding.layoutSeekBar.getPaddingLeft();
-            Log.d("THUMB_DEBUG", "translationX: " + translationX);
-            Log.d("THUMB_DEBUG", "translationX2: " + layOutWidth);
 
             // Clamp
             translationX = Math.max(0, Math.min(translationX, layOutWidth));
-
-            // 🪵 Log ra thông tin debug
-            Log.d("THUMB_DEBUG", "Progress: " + progress);
-            Log.d("THUMB_DEBUG", "seekBarWidth: " + seekBarWidth);
-            Log.d("THUMB_DEBUG", "usableWidth: " + usableWidth);
-            Log.d("THUMB_DEBUG", "thumbCenterX: " + thumbCenterX);
-            Log.d("THUMB_DEBUG", "containerWidth: " + containerWidth);
-            Log.d("THUMB_DEBUG", "translationX: " + translationX);
 
             container.setTranslationX(translationX);
         });
@@ -1152,6 +1200,7 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
         hideSystemUI();
         startSeekBarUpdate();
         startVolumeObserver();
+        startTrackingLoop();
     }
     @Override
     protected void onPause() {
@@ -1191,11 +1240,7 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
 
         stopSeekBarUpdate();
         stopVolumeObserver();
-
-        // KHÔNG set = null nữa!
-        // seekHandler = null;
-        // autoHideHandler = null;
-        // countResetHandler = null;
+        stopTrackingLoop();
     }
 
     // region === Click ===
@@ -1388,6 +1433,7 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
         player.setTrackSelectionParameters(builder.build());
 
         MediaItem newItem = MediaItem.fromUri(newUri);
+        isStartContinueWatch = false;
         player.stop();
         player.clearMediaItems();
         player.setMediaItem(newItem);
@@ -1503,6 +1549,7 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
     }
 
     public void onNextEpisodeClick() {
+        updateVideoTracking();
         viewModel.nowEpisodePlay = getNextEpisode();
         viewModel.nowVideoPlay = viewModel.nowEpisodePlay.getVideo();
         setUpViewForSeriesMovie();
@@ -1529,6 +1576,7 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
     }
     @Override
     public void onEpisodeClick(MovieItemResponse season) {
+        updateVideoTracking();
         viewBinding.layoutListEpisodes.listEpisode.setVisibility(View.GONE);
         viewModel.nowEpisodePlay = season;
         viewModel.nowVideoPlay = viewModel.nowEpisodePlay.getVideo();
@@ -1574,5 +1622,28 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
 
         viewModel.updateTrackingMovie(request);
     }
+
+    private void startTrackingLoop() {
+        if (trackingRunnable == null) {
+            trackingRunnable = new Runnable() {
+                @Override
+                public void run() {
+                    if (isStartContinueWatch) {
+                        updateVideoTracking();
+                    }
+                    trackingHandler.postDelayed(this, TRACKING_INTERVAL_MS);
+                }
+            };
+        }
+
+        trackingHandler.postDelayed(trackingRunnable, TRACKING_INTERVAL_MS);
+    }
+
+    private void stopTrackingLoop() {
+        if (trackingHandler != null && trackingRunnable != null) {
+            trackingHandler.removeCallbacks(trackingRunnable);
+        }
+    }
+
 }
 

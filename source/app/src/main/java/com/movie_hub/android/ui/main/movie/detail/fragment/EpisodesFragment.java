@@ -1,7 +1,6 @@
 package com.movie_hub.android.ui.main.movie.detail.fragment;
 
 import android.annotation.SuppressLint;
-import android.content.Intent;
 import android.widget.Toast;
 
 import androidx.lifecycle.ViewModelProvider;
@@ -18,14 +17,12 @@ import com.movie_hub.android.ui.base.fragment.BaseFragment;
 import com.movie_hub.android.ui.main.movie.detail.MovieDetailActivity;
 import com.movie_hub.android.ui.main.movie.detail.MovieDetailViewModel;
 import com.movie_hub.android.ui.main.movie.detail.adapter.EpisodeItemListAdapter;
-import com.movie_hub.android.ui.main.movie.detail.adapter.SeasonItemListAdapter;
 import com.movie_hub.android.ui.main.movie.detail.dialog.ChooseSeasonBottomSheetDialog;
-import com.movie_hub.android.ui.main.movie.watch.WatchMovieActivity;
 import com.movie_hub.android.utils.ClickUtils;
 import com.movie_hub.android.utils.GsonUtils;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 import eu.davidea.flexibleadapter.databinding.BR;
 
@@ -36,6 +33,8 @@ public class EpisodesFragment extends BaseFragment<FragmentEpisodeBinding, Episo
     private List<MovieItemResponse> episodes;
     private EpisodeItemListAdapter adapter;
 
+    private int seasonIndexSelect = 0;
+
     @Override
     protected void performDataBinding() {
         binding.setF(this);
@@ -44,6 +43,27 @@ public class EpisodesFragment extends BaseFragment<FragmentEpisodeBinding, Episo
         movieDetail = sharedViewModel.movieDetails;
         episodes = movieDetail.getSeasons().get(movieDetail.getSeasons().size() - 1).getEpisodes();
         setUpView();
+
+        sharedViewModel.movieDetailsTracking.observe(getViewLifecycleOwner(), tracking -> {
+            if (tracking == null || !viewModel.isLogin()) return;
+
+            sharedViewModel.applyWatchHistory(tracking);
+
+            MovieResponse movie = sharedViewModel.movieDetails;
+            List<SeasonResponse> seasons = movie.getSeasons();
+
+            if (seasons != null && seasonIndexSelect >= 0 && seasonIndexSelect < seasons.size()) {
+                List<MovieItemResponse> originalEpisodes = seasons.get(seasonIndexSelect).getEpisodes();
+
+                List<MovieItemResponse> cloned = new ArrayList<>();
+                for (MovieItemResponse item : originalEpisodes) {
+                    cloned.add(new MovieItemResponse(item));
+                }
+
+                adapter.setData(cloned);
+            }
+        });
+
     }
 
     @SuppressLint("SetTextI18n")
@@ -109,23 +129,19 @@ public class EpisodesFragment extends BaseFragment<FragmentEpisodeBinding, Episo
         MovieResponse currentMovie = sharedViewModel.movieDetails;
         if (currentMovie == null) return;
 
-        MovieResponse updatedMovie = GsonUtils.fromJson(
-                GsonUtils.toJson(currentMovie),
-                MovieResponse.class
-        );
-
-        for (SeasonResponse s : updatedMovie.getSeasons()) {
+        for (SeasonResponse s : currentMovie.getSeasons()) {
             s.setSelect(s.getId().equals(selectedSeason.getId()));
             if (s.isSelect()) {
                 episodes.clear();
                 episodes.addAll(s.getEpisodes());
                 adapter.setData(episodes);
-                adapter.notifyDataSetChanged();
                 binding.tvSeason.setText(getString(R.string.season) + " " +
-                        (updatedMovie.getSeasons().indexOf(s) + 1));
+                        (currentMovie.getSeasons().indexOf(s) + 1));
+
+                seasonIndexSelect = currentMovie.getSeasons().indexOf(s);
             }
         }
-        sharedViewModel.movieDetails = updatedMovie;
+        sharedViewModel.movieDetails = currentMovie;
     }
 
     @Override

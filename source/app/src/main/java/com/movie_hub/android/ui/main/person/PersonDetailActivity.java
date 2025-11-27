@@ -54,7 +54,7 @@ public class PersonDetailActivity extends BaseActivity<ActivityPersonDetailBindi
             if (viewModel.isLogin()) {
                 CreateFavouriteRequest request = new CreateFavouriteRequest();
                 request.setTargetId(viewModel.person.getId());
-                request.setType(CreateFavouriteRequest.FAVOURITE_TYPE_PERSON);
+                request.setType(Constants.FAVOURITE_TYPE_PERSON);
                 viewModel.getFavourite(request);
             }
 
@@ -81,7 +81,7 @@ public class PersonDetailActivity extends BaseActivity<ActivityPersonDetailBindi
                             new ToastMessage(ToastMessage.TYPE_NORMAL, getString(R.string.login_successful)).showMessage(this);
                             CreateFavouriteRequest request = new CreateFavouriteRequest();
                             request.setTargetId(viewModel.person.getId());
-                            request.setType(CreateFavouriteRequest.FAVOURITE_TYPE_PERSON);
+                            request.setType(Constants.FAVOURITE_TYPE_PERSON);
                             viewModel.getFavourite(request);
                         }
                     }
@@ -201,7 +201,7 @@ public class PersonDetailActivity extends BaseActivity<ActivityPersonDetailBindi
 
     public void addFavoritePerson() {
         CreateFavouriteRequest request = new CreateFavouriteRequest();
-        request.setType(CreateFavouriteRequest.FAVOURITE_TYPE_PERSON);
+        request.setType(Constants.FAVOURITE_TYPE_PERSON);
         request.setTargetId(viewModel.person.getId());
         viewModel.createFavorite(request);
     }

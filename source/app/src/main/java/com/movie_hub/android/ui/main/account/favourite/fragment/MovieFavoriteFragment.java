@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.movie_hub.android.BR;
 import com.movie_hub.android.R;
+import com.movie_hub.android.constant.Constants;
 import com.movie_hub.android.data.model.api.ResponseListObj;
 import com.movie_hub.android.data.model.api.request.favourite.CreateFavouriteRequest;
 import com.movie_hub.android.data.model.api.request.favourite.FavouriteListRequest;
@@ -106,7 +107,7 @@ public class MovieFavoriteFragment extends BaseFragment<FragmentMovieFavoriteBin
         showLoading();
 
         FavouriteListRequest request = new FavouriteListRequest();
-        request.setType(CreateFavouriteRequest.FAVOURITE_TYPE_MOVIE);
+        request.setType(Constants.FAVOURITE_TYPE_MOVIE);
         request.setPage(currentPage);
         request.setSize(pageSize);
         request.setPaged(true);
@@ -209,7 +210,7 @@ public class MovieFavoriteFragment extends BaseFragment<FragmentMovieFavoriteBin
     public void getListMovieTracking(MovieResponse movie) {
         if (!isAdded()) return;
         showLoading();
-        viewModel.getListMovieTracking(new MainCallback<List<ListWatchHistoryResponse>>() {
+        viewModel.getListMovieTracking(new MainCallback<ListWatchHistoryResponse>() {
             @Override
             public void doError(Throwable throwable) {
                 hideLoading();
@@ -225,7 +226,7 @@ public class MovieFavoriteFragment extends BaseFragment<FragmentMovieFavoriteBin
             }
 
             @Override
-            public void doSuccess(List<ListWatchHistoryResponse> list) {
+            public void doSuccess(ListWatchHistoryResponse list) {
                 if (!isAdded()) return;
 
                 Intent intent = new Intent(getContext(), MovieDetailActivity.class);

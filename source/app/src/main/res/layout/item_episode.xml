@@ -27,14 +27,40 @@
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintDimensionRatio="16:9">
+                    app:layout_constraintDimensionRatio="16:9"
+                    android:background="@color/bg_app">
 
-                    <com.google.android.material.imageview.ShapeableImageView
-                        android:id="@+id/image"
+                    <FrameLayout
+
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:scaleType="centerCrop"
-                        app:shapeAppearanceOverlay="@style/movieVerticalImg"/>
+                        android:layout_height="match_parent">
+
+                        <com.google.android.material.imageview.ShapeableImageView
+                            android:id="@+id/image"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:scaleType="centerCrop"
+                            app:shapeAppearanceOverlay="@style/movieVerticalImg"
+                            />
+
+                        <SeekBar
+                            android:id="@+id/seekBar"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:max="100"
+                            android:progress="100"
+                            android:minHeight="@dimen/_3sdp"
+                            android:maxHeight="@dimen/_3sdp"
+                            android:progressDrawable="@drawable/seekbar_video_progress_history_radius_half"
+                            android:paddingStart="0dp"
+                            android:paddingEnd="0dp"
+                            android:thumb="@null"
+                            android:layout_gravity="bottom"
+                            android:visibility="gone"/>
+
+                    </FrameLayout>
+
+
 
                     <FrameLayout
                         android:id="@+id/play"

@@ -55,7 +55,6 @@ public class MovieFavoriteViewModel extends BaseFragmentViewModel {
         );
     }
     public void getFavoriteMovieList(MainCallback<ResponseListObj<FavouriteResponse>> callback, FavouriteListRequest request) {
-        request.setType(CreateFavouriteRequest.FAVOURITE_TYPE_MOVIE);
         Map<String, Object> query = RequestToMapConverter.convert(request);
         compositeDisposable.add(repository.getApiService().getFavouriteList(query)
                 .subscribeOn(Schedulers.io())
@@ -84,7 +83,7 @@ public class MovieFavoriteViewModel extends BaseFragmentViewModel {
         );
     }
 
-    public void getListMovieTracking(MainCallback<List<ListWatchHistoryResponse>> callback, long movieId) {
+    public void getListMovieTracking(MainCallback<ListWatchHistoryResponse> callback, long movieId) {
         ListWatchHistoryRequest request = new ListWatchHistoryRequest();
         request.setMovieId(movieId);
 
@@ -105,7 +104,7 @@ public class MovieFavoriteViewModel extends BaseFragmentViewModel {
                 .subscribe(
                         response -> {
                             if (response.isResult()) {
-                                callback.doSuccess(response.getData().getContent());
+                                callback.doSuccess(response.getData());
                             } else {
                                 callback.doFail();
                             }

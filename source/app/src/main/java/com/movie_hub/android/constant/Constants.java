@@ -47,6 +47,9 @@ public class Constants {
     public static final int AGE_RATING_R = 4;
     public static final int AGE_RATING_NC17 = 5;
     public static final int AGE_RATING_18 = 6;
+
+    public static final int FAVOURITE_TYPE_MOVIE = 1;
+    public static final int FAVOURITE_TYPE_PERSON = 2;
     private Constants(){
 
     }

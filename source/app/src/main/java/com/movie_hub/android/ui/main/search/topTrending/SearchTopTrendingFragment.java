@@ -208,7 +208,7 @@ public class SearchTopTrendingFragment extends BaseFragment<FragmentSearchTopTre
         if (!isAdded()) return;
         ((MainActivity) requireActivity()).showLoading();
 
-        viewModel.getListMovieTracking(new MainCallback<List<ListWatchHistoryResponse>>() {
+        viewModel.getListMovieTracking(new MainCallback<ListWatchHistoryResponse>() {
             @Override
             public void doError(Throwable throwable) {
                 ((MainActivity) requireActivity()).hideLoading();
@@ -224,7 +224,7 @@ public class SearchTopTrendingFragment extends BaseFragment<FragmentSearchTopTre
             }
 
             @Override
-            public void doSuccess(List<ListWatchHistoryResponse> list) {
+            public void doSuccess(ListWatchHistoryResponse list) {
                 if (!isAdded()) return;
 
                 Intent intent = new Intent(getContext(), MovieDetailActivity.class);

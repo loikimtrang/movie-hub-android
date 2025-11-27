@@ -171,5 +171,34 @@ public class DisplayUtils {
             return String.format(Locale.getDefault(), "%02d:%02d", minutes, seconds);
         }
     }
+    public static String getRemainingTimeText(Context context, long currentSeconds, long totalSeconds) {
+        long remaining = totalSeconds - currentSeconds;
+
+        if (remaining <= 0) {
+            remaining = 0;
+        } else if (remaining < 60) {
+            remaining = 60;
+        }
+
+        long hours = remaining / 3600;
+        long minutes = (remaining % 3600) / 60;
+
+        String hourStr = context.getString(R.string.hour);       // "h"
+        String minuteStr = context.getString(R.string.minute);   // "m"
+        String remainingStr = context.getString(R.string.remaining); // "remaining"
+
+        StringBuilder result = new StringBuilder(remainingStr + " ");
+
+        if (hours > 0) {
+            result.append(hours).append(hourStr);
+        }
+
+        if (minutes > 0 || hours == 0) {
+            if (hours > 0) result.append(" ");
+            result.append(minutes).append(minuteStr);
+        }
+
+        return result.toString().trim();
+    }
 
 }

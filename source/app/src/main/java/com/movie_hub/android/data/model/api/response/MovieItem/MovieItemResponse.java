@@ -25,6 +25,24 @@ public class MovieItemResponse {
     private boolean isPlaying = false;
     private String thumbnailUrl;
     private SeasonResponse parent;
+    private boolean isCompleted;
+    private Long lastWatchSeconds;
+
+    public MovieItemResponse(MovieItemResponse source) {
+        this.id = source.id;
+        this.title = source.title;
+        this.label = source.label;
+        this.description = source.description;
+        this.isCompleted = source.isCompleted;
+        this.lastWatchSeconds = source.lastWatchSeconds;
+        this.thumbnailUrl = source.thumbnailUrl;
+        this.isPlaying = source.isPlaying;
+        this.video = source.video;
+    }
+
+    public MovieItemResponse() {
+    }
+
     public String getThumbnailUrl() {
         return (thumbnailUrl == null || thumbnailUrl.trim().isEmpty())
                 ? null
