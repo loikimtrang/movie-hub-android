@@ -121,6 +121,7 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
     private Handler trackingHandler = new Handler(Looper.getMainLooper());
     private Runnable trackingRunnable;
     private static final long TRACKING_INTERVAL_MS = 5 * 60 * 1000L;
+    private int currentSeasonIndex = 0;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -184,7 +185,14 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
 
     public void handleObserveTracking() {
         viewModel.movieDetailsTracking.observe(this, response -> {
-            if (player == null || response == null || response.getWatchHistories() == null || isStartContinueWatch) return;
+            if (player == null || response == null || response.getWatchHistories() == null) return;
+
+            viewModel.movieDetails.applyWatchHistory(response);
+            if (episodeItemListHoriAdapter != null) {
+                episodeItemListHoriAdapter.setData(viewModel.movieDetails.getSeasons().get(currentSeasonIndex).getEpisodes(), viewBinding.layoutListEpisodes.rvEpisode);
+            }
+
+            if (isStartContinueWatch) return;
 
             Long movieItemId = null;
             if (viewModel.movieDetails.getType() == Constants.TYPE_MOVIE_SINGLE) {
@@ -235,6 +243,8 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
 
     @SuppressLint("SetTextI18n")
     public void setUpViewForSeriesMovie() {
+        currentSeasonIndex = viewModel.movieDetails.getIndexSeasonSelect();
+
         viewBinding.nameMovie.setText(getString(R.string.episode_index) + " " + viewModel.nowEpisodePlay.getLabel()
                 + ". " + viewModel.nowEpisodePlay.getTitle());
         viewBinding.nameMovieOriginal.setText(viewModel.movieDetails.getTitle() + findLabelSeason());
@@ -247,11 +257,14 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
         }
     }
 
+    @SuppressLint("SetTextI18n")
     public void reset() {
         forwardCount = 0;
         previousCount = 0;
         isVideoReadyWhenStartActivity = false;
         viewBinding.seekBar.setProgress(0);
+        viewBinding.tvCurrentTime.setText("00:00");
+        viewBinding.tvTotalTime.setText("00:00");
     }
     public void setUpMovie(String uri) {
         if (!uri.contains("http")) {
@@ -1572,6 +1585,7 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
         viewModel.movieDetails.setSeasonAndEpisodeSelectedAndPlaying(viewModel.nowEpisodePlay.getId());
         seasonItemAdapter.setData(viewModel.movieDetails.getSeasons());
         episodeItemListHoriAdapter.setData(viewModel.movieDetails.getSelectedSeasonEpisodes(), viewBinding.layoutListEpisodes.rvEpisode);
+        currentSeasonIndex = viewModel.movieDetails.getIndexSeasonSelect();
         viewBinding.layoutListEpisodes.listEpisode.setVisibility(View.VISIBLE);
     }
     @Override
@@ -1605,7 +1619,10 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
 
     @Override
     public void onSeasonClick(SeasonResponse season) {
+        viewModel.movieDetails.setSeasonSelect(season.getId());
         episodeItemListHoriAdapter.setData(viewModel.movieDetails.getSeasonEpisodesById(season.getId()), viewBinding.layoutListEpisodes.rvEpisode);
+
+        currentSeasonIndex = viewModel.movieDetails.getIndexSeasonSelect();
     }
 
     public void updateVideoTracking() {

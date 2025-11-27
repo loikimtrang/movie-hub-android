@@ -39,7 +39,6 @@ public class FavouriteActivity extends BaseActivity<ActivityFavouriteBinding, Fa
         fragmentList.add(CastFragment.newInstance(CastFragment.TYPE_FAVORITE, null));
         SearchResultTabAdapter tabAdapter = new SearchResultTabAdapter(this, fragmentList);
         viewBinding.viewPager.setAdapter(tabAdapter);
-        viewBinding.viewPager.setOffscreenPageLimit(fragmentList.size());
 
         viewBinding.viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
             @Override

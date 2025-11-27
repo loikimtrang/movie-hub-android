@@ -26,81 +26,94 @@ import java.util.List;
 
 import eu.davidea.flexibleadapter.databinding.BR;
 
-public class EpisodesFragment extends BaseFragment<FragmentEpisodeBinding, EpisodesFragmentViewModel> implements ChooseSeasonBottomSheetDialog.ChooseSeasonBottomSheetCallback,
-    EpisodeItemListAdapter.OnEpisodeClickListener {
+public class EpisodesFragment extends BaseFragment<FragmentEpisodeBinding, EpisodesFragmentViewModel>
+        implements ChooseSeasonBottomSheetDialog.ChooseSeasonBottomSheetCallback,
+        EpisodeItemListAdapter.OnEpisodeClickListener {
+
     private MovieDetailViewModel sharedViewModel;
     private MovieResponse movieDetail;
-    private List<MovieItemResponse> episodes;
     private EpisodeItemListAdapter adapter;
 
-    private int seasonIndexSelect = 0;
+    // Chỉ lưu index của season đang được chọn
+    private int currentSeasonIndex = 0;
 
     @Override
     protected void performDataBinding() {
         binding.setF(this);
         binding.setVm(viewModel);
+
         sharedViewModel = new ViewModelProvider(requireActivity()).get(MovieDetailViewModel.class);
         movieDetail = sharedViewModel.movieDetails;
-        episodes = movieDetail.getSeasons().get(movieDetail.getSeasons().size() - 1).getEpisodes();
-        setUpView();
 
+        // Mặc định là season cuối cùng
+        if (movieDetail != null && movieDetail.getSeasons() != null && !movieDetail.getSeasons().isEmpty()) {
+            currentSeasonIndex = movieDetail.getSeasons().size() - 1;
+        }
+
+        setupViews();
+        observeTracking();
+    }
+
+    private void setupViews() {
+        adapter = new EpisodeItemListAdapter(this, getContext());
+        binding.rvEpisode.setLayoutManager(new LinearLayoutManager(getContext()));
+        binding.rvEpisode.setAdapter(adapter);
+
+        updateSeasonDisplay();
+    }
+
+    private void observeTracking() {
         sharedViewModel.movieDetailsTracking.observe(getViewLifecycleOwner(), tracking -> {
             if (tracking == null || !viewModel.isLogin()) return;
 
             sharedViewModel.applyWatchHistory(tracking);
-
-            MovieResponse movie = sharedViewModel.movieDetails;
-            List<SeasonResponse> seasons = movie.getSeasons();
-
-            if (seasons != null && seasonIndexSelect >= 0 && seasonIndexSelect < seasons.size()) {
-                List<MovieItemResponse> originalEpisodes = seasons.get(seasonIndexSelect).getEpisodes();
-
-                List<MovieItemResponse> cloned = new ArrayList<>();
-                for (MovieItemResponse item : originalEpisodes) {
-                    cloned.add(new MovieItemResponse(item));
-                }
-
-                adapter.setData(cloned);
-            }
+            updateSeasonDisplay(); // refresh lại UI sau khi apply history
         });
+    }
 
+    // Luôn lấy dữ liệu mới nhất từ season hiện tại → không bao giờ bị mất dữ liệu
+    private void updateSeasonDisplay() {
+        if (movieDetail == null || movieDetail.getSeasons() == null || movieDetail.getSeasons().isEmpty()) {
+            adapter.setData(new ArrayList<>());
+            binding.tvSeason.setText(getString(R.string.season) + " -");
+            return;
+        }
+
+        List<SeasonResponse> seasons = movieDetail.getSeasons();
+        SeasonResponse currentSeason = seasons.get(currentSeasonIndex);
+
+        binding.tvSeason.setText(getString(R.string.season) + " " + (currentSeasonIndex + 1));
+        adapter.setData(currentSeason.getEpisodes());
+
+        // Đánh dấu season đang chọn (nếu cần cho UI bottom sheet)
+        for (SeasonResponse s : seasons) {
+            s.setSelect(s == currentSeason);
+        }
     }
 
     @SuppressLint("SetTextI18n")
-    public void setUpView() {
-        binding.tvSeason.setText(getContext().getString(R.string.season) + " " + (movieDetail.getSeasons().size()));
-
-        adapter = new EpisodeItemListAdapter(this, getContext());
-        binding.rvEpisode.setLayoutManager(new LinearLayoutManager(getContext()));
-        binding.rvEpisode.setAdapter(adapter);
-        adapter.setData(episodes);
-    }
     public void showSeasonListBottomSheet() {
         ClickUtils.debounceClick(binding.btnChooseSeason);
 
         if (movieDetail == null) return;
-        int type = movieDetail.getType();
-        if (type == Constants.TYPE_MOVIE_SINGLE || type == Constants.TYPE_MOVIE_TRAILER)
-            return;
 
-        // Lấy seasons, nếu null thì cho list rỗng
-        List<SeasonResponse> seasons = null;
-        if (sharedViewModel.movieDetails != null) {
-            seasons = sharedViewModel.movieDetails.getSeasons();
-        }
+        int type = movieDetail.getType();
+        if (type == Constants.TYPE_MOVIE_SINGLE || type == Constants.TYPE_MOVIE_TRAILER) return;
+
+        List<SeasonResponse> seasons = sharedViewModel.movieDetails != null
+                ? sharedViewModel.movieDetails.getSeasons()
+                : null;
 
         if (seasons == null || seasons.isEmpty()) {
             Toast.makeText(getContext(), "Không có season để hiển thị", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        ChooseSeasonBottomSheetDialog sheet =
-                new ChooseSeasonBottomSheetDialog(
-                        requireContext(),
-                        this,
-                        GsonUtils.toJson(seasons)
-                );
-
+        ChooseSeasonBottomSheetDialog sheet = new ChooseSeasonBottomSheetDialog(
+                requireContext(),
+                this,
+                GsonUtils.toJson(seasons)
+        );
         sheet.show();
 
         if (sheet.getWindow() != null) {
@@ -108,6 +121,25 @@ public class EpisodesFragment extends BaseFragment<FragmentEpisodeBinding, Episo
         }
     }
 
+    @Override
+    public void onSeasonClicked(SeasonResponse selectedSeason) {
+        if (movieDetail == null || movieDetail.getSeasons() == null) return;
+
+        for (int i = 0; i < movieDetail.getSeasons().size(); i++) {
+            if (movieDetail.getSeasons().get(i).getId().equals(selectedSeason.getId())) {
+                currentSeasonIndex = i;
+                updateSeasonDisplay();
+                break;
+            }
+        }
+    }
+
+    @Override
+    public void onEpisodeClick(MovieItemResponse episode) {
+        ((MovieDetailActivity) requireActivity()).navigateToWatchMovieActivity(episode);
+    }
+
+    // ==================== BaseFragment override ====================
     @Override
     public int getBindingVariable() {
         return BR.vm;
@@ -121,31 +153,5 @@ public class EpisodesFragment extends BaseFragment<FragmentEpisodeBinding, Episo
     @Override
     protected void performDependencyInjection(FragmentComponent buildComponent) {
         buildComponent.inject(this);
-    }
-
-    @SuppressLint("SetTextI18n")
-    @Override
-    public void onSeasonClicked(SeasonResponse selectedSeason) {
-        MovieResponse currentMovie = sharedViewModel.movieDetails;
-        if (currentMovie == null) return;
-
-        for (SeasonResponse s : currentMovie.getSeasons()) {
-            s.setSelect(s.getId().equals(selectedSeason.getId()));
-            if (s.isSelect()) {
-                episodes.clear();
-                episodes.addAll(s.getEpisodes());
-                adapter.setData(episodes);
-                binding.tvSeason.setText(getString(R.string.season) + " " +
-                        (currentMovie.getSeasons().indexOf(s) + 1));
-
-                seasonIndexSelect = currentMovie.getSeasons().indexOf(s);
-            }
-        }
-        sharedViewModel.movieDetails = currentMovie;
-    }
-
-    @Override
-    public void onEpisodeClick(MovieItemResponse episode) {
-        ((MovieDetailActivity) requireActivity()).navigateToWatchMovieActivity(episode);
     }
 }

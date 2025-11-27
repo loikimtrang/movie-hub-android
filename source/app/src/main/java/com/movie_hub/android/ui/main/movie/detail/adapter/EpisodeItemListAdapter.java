@@ -47,7 +47,7 @@ public class EpisodeItemListAdapter extends RecyclerView.Adapter<EpisodeItemList
     }
     private int lastPosition = -1;
 
-    @SuppressLint({"SetTextI18n", "ResourceAsColor"})
+    @SuppressLint({"SetTextI18n", "ResourceAsColor", "ClickableViewAccessibility"})
     @Override
     public void onBindViewHolder(@NonNull EpisodeItemListViewHolder holder, @SuppressLint("RecyclerView") int position) {
         MovieItemResponse item = items.get(position);
@@ -60,7 +60,7 @@ public class EpisodeItemListAdapter extends RecyclerView.Adapter<EpisodeItemList
                 HtmlUtils.convertPtoStrong(item.getDescription()));
 
         holder.binding.tvDuration.setText(DisplayUtils.displayTimeFromSeconds(context ,item.getVideo().getDuration()));
-
+        holder.binding.seekBar.setOnTouchListener((v, event) -> true);
         String img = "";
 
         if (item.getThumbnailUrl() != null) {
@@ -126,14 +126,9 @@ public class EpisodeItemListAdapter extends RecyclerView.Adapter<EpisodeItemList
                     .forEach(filtered::add);
         }
 
-        DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(
-                new EpisodeDiffCallback(this.items, filtered)
-        );
-
         this.items.clear();
         this.items.addAll(filtered);
-
-        diffResult.dispatchUpdatesTo(this);
+        notifyDataSetChanged();
     }
 
 

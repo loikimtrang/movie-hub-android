@@ -9,7 +9,7 @@ public class MovieRequest {
     private Long offset;
     private String originalTitle;
     private Integer page;
-    private Integer pageSize = 1000;
+    private Integer size;
     private Boolean paged;
     private Boolean sortSorted;
     private Boolean sortUnsorted;

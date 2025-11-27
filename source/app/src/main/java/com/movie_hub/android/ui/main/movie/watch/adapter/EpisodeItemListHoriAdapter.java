@@ -88,6 +88,24 @@ public class EpisodeItemListHoriAdapter extends RecyclerView.Adapter<EpisodeItem
                 }
             }
         });
+
+        if ((item.getLastWatchSeconds() == null || item.getVideo() == null || item.getVideo().getDuration() == null)
+                && !item.isCompleted()) {
+            holder.binding.seekBar.setVisibility(View.GONE);
+        } else {
+            holder.binding.seekBar.setVisibility(View.VISIBLE);
+
+            if (item.isCompleted()) {
+                holder.binding.seekBar.setMax(100);
+                holder.binding.seekBar.setProgress(100);
+            } else {
+                int duration = item.getVideo().getDuration().intValue();
+                int progress = item.getLastWatchSeconds() != null ? item.getLastWatchSeconds().intValue() : 0;
+
+                holder.binding.seekBar.setMax(duration);
+                holder.binding.seekBar.setProgress(progress);
+            }
+        }
     }
     @Override
     public void onViewDetachedFromWindow(@NonNull EpisodeItemListHoriViewHolder holder) {

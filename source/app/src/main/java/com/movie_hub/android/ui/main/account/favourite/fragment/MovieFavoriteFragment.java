@@ -32,6 +32,7 @@ import java.util.List;
 
 public class MovieFavoriteFragment extends BaseFragment<FragmentMovieFavoriteBinding, MovieFavoriteViewModel> implements MovieFavouriteAdapter.OnMovieClickListener {
     private boolean isLoaded = false;
+    private boolean isLoading = false;
     int currentPage = 0;
     int pageSize = 8;
     boolean isLastPage = false;
@@ -41,7 +42,8 @@ public class MovieFavoriteFragment extends BaseFragment<FragmentMovieFavoriteBin
     protected void performDataBinding() {
         binding.setF(this);
         binding.setVm(viewModel);
-        if (!isLoaded && currentPage == 0) {
+        if (!isLoaded && currentPage == 0 && !isLoading) {
+            isLoading = true;
             showShimmerLoading();
             getListFavoriteMovie();
         }
@@ -51,19 +53,20 @@ public class MovieFavoriteFragment extends BaseFragment<FragmentMovieFavoriteBin
             @Override
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
-                LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
+                if (dy <= 0) return;
 
-                if (layoutManager != null
-                        && movieFavouriteAdapter != null
-                        && layoutManager.findLastCompletelyVisibleItemPosition() == movieFavouriteAdapter.getItemCount() - 1) {
-                    if (!isLastPage) {
-                        getListFavoriteMovie();
-                    }
+                LinearLayoutManager lm = (LinearLayoutManager) recyclerView.getLayoutManager();
+                if (lm == null || movieFavouriteAdapter == null) return;
+
+                int totalItemCount = lm.getItemCount();
+                int lastVisibleItemPosition = lm.findLastVisibleItemPosition();
+
+                if (!isLoading && !isLastPage && lastVisibleItemPosition >= totalItemCount - 3) {
+                    isLoading = true;
+                    getListFavoriteMovie();
                 }
-
             }
         });
-
     }
     public void showShimmerLoading() {
         shimmerAdapter = new MovieFavoriteShimmerAdapter(6);
@@ -135,17 +138,21 @@ public class MovieFavoriteFragment extends BaseFragment<FragmentMovieFavoriteBin
                     if (currentPage == 0) binding.layoutEmpty.setVisibility(View.VISIBLE);
                     isLastPage = true;
                 }
+
+                isLoading = false;
             }
 
             @Override public void doError(Throwable throwable) {
                 hideLoading();
                 if (!isAdded()) return;
                 showError(getString(R.string.fetch_data_failed));
+                isLoading = false;
             }
 
             @Override public void doFail() {
                 hideLoading();
                 showError(getString(R.string.fetch_data_failed));
+                isLoading = false;
             }
 
             @Override public void doSuccess() {}

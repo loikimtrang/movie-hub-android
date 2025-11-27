@@ -31,15 +31,43 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:visibility="gone">
+                android:visibility="visible">
 
-                <TextView
+                <FrameLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    style="@style/Text_12_Normal"
-                    android:text="@string/movie_list"
-                    android:layout_margin="@dimen/_12sdp"
-                    android:textColor="@color/text_gray"/>
+                    android:layout_margin="@dimen/_12sdp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        style="@style/Text_12_Normal"
+                        android:text="@string/movie_list"
+                        android:textColor="@color/text_gray"
+                        android:id="@+id/tv_movie"
+                        android:visibility="gone"/>
+
+                    <com.facebook.shimmer.ShimmerFrameLayout
+                        android:id="@+id/tv_movie_shimmer"
+                        android:layout_width="@dimen/_60sdp"
+                        android:layout_height="wrap_content"
+                        android:background="@android:color/transparent"
+                        android:foreground="?android:attr/selectableItemBackground"
+                        android:clickable="false"
+                        android:focusable="false">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            style="@style/Text_12_Normal"
+                            android:textColor="@color/text_gray"
+                            android:background="@drawable/bg_shimmer_radius_6sdp"
+                            />
+
+                    </com.facebook.shimmer.ShimmerFrameLayout>
+                </FrameLayout>
+
+
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/rv_movie"
@@ -54,15 +82,43 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:visibility="gone">
+                android:visibility="visible">
 
-                <TextView
+
+
+                <FrameLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    style="@style/Text_12_Normal"
-                    android:text="@string/actor_list"
-                    android:layout_margin="@dimen/_12sdp"
-                    android:textColor="@color/text_gray"/>
+                    android:layout_margin="@dimen/_12sdp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        style="@style/Text_12_Normal"
+                        android:text="@string/actor_list"
+                        android:textColor="@color/text_gray"
+                        android:id="@+id/tv_actor"
+                        android:visibility="gone"/>
+
+                    <com.facebook.shimmer.ShimmerFrameLayout
+                        android:id="@+id/tv_actor_shimmer"
+                        android:layout_width="@dimen/_60sdp"
+                        android:layout_height="wrap_content"
+                        android:background="@android:color/transparent"
+                        android:foreground="?android:attr/selectableItemBackground"
+                        android:clickable="false"
+                        android:focusable="false">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            style="@style/Text_12_Normal"
+                            android:textColor="@color/text_gray"
+                            android:background="@drawable/bg_shimmer_radius_6sdp"
+                            />
+
+                    </com.facebook.shimmer.ShimmerFrameLayout>
+                </FrameLayout>
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/rv_actor"

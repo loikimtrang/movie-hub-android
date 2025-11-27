@@ -191,4 +191,18 @@ public class MovieResponse {
             }
         }
     }
+
+    public void setSeasonSelect(Long id) {
+        for (SeasonResponse s : seasons) {
+            s.setSelect(s.getId().equals(id));
+        }
+    }
+
+    public int getIndexSeasonSelect() {
+        for (int i = 0; i<seasons.size(); i++) {
+            if (seasons.get(i).isSelect()) return i;
+        }
+
+        return -1;
+    }
 }

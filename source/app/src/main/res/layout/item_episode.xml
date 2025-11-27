@@ -60,8 +60,6 @@
 
                     </FrameLayout>
 
-
-
                     <FrameLayout
                         android:id="@+id/play"
                         android:layout_width="wrap_content"

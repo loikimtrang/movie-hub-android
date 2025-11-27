@@ -8,8 +8,11 @@ import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.movie_hub.android.R;
+import com.movie_hub.android.data.model.api.ResponseListObj;
 import com.movie_hub.android.data.model.api.request.movie.MovieRequest;
 import com.movie_hub.android.data.model.api.response.history.ListWatchHistoryResponse;
 import com.movie_hub.android.data.model.api.response.movie.MovieResponse;
@@ -21,6 +24,7 @@ import com.movie_hub.android.ui.main.MainCallback;
 import com.movie_hub.android.ui.main.custom.GridSpacingItemDecoration;
 import com.movie_hub.android.ui.main.movie.detail.MovieDetailActivity;
 import com.movie_hub.android.ui.main.search.topTrending.adapter.MovieVerticalAdapter;
+import com.movie_hub.android.ui.main.search.topTrending.shimmer.MovieVerticalShimmerAdapter;
 import com.movie_hub.android.utils.GridUtil;
 import com.movie_hub.android.utils.GsonUtils;
 
@@ -31,7 +35,10 @@ import eu.davidea.flexibleadapter.databinding.BR;
 
 public class RecommendationFragment extends BaseFragment<FragmentRecommendationBinding, RecommendationFragmentViewModel> implements MovieVerticalAdapter.OnMovieClickListener{
     private MovieVerticalAdapter movieAdapter;
+    private MovieVerticalShimmerAdapter shimmerAdapter;
     private boolean isLoaded = false;
+    private boolean isLoading = false;
+
     public static final int TYPE_SEARCH = 0;
     public static final int TYPE_MOVIE_DETAIL = 1;
 
@@ -43,18 +50,48 @@ public class RecommendationFragment extends BaseFragment<FragmentRecommendationB
     private String keyword;
     private Long idMovie;
 
+    int currentPage = 0;
+    int pageSize = 12;
+    boolean isLastPage = false;
+
+
     @Override
     protected void performDataBinding() {
         binding.setF(this);
         binding.setVm(viewModel);
 
-        if (!isLoaded) {
+        setUpAdapter();
+        showShimmerAdapter();
+
+        if (!isLoaded && currentPage == 0 && !isLoading) {
+            isLoading = true;
             if (displayFrom == TYPE_MOVIE_DETAIL) {
                 getListMovieTypeMovieDetail();
             } else {
                 getListMovieTypeSearch();
             }
         }
+
+        binding.rvRecommendation.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+
+                if (displayFrom == TYPE_MOVIE_DETAIL) return;
+                if (dy <= 0) return; // chỉ load khi kéo xuống
+
+                LinearLayoutManager lm = (LinearLayoutManager) recyclerView.getLayoutManager();
+                if (lm == null || movieAdapter == null) return;
+
+                int totalItemCount = lm.getItemCount();
+                int lastVisibleItemPosition = lm.findLastVisibleItemPosition();
+
+                if (!isLoading && !isLastPage && lastVisibleItemPosition >= totalItemCount - 5) {
+                    isLoading = true;
+                    getListMovieTypeSearch();
+                }
+            }
+        });
     }
 
     @Override
@@ -65,12 +102,6 @@ public class RecommendationFragment extends BaseFragment<FragmentRecommendationB
             keyword = getArguments().getString(ARG_KEYWORD);
             idMovie = getArguments().getLong(ARG_ID_MOVIE, 0L);
         }
-    }
-
-    @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-        setUpAdapter();
     }
 
     @Override
@@ -91,15 +122,24 @@ public class RecommendationFragment extends BaseFragment<FragmentRecommendationB
 
     public void setUpAdapter() {
         movieAdapter = new MovieVerticalAdapter(this);
+        shimmerAdapter = new MovieVerticalShimmerAdapter(6);
+
         int spacing = requireContext().getResources().getDimensionPixelSize(R.dimen._8sdp);
         int spanCount = GridUtil.calculateSpanCount(requireContext(), 110);
 
         GridLayoutManager layoutManager = new GridLayoutManager(requireContext(), spanCount);
         binding.rvRecommendation.setLayoutManager(layoutManager);
         binding.rvRecommendation.addItemDecoration(new GridSpacingItemDecoration(spanCount, spacing));
-        binding.rvRecommendation.setAdapter(movieAdapter);
     }
 
+    public void showShimmerAdapter() {
+        binding.rvRecommendation.setAdapter(shimmerAdapter);
+    }
+
+    public void hideShimmer(List<MovieResponse> data) {
+        binding.rvRecommendation.setAdapter(movieAdapter);
+        movieAdapter.setData(data);
+    }
     public void getListMovieTypeMovieDetail() {
         showLoading();
         viewModel.getListMovieRecommendations(new MainCallback<List<MovieResponse>>() {
@@ -122,9 +162,15 @@ public class RecommendationFragment extends BaseFragment<FragmentRecommendationB
             public void doSuccess(List<MovieResponse> list) {
                 hideLoading();
                 if (!isAdded()) return;
-                list.removeIf(movie -> Objects.equals(movie.getId(), idMovie));
-                movieAdapter.setData(list);
-                isLoaded = true;
+                if (list != null && !list.isEmpty()) {
+                    binding.layoutEmpty.setVisibility(View.GONE);
+                    list.removeIf(movie -> Objects.equals(movie.getId(), idMovie));
+                    hideShimmer(list);
+                    isLoaded = true;
+                } else {
+                    binding.layoutEmpty.setVisibility(View.VISIBLE);
+                }
+
             }
 
             @Override
@@ -137,9 +183,10 @@ public class RecommendationFragment extends BaseFragment<FragmentRecommendationB
 
         ((MainActivity) requireActivity()).showLoading();
         MovieRequest request = new MovieRequest();
-        request.setTitle(keyword);
-
-        viewModel.getListMovie(new MainCallback<List<MovieResponse>>() {
+        request.setPage(currentPage);
+        request.setSize(pageSize);
+        request.setPaged(true);
+        viewModel.getListMovie(new MainCallback<ResponseListObj<MovieResponse>>() {
             @Override
             public void doError(Throwable throwable) {
                 ((MainActivity) requireActivity()).hideLoading();
@@ -156,10 +203,29 @@ public class RecommendationFragment extends BaseFragment<FragmentRecommendationB
             }
 
             @Override
-            public void doSuccess(List<MovieResponse> list) {
+            public void doSuccess(ResponseListObj<MovieResponse> data) {
                 ((MainActivity) requireActivity()).hideLoading();
                 if (!isAdded()) return;
-                movieAdapter.setData(list);
+
+                if (data.getContent() != null && !data.getContent().isEmpty()) {
+                    if (currentPage == 0) {
+                        hideShimmer(data.getContent());
+                    } else {
+                        movieAdapter.addData(data.getContent());
+                    }
+
+                    binding.layoutEmpty.setVisibility(View.GONE);
+                    currentPage++;
+
+                    if (currentPage >= data.getTotalPages()) {  // >= để an toàn
+                        isLastPage = true;
+                    }
+                } else {
+                    if (currentPage == 0) binding.layoutEmpty.setVisibility(View.VISIBLE);
+                    isLastPage = true;
+                }
+
+                isLoading = false;
                 isLoaded = true;
             }
 

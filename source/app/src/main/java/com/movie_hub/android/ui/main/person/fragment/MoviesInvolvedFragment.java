@@ -20,6 +20,7 @@ import com.movie_hub.android.ui.main.custom.GridSpacingItemDecoration;
 import com.movie_hub.android.ui.main.movie.detail.MovieDetailActivity;
 import com.movie_hub.android.ui.main.person.PersonDetailActivity;
 import com.movie_hub.android.ui.main.search.topTrending.adapter.MovieVerticalAdapter;
+import com.movie_hub.android.ui.main.search.topTrending.shimmer.MovieVerticalShimmerAdapter;
 import com.movie_hub.android.utils.GridUtil;
 import com.movie_hub.android.utils.GsonUtils;
 
@@ -29,6 +30,7 @@ import java.util.List;
 public class MoviesInvolvedFragment extends BaseFragment<FragmentMoviesInvolvedBinding, MoviesInvolvedFragmentViewModel> implements MovieVerticalAdapter.OnMovieClickListener{
 
     private MovieVerticalAdapter movieAdapter;
+    private MovieVerticalShimmerAdapter shimmerAdapter;
     private boolean isLoaded = false;
     private static final String ARG_PERSON_ID = "person_id";
     private Long personId;
@@ -44,20 +46,31 @@ public class MoviesInvolvedFragment extends BaseFragment<FragmentMoviesInvolvedB
 
         if (!isLoaded) {
             setUpAdapter();
+            showShimmer();
             getListMovieOfPerson();
         }
     }
 
     public void setUpAdapter() {
         movieAdapter = new MovieVerticalAdapter(this);
+        shimmerAdapter = new MovieVerticalShimmerAdapter(6);
+
         int spacing = requireContext().getResources().getDimensionPixelSize(R.dimen._8sdp);
         int spanCount = GridUtil.calculateSpanCount(requireContext(), 110);
 
         GridLayoutManager layoutManager = new GridLayoutManager(requireContext(), spanCount);
         binding.rvMovie.setLayoutManager(layoutManager);
         binding.rvMovie.addItemDecoration(new GridSpacingItemDecoration(spanCount, spacing));
+    }
+
+    public void showShimmer() {
+        binding.rvMovie.setAdapter(shimmerAdapter);
+    }
+
+    public void hideShimmer() {
         binding.rvMovie.setAdapter(movieAdapter);
     }
+
     public static MoviesInvolvedFragment newInstance(Long personId) {
         MoviesInvolvedFragment fragment = new MoviesInvolvedFragment();
         Bundle args = new Bundle();
@@ -87,6 +100,7 @@ public class MoviesInvolvedFragment extends BaseFragment<FragmentMoviesInvolvedB
                     }
 
                     if (movieList != null) {
+                        hideShimmer();
                         movieAdapter.setData(movieList);
                         isLoaded = true;
                     } else {

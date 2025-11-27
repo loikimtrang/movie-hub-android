@@ -50,6 +50,9 @@ public class Constants {
 
     public static final int FAVOURITE_TYPE_MOVIE = 1;
     public static final int FAVOURITE_TYPE_PERSON = 2;
+
+    public static float SHIMMER_START_ALPHA = 0.4f;
+    public static float SHIMMER_END_ALPHA = 0.08f;
     private Constants(){
 
     }

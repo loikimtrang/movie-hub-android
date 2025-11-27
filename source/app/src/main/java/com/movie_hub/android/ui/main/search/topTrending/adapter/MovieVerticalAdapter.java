@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.movie_hub.android.R;
 import com.movie_hub.android.constant.Constants;
+import com.movie_hub.android.data.model.api.response.favourite.FavouriteResponse;
 import com.movie_hub.android.data.model.api.response.movie.MovieResponse;
 import com.movie_hub.android.databinding.ItemMovieBinding;
 import com.movie_hub.android.utils.GridUtil;
@@ -81,6 +82,11 @@ public class MovieVerticalAdapter extends RecyclerView.Adapter<MovieVerticalAdap
         notifyDataSetChanged();
     }
 
+    public void addData(List<MovieResponse> moreItems) {
+        int startPos = movieList.size();
+        movieList.addAll(moreItems);
+        notifyItemRangeInserted(startPos, moreItems.size());
+    }
 
     @Override
     public int getItemCount() {

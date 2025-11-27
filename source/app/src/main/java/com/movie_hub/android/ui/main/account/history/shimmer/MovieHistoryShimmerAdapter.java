@@ -8,6 +8,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.movie_hub.android.R;
+import com.movie_hub.android.constant.Constants;
 
 public class MovieHistoryShimmerAdapter extends RecyclerView.Adapter<MovieHistoryShimmerAdapter.ViewHolder> {
     private final int shimmerItemCount;
@@ -25,8 +26,8 @@ public class MovieHistoryShimmerAdapter extends RecyclerView.Adapter<MovieHistor
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        float startAlpha = 0.8f;
-        float endAlpha = 0.25f;
+        float startAlpha = Constants.SHIMMER_START_ALPHA;
+        float endAlpha = Constants.SHIMMER_END_ALPHA;
         float alpha = startAlpha - (endAlpha * position);
 
         holder.itemView.setAlpha(alpha);

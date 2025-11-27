@@ -3,6 +3,7 @@ package com.movie_hub.android.ui.main.movie.detail.fragment;
 import com.movie_hub.android.MVVMApplication;
 import com.movie_hub.android.data.Repository;
 import com.movie_hub.android.data.model.api.RequestToMapConverter;
+import com.movie_hub.android.data.model.api.ResponseListObj;
 import com.movie_hub.android.data.model.api.request.history.ListWatchHistoryRequest;
 import com.movie_hub.android.data.model.api.request.movie.MovieRequest;
 import com.movie_hub.android.data.model.api.response.history.ListWatchHistoryResponse;
@@ -26,7 +27,7 @@ public class RecommendationFragmentViewModel extends BaseFragmentViewModel {
         super(repository, application);
     }
 
-    public void getListMovie(MainCallback<List<MovieResponse>> callback, MovieRequest request) {
+    public void getListMovie(MainCallback<ResponseListObj<MovieResponse>> callback, MovieRequest request) {
         Map<String, Object> query = RequestToMapConverter.convert(request);
 
         compositeDisposable.add(repository.getApiService().getListMovie(query)
@@ -45,7 +46,7 @@ public class RecommendationFragmentViewModel extends BaseFragmentViewModel {
                 .subscribe(
                         response -> {
                             if (response.isResult()) {
-                                callback.doSuccess(response.getData().getContent());
+                                callback.doSuccess(response.getData());
                             } else {
                                 callback.doFail();
                             }

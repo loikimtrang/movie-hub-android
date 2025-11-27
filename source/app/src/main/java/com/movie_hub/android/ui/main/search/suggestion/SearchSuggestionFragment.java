@@ -6,6 +6,7 @@ import android.view.View;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.movie_hub.android.R;
+import com.movie_hub.android.constant.Constants;
 import com.movie_hub.android.data.model.api.request.person.PersonRequest;
 import com.movie_hub.android.data.model.api.request.movie.MovieRequest;
 import com.movie_hub.android.data.model.api.response.history.ListWatchHistoryResponse;
@@ -22,6 +23,8 @@ import com.movie_hub.android.ui.main.movie.detail.MovieDetailActivity;
 import com.movie_hub.android.ui.main.person.PersonDetailActivity;
 import com.movie_hub.android.ui.main.search.suggestion.adapter.ActorAdapter;
 import com.movie_hub.android.ui.main.search.suggestion.adapter.MovieSuggestAdapter;
+import com.movie_hub.android.ui.main.search.suggestion.shimmer.ActorShimmerAdapter;
+import com.movie_hub.android.ui.main.search.suggestion.shimmer.MovieSuggestShimmerAdapter;
 import com.movie_hub.android.utils.GsonUtils;
 
 import java.net.ConnectException;
@@ -38,6 +41,8 @@ public class SearchSuggestionFragment extends BaseFragment<FragmentSearchSuggest
     private String keyWord;
     private MovieSuggestAdapter movieAdapter;
     private ActorAdapter actorAdapter;
+    private ActorShimmerAdapter actorShimmerAdapter;
+    private MovieSuggestShimmerAdapter movieSuggestShimmerAdapter;
 
     boolean isMovieDone = false;
     boolean isActorDone = false;
@@ -50,6 +55,7 @@ public class SearchSuggestionFragment extends BaseFragment<FragmentSearchSuggest
         binding.setF(this);
         binding.setVm(viewModel);
         setUpAdapter();
+        showShimmerLoading();
     }
 
     public void setKeyWord(String keyWord) {
@@ -59,9 +65,7 @@ public class SearchSuggestionFragment extends BaseFragment<FragmentSearchSuggest
 
         if (!isAdded()) return;
         ((MainActivity) requireActivity()).showLoading();
-
-        binding.lMovie.setVisibility(View.GONE);
-        binding.lActor.setVisibility(View.GONE);
+        showShimmerLoading();
         binding.layoutEmpty.setVisibility(View.GONE);
         MovieRequest movieRequest = new MovieRequest();
         movieRequest.setTitle(keyWord);
@@ -73,14 +77,45 @@ public class SearchSuggestionFragment extends BaseFragment<FragmentSearchSuggest
         getListActor(personRequest);
     }
 
+    public void showShimmerLoading() {
+        binding.tvActor.setVisibility(View.GONE);
+        binding.tvMovie.setVisibility(View.GONE);
+
+        binding.rvMovie.setAdapter(movieSuggestShimmerAdapter);
+        binding.rvActor.setAdapter(actorShimmerAdapter);
+        binding.tvMovieShimmer.setAlpha(Constants.SHIMMER_START_ALPHA);
+        binding.tvActorShimmer.setAlpha(Constants.SHIMMER_START_ALPHA);
+
+        binding.tvActorShimmer.setVisibility(View.VISIBLE);
+        binding.tvMovieShimmer.setVisibility(View.VISIBLE);
+    }
+
+    public void hideActorShimmer(List<PersonResponse> data) {
+        binding.tvActorShimmer.setVisibility(View.GONE);
+        binding.tvActor.setVisibility(View.VISIBLE);
+
+        binding.rvActor.setAdapter(actorAdapter);
+        actorAdapter.setData(data);
+    }
+
+    public void hideMovieShimmer(List<MovieResponse> data) {
+        binding.tvMovieShimmer.setVisibility(View.GONE);
+        binding.tvMovie.setVisibility(View.VISIBLE);
+
+        binding.rvMovie.setAdapter(movieAdapter);
+        movieAdapter.setData(data);
+    }
+
     public void getListMovie(MovieRequest request) {
-        isMovieDone = false;
+        hasMovie = true;
+        updateLayoutVisibility();
+
+        showShimmerLoading();
         viewModel.getListMovie(new MainCallback<List<MovieResponse>>() {
             @Override public void doSuccess(List<MovieResponse> data) {
                 hasMovie = data != null && !data.isEmpty();
-                movieAdapter.setData(data);
-                isMovieDone = true;
                 updateLayoutVisibility();
+                hideMovieShimmer(data);
             }
 
             @Override public void doError(Throwable t) { handleError(t); isMovieDone = true; updateLayoutVisibility(); }
@@ -89,13 +124,15 @@ public class SearchSuggestionFragment extends BaseFragment<FragmentSearchSuggest
         }, request);
     }
     public void getListActor(PersonRequest request) {
-        isActorDone = false;
+        hasActor = true;
+        updateLayoutVisibility();
+
+        showShimmerLoading();
         viewModel.getListPerson(new MainCallback<List<PersonResponse>>() {
             @Override public void doSuccess(List<PersonResponse> data) {
                 hasActor = data != null && !data.isEmpty();
-                actorAdapter.setData(data);
-                isActorDone = true;
                 updateLayoutVisibility();
+                hideActorShimmer(data);
             }
 
             @Override public void doError(Throwable t) { handleError(t); isActorDone = true; updateLayoutVisibility(); }
@@ -105,7 +142,6 @@ public class SearchSuggestionFragment extends BaseFragment<FragmentSearchSuggest
     }
 
     private void updateLayoutVisibility() {
-        if (!isActorDone || !isMovieDone) return;
         if (!isAdded()) return;
         ((MainActivity) requireActivity()).hideLoading();
 
@@ -128,6 +164,8 @@ public class SearchSuggestionFragment extends BaseFragment<FragmentSearchSuggest
     public void setUpAdapter() {
         movieAdapter = new MovieSuggestAdapter(this);
         actorAdapter = new ActorAdapter(this);
+        movieSuggestShimmerAdapter = new MovieSuggestShimmerAdapter(6);
+        actorShimmerAdapter = new ActorShimmerAdapter(6);
 
         binding.rvMovie.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
         binding.rvActor.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
@@ -135,9 +173,6 @@ public class SearchSuggestionFragment extends BaseFragment<FragmentSearchSuggest
         int spacing = getResources().getDimensionPixelSize(R.dimen._8sdp);
         binding.rvMovie.addItemDecoration(new HorizontalSpacingItemDecoration(spacing));
         binding.rvActor.addItemDecoration(new HorizontalSpacingItemDecoration(spacing));
-
-        binding.rvMovie.setAdapter(movieAdapter);
-        binding.rvActor.setAdapter(actorAdapter);
     }
 
     @Override

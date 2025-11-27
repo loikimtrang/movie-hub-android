@@ -1,4 +1,4 @@
-package com.movie_hub.android.ui.main.account.favourite.shimmer;
+package com.movie_hub.android.ui.main.search.suggestion.shimmer;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,17 +10,17 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.movie_hub.android.R;
 import com.movie_hub.android.constant.Constants;
 
-public class MovieFavoriteShimmerAdapter extends RecyclerView.Adapter<MovieFavoriteShimmerAdapter.ViewHolder> {
+public class MovieSuggestShimmerAdapter extends RecyclerView.Adapter<MovieSuggestShimmerAdapter.ViewHolder> {
     private final int shimmerItemCount;
 
-    public MovieFavoriteShimmerAdapter(int count) {
+    public MovieSuggestShimmerAdapter(int count) {
         this.shimmerItemCount = count;
     }
 
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_movie_favourite_shimmer, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_movie_suggestion_shimmer, parent, false);
         return new ViewHolder(view);
     }
 

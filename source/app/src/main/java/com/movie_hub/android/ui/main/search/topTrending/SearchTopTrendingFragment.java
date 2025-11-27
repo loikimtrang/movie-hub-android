@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.view.View;
 
 import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.google.android.flexbox.AlignItems;
 import com.google.android.flexbox.FlexDirection;
@@ -12,6 +13,7 @@ import com.google.android.flexbox.FlexboxLayoutManager;
 import com.google.android.flexbox.JustifyContent;
 import com.movie_hub.android.R;
 import com.movie_hub.android.data.model.api.request.movie.MovieRequest;
+import com.movie_hub.android.data.model.api.response.favourite.FavouriteResponse;
 import com.movie_hub.android.data.model.api.response.history.ListWatchHistoryResponse;
 import com.movie_hub.android.data.model.api.response.movie.MovieResponse;
 import com.movie_hub.android.data.model.other.ToastMessage;
@@ -21,11 +23,14 @@ import com.movie_hub.android.di.component.FragmentComponent;
 import com.movie_hub.android.ui.base.fragment.BaseFragment;
 import com.movie_hub.android.ui.main.MainActivity;
 import com.movie_hub.android.ui.main.MainCallback;
+import com.movie_hub.android.ui.main.account.favourite.adapter.MovieFavouriteAdapter;
+import com.movie_hub.android.ui.main.account.favourite.shimmer.MovieFavoriteShimmerAdapter;
 import com.movie_hub.android.ui.main.custom.GridSpacingItemDecoration;
 import com.movie_hub.android.ui.main.movie.detail.MovieDetailActivity;
 import com.movie_hub.android.ui.main.search.SearchFragment;
 import com.movie_hub.android.ui.main.search.topTrending.adapter.MovieVerticalAdapter;
 import com.movie_hub.android.ui.main.search.topTrending.adapter.SearchHistoryAdapter;
+import com.movie_hub.android.ui.main.search.topTrending.shimmer.MovieVerticalShimmerAdapter;
 import com.movie_hub.android.utils.GridUtil;
 import com.movie_hub.android.utils.GsonUtils;
 
@@ -40,10 +45,12 @@ public class SearchTopTrendingFragment extends BaseFragment<FragmentSearchTopTre
 
     private MovieVerticalAdapter movieAdapter;
     private SearchHistoryAdapter historyAdapter;
+    private MovieVerticalShimmerAdapter shimmerAdapter;
     @Override
     protected void performDataBinding() {
         binding.setF(this);
         binding.setVm(viewModel);
+        showShimmerLoading();
         setUpAdapter();
         getListMovie();
         viewModel.getHistory();
@@ -67,8 +74,19 @@ public class SearchTopTrendingFragment extends BaseFragment<FragmentSearchTopTre
         });
     }
 
-    public void setUpAdapter() {
+    public void showShimmerLoading() {
+        shimmerAdapter = new MovieVerticalShimmerAdapter(6);
 
+        int spacing = requireContext().getResources().getDimensionPixelSize(R.dimen._8sdp);
+        int spanCount = GridUtil.calculateSpanCount(requireContext(), 110);
+
+        GridLayoutManager layoutManager = new GridLayoutManager(requireContext(), spanCount);
+        binding.rvMovie.setLayoutManager(layoutManager);
+        binding.rvMovie.addItemDecoration(new GridSpacingItemDecoration(spanCount, spacing));
+        binding.rvMovie.setAdapter(shimmerAdapter);
+    }
+
+    public void hideShimmerAndShowData(List<MovieResponse> data) {
         movieAdapter = new MovieVerticalAdapter(this);
         int spacing = requireContext().getResources().getDimensionPixelSize(R.dimen._8sdp);
         int spanCount = GridUtil.calculateSpanCount(requireContext(), 110);
@@ -77,6 +95,10 @@ public class SearchTopTrendingFragment extends BaseFragment<FragmentSearchTopTre
         binding.rvMovie.setLayoutManager(layoutManager);
         binding.rvMovie.addItemDecoration(new GridSpacingItemDecoration(spanCount, spacing));
         binding.rvMovie.setAdapter(movieAdapter);
+        movieAdapter.setData(data);
+    }
+
+    public void setUpAdapter() {
 
         historyAdapter = new SearchHistoryAdapter(this);
 
@@ -134,7 +156,7 @@ public class SearchTopTrendingFragment extends BaseFragment<FragmentSearchTopTre
                 if (!isAdded()) return;
 
                 ((MainActivity) requireActivity()).hideLoading();
-                movieAdapter.setData(list);
+                hideShimmerAndShowData(list);
             }
 
             @Override

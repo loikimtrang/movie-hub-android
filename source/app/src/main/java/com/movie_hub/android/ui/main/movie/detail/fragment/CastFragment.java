@@ -30,6 +30,7 @@ import com.movie_hub.android.ui.main.MainActivity;
 import com.movie_hub.android.ui.main.MainCallback;
 import com.movie_hub.android.ui.main.account.favourite.FavouriteActivity;
 import com.movie_hub.android.ui.main.account.favourite.adapter.PersonFavouriteAdapter;
+import com.movie_hub.android.ui.main.account.favourite.shimmer.PersonFavoriteShimmerAdapter;
 import com.movie_hub.android.ui.main.movie.detail.MovieDetailActivity;
 import com.movie_hub.android.ui.main.movie.detail.MovieDetailViewModel;
 import com.movie_hub.android.ui.main.movie.detail.adapter.MoviePersonAdapter;
@@ -52,6 +53,7 @@ public class CastFragment extends BaseFragment<FragmentCastBinding, CastFragment
     private PersonAdapter personAdapter;
     private PersonFavouriteAdapter personFavouriteAdapter;
     private boolean isLoaded = false;
+    private boolean isLoading = false;
     private MovieDetailViewModel sharedViewModel;
     public static final int TYPE_SEARCH = 0;
     public static final int TYPE_MOVIE_DETAIL = 1;
@@ -67,6 +69,8 @@ public class CastFragment extends BaseFragment<FragmentCastBinding, CastFragment
     int pageSize = 8;
     boolean isLastPage = false;
 
+    private PersonFavoriteShimmerAdapter shimmerAdapter;
+
     @Override
     protected void performDataBinding() {
         binding.setF(this);
@@ -78,17 +82,23 @@ public class CastFragment extends BaseFragment<FragmentCastBinding, CastFragment
             } else if (displayFrom == TYPE_SEARCH) {
                 getListMoviePersonTypeSearch();
             } else {
+                isLoading = true;
                 getListFavoritePersonTypeFavourite();
                 binding.rvCast.addOnScrollListener(new RecyclerView.OnScrollListener() {
                     @Override
                     public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
                         super.onScrolled(recyclerView, dx, dy);
-                        LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
+                        if (dy <= 0) return;
 
-                        if (layoutManager != null && layoutManager.findLastCompletelyVisibleItemPosition() == personFavouriteAdapter.getItemCount() - 1) {
-                            if (!isLastPage) {
-                                getListFavoritePersonTypeFavourite();
-                            }
+                        LinearLayoutManager lm = (LinearLayoutManager) recyclerView.getLayoutManager();
+                        if (lm == null || personFavouriteAdapter == null) return;
+
+                        int totalItemCount = lm.getItemCount();
+                        int lastVisibleItemPosition = lm.findLastVisibleItemPosition();
+
+                        if (!isLoading && !isLastPage && lastVisibleItemPosition >= totalItemCount - 3) {
+                            isLoading = true;
+                            getListFavoritePersonTypeFavourite();
                         }
                     }
                 });
@@ -107,6 +117,7 @@ public class CastFragment extends BaseFragment<FragmentCastBinding, CastFragment
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         setUpAdapter();
+        showShimmer();
     }
 
     public static CastFragment newInstance(int displayFrom, String keyword) {
@@ -124,17 +135,33 @@ public class CastFragment extends BaseFragment<FragmentCastBinding, CastFragment
     }
 
     public void setUpAdapter() {
+        binding.rvCast.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false));
+
         if (displayFrom == TYPE_MOVIE_DETAIL) {
+            shimmerAdapter = new PersonFavoriteShimmerAdapter(6, false);
             moviePersonAdapter = new MoviePersonAdapter(this);
-            binding.rvCast.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false));
             binding.rvCast.setAdapter(moviePersonAdapter);
         } else if (displayFrom == TYPE_SEARCH) {
+            shimmerAdapter = new PersonFavoriteShimmerAdapter(6, false);
             personAdapter = new PersonAdapter(this);
-            binding.rvCast.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false));
             binding.rvCast.setAdapter(personAdapter);
         } else {
+            shimmerAdapter = new PersonFavoriteShimmerAdapter(6, true);
             personFavouriteAdapter = new PersonFavouriteAdapter(this);
-            binding.rvCast.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false));
+            binding.rvCast.setAdapter(personFavouriteAdapter);
+        }
+    }
+
+    public void showShimmer() {
+        binding.rvCast.setAdapter(shimmerAdapter);
+    }
+
+    public void hideShimmer() {
+        if (displayFrom == TYPE_MOVIE_DETAIL) {
+            binding.rvCast.setAdapter(moviePersonAdapter);
+        } else if (displayFrom == TYPE_SEARCH) {
+            binding.rvCast.setAdapter(personAdapter);
+        } else {
             binding.rvCast.setAdapter(personFavouriteAdapter);
         }
     }
@@ -152,6 +179,7 @@ public class CastFragment extends BaseFragment<FragmentCastBinding, CastFragment
             @Override public void doSuccess(List<MoviePersonResponse> data) {
                 ((MovieDetailActivity) requireActivity()).hideLoading();
                 if (data != null && !data.isEmpty()) {
+                    hideShimmer();
                     moviePersonAdapter.setData(data);
                     binding.layoutEmpty.setVisibility(View.GONE);
                     isLoaded = true;
@@ -185,6 +213,7 @@ public class CastFragment extends BaseFragment<FragmentCastBinding, CastFragment
             @Override public void doSuccess(List<PersonResponse> data) {
                 hideLoading();
                 if (data != null && !data.isEmpty()) {
+                    hideShimmer();
                     personAdapter.setData(data);
                     binding.layoutEmpty.setVisibility(View.GONE);
                     isLoaded = true;
@@ -219,6 +248,7 @@ public class CastFragment extends BaseFragment<FragmentCastBinding, CastFragment
                 hideLoading();
                 if (data.getContent() != null && !data.getContent().isEmpty()) {
                     if (currentPage == 0) {
+                        hideShimmer();
                         personFavouriteAdapter.setData(data.getContent());
                     } else {
                         personFavouriteAdapter.addData(data.getContent());
@@ -236,17 +266,21 @@ public class CastFragment extends BaseFragment<FragmentCastBinding, CastFragment
                     if (currentPage == 0) binding.layoutEmpty.setVisibility(View.VISIBLE);
                     isLastPage = true;
                 }
+
+                isLoading = false;
             }
 
             @Override public void doError(Throwable throwable) {
                 hideLoading();
                 if (!isAdded()) return;
                 showError(getString(R.string.fetch_data_failed));
+                isLoading = false;
 
             }
             @Override public void doFail() {
                 hideLoading();
                 showError(getString(R.string.fetch_data_failed));
+                isLoading = false;
             }
             @Override public void doSuccess() {}
         }, request);
