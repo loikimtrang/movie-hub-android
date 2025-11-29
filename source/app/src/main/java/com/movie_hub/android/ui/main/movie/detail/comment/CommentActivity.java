@@ -1,30 +1,41 @@
 package com.movie_hub.android.ui.main.movie.detail.comment;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Rect;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.text.Editable;
+import android.text.SpannableString;
+import android.text.Spanned;
 import android.text.TextWatcher;
+import android.text.style.BackgroundColorSpan;
+import android.text.style.ForegroundColorSpan;
+import android.text.style.StyleSpan;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.FrameLayout;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.movie_hub.android.BR;
 import com.movie_hub.android.R;
+import com.movie_hub.android.constant.Constants;
 import com.movie_hub.android.data.model.api.ResponseListObj;
 import com.movie_hub.android.data.model.api.ResponseWrapper;
 import com.movie_hub.android.data.model.api.request.comment.CommentRequest;
+import com.movie_hub.android.data.model.api.request.comment.CreateCommentReactionRequest;
 import com.movie_hub.android.data.model.api.request.comment.CreateCommentRequest;
 import com.movie_hub.android.data.model.api.response.comment.CommentResponse;
+import com.movie_hub.android.data.model.api.response.comment.VoteListResponse;
 import com.movie_hub.android.data.model.api.response.movie.MovieResponse;
 import com.movie_hub.android.data.model.other.ToastMessage;
 import com.movie_hub.android.databinding.ActivityCommentBinding;
@@ -33,22 +44,27 @@ import com.movie_hub.android.ui.base.activity.BaseActivity;
 import com.movie_hub.android.ui.base.activity.SystemBarColorProvider;
 import com.movie_hub.android.ui.main.MainCallback;
 import com.movie_hub.android.ui.main.account.login.LoginActivity;
+import com.movie_hub.android.ui.main.movie.detail.comment.adapter.CommentChildAdapter;
 import com.movie_hub.android.ui.main.movie.detail.comment.adapter.CommentParentAdapter;
+import com.movie_hub.android.ui.main.movie.detail.comment.shimmer.CommentShimmerAdapter;
 import com.movie_hub.android.utils.ClickUtils;
 import com.movie_hub.android.utils.DialogUtils;
 import com.movie_hub.android.utils.GsonUtils;
 
+import java.util.List;
+
 public class CommentActivity extends BaseActivity<ActivityCommentBinding, CommentViewModel>
         implements SystemBarColorProvider, View.OnClickListener,
-        CommentParentAdapter.OnCommentParentClickListener {
+        CommentParentAdapter.OnCommentParentClickListener,
+        CommentChildAdapter.OnCommentChildClickListener {
 
-    private static final float SHEET_TRANSLATE_Y_DP = 200f; // bạn điều chỉnh độ trượt
-    public int currentPage = 0;
-    public int pageSize = 8;
-    boolean isLastPage = false;
-    private boolean isLoading = false;
+    private static final float SHEET_TRANSLATE_Y_DP = 200f;
+    public int pageSize = 1000;
     private CommentParentAdapter commentParentAdapter;
+    private CommentShimmerAdapter commentShimmerAdapter;
     private ActivityResultLauncher<Intent> loginLauncher;
+    private boolean isStateReply = false;
+    private boolean isShowShimmer = false;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -63,37 +79,9 @@ public class CommentActivity extends BaseActivity<ActivityCommentBinding, Commen
         if (movieResponse != null) {
             viewModel.movieDetails = movieResponse;
             setUpAdapter();
-            CommentRequest request = new CommentRequest();
-            request.setPage(currentPage);
-            request.setSize(pageSize);
-            request.setMovieId(viewModel.movieDetails.getId());
-
-            getListComment(request, false);
+            showShimmer();
+            getVoteList();
         }
-
-        viewBinding.rvComment.addOnScrollListener(new RecyclerView.OnScrollListener() {
-            @Override
-            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
-                super.onScrolled(recyclerView, dx, dy);
-                if (dy <= 0) return;
-
-                LinearLayoutManager lm = (LinearLayoutManager) recyclerView.getLayoutManager();
-                if (lm == null || commentParentAdapter == null) return;
-
-                int totalItemCount = lm.getItemCount();
-                int lastVisibleItemPosition = lm.findLastVisibleItemPosition();
-
-                if (!isLoading && !isLastPage && lastVisibleItemPosition >= totalItemCount - 5) {
-                    isLoading = true;
-
-                    CommentRequest request = new CommentRequest();
-                    request.setPage(currentPage);
-                    request.setSize(pageSize);
-                    request.setMovieId(viewModel.movieDetails.getId());
-                    getListComment(request, false);
-                }
-            }
-        });
 
         loginLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
@@ -111,20 +99,40 @@ public class CommentActivity extends BaseActivity<ActivityCommentBinding, Commen
         observeCommentList();
     }
 
+    public void showShimmer() {
+        viewBinding.rvComment.setAdapter(commentShimmerAdapter);
+    }
+
+    public void hideShimmer() {
+        isShowShimmer = true;
+        viewBinding.rvComment.setAdapter(commentParentAdapter);
+    }
+
+    @SuppressLint("SetTextI18n")
     public void observeCommentList() {
         viewBinding.rvComment.setItemAnimator(null);
         viewModel.commentList.observe(this, commentList -> {
             if (commentList.isEmpty()) return;
-            commentParentAdapter.updateDataDiff(commentList);
+            List<VoteListResponse> voteList = viewModel.voteList.getValue();
+            commentParentAdapter.setData(commentList, viewModel.voteList.getValue());
+        });
+
+        viewModel.totalComment.observe(this, total -> {
+            if (total == null || total == 0) {
+                viewBinding.tvCountCmt.setText(getString(R.string.comment));
+                return;
+            }
+            viewBinding.tvCountCmt.setText(getString(R.string.comment) + " (" + total + ")");
         });
     }
     public void setUpAdapter() {
         commentParentAdapter = new CommentParentAdapter(this, this);
+        commentShimmerAdapter = new CommentShimmerAdapter(6);
         viewBinding.rvComment.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
-        viewBinding.rvComment.setAdapter(commentParentAdapter);
     }
 
     public void createComment(CreateCommentRequest request) {
+        hideStateReply();
         viewModel.createComment(new MainCallback<ResponseWrapper>() {
             @Override
             public void doError(Throwable error) {
@@ -140,11 +148,10 @@ public class CommentActivity extends BaseActivity<ActivityCommentBinding, Commen
             public void doSuccess(ResponseWrapper object) {
                 if (object.isResult()) {
                     CommentRequest request = new CommentRequest();
-                    request.setPage(0);
                     request.setSize(pageSize);
                     request.setMovieId(viewModel.movieDetails.getId());
 
-                    getListComment(request, true);
+                    getListComment(request);
                     viewBinding.edtComment.setText("");
                 }
             }
@@ -156,122 +163,55 @@ public class CommentActivity extends BaseActivity<ActivityCommentBinding, Commen
             }
         }, request);
     }
-    public void getListComment(CommentRequest request, Boolean isRefresh) {
-        isLoading = true;
+    public void getListComment(CommentRequest request) {
         showLoading();
         viewModel.getListComment(new MainCallback<ResponseListObj<CommentResponse>>() {
             @Override
             public void doSuccess(ResponseListObj<CommentResponse> data) {
-                isLoading = false;
                 hideLoading();
                 if (data.getContent() != null && !data.getContent().isEmpty()) {
+                    if (!isShowShimmer) {
+                        hideShimmer();
+                    }
                     viewBinding.layoutEmpty.setVisibility(View.GONE);
                     viewBinding.rvComment.setVisibility(View.VISIBLE);
 
-                    if (isRefresh) {
-                        LinearLayoutManager lm = (LinearLayoutManager) viewBinding.rvComment.getLayoutManager();
-                        int firstVisible = lm.findFirstVisibleItemPosition();
-                        View firstVisibleView = lm.findViewByPosition(firstVisible);
-                        int offset = firstVisibleView != null ? firstVisibleView.getTop() : 0;
+                    LinearLayoutManager lm = (LinearLayoutManager) viewBinding.rvComment.getLayoutManager();
+                    int firstVisible = lm.findFirstVisibleItemPosition();
+                    View firstVisibleView = lm.findViewByPosition(firstVisible);
+                    int offset = firstVisibleView != null ? firstVisibleView.getTop() : 0;
 
-                        viewModel.mergeOrUpdateComments(data.getContent());
-
-                        int total = viewModel.commentList.getValue() != null ? viewModel.commentList.getValue().size() : 0;
-                        currentPage = total / pageSize;
-                        if (total % pageSize != 0) {
-                            currentPage += 1;
-                        }
-
-                        viewBinding.rvComment.post(() -> {
-                            lm.scrollToPositionWithOffset(firstVisible, offset);
-                        });
-                    }
-                    else {
-                        currentPage++;
-                        viewModel.mergeOrUpdateComments(data.getContent());
-                    }
+                    viewModel.mergeOrUpdateComments(data.getContent());
 
 
-                    if (currentPage == data.getTotalPages()) {
-                        isLastPage = true;
-                    }
+                    viewBinding.rvComment.post(() -> {
+                        lm.scrollToPositionWithOffset(firstVisible, offset);
+                    });
 
                 } else {
-                    if (currentPage == 0) {
-                        viewBinding.rvComment.setVisibility(View.GONE);
-                        viewBinding.layoutEmpty.setVisibility(View.VISIBLE);
-                    }
-                    isLastPage = true;
+                    hideShimmer();
+                    viewBinding.rvComment.setVisibility(View.GONE);
+                    viewBinding.layoutEmpty.setVisibility(View.VISIBLE);
                 }
             }
 
             @Override
             public void doError(Throwable error) {
                 hideLoading();
-                isLoading = false;
 
             }
 
             @Override
             public void doSuccess() {
                 hideLoading();
-                isLoading = false;
 
             }
 
             @Override public void doFail() {
-                isLoading = false;
                 hideLoading();
 
             }
         }, request);
-    }
-
-    public void getListChildComment(CommentRequest request) {
-        viewModel.getListComment(new MainCallback<ResponseListObj<CommentResponse>>() {
-            @Override
-            public void doError(Throwable error) {
-
-            }
-
-            @Override
-            public void doSuccess() {
-
-            }
-
-            @Override
-            public void doSuccess(ResponseListObj<CommentResponse> data) {
-
-            }
-
-            @Override
-            public void doFail() {
-
-            }
-        }, request);
-    }
-
-
-    @SuppressLint("NonConstantResourceId")
-    @Override
-    public void onClick(View view) {
-        switch (view.getId()) {
-            case R.id.btn_create_comment:
-                String content = viewBinding.edtComment.getText().toString().trim();
-                if (!content.isEmpty()) {
-                    CreateCommentRequest request = new CreateCommentRequest();
-                    request.setContent(content);
-                    request.setMovieId(viewModel.movieDetails.getId());
-                    createComment(request);
-
-                    viewBinding.edtComment.setText("");
-                } else {
-
-                }
-                break;
-            default:
-                break;
-        }
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -290,35 +230,45 @@ public class CommentActivity extends BaseActivity<ActivityCommentBinding, Commen
         });
 
         viewBinding.edtComment.addTextChangedListener(new TextWatcher() {
-            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            CharSequence beforeText;
+
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                beforeText = s.toString();
+            }
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 int length = s.length();
                 viewBinding.tvCountChar.setText(String.valueOf(length));
+                viewBinding.btnCreateComment.setVisibility(length > 0 ? View.VISIBLE : View.GONE);
+            }
 
-                if (length > 0) {
-                    viewBinding.btnCreateComment.setVisibility(View.VISIBLE);
-                } else {
-                    viewBinding.btnCreateComment.setVisibility(View.GONE);
+            @Override
+            public void afterTextChanged(Editable s) {
+                ForegroundColorSpan[] spans = s.getSpans(0, s.length(), ForegroundColorSpan.class);
+                for (ForegroundColorSpan span : spans) {
+                    int spanStart = s.getSpanStart(span);
+                    int spanEnd = s.getSpanEnd(span);
+                    int cursorPos = viewBinding.edtComment.getSelectionStart();
+
+                    if (cursorPos == spanEnd && beforeText.length() > s.length()) {
+                        s.delete(spanStart, spanEnd); // chỉ xoá mention
+                        break;
+                    }
                 }
             }
 
-
-            @Override public void afterTextChanged(Editable s) {}
         });
 
         viewBinding.edtComment.setOnTouchListener((v, event) -> {
             if (event.getAction() == MotionEvent.ACTION_UP && !viewModel.isLogin()) {
-                if (!viewModel.isLogin()) {
-                    ClickUtils.debounceClick(viewBinding.edtComment);
-                    showLoginRequiredDialog();
-                }
+                ClickUtils.debounceClick(viewBinding.edtComment);
+                showLoginRequiredDialog();
                 return true;
             }
             return false;
         });
-
     }
     public void showLoginRequiredDialog() {
         DialogUtils.dialogConfirm(
@@ -392,6 +342,8 @@ public class CommentActivity extends BaseActivity<ActivityCommentBinding, Commen
                 .setDuration(200)
                 .setInterpolator(new DecelerateInterpolator())
                 .start();
+
+        setupKeyboardVisibilityListener();
     }
 
     @Override
@@ -415,24 +367,250 @@ public class CommentActivity extends BaseActivity<ActivityCommentBinding, Commen
                 .start();
 
     }
+    private void setupKeyboardVisibilityListener() {
+        final View rootView = findViewById(android.R.id.content);
+        final View contentView = findViewById(R.id.content_view);
+        final int defaultMarginTop = getResources().getDimensionPixelSize(R.dimen._80sdp);
+
+        rootView.getViewTreeObserver().addOnGlobalLayoutListener(() -> {
+            Rect r = new Rect();
+            rootView.getWindowVisibleDisplayFrame(r);
+            int screenHeight = rootView.getRootView().getHeight();
+            int keypadHeight = screenHeight - r.bottom;
+
+            FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) contentView.getLayoutParams();
+
+            if (keypadHeight > screenHeight * 0.15) {
+                if (params.topMargin != 0) {
+                    params.topMargin = 0;
+                    contentView.setLayoutParams(params);
+                }
+            } else {
+                if (params.topMargin != defaultMarginTop) {
+                    params.topMargin = defaultMarginTop;
+                    contentView.setLayoutParams(params);
+                }
+            }
+        });
+    }
 
     @Override
-    public void onOpenChildClick(CommentResponse commentResponse) {
+    public void onOpenChildClick(CommentResponse commentResponse, List<CommentResponse> items) {
+        for (CommentResponse comment: items) {
+            if (comment.getId().equals(commentResponse.getId())) {
+                if (Boolean.TRUE.equals(commentResponse.getIsOpenChildComment())) {
+                    CommentRequest request = new CommentRequest();
+                    request.setParentId(commentResponse.getId());
+                    request.setIsOpenChildComment(true);
+                    viewModel.getListChildComment(request);
 
+                } else {
+                    comment.setIsOpenChildComment(false);
+                    viewModel.commentList.postValue(items);
+                }
+                return;
+            }
+        }
     }
 
     @Override
     public void onDisLikeClick(CommentResponse commentResponse) {
+        if (!viewModel.isLogin()) {
+            showLoginRequiredDialog();
+            return;
+        }
 
+        CreateCommentReactionRequest request = new CreateCommentReactionRequest();
+        request.setId(commentResponse.getId());
+        request.setType(Constants.REACTION_TYPE_DISLIKE);
+
+        voteComment(request);
     }
 
     @Override
     public void onLikeClick(CommentResponse commentResponse) {
+        if (!viewModel.isLogin()) {
+            showLoginRequiredDialog();
+            return;
+        }
 
+        CreateCommentReactionRequest request = new CreateCommentReactionRequest();
+        request.setId(commentResponse.getId());
+        request.setType(Constants.REACTION_TYPE_LIKE);
+
+        voteComment(request);
+    }
+    public void getVoteList() {
+        viewModel.getVoteList(new MainCallback<List<VoteListResponse>>() {
+            @Override
+            public void doError(Throwable error) {
+
+            }
+
+            @Override
+            public void doSuccess() {
+
+            }
+
+            @Override
+            public void doSuccess(List<VoteListResponse> response) {
+                viewModel.voteList.postValue(response);
+
+                CommentRequest request = new CommentRequest();
+                request.setSize(pageSize);
+                request.setMovieId(viewModel.movieDetails.getId());
+                getListComment(request);
+            }
+
+            @Override
+            public void doFail() {
+
+            }
+        });
+    }
+    public void voteComment(CreateCommentReactionRequest request) {
+        viewModel.voteComment(new MainCallback<ResponseWrapper>() {
+            @Override
+            public void doError(Throwable error) {
+
+            }
+
+            @Override
+            public void doSuccess() {
+
+            }
+
+            @Override
+            public void doSuccess(ResponseWrapper response) {
+                getVoteList();
+            }
+
+            @Override
+            public void doFail() {
+
+            }
+        }, request);
+    }
+
+    @SuppressLint("SetTextI18n")
+    @Override
+    public void onReplyClick(CommentResponse commentResponse) {
+        if (!viewModel.isLogin()) {
+            showLoginRequiredDialog();
+            return;
+        }
+        isStateReply = true;
+        viewModel.replyTo = commentResponse;
+        viewBinding.tvReplyTo.setText(getString(R.string.replying_to) + " " + commentResponse.getAuthor().getFullName());
+        viewBinding.lReplyTo.setVisibility(View.VISIBLE);
+
+        insertMention(commentResponse.getAuthor().getFullName());
+    }
+    private void insertMention(String fullName) {
+        String mentionText = "@" + fullName + " "; // ← THÊM DẤU CÁCH Ở ĐÂY
+        SpannableString spannable = new SpannableString(mentionText);
+
+        // Màu nền
+        BackgroundColorSpan bgSpan = new BackgroundColorSpan(ContextCompat.getColor(this, R.color.bg_mention));
+        spannable.setSpan(bgSpan, 0, mentionText.length() - 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE); // KHÔNG áp dụng span cho dấu cách
+
+        // Màu chữ
+        ForegroundColorSpan fgSpan = new ForegroundColorSpan(ContextCompat.getColor(this, R.color.black));
+        spannable.setSpan(fgSpan, 0, mentionText.length() - 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+        // Optional: chữ đậm
+        StyleSpan boldSpan = new StyleSpan(Typeface.BOLD);
+        spannable.setSpan(boldSpan, 0, mentionText.length() - 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+        viewBinding.edtComment.setText(spannable);
+        viewBinding.edtComment.setSelection(spannable.length()); // Đặt con trỏ sau dấu cách
+
+        // Focus + mở bàn phím
+        viewBinding.edtComment.requestFocus();
+        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        if (imm != null) {
+            imm.showSoftInput(viewBinding.edtComment, InputMethodManager.SHOW_IMPLICIT);
+        }
+    }
+
+    @SuppressLint("NonConstantResourceId")
+    @Override
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.btn_create_comment:
+                String content = viewBinding.edtComment.getText().toString().trim();
+                if (!content.isEmpty()) {
+                    CreateCommentRequest request = new CreateCommentRequest();
+                    request.setContent(content);
+                    request.setMovieId(viewModel.movieDetails.getId());
+
+                    if (isStateReply) {
+                        if (viewModel.replyTo.getParent() != null && viewModel.replyTo.getParent().getId() != null) {
+                            request.setParentId(viewModel.replyTo.getParent().getId());
+                        } else if (viewModel.replyTo.getId() != null) {
+                            request.setParentId(viewModel.replyTo.getId());
+                        }
+                    }
+
+                    createComment(request);
+                    viewBinding.edtComment.setText("");
+                }
+                break;
+            case R.id.btn_cancel_cmt:
+                hideStateReply();
+                break;
+            default:
+                break;
+        }
+    }
+
+    public void hideStateReply() {
+        viewBinding.lReplyTo.setVisibility(View.GONE);
+        isStateReply = false;
+        viewBinding.edtComment.setText("");
+        viewBinding.tvReplyTo.setText(getString(R.string.replying_to));
     }
 
     @Override
-    public void onReplyClick(CommentResponse commentResponse) {
+    public void onLikeChildClick(CommentResponse commentResponse) {
+        if (!viewModel.isLogin()) {
+            showLoginRequiredDialog();
+            return;
+        }
 
+        CreateCommentReactionRequest request = new CreateCommentReactionRequest();
+        request.setId(commentResponse.getId());
+        request.setType(Constants.REACTION_TYPE_LIKE);
+
+        voteComment(request);
+    }
+
+    @Override
+    public void onDislikeChildClick(CommentResponse commentResponse) {
+        if (!viewModel.isLogin()) {
+            showLoginRequiredDialog();
+            return;
+        }
+
+        CreateCommentReactionRequest request = new CreateCommentReactionRequest();
+        request.setId(commentResponse.getId());
+        request.setType(Constants.REACTION_TYPE_DISLIKE);
+
+        voteComment(request);
+    }
+
+    @SuppressLint("SetTextI18n")
+    @Override
+    public void onReplyChildClick(CommentResponse commentResponse) {
+        if (!viewModel.isLogin()) {
+            showLoginRequiredDialog();
+            return;
+        }
+        isStateReply = true;
+        viewModel.replyTo = commentResponse;
+        viewBinding.tvReplyTo.setText(getString(R.string.replying_to) + " " + commentResponse.getAuthor().getFullName());
+        viewBinding.lReplyTo.setVisibility(View.VISIBLE);
+
+        insertMention(commentResponse.getAuthor().getFullName());
     }
 }

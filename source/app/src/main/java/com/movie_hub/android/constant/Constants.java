@@ -53,6 +53,8 @@ public class Constants {
 
     public static float SHIMMER_START_ALPHA = 0.4f;
     public static float SHIMMER_END_ALPHA = 0.08f;
+    public static final Integer REACTION_TYPE_LIKE = 1;
+    public static final Integer REACTION_TYPE_DISLIKE = 2;
     private Constants(){
 
     }

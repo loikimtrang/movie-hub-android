@@ -200,6 +200,7 @@
     <string name="comment_here">Bình luận ở đây ...</string>
     <string name="reply">Trả lời</string>
     <string name="comment_non_up">bình luận</string>
+    <string name="comment_non_up_one">bình luận</string>
     <string name="minutes_ago">phút trước</string>
     <string name="hours_ago">giờ trước</string>
     <string name="days_ago">ngày trước</string>
@@ -207,5 +208,6 @@
     <string name="just_now">vừa xong</string>
     <string name="no_comment_yet">Chưa có bình luận nào</string>
     <string name="not_login">Bạn chưa đăng nhập!</string>
+    <string name="replying_to">Đang trả lời</string>
 
 </resources>

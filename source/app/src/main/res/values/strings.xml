@@ -202,6 +202,7 @@
     <string name="comment_here">Comment here ...</string>
     <string name="reply">Reply</string>
     <string name="comment_non_up">comments</string>
+    <string name="comment_non_up_one">comment</string>
     <string name="minutes_ago">minutes ago</string>
     <string name="hours_ago">hours ago</string>
     <string name="days_ago">days ago</string>
@@ -209,4 +210,5 @@
     <string name="just_now">just now</string>
     <string name="no_comment_yet">No comments yet</string>
     <string name="not_login">You are not logged in yet!</string>
+    <string name="replying_to">Replying to</string>
 </resources>

@@ -79,4 +79,6 @@
     <color name="text_comment">#A5A5A5</color> // ic up 18D158 D33E1A
     <color name="bg_input_comment">#363B51</color>
     <color name="text_more_comment">#EDD59A</color>
+    <color name="bg_mention">#E0F7FA</color> <!-- xanh nhạt hoặc màu tuỳ mày -->
+
 </resources>

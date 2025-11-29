@@ -83,6 +83,7 @@
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
+
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -94,9 +95,10 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:background="@drawable/bg_btn_press_tran"
-                        android:padding="@dimen/_4sdp"
+                        android:padding="@dimen/_8sdp"
                         android:clickable="true"
-                        android:focusable="true">
+                        android:focusable="true"
+                        android:clipToPadding="true">
 
                         <ImageView
                             android:id="@+id/ic_like"
@@ -123,7 +125,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:background="@drawable/bg_btn_press_tran"
-                        android:padding="@dimen/_4sdp"
+                        android:padding="@dimen/_8sdp"
                         android:clickable="true"
                         android:focusable="true"
                         android:layout_marginStart="@dimen/_6sdp">
@@ -189,15 +191,16 @@
                 android:layout_height="wrap_content"
                 android:layout_marginVertical="@dimen/_6sdp"
                 android:orientation="horizontal"
-                android:layout_marginStart="@dimen/_5sdp"
+                android:padding="@dimen/_5sdp"
                 android:gravity="center_vertical"
-                android:visibility="gone">
+                android:visibility="visible">
 
                 <ImageView
                     android:id="@+id/ic_open_child_comment"
                     android:layout_width="@dimen/_10sdp"
                     android:layout_height="@dimen/_10sdp"
-                    android:src="@drawable/ic_open_child_comment"/>
+                    android:src="@drawable/ic_open_child_comment"
+                    android:layout_marginTop="@dimen/_2sdp"/>
 
                 <TextView
                     android:id="@+id/tv_open_child_comment"
@@ -206,7 +209,7 @@
                     style="@style/Text_10_Normal"
                     android:textColor="@color/text_more_comment"
                     android:text="@string/comment"
-                    android:layout_marginStart="@dimen/_6sdp"/>
+                    android:layout_marginStart="@dimen/_3sdp"/>
 
             </LinearLayout>
 
@@ -216,7 +219,8 @@
                 android:layout_height="match_parent"
                 android:id="@+id/child_comment"
                 android:layout_marginTop="@dimen/_6sdp"
-                android:visibility="gone"/>
+                android:visibility="visible"
+                android:animateLayoutChanges="false"/>
 
         </LinearLayout>
 

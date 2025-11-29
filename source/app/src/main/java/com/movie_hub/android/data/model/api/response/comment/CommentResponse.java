@@ -3,6 +3,8 @@ package com.movie_hub.android.data.model.api.response.comment;
 import com.movie_hub.android.data.model.api.response.MovieItem.MovieItemResponse;
 import com.movie_hub.android.data.model.api.response.user.UserResponse;
 
+import java.util.List;
+
 import lombok.Data;
 
 @Data
@@ -20,5 +22,8 @@ public class CommentResponse {
     private UserResponse author;
     private MovieItemResponse movieItem;
     private CommentResponse parent;
-    private Boolean isOpenChildComment = false;
+    private Boolean isOpenChildComment;
+    private List<CommentResponse> childComments;
+    private boolean isLike;
+    private boolean isDislike;
 }

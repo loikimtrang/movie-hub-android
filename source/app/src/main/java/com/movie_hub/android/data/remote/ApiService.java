@@ -16,6 +16,7 @@ import com.movie_hub.android.data.model.api.request.user.UserUpdateProfileReques
 import com.movie_hub.android.data.model.api.response.MovieItem.MovieItemResponse;
 import com.movie_hub.android.data.model.api.response.appversion.CheckAppVersionResponse;
 import com.movie_hub.android.data.model.api.response.comment.CommentResponse;
+import com.movie_hub.android.data.model.api.response.comment.VoteListResponse;
 import com.movie_hub.android.data.model.api.response.favourite.FavouriteResponse;
 import com.movie_hub.android.data.model.api.response.history.ListWatchHistoryResponse;
 import com.movie_hub.android.data.model.api.response.history.MovieHistoryResponse;
@@ -147,4 +148,7 @@ public interface ApiService {
 
     @PATCH("v1/comment/vote")
     Observable<ResponseWrapper> voteComment(@Body CreateCommentReactionRequest request);
+
+    @GET("v1/comment/vote-list/{movieId}")
+    Observable<ResponseWrapper<List<VoteListResponse>>> getVoteList(@Path("movieId") Long movieId);
 }

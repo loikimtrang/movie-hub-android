@@ -19,5 +19,7 @@ public class CommentRequest {
     private Boolean sortUnsorted;   // map với sort.unsorted
     private Integer status;
     private Boolean unpaged;
+    private Boolean isOpenChildComment;
+
 }
 

@@ -12,7 +12,6 @@ public interface PreferencesService {
 
     String KEY_ACCESS_TOKEN_OBJECT = "KEY_ACCESS_TOKEN_OBJECT";
     String KEY_USER_RESPONSE = "KEY_USER_RESPONSE";
-
     String KEY_USER_ID = "KEY_USER_ID";
 
     void saveAccessTokenObject(UserLoginResponse userLoginResponse);

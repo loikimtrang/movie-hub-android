@@ -15,6 +15,7 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -272,21 +273,44 @@ public abstract class BaseActivity<B extends ViewDataBinding, V extends BaseView
         super.attachBaseContext(context);
     }
 
+    private long lastTouchDown = 0;
+
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
         if (ev.getAction() == MotionEvent.ACTION_DOWN) {
-            View view = getCurrentFocus();
-            if (view instanceof android.widget.EditText) {
-                Rect outRect = new Rect();
-                view.getGlobalVisibleRect(outRect);
-                if (!outRect.contains((int) ev.getRawX(), (int) ev.getRawY())) {
-                    view.clearFocus();
-                    hideKeyboard();
+            lastTouchDown = System.currentTimeMillis();
+        } else if (ev.getAction() == MotionEvent.ACTION_UP) {
+            long clickDuration = System.currentTimeMillis() - lastTouchDown;
+            if (clickDuration < 200) { // tap nhẹ, không phải scroll
+                View view = getCurrentFocus();
+                if (view instanceof EditText && view.isFocused()) {
+                    Rect outRect = new Rect();
+                    view.getGlobalVisibleRect(outRect);
+                    if (!outRect.contains((int) ev.getRawX(), (int) ev.getRawY())) {
+                        view.clearFocus();
+                        hideKeyboard();
+                    }
                 }
             }
         }
+
         return super.dispatchTouchEvent(ev);
     }
+//    @Override
+//    public boolean dispatchTouchEvent(MotionEvent ev) {
+//        if (ev.getAction() == MotionEvent.ACTION_DOWN) {
+//            View view = getCurrentFocus();
+//            if (view instanceof android.widget.EditText) {
+//                Rect outRect = new Rect();
+//                view.getGlobalVisibleRect(outRect);
+//                if (!outRect.contains((int) ev.getRawX(), (int) ev.getRawY())) {
+//                    view.clearFocus();
+//                    hideKeyboard();
+//                }
+//            }
+//        }
+//        return super.dispatchTouchEvent(ev);
+//    }
 
     public void showError(String message) {
         new ToastMessage(ToastMessage.TYPE_WARNING, message).showMessage(this);
