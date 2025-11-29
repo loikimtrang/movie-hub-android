@@ -1,7 +1,7 @@
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="@dimen/_45sdp"
+    android:layout_height="@dimen/_50sdp"
     android:background="@drawable/bg_person_item"
     android:clickable="true"
     android:focusable="true"
@@ -9,18 +9,18 @@
 
     <ImageView
         android:id="@+id/icon"
-        android:layout_width="@dimen/_12sdp"
-        android:layout_height="@dimen/_12sdp"
+        android:layout_width="@dimen/_14sdp"
+        android:layout_height="@dimen/_14sdp"
         android:layout_centerVertical="true"
         android:layout_marginStart="@dimen/_6sdp"
-        android:src="@drawable/ic_lock" />
+        android:src="@drawable/ic_lock_screen" />
 
     <TextView
         android:id="@+id/title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/change_password"
-        style="@style/Text_12_Normal"
+        style="@style/Text_14_Normal"
         android:layout_toEndOf="@+id/icon"
         android:layout_marginStart="@dimen/_12sdp"
         android:layout_centerVertical="true" />

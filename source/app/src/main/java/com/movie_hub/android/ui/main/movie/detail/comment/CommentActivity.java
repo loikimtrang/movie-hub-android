@@ -65,7 +65,6 @@ public class CommentActivity extends BaseActivity<ActivityCommentBinding, Commen
     private ActivityResultLauncher<Intent> loginLauncher;
     private boolean isStateReply = false;
     private boolean isShowShimmer = false;
-
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -80,7 +79,14 @@ public class CommentActivity extends BaseActivity<ActivityCommentBinding, Commen
             viewModel.movieDetails = movieResponse;
             setUpAdapter();
             showShimmer();
-            getVoteList();
+            if (viewModel.isLogin()) {
+                getVoteList();
+            } else {
+                CommentRequest request = new CommentRequest();
+                request.setSize(pageSize);
+                request.setMovieId(viewModel.movieDetails.getId());
+                getListComment(request);
+            }
         }
 
         loginLauncher = registerForActivityResult(
@@ -91,12 +97,19 @@ public class CommentActivity extends BaseActivity<ActivityCommentBinding, Commen
                         boolean loginSuccess = data != null && data.getBooleanExtra("login_success", false);
                         if (loginSuccess) {
                             new ToastMessage(ToastMessage.TYPE_NORMAL, getString(R.string.login_successful)).showMessage(this);
+                            getVoteList();
                         }
                     }
                 }
         );
 
         observeCommentList();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
     }
 
     public void showShimmer() {

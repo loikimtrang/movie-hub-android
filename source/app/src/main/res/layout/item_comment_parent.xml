@@ -197,10 +197,10 @@
 
                 <ImageView
                     android:id="@+id/ic_open_child_comment"
-                    android:layout_width="@dimen/_10sdp"
-                    android:layout_height="@dimen/_10sdp"
+                    android:layout_width="@dimen/_8sdp"
+                    android:layout_height="@dimen/_8sdp"
                     android:src="@drawable/ic_open_child_comment"
-                    android:layout_marginTop="@dimen/_2sdp"/>
+                    android:layout_marginTop="@dimen/_1sdp"/>
 
                 <TextView
                     android:id="@+id/tv_open_child_comment"
@@ -209,7 +209,7 @@
                     style="@style/Text_10_Normal"
                     android:textColor="@color/text_more_comment"
                     android:text="@string/comment"
-                    android:layout_marginStart="@dimen/_3sdp"/>
+                    android:layout_marginStart="@dimen/_6sdp"/>
 
             </LinearLayout>
 

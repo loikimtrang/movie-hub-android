@@ -368,7 +368,7 @@
                             android:layout_width="@dimen/_36sdp"
                             android:layout_height="@dimen/_36sdp"
                             android:background="?attr/selectableItemBackgroundBorderless"
-                            android:src="@drawable/ic_replay"
+                            android:src="@drawable/ic_previous_looping"
                             android:layout_margin="@dimen/_6sdp"/>
                     </FrameLayout>
 

@@ -90,7 +90,8 @@
                 android:paddingHorizontal="@dimen/_12sdp"
                 android:clickable="true"
                 android:focusable="true"
-                android:background="@drawable/bg_setting_list">
+                android:background="@drawable/bg_setting_list"
+                android:visibility="gone">
 
                 <ImageView
                     android:id="@+id/ic_subtitle"

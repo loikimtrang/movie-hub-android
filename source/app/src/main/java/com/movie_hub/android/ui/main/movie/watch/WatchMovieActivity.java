@@ -528,6 +528,8 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
         }
         viewModel.setPlaying(isPlaying);
         updatePlayPauseIcons(isPlaying);
+        autoHideHandler.removeCallbacks(hideControlsRunnable);
+        autoHideHandler.postDelayed(hideControlsRunnable, AUTO_HIDE_DELAY_MILLIS);
     }
 
     private int countdown = 5;
@@ -1052,6 +1054,8 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
             viewBinding.layoutBrightness.setVisibility(View.GONE);
             viewBinding.layoutVolume.setVisibility(View.GONE);
         }
+        autoHideHandler.removeCallbacks(hideControlsRunnable);
+        autoHideHandler.postDelayed(hideControlsRunnable, AUTO_HIDE_DELAY_MILLIS);
     }
 
     private void showLoadingVideo() {

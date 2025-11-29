@@ -185,7 +185,7 @@
                             android:layout_width="@dimen/_32sdp"
                             android:layout_height="@dimen/_32sdp"
                             android:onClick="@{(v) -> a.onClick(v)}"
-                            android:background="@drawable/bg_btn_replay"
+                            android:background="@drawable/bg_btn_close"
                             android:layout_margin="@dimen/_6sdp"
                             android:padding="@dimen/_6sdp">
 

@@ -81,7 +81,7 @@ public class ManageAccountActivity extends BaseActivity<ActivityManageAccountBin
     public void setUpMenu() {
         List<ManageAccountItemModel> menuItems = Arrays.asList(
                 new ManageAccountItemModel(R.drawable.ic_edit, R.string.update_information),
-                new ManageAccountItemModel(R.drawable.ic_lock, R.string.change_password)
+                new ManageAccountItemModel(R.drawable.ic_lock_screen, R.string.change_password)
         );
 
         adapter = new ManageAccountMenuAdapter(menuItems, this);
