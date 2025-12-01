@@ -3,22 +3,26 @@
     android:layout_width="match_parent"
     android:layout_height="@dimen/_65sdp"
     android:background="@drawable/bg_season_list"
-    android:clickable="true"
-    android:focusable="true">
+    android:clickable="false"
+    android:focusable="false">
 
     <FrameLayout
-        android:id="@+id/layout_ic_season"
-        android:layout_width="@dimen/_40sdp"
-        android:layout_height="@dimen/_40sdp"
-        android:layout_marginHorizontal="@dimen/_12sdp"
-        android:background="@drawable/bg_season_list_ic"
-        android:layout_marginVertical="@dimen/_12sdp">
+        android:id="@+id/btn_check"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/_6sdp"
+        android:background="@drawable/bg_btn_press_tran"
+        android:layout_marginVertical="@dimen/_12sdp"
+        android:layout_centerVertical="true"
+        android:padding="@dimen/_6sdp"
+        android:clickable="true"
+        android:focusable="true">
 
         <ImageView
-            android:id="@+id/ic_season"
-            android:layout_width="@dimen/_22sdp"
-            android:layout_height="@dimen/_22sdp"
-            android:src="@drawable/ic_season_no_select"
+            android:id="@+id/ic_check"
+            android:layout_width="@dimen/_14sdp"
+            android:layout_height="@dimen/_14sdp"
+            android:src="@drawable/ic_check_box_un_check"
             android:layout_gravity="center"/>
 
     </FrameLayout>
@@ -27,34 +31,25 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:layout_toEndOf="@+id/layout_ic_season"
+        android:layout_toEndOf="@+id/btn_check"
         android:layout_centerVertical="true">
 
         <TextView
-            android:id="@+id/tv_season"
+            android:id="@+id/tv_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             style="@style/Text_12_Bold"
-            android:text="@string/season"
-            android:textColor="@color/text_season"
+            android:text="@string/name"
             android:layout_marginBottom="@dimen/_3sdp"/>
-
-        <TextView
-            android:id="@+id/tv_year_release"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            style="@style/Text_12_Normal"
-            android:text="2025"
-            android:textColor="@color/text_season"/>
 
     </LinearLayout>
 
     <TextView
-        android:id="@+id/tv_episode"
+        android:id="@+id/tv_count"
         android:layout_width="wrap_content"
         android:layout_height="@dimen/_40sdp"
         style="@style/Text_12_Normal"
-        android:text="10 tập"
+        android:text="10 phim"
         android:layout_marginTop="@dimen/_12sdp"
         android:gravity="center"
         android:layout_alignParentEnd="true"

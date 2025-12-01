@@ -10,14 +10,18 @@ import com.movie_hub.android.data.model.api.ResponseListObj;
 import com.movie_hub.android.data.model.api.ResponseWrapper;
 import com.movie_hub.android.data.model.api.request.favourite.CreateFavouriteRequest;
 import com.movie_hub.android.data.model.api.request.history.ListWatchHistoryRequest;
+import com.movie_hub.android.data.model.api.request.playlist.CreatePlaylistRequest;
+import com.movie_hub.android.data.model.api.request.playlist.UpdatePlayListItemRequest;
 import com.movie_hub.android.data.model.api.response.MovieItem.MovieItemResponse;
 import com.movie_hub.android.data.model.api.response.favourite.FavouriteResponse;
 import com.movie_hub.android.data.model.api.response.history.ListWatchHistoryResponse;
 import com.movie_hub.android.data.model.api.response.movie.MovieResponse;
+import com.movie_hub.android.data.model.api.response.playlist.PlayListResponse;
 import com.movie_hub.android.ui.base.activity.BaseViewModel;
 import com.movie_hub.android.ui.main.MainCallback;
 import com.movie_hub.android.utils.NetworkUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -39,7 +43,7 @@ public class MovieDetailViewModel extends BaseViewModel {
     public MutableLiveData<FavouriteResponse> favouriteResponseFirst = new MutableLiveData<>();
 
     public FavouriteResponse favourite = new FavouriteResponse();
-
+    public List<PlayListResponse> playListResponseList = new ArrayList<>();
     public MovieDetailViewModel(Repository repository, MVVMApplication application) {
         super(repository, application);
     }
@@ -164,6 +168,122 @@ public class MovieDetailViewModel extends BaseViewModel {
                             }
                         }, throwable -> {
                             Timber.e(throwable);
+                        }
+                )
+        );
+    }
+
+    public void getListPlaylist(MainCallback<List<PlayListResponse>> callback) {
+        compositeDisposable.add(repository.getApiService().getPlaylistList()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .retryWhen(throwable ->
+                        throwable.flatMap((Function<Throwable, ObservableSource<?>>) throwable1 -> {
+                            if (NetworkUtils.checkNetworkError(throwable1)) {
+                                hideLoading();
+                                return application.showDialogNoInternetAccess();
+                            } else {
+                                return Observable.error(throwable1);
+                            }
+                        })
+                )
+                .subscribe(
+                        response -> {
+                            if (response.isResult()) {
+                                callback.doSuccess(response.getData());
+                            } else {
+                                callback.doFail();
+                            }
+                        }, throwable -> {
+                            Timber.e(throwable);
+                            callback.doError(throwable);
+                        }
+                )
+        );
+    }
+
+    public void getPlayListOfMovie(MainCallback<List<Long>> callback, Long movieId) {
+        compositeDisposable.add(repository.getApiService().getPlaylistsByMovie(movieId)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .retryWhen(throwable ->
+                        throwable.flatMap((Function<Throwable, ObservableSource<?>>) throwable1 -> {
+                            if (NetworkUtils.checkNetworkError(throwable1)) {
+                                hideLoading();
+                                return application.showDialogNoInternetAccess();
+                            } else {
+                                return Observable.error(throwable1);
+                            }
+                        })
+                )
+                .subscribe(
+                        response -> {
+                            if (response.isResult()) {
+                                callback.doSuccess(response.getData());
+                            } else {
+                                callback.doFail();
+                            }
+                        }, throwable -> {
+                            Timber.e(throwable);
+                            callback.doError(throwable);
+                        }
+                )
+        );
+    }
+
+    public void createPlaylist(MainCallback<PlayListResponse> callback, CreatePlaylistRequest request) {
+        compositeDisposable.add(repository.getApiService().createPlaylist(request)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .retryWhen(throwable ->
+                        throwable.flatMap((Function<Throwable, ObservableSource<?>>) throwable1 -> {
+                            if (NetworkUtils.checkNetworkError(throwable1)) {
+                                hideLoading();
+                                return application.showDialogNoInternetAccess();
+                            } else {
+                                return Observable.error(throwable1);
+                            }
+                        })
+                )
+                .subscribe(
+                        response -> {
+                            if (response.isResult()) {
+                                callback.doSuccess(response.getData());
+                            } else {
+                                callback.doFail();
+                            }
+                        }, throwable -> {
+                            Timber.e(throwable);
+                            callback.doError(throwable);
+                        }
+                )
+        );
+    }
+
+    public void updateItemPlayList(MainCallback<ResponseWrapper> callback, UpdatePlayListItemRequest request) {
+        compositeDisposable.add(repository.getApiService().updateItemPlayList(request)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .retryWhen(throwable ->
+                        throwable.flatMap((Function<Throwable, ObservableSource<?>>) throwable1 -> {
+                            if (NetworkUtils.checkNetworkError(throwable1)) {
+                                hideLoading();
+                                return application.showDialogNoInternetAccess();
+                            } else {
+                                return Observable.error(throwable1);
+                            }
+                        })
+                )
+                .subscribe(
+                        response -> {
+                            if (response.isResult()) {
+                                callback.doSuccess(response);
+                            } else {
+                                callback.doFail();
+                            }
+                        }, throwable -> {
+                            Timber.e(throwable);
+                            callback.doError(throwable);
                         }
                 )
         );

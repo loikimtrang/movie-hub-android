@@ -80,5 +80,10 @@
     <color name="bg_input_comment">#363B51</color>
     <color name="text_more_comment">#EDD59A</color>
     <color name="bg_mention">#E0F7FA</color> <!-- xanh nhạt hoặc màu tuỳ mày -->
+    <color name="text_manage_playlist">#F9D57B</color>
+    <color name="text_play_list">#747881</color>
 
+    <color name="bg_item_add_to_list_ic_select">#FED779</color>
+    <color name="bg_play_list_movie_details">#272A3B</color>
+    <color name="line_playlist">#343848</color>
 </resources>

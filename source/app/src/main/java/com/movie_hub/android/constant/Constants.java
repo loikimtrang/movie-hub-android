@@ -55,6 +55,9 @@ public class Constants {
     public static float SHIMMER_END_ALPHA = 0.08f;
     public static final Integer REACTION_TYPE_LIKE = 1;
     public static final Integer REACTION_TYPE_DISLIKE = 2;
+    public static final int MaxPlaylist = 5;
+    public static final int MaxLengthNamePlaylist = 25;
+
     private Constants(){
 
     }

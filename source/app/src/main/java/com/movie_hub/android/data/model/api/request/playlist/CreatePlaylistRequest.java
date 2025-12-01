@@ -4,5 +4,5 @@ import lombok.Data;
 
 @Data
 public class CreatePlaylistRequest {
-    private String Name;
+    private String name;
 }

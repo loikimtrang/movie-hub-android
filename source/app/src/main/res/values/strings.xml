@@ -211,4 +211,25 @@
     <string name="no_comment_yet">No comments yet</string>
     <string name="not_login">You are not logged in yet!</string>
     <string name="replying_to">Replying to</string>
+    <string name="add_new">Add new</string>
+    <string name="movie_list_empty">Movie list is empty</string>
+    <string name="manage">Manage</string>
+    <string name="movie_non_up">movie</string>
+    <string name="movie_non_up_one">movies</string>
+
+    <string name="manage_list">Manage list</string>
+    <string name="save">Save</string>
+    <string name="delete_list">Delete list</string>
+    <string name="create_list">Create list</string>
+    <string name="enter_title">Enter title</string>
+    <string name="create_new">Create new</string>
+    <string name="cancel_create">Cancel</string>
+    <string name="please_enter_title">Please enter a title</string>
+    <string name="create_playlist_succes">Playlist creation successful</string>
+    <string name="limit_list">You have reached your list creation limit</string>
+    <string name="update_list_success">Playlist updated successfully</string>
+    <string name="delete_list_success">Playlist deleted successfully</string>
+    <string name="add_to_list">Add to playlist</string>
+    <string name="choose">Choose</string>
+
 </resources>

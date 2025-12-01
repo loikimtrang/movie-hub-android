@@ -11,5 +11,6 @@ public class PlayListResponse {
     private Integer totalMovie;
     private String createdDate;
     private String modifiedDate;
+    private boolean isSelect;
 }
 

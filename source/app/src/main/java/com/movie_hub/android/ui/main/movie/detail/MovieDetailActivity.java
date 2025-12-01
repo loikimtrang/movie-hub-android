@@ -34,11 +34,17 @@ import com.google.android.flexbox.JustifyContent;
 import com.google.android.material.tabs.TabLayoutMediator;
 import com.movie_hub.android.R;
 import com.movie_hub.android.constant.Constants;
+import com.movie_hub.android.data.model.api.ResponseListObj;
+import com.movie_hub.android.data.model.api.ResponseWrapper;
 import com.movie_hub.android.data.model.api.request.favourite.CreateFavouriteRequest;
+import com.movie_hub.android.data.model.api.request.playlist.CreatePlaylistRequest;
+import com.movie_hub.android.data.model.api.request.playlist.GetListMoviePlayListRequest;
+import com.movie_hub.android.data.model.api.request.playlist.UpdatePlayListItemRequest;
 import com.movie_hub.android.data.model.api.response.MovieItem.MovieItemResponse;
 import com.movie_hub.android.data.model.api.response.history.ListWatchHistoryResponse;
 import com.movie_hub.android.data.model.api.response.history.WatchHistoryResponse;
 import com.movie_hub.android.data.model.api.response.movie.MovieResponse;
+import com.movie_hub.android.data.model.api.response.playlist.PlayListResponse;
 import com.movie_hub.android.data.model.api.response.season.SeasonResponse;
 import com.movie_hub.android.data.model.api.response.video.VideoResponse;
 import com.movie_hub.android.data.model.other.ToastMessage;
@@ -46,10 +52,13 @@ import com.movie_hub.android.databinding.ActivityMovieDetailBinding;
 import com.movie_hub.android.di.component.ActivityComponent;
 import com.movie_hub.android.ui.base.activity.BaseActivity;
 import com.movie_hub.android.ui.base.activity.SystemBarColorProvider;
+import com.movie_hub.android.ui.main.MainCallback;
 import com.movie_hub.android.ui.main.account.login.LoginActivity;
+import com.movie_hub.android.ui.main.account.playlist.dialog.CreatePlaylistDialogFragment;
 import com.movie_hub.android.ui.main.movie.detail.adapter.MovieDetailTabAdapter;
 import com.movie_hub.android.ui.main.movie.detail.adapter.TagCategoryAdapter;
 import com.movie_hub.android.ui.main.movie.detail.comment.CommentActivity;
+import com.movie_hub.android.ui.main.movie.detail.dialog.AddToPlaylistDialogFragment;
 import com.movie_hub.android.ui.main.movie.detail.dialog.InformationMovieBottomSheetDialog;
 import com.movie_hub.android.ui.main.movie.detail.fragment.CastFragment;
 import com.movie_hub.android.ui.main.movie.detail.fragment.EpisodesFragment;
@@ -69,7 +78,9 @@ import java.util.Objects;
 
 import eu.davidea.flexibleadapter.databinding.BR;
 
-public class MovieDetailActivity extends BaseActivity<ActivityMovieDetailBinding, MovieDetailViewModel> implements SystemBarColorProvider, View.OnClickListener {
+public class MovieDetailActivity extends BaseActivity<ActivityMovieDetailBinding, MovieDetailViewModel> implements SystemBarColorProvider,
+        View.OnClickListener,
+        AddToPlaylistDialogFragment.AddToPlaylistPlaylistDialogCallback {
     private TagCategoryAdapter tagCategoryAdapter;
     private final List<Fragment> fragmentList = new ArrayList<>();
     private ExoPlayer player;
@@ -633,6 +644,14 @@ public class MovieDetailActivity extends BaseActivity<ActivityMovieDetailBinding
                 it.putExtra("movie_details", GsonUtils.toJson(viewModel.movieDetails));
                 startActivity(it);
                 break;
+
+            case R.id.btn_playlist:
+                if (!viewModel.isLogin()) {
+                    showLoginRequiredDialog();
+                    return;
+                }
+                getListPlayList();
+                break;
             default:
                 break;
         }
@@ -722,5 +741,154 @@ public class MovieDetailActivity extends BaseActivity<ActivityMovieDetailBinding
         });
 
         animator.start();
+    }
+
+    public CreatePlayListCallback createPlayListCallback;
+
+    public void showBottomSheetAddToPlaylist(List<PlayListResponse> playListResponseList) {
+        AddToPlaylistDialogFragment dialog = new AddToPlaylistDialogFragment(
+                this,
+                playListResponseList,
+                viewModel.movieDetails.getId()
+        );
+        this.createPlayListCallback = dialog.getCreatePlayListCallback();
+        dialog.show(getSupportFragmentManager(), "AddToPlaylistPlaylistDialog");
+
+    }
+    public void createNewPlayList(CreatePlaylistRequest request) {
+        showLoading();
+        viewModel.createPlaylist(new MainCallback<PlayListResponse>() {
+            @Override
+            public void doSuccess(PlayListResponse data) {
+                hideLoading();
+                createPlayListCallback.onCreateSuccessCallBack(data);
+            }
+
+            @Override
+            public void doError(Throwable error) {
+                hideLoading();
+                showError(getString(R.string.an_error_occurred));
+            }
+
+            @Override
+            public void doSuccess() {
+                hideLoading();
+
+            }
+
+            @Override
+            public void doFail() {
+                hideLoading();
+                showError(getString(R.string.an_error_occurred));
+            }
+        }, request);
+    }
+
+    public void getListPlayList() {
+        showLoading();
+        viewModel.getListPlaylist(new MainCallback<List<PlayListResponse>>() {
+            @Override
+            public void doSuccess(List<PlayListResponse> data) {
+                hideLoading();
+                if (data == null || data.isEmpty()) {
+                    showBottomSheetAddToPlaylist(new ArrayList<>());
+                    return;
+                }
+                if (!viewModel.playListResponseList.isEmpty()) {
+                    viewModel.playListResponseList.clear();
+                }
+                viewModel.playListResponseList.addAll(data);
+                getPlayListMovie();
+            }
+            @Override
+            public void doError(Throwable error) {
+                hideLoading();
+                showError(getString(R.string.an_error_occurred));
+            }
+
+            @Override
+            public void doSuccess() {
+                hideLoading();
+            }
+
+            @Override
+            public void doFail() {
+                hideLoading();
+                showError(getString(R.string.an_error_occurred));
+            }
+        });
+    }
+
+    public void getPlayListMovie() {
+        showLoading();
+        viewModel.getPlayListOfMovie(new MainCallback<List<Long>>() {
+            @Override
+            public void doSuccess(List<Long> data) {
+                hideLoading();
+
+                if (viewModel.playListResponseList != null && data != null) {
+                    for (PlayListResponse item : viewModel.playListResponseList) {
+                        item.setSelect(data.contains(item.getId()));
+                    }
+                }
+
+                showBottomSheetAddToPlaylist(viewModel.playListResponseList);
+            }
+
+            @Override
+            public void doError(Throwable error) {
+                hideLoading();
+                showError(getString(R.string.an_error_occurred));
+            }
+
+            @Override
+            public void doSuccess() {
+                hideLoading();
+            }
+
+            @Override
+            public void doFail() {
+                hideLoading();
+                showError(getString(R.string.an_error_occurred));
+            }
+        }, viewModel.movieDetails.getId());
+    }
+
+    public void updatePlayListItem(UpdatePlayListItemRequest request) {
+        showLoading();
+        viewModel.updateItemPlayList(new MainCallback<ResponseWrapper>() {
+            @Override
+            public void doSuccess(ResponseWrapper data) {
+                hideLoading();
+                new ToastMessage(ToastMessage.TYPE_NORMAL, getString(R.string.update_list_success)).showMessage(getApplicationContext());
+            }
+            @Override
+            public void doError(Throwable error) {
+                hideLoading();
+                showError(getString(R.string.an_error_occurred));
+            }
+
+            @Override
+            public void doSuccess() {
+                hideLoading();
+            }
+
+            @Override
+            public void doFail() {
+                hideLoading();
+                showError(getString(R.string.an_error_occurred));
+            }
+        }, request);
+    }
+
+    @Override
+    public void onCreateClicked(CreatePlaylistRequest request) {
+        createNewPlayList(request);
+    }
+
+    @Override
+    public void onChooseClicked(UpdatePlayListItemRequest request) {
+        if (request.getActions().isEmpty() || request.getActions() == null) return;
+        updatePlayListItem(request);
     }
 }

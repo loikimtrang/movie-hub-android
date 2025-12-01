@@ -190,7 +190,7 @@
     <string name="update_now">Cập nhật ngay</string>
     <string name="status">Trạng thái: </string>
     <string name="obligatory">Bắt buộc</string>
-    <string name="menu_my_play_list">Danh sách phim của tôi</string>
+    <string name="menu_my_play_list">Danh sách phim</string>
     <string name="not_favorite">Bỏ thích</string>
     <string name="episode_char">T</string>
     <string name="season_char">M</string>
@@ -209,5 +209,24 @@
     <string name="no_comment_yet">Chưa có bình luận nào</string>
     <string name="not_login">Bạn chưa đăng nhập!</string>
     <string name="replying_to">Đang trả lời</string>
+    <string name="add_new">Thêm mới</string>
+    <string name="movie_list_empty">Danh sách phim trống</string>
+    <string name="manage">Quản lý</string>
+    <string name="movie_non_up">phim</string>
+    <string name="movie_non_up_one">phim</string>
 
+    <string name="manage_list">Quản lý danh sách</string>
+    <string name="save">Lưu lại</string>
+    <string name="delete_list">Xóa danh sách</string>
+    <string name="create_list">Tạo danh sách</string>
+    <string name="enter_title">Nhập tiêu đề</string>
+    <string name="create_new">Tạo mới</string>
+    <string name="cancel_create">Hủy Tạo</string>
+    <string name="please_enter_title">Vui lòng nhập tiêu đề</string>
+    <string name="create_playlist_succes">Tạo danh sách phát thành công</string>
+    <string name="limit_list">Bạn đã đạt đến giới hạn tạo danh sách.</string>
+    <string name="update_list_success">Đã cập nhật danh sách phim thành công</string>
+    <string name="delete_list_success">Đã xóa danh sách phim thành công</string>
+    <string name="add_to_list">Thêm vào danh sách</string>
+    <string name="choose">Chọn</string>
 </resources>

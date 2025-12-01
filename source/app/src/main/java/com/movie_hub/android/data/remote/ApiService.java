@@ -13,6 +13,7 @@ import com.movie_hub.android.data.model.api.request.otp.VerifyOtpRequest;
 import com.movie_hub.android.data.model.api.request.playlist.CreatePlaylistRequest;
 import com.movie_hub.android.data.model.api.request.playlist.GetListMoviePlayListRequest;
 import com.movie_hub.android.data.model.api.request.playlist.RemoveItemPlaylistRequest;
+import com.movie_hub.android.data.model.api.request.playlist.UpdatePlayListItemRequest;
 import com.movie_hub.android.data.model.api.request.playlist.UpdatePlaylistRequest;
 import com.movie_hub.android.data.model.api.request.user.UserChangePasswordRequest;
 import com.movie_hub.android.data.model.api.request.user.UserLoginGoogleRequest;
@@ -151,7 +152,7 @@ public interface ApiService {
     @POST("v1/comment/create")
     Observable<ResponseWrapper> createComment(@Body CreateCommentRequest request);
 
-    @PATCH("v1/comment/vote")
+    @PUT("v1/comment/vote")
     Observable<ResponseWrapper> voteComment(@Body CreateCommentReactionRequest request);
 
     @GET("v1/comment/vote-list/{movieId}")
@@ -159,13 +160,13 @@ public interface ApiService {
 
     // Playlist
     @GET("v1/playlist/list")
-    Observable<ResponseWrapper<List<PlayListResponse>>> getPlaylistList(@QueryMap Map<String, Object> query);
+    Observable<ResponseWrapper<List<PlayListResponse>>> getPlaylistList();
 
     @GET("v1/playlist/get/{id}")
     Observable<ResponseWrapper<PlayListResponse>> getPlaylistById(@Path("id") Long id);
 
     @POST("v1/playlist/create")
-    Observable<ResponseWrapper> createPlaylist(@Body CreatePlaylistRequest request);
+    Observable<ResponseWrapper<PlayListResponse>> createPlaylist(@Body CreatePlaylistRequest request);
 
     @PUT("v1/playlist/update")
     Observable<ResponseWrapper> updatePlaylist(@Body UpdatePlaylistRequest request);
@@ -174,10 +175,16 @@ public interface ApiService {
     Observable<ResponseWrapper> deletePlaylist(@Path("id") Long id);
 
     @GET("v1/playlist/{id}/movies")
-    Observable<ResponseWrapper<ResponseListObj<MovieResponse>>> getPlaylistMovies(@Path("id") Long playlistId);
+    Observable<ResponseWrapper<ResponseListObj<MovieResponse>>> getPlaylistMovies(
+            @Path("id") Long playlistId,
+            @QueryMap Map<String, Object> queryParams
+    );
 
     @DELETE("v1/playlist/remove-item")
-    Observable<ResponseWrapper> removeMovieFromPlaylist(@Body RemoveItemPlaylistRequest request);
+    Observable<ResponseWrapper> removeMovieFromPlaylist(@QueryMap Map<String, Object> queryParams);
     @GET("v1/playlist/list-by-movie/{movieId}")
-    Observable<ResponseWrapper<ResponseListObj<PlayListResponse>>> getPlaylistsByMovie(@Path("movieId") Long movieId);
+    Observable<ResponseWrapper<List<Long>>> getPlaylistsByMovie(@Path("movieId") Long movieId);
+
+    @POST("v1/playlist/update-item")
+    Observable<ResponseWrapper> updateItemPlayList(@Body UpdatePlayListItemRequest request);
 }

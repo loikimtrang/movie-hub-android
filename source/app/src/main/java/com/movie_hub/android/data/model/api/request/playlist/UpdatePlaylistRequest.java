@@ -5,5 +5,5 @@ import lombok.Data;
 @Data
 public class UpdatePlaylistRequest {
     private Long id;
-    private String Name;
+    private String name;
 }
