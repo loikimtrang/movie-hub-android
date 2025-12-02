@@ -31,8 +31,10 @@ import com.movie_hub.android.data.local.room.AppDbService;
 import com.movie_hub.android.data.local.room.RoomService;
 import com.movie_hub.android.data.remote.ApiService;
 import com.movie_hub.android.data.remote.AuthInterceptor;
+import com.movie_hub.android.data.remote.MasterApiService;
 import com.movie_hub.android.di.qualifier.ApiInfo;
 import com.movie_hub.android.di.qualifier.DatabaseInfo;
+import com.movie_hub.android.di.qualifier.MasterApi;
 import com.movie_hub.android.di.qualifier.PreferenceInfo;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
@@ -49,7 +51,12 @@ public class AppModule {
     String provideBaseUrl() {
         return BuildConfig.BASE_URL;
     }
-
+    @Provides
+    @Singleton
+    @MasterApi
+    String provideMasterUrl() {
+        return BuildConfig.MASTER_URL;
+    }
 
     @Provides
     @Singleton
@@ -119,7 +126,24 @@ public class AppModule {
         return retrofit.create(ApiService.class);
     }
 
+    @Provides
+    @Singleton
+    @MasterApi
+    Retrofit provideMasterRetrofit(OkHttpClient client, @MasterApi String masterUrl) {
+        return new Retrofit.Builder()
+                .client(client)
+                .baseUrl(masterUrl)
+                .addConverterFactory(GsonConverterFactory.create())
+                .addCallAdapterFactory(RxJava3CallAdapterFactory.create())
+                .build();
+    }
 
+    @Provides
+    @Singleton
+    @MasterApi
+    MasterApiService provideMasterApiService(@MasterApi Retrofit retrofit) {
+        return retrofit.create(MasterApiService.class);
+    }
     @Provides
     @Singleton
     public Repository provideDataManager(AppRepository appRepository) {

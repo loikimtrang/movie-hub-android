@@ -166,6 +166,7 @@
     <string name="download_failed">Download failed</string>
     <string name="please_update">New version is available, please update</string>
     <string name="movie_info">Movie Information</string>
+    <string name="info">Information</string>
     <string name="introduction">Introduction:</string>
     <string name="director">Director:</string>
     <string name="duration">Duration:</string>
@@ -231,5 +232,8 @@
     <string name="delete_list_success">Playlist deleted successfully</string>
     <string name="add_to_list">Add to playlist</string>
     <string name="choose">Choose</string>
+    <string name="permission_install">You need permission to install the application</string>
+    <string name="slogan_app">Phim hay cả rổ</string>
+    <string name="all">All</string>
 
 </resources>

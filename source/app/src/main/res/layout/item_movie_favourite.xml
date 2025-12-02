@@ -83,6 +83,7 @@
                         android:layout_height="wrap_content"
                         android:id="@+id/age_rating"
                         style="@style/Text_10_Normal"
+                        android:textColor="@color/black"
                         android:gravity="center"
                         android:layout_gravity="center"/>
 

@@ -54,6 +54,27 @@
                         android:layout_gravity="center_vertical"
                         android:layout_marginStart="@dimen/_3sdp"/>
 
+                    <FrameLayout
+                        android:id="@+id/layout_tag_episode"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/bg_tag_episode_comment"
+                        android:paddingVertical="@dimen/_1sdp"
+                        android:paddingHorizontal="@dimen/_3sdp"
+                        android:layout_marginStart="@dimen/_12sdp"
+                        android:visibility="gone"
+                        android:layout_gravity="center_vertical">
+
+                        <TextView
+                            android:id="@+id/tv_episode"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            style="@style/Text_10_Normal"
+                            android:textColor="@color/text_time_comment"
+                            android:text="E2:12"/>
+
+                    </FrameLayout>
+
                 </LinearLayout>
 
 

@@ -179,7 +179,7 @@ public class CheckUpdateActivity extends BaseActivity<ActivityCheckUpdateBinding
                     if (getPackageManager().canRequestPackageInstalls()) {
                         installApk(new File(getExternalFilesDir(null), "app_update.apk"));
                     } else {
-                        Toast.makeText(this, "Bạn cần cấp quyền để cài ứng dụng", Toast.LENGTH_SHORT).show();
+                        new ToastMessage(ToastMessage.TYPE_NORMAL, getString(R.string.permission_install)).showMessage(this);
                     }
                 }
             });

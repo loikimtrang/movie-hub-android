@@ -1,12 +1,17 @@
 package com.movie_hub.android.data.model.api.response.movie;
 
+import android.content.Context;
+
+import com.movie_hub.android.R;
 import com.movie_hub.android.constant.Constants;
 import com.movie_hub.android.data.model.api.response.MovieItem.MovieItemResponse;
 import com.movie_hub.android.data.model.api.response.category.CategoryResponse;
 import com.movie_hub.android.data.model.api.response.history.ListWatchHistoryResponse;
 import com.movie_hub.android.data.model.api.response.history.WatchHistoryResponse;
 import com.movie_hub.android.data.model.api.response.season.SeasonResponse;
+import com.movie_hub.android.ui.main.movie.detail.comment.model.TagComment;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -204,5 +209,22 @@ public class MovieResponse {
         }
 
         return -1;
+    }
+
+    public List<TagComment> getListLabelEpisode(Context context) {
+        List<TagComment> comments = new ArrayList<>();
+        for (int i = 0; i < seasons.size(); i++) {
+            for (int j = 0; j < seasons.get(i).getEpisodes().size(); j++) {
+                TagComment tagComment = new TagComment();
+                tagComment.setMovieId(id);
+                tagComment.setMovieItemId(seasons.get(i).getEpisodes().get(j).getId());
+                tagComment.setLabel(context.getString(R.string.season_char) + (i + 1) + ":"
+                       + context.getString(R.string.episode_char) + (j + 1));
+
+                comments.add(tagComment);
+            }
+        }
+
+        return comments;
     }
 }

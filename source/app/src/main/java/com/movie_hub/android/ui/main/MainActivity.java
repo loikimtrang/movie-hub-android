@@ -19,7 +19,11 @@ import com.movie_hub.android.data.model.api.request.appversion.CheckAppVersionRe
 import com.movie_hub.android.data.model.api.request.login.UserLoginRequest;
 import com.movie_hub.android.data.model.api.request.login.UserRegisterRequest;
 import com.movie_hub.android.data.model.api.request.user.UserLoginGoogleRequest;
+import com.movie_hub.android.data.model.api.response.MovieItem.MovieItemResponse;
+import com.movie_hub.android.data.model.api.response.history.ListWatchHistoryResponse;
+import com.movie_hub.android.data.model.api.response.history.WatchHistoryResponse;
 import com.movie_hub.android.data.model.api.response.login.UserLoginResponse;
+import com.movie_hub.android.data.model.api.response.movie.MovieResponse;
 import com.movie_hub.android.data.model.api.response.user.UserResponse;
 import com.movie_hub.android.data.model.other.ToastMessage;
 import com.movie_hub.android.databinding.ActivityMainBinding;
@@ -36,10 +40,12 @@ import com.movie_hub.android.ui.main.account.manage_account.ManageAccountActivit
 import com.movie_hub.android.ui.main.account.playlist.PlayListActivity;
 import com.movie_hub.android.ui.main.account.updateapp.CheckUpdateActivity;
 import com.movie_hub.android.ui.main.home.HomeFragment;
+import com.movie_hub.android.ui.main.movie.detail.MovieDetailActivity;
 import com.movie_hub.android.ui.main.movie.watch.WatchMovieActivity;
 import com.movie_hub.android.ui.main.schedule.ScheduleFragment;
 import com.movie_hub.android.ui.main.search.SearchFragment;
 import com.movie_hub.android.ui.main.splash.SplashActivity;
+import com.movie_hub.android.utils.GsonUtils;
 
 
 public class MainActivity extends BaseActivity<ActivityMainBinding, MainViewModel> implements SystemBarColorProvider, View.OnClickListener {
@@ -88,13 +94,22 @@ public class MainActivity extends BaseActivity<ActivityMainBinding, MainViewMode
         });
     }
     private void initFragments() {
-        homeFragment = new HomeFragment();
         fm = getSupportFragmentManager();
+
+        String bannerJson = getIntent().getStringExtra("home_banner");
+
+        Bundle bundle = new Bundle();
+        bundle.putString("banner_json", bannerJson);
+
+        homeFragment = new HomeFragment();
+        homeFragment.setArguments(bundle);
+
         fm.beginTransaction()
                 .add(R.id.fragment_container, homeFragment, Constants.HOME)
                 .commit();
         active = homeFragment;
     }
+
     public void handleFragment(String tag) {
         if (fm == null) fm = getSupportFragmentManager();
 
@@ -246,5 +261,84 @@ public class MainActivity extends BaseActivity<ActivityMainBinding, MainViewMode
             default:
                 break;
         }
+    }
+    
+    public void navigateToMovieDetail(MovieResponse movieResponse, ListWatchHistoryResponse listWatchHistoryResponse) {
+        Intent it = new Intent(this, MovieDetailActivity.class);
+        if (viewModel.isLogin()) {
+            it.putExtra("movie_details", GsonUtils.toJson(movieResponse));
+            it.putExtra("movie_details_tracking", GsonUtils.toJson(listWatchHistoryResponse));
+            
+        } else {
+            it.putExtra("movie_details", GsonUtils.toJson(movieResponse));
+        }
+        startActivity(it);
+    }
+
+    public void navigateToWatchMovie(MovieResponse movieResponse, ListWatchHistoryResponse listWatchHistoryResponse) {
+        Intent it = new Intent(this, WatchMovieActivity.class);
+        if (viewModel.isLogin()) {
+            if (movieResponse.getType() == Constants.TYPE_MOVIE_SERIES) {
+                MovieItemResponse remainingEpisode;
+                
+                if (listWatchHistoryResponse == null || listWatchHistoryResponse.getWatchHistories() == null) {
+                    remainingEpisode = null;
+                } else {
+                    
+                    WatchHistoryResponse watchHistoryResponse = listWatchHistoryResponse.getFirstWatchHistory();
+                    if (watchHistoryResponse == null) {
+                        remainingEpisode = null;
+                    } else {
+                        
+                        MovieItemResponse remaining = new MovieItemResponse();
+
+                        if (!watchHistoryResponse.isCompleted()) {
+                            remaining = movieResponse.getEpisodeById(watchHistoryResponse.getMovieItemId());
+                        } else {
+                            if (!movieResponse.isLastEpisode(watchHistoryResponse.getMovieItemId())) {
+                                MovieItemResponse nextEpisode = movieResponse.getNextEpisode(watchHistoryResponse.getMovieItemId());
+
+                                WatchHistoryResponse watchHistoryNoComplete = listWatchHistoryResponse.getWatchHistoryByMovieId(nextEpisode.getId());
+
+                                if (watchHistoryNoComplete == null) {
+                                    remaining = movieResponse.getEpisodeById(nextEpisode.getId());
+                                } else {
+                                    remaining = movieResponse.getEpisodeById(watchHistoryNoComplete.getMovieItemId());
+                                }
+
+                            } else {
+
+                                WatchHistoryResponse watchHistoryNoComplete = listWatchHistoryResponse.getWatchHistoryNoComplete();
+
+                                if (watchHistoryNoComplete == null) {
+                                    remainingEpisode = null;
+                                } else {
+                                    remaining = movieResponse.getEpisodeById(watchHistoryNoComplete.getMovieItemId());
+                                }
+                            }
+                        }
+
+                        remainingEpisode = remaining;
+                    }
+                }
+
+                if (remainingEpisode == null) {
+                    movieResponse.setSeasonAndEpisodeSelectedAndPlaying(movieResponse.getSeasons().get(0).getEpisodes().get(0).getId());
+                    it.putExtra("episode", GsonUtils.toJson(movieResponse.getSeasons().get(0).getEpisodes().get(0)));
+                } else {
+                    movieResponse.setSeasonAndEpisodeSelectedAndPlaying(remainingEpisode.getId());
+                    it.putExtra("episode", GsonUtils.toJson(remainingEpisode));
+                }
+            }
+
+            it.putExtra("movie_details", GsonUtils.toJson(movieResponse));
+            it.putExtra("movie_details_tracking", GsonUtils.toJson(listWatchHistoryResponse));
+        } else {
+            it.putExtra("movie_details", GsonUtils.toJson(movieResponse));
+            if (movieResponse.getType() == Constants.TYPE_MOVIE_SERIES) {
+                it.putExtra("episode", GsonUtils.toJson(movieResponse.getSeasons().get(0).getEpisodes().get(0)));
+            }
+        }
+        startActivity(it);
     }
 }

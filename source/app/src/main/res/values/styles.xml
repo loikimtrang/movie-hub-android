@@ -40,6 +40,11 @@
         <item name="cornerSize">5%</item>
     </style>
 
+    <style name="movieBannerImg">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">@dimen/_12sdp</item>
+    </style>
+
     <style name="thumbnailVtt">
         <item name="cornerFamily">rounded</item>
         <item name="cornerSize">5%</item>

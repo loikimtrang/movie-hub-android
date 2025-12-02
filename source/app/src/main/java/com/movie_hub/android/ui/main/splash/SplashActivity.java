@@ -1,27 +1,31 @@
 package com.movie_hub.android.ui.main.splash;
 
-import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Intent;
-import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.Settings;
 import android.view.View;
-import android.widget.Toast;
+import android.view.Window;
+import android.view.WindowInsets;
+import android.view.WindowInsetsController;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
+import androidx.core.view.WindowCompat;
 
 import com.movie_hub.android.BR;
 import com.movie_hub.android.BuildConfig;
 import com.movie_hub.android.R;
 import com.movie_hub.android.data.model.api.ResponseWrapper;
 import com.movie_hub.android.data.model.api.request.appversion.CheckAppVersionRequest;
+import com.movie_hub.android.data.model.api.request.movie.MovieRequest;
 import com.movie_hub.android.data.model.api.response.appversion.CheckAppVersionResponse;
+import com.movie_hub.android.data.model.api.response.movie.MovieResponse;
 import com.movie_hub.android.data.model.api.response.user.UserResponse;
 import com.movie_hub.android.data.model.other.ToastMessage;
 import com.movie_hub.android.databinding.ActivitySplashBinding;
@@ -33,9 +37,11 @@ import com.movie_hub.android.ui.main.MainCallback;
 import com.movie_hub.android.ui.main.account.login.LoginActivity;
 import com.movie_hub.android.ui.main.account.updateapp.UpdateManager;
 import com.movie_hub.android.ui.main.account.updateapp.dialog.UpdateVersionBottomSheetDialog;
+import com.movie_hub.android.utils.GsonUtils;
 
 import java.io.File;
 import java.net.ConnectException;
+import java.util.List;
 
 @SuppressLint("CustomSplashScreen")
 public class SplashActivity extends BaseActivity<ActivitySplashBinding, SplashViewModel> implements View.OnClickListener, SystemBarColorProvider, UpdateVersionBottomSheetDialog.UpdateVersionBottomSheetCallback {
@@ -47,6 +53,7 @@ public class SplashActivity extends BaseActivity<ActivitySplashBinding, SplashVi
         viewBinding.setA(this);
         viewBinding.setVm(viewModel);
         handleCheckUpdate();
+        hideSystemUI();
     }
 
     public void handleCheckUpdate() {
@@ -126,8 +133,9 @@ public class SplashActivity extends BaseActivity<ActivitySplashBinding, SplashVi
         });
     }
     public void navigateToMainActivity() {
-        startActivity(new Intent(this, MainActivity.class));
-        finish();
+//        startActivity(new Intent(this, MainActivity.class));
+//        finish();
+        getListMovie();
     }
 
     public void navigateToLoginActivity() {
@@ -280,8 +288,62 @@ public class SplashActivity extends BaseActivity<ActivitySplashBinding, SplashVi
                     if (getPackageManager().canRequestPackageInstalls()) {
                         installApk(new File(getExternalFilesDir(null), "app_update.apk"));
                     } else {
-                        Toast.makeText(this, "Bạn cần cấp quyền để cài ứng dụng", Toast.LENGTH_SHORT).show();
+                        new ToastMessage(ToastMessage.TYPE_NORMAL, getString(R.string.permission_install)).showMessage(this);
                     }
                 }
             });
+
+    public void hideSystemUI() {
+        Window window = getWindow();
+        WindowCompat.setDecorFitsSystemWindows(window, false);
+        window.setStatusBarColor(Color.TRANSPARENT);
+        window.setNavigationBarColor(Color.TRANSPARENT);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            getWindow().setDecorFitsSystemWindows(false);
+            getWindow().getInsetsController().hide(WindowInsets.Type.systemBars());
+            getWindow().getInsetsController().setSystemBarsBehavior(
+                    WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+            );
+        } else {
+            getWindow().getDecorView().setSystemUiVisibility(
+                    View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                            | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                            | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                            | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                            | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                            | View.SYSTEM_UI_FLAG_FULLSCREEN
+            );
+        }
+    }
+
+    public void getListMovie() {
+        showLoading();
+        viewModel.getListMovie(new MainCallback<List<MovieResponse>>() {
+            @Override
+            public void doSuccess(List<MovieResponse> data) {
+                hideLoading();
+                Intent it = new Intent(SplashActivity.this, MainActivity.class);
+                it.putExtra("home_banner", GsonUtils.toJson(data));
+                startActivity(it);
+                finish();
+            }
+            @Override
+            public void doError(Throwable error) {
+                hideLoading();
+                showError(getString(R.string.an_error_occurred));
+            }
+
+            @Override
+            public void doSuccess() {
+                hideLoading();
+
+            }
+
+            @Override
+            public void doFail() {
+                hideLoading();
+                showError(getString(R.string.an_error_occurred));
+            }
+        }, new MovieRequest());
+    }
 }

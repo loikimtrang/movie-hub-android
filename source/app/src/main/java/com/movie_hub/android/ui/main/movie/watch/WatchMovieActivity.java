@@ -66,6 +66,7 @@ import com.movie_hub.android.data.model.api.response.video.VideoResponse;
 import com.movie_hub.android.databinding.ActivityWatchMovieBinding;
 import com.movie_hub.android.di.component.ActivityComponent;
 import com.movie_hub.android.ui.base.activity.BaseActivity;
+import com.movie_hub.android.ui.main.movie.detail.TokenRefreshingDataSourceFactoryMovieDetails;
 import com.movie_hub.android.ui.main.movie.watch.Provider.SpriteThumbnailManager;
 import com.movie_hub.android.ui.main.movie.watch.adapter.EpisodeItemListHoriAdapter;
 import com.movie_hub.android.ui.main.movie.watch.adapter.SeasonItemAdapter;
@@ -77,6 +78,7 @@ import com.movie_hub.android.ui.main.movie.watch.setting.SettingVideoModel;
 import com.movie_hub.android.ui.main.movie.watch.setting.VideoQuality;
 import com.movie_hub.android.utils.DeviceUtils;
 import com.movie_hub.android.utils.GsonUtils;
+import com.movie_hub.android.utils.LiveDataUtils;
 import com.movie_hub.android.utils.NetworkUtils;
 
 import java.util.Collections;
@@ -129,6 +131,7 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
         viewBinding.setA(this);
         viewBinding.setVm(viewModel);
         hideSystemUI();
+        viewModel.startTokenAutoRefresh();
 
         String json = getIntent().getStringExtra("movie_details");
         MovieResponse movie = GsonUtils.fromJson(json, MovieResponse.class);
@@ -179,7 +182,18 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
     public void initMovie() {
         reset();
         viewModel.nowUriPlay = getVideoUri(viewModel.nowVideoPlay);
-        setUpMovie(viewModel.nowUriPlay);
+
+        if (Boolean.TRUE.equals(viewModel.getTokenReady().getValue())) {
+            setUpMovie(viewModel.nowUriPlay);
+
+        } else {
+            LiveDataUtils.observeOnce(viewModel.getTokenReady(), this, isReady -> {
+                if (Boolean.TRUE.equals(isReady)) {
+                    setUpMovie(viewModel.nowUriPlay);
+
+                }
+            });
+        }
         viewModel.getIsPlaying().observe(this, this::updatePlayPauseIcons);
     }
 
@@ -265,21 +279,21 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
         viewBinding.seekBar.setProgress(0);
         viewBinding.tvCurrentTime.setText("00:00");
         viewBinding.tvTotalTime.setText("00:00");
+
+        viewModel.lastPlaybackPosition = 0L;
     }
     public void setUpMovie(String uri) {
         if (!uri.contains("http")) {
             uri = Constants.MEDIA_URL_VIDEO + uri;
         }
 
-        String token = viewModel.getTokenVideo();
-
-        DefaultHttpDataSource.Factory httpFactory = new DefaultHttpDataSource.Factory()
-                .setDefaultRequestProperties(
-                        Collections.singletonMap("Authorization", token)
+        DefaultMediaSourceFactory mediaSourceFactory =
+                new DefaultMediaSourceFactory(
+                        new TokenRefreshingDataSourceFactoryWatchMovie(viewModel)
                 );
 
         ExoPlayer.Builder playerBuilder = new ExoPlayer.Builder(this)
-                .setMediaSourceFactory(new DefaultMediaSourceFactory(httpFactory));
+                .setMediaSourceFactory(mediaSourceFactory);
 
         // === RENDERERS FACTORY ===
         DefaultRenderersFactory renderersFactory = new DefaultRenderersFactory(this)
@@ -314,6 +328,10 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
         MediaItem mediaItem = MediaItem.fromUri(uri);
         player.setMediaItem(mediaItem);
         player.prepare();
+        long lastPosition = viewModel.lastPlaybackPosition;
+        if (lastPosition > 0) {
+            player.seekTo(lastPosition);
+        }
         player.setPlayWhenReady(true);
 
         setupPlayerListener();
@@ -502,14 +520,29 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
             mgs = getString(R.string.network_error_please_check_your_internet_connection);
         }
         String finalMgs = mgs;
+
+        viewModel.lastPlaybackPosition = player != null ? player.getCurrentPosition() : 0L;
+
         runOnUiThread(() -> {
             viewBinding.lDialogErrorVideo.setVisibility(View.VISIBLE);
             viewBinding.dialogErrorVideoMessage.setText(finalMgs);
 
             viewBinding.btnRetryErrorVideo.setOnClickListener(v -> {
                 viewBinding.lDialogErrorVideo.setVisibility(View.GONE);
-                reset();
-                setUpMovie(viewModel.nowUriPlay);
+                if (viewModel.lastPlaybackPosition == 0L) {
+                    reset();
+                }
+                if (Boolean.TRUE.equals(viewModel.getTokenReady().getValue())) {
+                    setUpMovie(viewModel.nowUriPlay);
+
+                } else {
+                    LiveDataUtils.observeOnce(viewModel.getTokenReady(), this, isReady -> {
+                        if (Boolean.TRUE.equals(isReady)) {
+                            setUpMovie(viewModel.nowUriPlay);
+
+                        }
+                    });
+                }
             });
 
             viewBinding.btnExitErrorVideo.setOnClickListener(v -> {
@@ -1218,6 +1251,8 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
         startSeekBarUpdate();
         startVolumeObserver();
         startTrackingLoop();
+        viewModel.startTokenAutoRefresh();
+
     }
     @Override
     protected void onPause() {
@@ -1229,6 +1264,8 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
             player.pause();
         }
         stopVolumeObserver();
+
+        viewModel.stopTokenAutoRefresh();
     }
     @Override
     protected void onDestroy() {
@@ -1258,6 +1295,8 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
         stopSeekBarUpdate();
         stopVolumeObserver();
         stopTrackingLoop();
+        viewModel.stopTokenAutoRefresh();
+
     }
 
     // region === Click ===

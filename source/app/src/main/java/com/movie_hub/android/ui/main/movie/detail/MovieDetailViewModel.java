@@ -24,10 +24,12 @@ import com.movie_hub.android.utils.NetworkUtils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.ObservableSource;
+import io.reactivex.rxjava3.disposables.Disposable;
 import io.reactivex.rxjava3.functions.Function;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import lombok.Getter;
@@ -43,6 +45,7 @@ public class MovieDetailViewModel extends BaseViewModel {
     public MutableLiveData<FavouriteResponse> favouriteResponseFirst = new MutableLiveData<>();
 
     public FavouriteResponse favourite = new FavouriteResponse();
+    public long lastPlaybackPosition = 0L;
     public List<PlayListResponse> playListResponseList = new ArrayList<>();
     public MovieDetailViewModel(Repository repository, MVVMApplication application) {
         super(repository, application);
@@ -55,8 +58,82 @@ public class MovieDetailViewModel extends BaseViewModel {
     public void setPlaying(boolean playing) {
         isPlaying.setValue(playing);
     }
-    public String getTokenVideo() {
-        return "Bearer " + repository.getSharedPreferences().getToken();
+
+    @Getter
+    private String tokenVideo;
+
+    public void setTokenVideo(String token) {
+        this.tokenVideo = "Bearer " + token;
+    }
+
+    private Disposable tokenRefreshDisposable;
+
+    public void startTokenAutoRefresh() {
+        if (isLogin()) {
+            setTokenVideo(repository.getToken());
+            tokenReady.postValue(true);
+            Timber.d("👤 User đã đăng nhập → dùng token login, không auto refresh.");
+            return;
+        }
+
+        // Nếu chưa login → dùng anonymous token và auto refresh mỗi 10 phút
+        getAnonymousToken();
+
+        if (tokenRefreshDisposable != null && !tokenRefreshDisposable.isDisposed()) return;
+
+        tokenRefreshDisposable = Observable.interval(10, 10, TimeUnit.MINUTES)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(aLong -> {
+                    Timber.d("🔄 Refreshing anonymous token...");
+                    getAnonymousToken();
+                });
+    }
+
+
+    public void stopTokenAutoRefresh() {
+        if (tokenRefreshDisposable != null && !tokenRefreshDisposable.isDisposed()) {
+            tokenRefreshDisposable.dispose();
+        }
+    }
+
+    private final MutableLiveData<Boolean> tokenReady = new MutableLiveData<>();
+
+    public LiveData<Boolean> getTokenReady() {
+        return tokenReady;
+    }
+
+    public void getAnonymousToken() {
+        if (isLogin()) {
+            setTokenVideo(repository.getToken());
+            tokenReady.postValue(true);
+            return;
+        }
+
+        compositeDisposable.add(repository.getMasterApiService().getAnonymousToken()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .retryWhen(throwable ->
+                        throwable.flatMap(throwable1 -> {
+                            if (NetworkUtils.checkNetworkError(throwable1)) {
+                                return application.showDialogNoInternetAccess();
+                            } else {
+                                return Observable.error(throwable1);
+                            }
+                        })
+                )
+                .subscribe(
+                        response -> {
+                            String token = response.getAccessToken();
+                            setTokenVideo(token);
+                            Timber.d("✅ Token đã sẵn sàng: %s", token);
+                            tokenReady.postValue(true);
+                        },
+                        throwable -> {
+                            Timber.e(throwable, "❌ Lỗi khi gọi anonymous token");
+                            tokenReady.postValue(false); // hoặc xử lý retry
+                        }
+                ));
     }
 
     public void applyWatchHistory(ListWatchHistoryResponse history) {
@@ -64,8 +141,6 @@ public class MovieDetailViewModel extends BaseViewModel {
             movieDetails.applyWatchHistory(history);
         }
     }
-
-
     public void createFavorite(CreateFavouriteRequest request) {
         Map<String, Object> query = RequestToMapConverter.convert(request);
         compositeDisposable.add(repository.getApiService().createFavourite(query)

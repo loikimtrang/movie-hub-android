@@ -112,6 +112,7 @@ public class SearchTopTrendingViewModel extends BaseFragmentViewModel {
                 )
         );
     }
+
     public void getMovie(MainCallback<MovieResponse> callback, Long id) {
         compositeDisposable.add(repository.getApiService().getMovie(id)
                 .subscribeOn(Schedulers.io())

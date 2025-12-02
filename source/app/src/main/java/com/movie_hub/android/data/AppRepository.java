@@ -3,19 +3,28 @@ package com.movie_hub.android.data;
 import com.movie_hub.android.data.local.prefs.PreferencesService;
 import com.movie_hub.android.data.local.room.RoomService;
 import com.movie_hub.android.data.remote.ApiService;
+import com.movie_hub.android.data.remote.MasterApiService;
+import com.movie_hub.android.di.qualifier.MasterApi;
 
 import javax.inject.Inject;
 
 public class AppRepository implements Repository {
 
     private final ApiService mApiService;
+    private final MasterApiService masterApiService;
     private final PreferencesService mPreferencesHelper;
     private final RoomService roomService;
 
     @Inject
-    public AppRepository(PreferencesService preferencesHelper, ApiService apiService, RoomService roomService) {
+    public AppRepository(
+            PreferencesService preferencesHelper,
+            ApiService apiService,
+            @MasterApi MasterApiService masterApiService,
+            RoomService roomService
+    ) {
         this.mPreferencesHelper = preferencesHelper;
         this.mApiService = apiService;
+        this.masterApiService = masterApiService;
         this.roomService = roomService;
     }
 
@@ -47,7 +56,10 @@ public class AppRepository implements Repository {
         return mApiService;
     }
 
-
+    @Override
+    public MasterApiService getMasterApiService() {
+        return masterApiService;
+    }
     @Override
     public RoomService getRoomService() {
         return roomService;

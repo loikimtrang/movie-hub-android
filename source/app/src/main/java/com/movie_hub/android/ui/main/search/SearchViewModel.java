@@ -56,7 +56,6 @@ public class SearchViewModel extends BaseFragmentViewModel {
                         )
         );
     }
-
     public void getListMovie(MainCallback<List<MovieResponse>> callback, MovieRequest request) {
         showLoading();
         Map<String, Object> query = RequestToMapConverter.convert(request);

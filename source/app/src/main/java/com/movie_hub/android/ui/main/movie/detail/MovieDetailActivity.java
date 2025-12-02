@@ -70,6 +70,7 @@ import com.movie_hub.android.utils.DialogUtils;
 import com.movie_hub.android.utils.DisplayUtils;
 import com.movie_hub.android.utils.GsonUtils;
 import com.movie_hub.android.utils.HtmlUtils;
+import com.movie_hub.android.utils.LiveDataUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -77,6 +78,7 @@ import java.util.List;
 import java.util.Objects;
 
 import eu.davidea.flexibleadapter.databinding.BR;
+import timber.log.Timber;
 
 public class MovieDetailActivity extends BaseActivity<ActivityMovieDetailBinding, MovieDetailViewModel> implements SystemBarColorProvider,
         View.OnClickListener,
@@ -99,7 +101,7 @@ public class MovieDetailActivity extends BaseActivity<ActivityMovieDetailBinding
 
         viewBinding.setA(this);
         viewBinding.setVm(viewModel);
-
+        viewModel.startTokenAutoRefresh();
         String json = getIntent().getStringExtra("movie_details");
 
         MovieResponse movie = GsonUtils.fromJson(json, MovieResponse.class);
@@ -261,6 +263,8 @@ public class MovieDetailActivity extends BaseActivity<ActivityMovieDetailBinding
         if (viewModel.isLogin()) {
             viewModel.getListMovieTracking(viewModel.movieDetails.getId());
         }
+
+        viewModel.startTokenAutoRefresh();
     }
 
     @SuppressLint({"SetTextI18n", "ClickableViewAccessibility"})
@@ -309,7 +313,15 @@ public class MovieDetailActivity extends BaseActivity<ActivityMovieDetailBinding
             if (lastSeason.getTrailer() != null) {
                 VideoResponse video = lastSeason.getTrailer().getVideo();
                 if (video != null && video.getContent() != null) {
-                    setUpTrailer(video.getContent());
+                    if (Boolean.TRUE.equals(viewModel.getTokenReady().getValue())) {
+                        setUpTrailer(video.getContent());
+                    } else {
+                        LiveDataUtils.observeOnce(viewModel.getTokenReady(), this, isReady -> {
+                            if (Boolean.TRUE.equals(isReady)) {
+                                setUpTrailer(video.getContent());
+                            }
+                        });
+                    }
                 }
             }
         }
@@ -358,15 +370,10 @@ public class MovieDetailActivity extends BaseActivity<ActivityMovieDetailBinding
     public void setUpTrailer(String uri) {
         if (uri == null || uri.isEmpty()) return;
 
-        String token = viewModel.getTokenVideo();
-
-        DefaultHttpDataSource.Factory httpFactory = new DefaultHttpDataSource.Factory()
-                .setDefaultRequestProperties(
-                        Collections.singletonMap("Authorization", token)
-                );
-
         DefaultMediaSourceFactory mediaSourceFactory =
-                new DefaultMediaSourceFactory(httpFactory);
+                new DefaultMediaSourceFactory(
+                        new TokenRefreshingDataSourceFactoryMovieDetails(viewModel)
+                );
 
         // tạo player có token
         player = new ExoPlayer.Builder(this)
@@ -583,6 +590,7 @@ public class MovieDetailActivity extends BaseActivity<ActivityMovieDetailBinding
             player.release();
             player = null;
         }
+        viewModel.stopTokenAutoRefresh();
     }
 
     @Override
@@ -591,6 +599,7 @@ public class MovieDetailActivity extends BaseActivity<ActivityMovieDetailBinding
         if (player != null) {
             player.pause();
         }
+        viewModel.stopTokenAutoRefresh();
     }
 
     @SuppressLint("NonConstantResourceId")

@@ -198,6 +198,10 @@ public class AddToPlaylistDialogFragment extends DialogFragment implements Playl
             }
 
         });
+
+        binding.btnClose.setOnClickListener(v -> {
+            dismiss();
+        });
     }
     public void hideKeyboard(View view) {
         if (view == null) return;

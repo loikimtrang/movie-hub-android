@@ -2,6 +2,7 @@ package com.movie_hub.android.ui.main.account;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.view.View;
 
 import androidx.recyclerview.widget.LinearLayoutManager;
 
@@ -22,7 +23,9 @@ import java.util.List;
 
 import eu.davidea.flexibleadapter.databinding.BR;
 
-public class UnLoginAccountFragment extends BaseFragment<FragmentUnLoginAccountBinding, UnLoginAccountViewModel> implements SystemBarColorProvider, AccountMenuAdapter.OnItemClickListener {
+public class UnLoginAccountFragment extends BaseFragment<FragmentUnLoginAccountBinding, UnLoginAccountViewModel> implements SystemBarColorProvider,
+        AccountMenuAdapter.OnItemClickListener,
+        View.OnClickListener {
     private AccountMenuAdapter adapter;
     @Override
     protected void performDataBinding() {
@@ -79,7 +82,7 @@ public class UnLoginAccountFragment extends BaseFragment<FragmentUnLoginAccountB
             case R.string.menu_watch_now:
             case R.string.menu_my_movies:
             case R.string.menu_favorites:
-                onLoginClick();
+                showLoginRequiredDialog();
                 break;
             case R.string.menu_privacy_policy:
                 break;
@@ -93,9 +96,10 @@ public class UnLoginAccountFragment extends BaseFragment<FragmentUnLoginAccountB
                 break;
         }
     }
+
     public void onLoginClick() {
         ClickUtils.debounceClick(binding.login);
-        showLoginRequiredDialog();
+        ((MainActivity) requireActivity()).navigateToNewActivity(getContext(), LoginActivity.class);
     }
 
     public void showLoginRequiredDialog() {
@@ -109,5 +113,17 @@ public class UnLoginAccountFragment extends BaseFragment<FragmentUnLoginAccountB
                 getString(R.string.cancel),
                 null
         );
+    }
+
+    @SuppressLint("NonConstantResourceId")
+    @Override
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.login:
+                ((MainActivity) requireActivity()).navigateToNewActivity(getContext(), LoginActivity.class);
+                break;
+            default:
+                break;
+        }
     }
 }

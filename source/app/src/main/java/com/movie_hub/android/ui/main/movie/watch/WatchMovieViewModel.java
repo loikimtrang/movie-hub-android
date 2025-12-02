@@ -28,8 +28,10 @@ import io.reactivex.exceptions.Exceptions;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.ObservableSource;
+import io.reactivex.rxjava3.disposables.Disposable;
 import io.reactivex.rxjava3.functions.Function;
 import io.reactivex.rxjava3.schedulers.Schedulers;
+import lombok.Getter;
 import timber.log.Timber;
 
 public class WatchMovieViewModel extends BaseViewModel {
@@ -40,6 +42,7 @@ public class WatchMovieViewModel extends BaseViewModel {
 
     private MutableLiveData<Boolean> isPlaying = new MutableLiveData<>(true);
     public MutableLiveData<ListWatchHistoryResponse> movieDetailsTracking = new MutableLiveData<>();
+    public long lastPlaybackPosition = 0L;
 
     SettingVideoModel settingVideoModel = new SettingVideoModel();
     public WatchMovieViewModel(Repository repository, MVVMApplication application) {
@@ -60,8 +63,81 @@ public class WatchMovieViewModel extends BaseViewModel {
         settingVideoModel.getQuality().setResolution(new VideoQuality());
         settingVideoModel.getAvailableQualities().clear();
     }
-    public String getTokenVideo() {
-        return "Bearer " + repository.getSharedPreferences().getToken();
+    @Getter
+    private String tokenVideo;
+
+    public void setTokenVideo(String token) {
+        this.tokenVideo = "Bearer " + token;
+    }
+
+    private Disposable tokenRefreshDisposable;
+
+    public void startTokenAutoRefresh() {
+        if (isLogin()) {
+            setTokenVideo(repository.getToken());
+            tokenReady.postValue(true);
+            Timber.d("👤 User đã đăng nhập → dùng token login, không auto refresh.");
+            return;
+        }
+
+        // Nếu chưa login → dùng anonymous token và auto refresh mỗi 10 phút
+        getAnonymousToken();
+
+        if (tokenRefreshDisposable != null && !tokenRefreshDisposable.isDisposed()) return;
+
+        tokenRefreshDisposable = Observable.interval(10, 10, TimeUnit.MINUTES)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(aLong -> {
+                    Timber.d("🔄 Refreshing anonymous token...");
+                    getAnonymousToken();
+                });
+    }
+
+
+    public void stopTokenAutoRefresh() {
+        if (tokenRefreshDisposable != null && !tokenRefreshDisposable.isDisposed()) {
+            tokenRefreshDisposable.dispose();
+        }
+    }
+
+    private final MutableLiveData<Boolean> tokenReady = new MutableLiveData<>();
+
+    public LiveData<Boolean> getTokenReady() {
+        return tokenReady;
+    }
+
+    public void getAnonymousToken() {
+        if (isLogin()) {
+            setTokenVideo(repository.getToken());
+            tokenReady.postValue(true);
+            return;
+        }
+
+        compositeDisposable.add(repository.getMasterApiService().getAnonymousToken()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .retryWhen(throwable ->
+                        throwable.flatMap(throwable1 -> {
+                            if (NetworkUtils.checkNetworkError(throwable1)) {
+                                return application.showDialogNoInternetAccess();
+                            } else {
+                                return Observable.error(throwable1);
+                            }
+                        })
+                )
+                .subscribe(
+                        response -> {
+                            String token = response.getAccessToken();
+                            setTokenVideo(token);
+                            Timber.d("✅ Token đã sẵn sàng: %s", token);
+                            tokenReady.postValue(true);
+                        },
+                        throwable -> {
+                            Timber.e(throwable, "❌ Lỗi khi gọi anonymous token");
+                            tokenReady.postValue(false); // hoặc xử lý retry
+                        }
+                ));
     }
 
     public void updateTrackingMovie(TrackingWatchHistoryRequest request) {

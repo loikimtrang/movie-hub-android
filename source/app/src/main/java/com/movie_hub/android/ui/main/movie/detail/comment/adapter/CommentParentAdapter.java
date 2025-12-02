@@ -21,6 +21,7 @@ import com.movie_hub.android.constant.Constants;
 import com.movie_hub.android.data.model.api.response.comment.CommentResponse;
 import com.movie_hub.android.data.model.api.response.comment.VoteListResponse;
 import com.movie_hub.android.databinding.ItemCommentParentBinding;
+import com.movie_hub.android.ui.main.movie.detail.comment.model.TagComment;
 import com.movie_hub.android.utils.DisplayUtils;
 
 import java.util.ArrayList;
@@ -33,6 +34,7 @@ public class CommentParentAdapter extends RecyclerView.Adapter<CommentParentAdap
     private final List<CommentResponse> items = new ArrayList<>();
     private OnCommentParentClickListener listener;
     private Context context;
+    private TagComment tagComment;
 
     public interface OnCommentParentClickListener {
         void onOpenChildClick(CommentResponse commentResponse, List<CommentResponse> items);
@@ -75,6 +77,26 @@ public class CommentParentAdapter extends RecyclerView.Adapter<CommentParentAdap
     @Override
     public void onBindViewHolder(@NonNull CommentParentViewHolder holder, @SuppressLint("RecyclerView") int position) {
         CommentResponse item = items.get(position);
+
+        if (tagComment.getLabel() != null && !tagComment.getLabel().isEmpty()) {
+            if (tagComment.getMovieItemId() != -1L) {
+                holder.binding.tvEpisode.setText(tagComment.getLabel());
+                holder.binding.layoutTagEpisode.setVisibility(View.VISIBLE);
+            } else {
+                if (item.getMovieItem() != null && item.getMovieItem().getParent() != null) {
+                    String label = context.getString(R.string.season_char)
+                            + item.getMovieItem().getParent().getLabel() + ":"
+                            + context.getString(R.string.episode_char)
+                            + item.getMovieItem().getLabel();
+
+                    holder.binding.tvEpisode.setText(label);
+                    holder.binding.layoutTagEpisode.setVisibility(View.VISIBLE);
+                } else {
+                    holder.binding.layoutTagEpisode.setVisibility(View.GONE);
+                }
+
+            }
+        }
 
         holder.binding.tvNameAuthor.setText(item.getAuthor().getFullName());
         holder.binding.tvContent.setText(item.getContent());
@@ -236,8 +258,9 @@ public class CommentParentAdapter extends RecyclerView.Adapter<CommentParentAdap
     }
 
     @SuppressLint("NewApi")
-    public void setData(List<CommentResponse> newData, List<VoteListResponse> voteList) {
+    public void setData(List<CommentResponse> newData, List<VoteListResponse> voteList, TagComment tag) {
         List<CommentResponse> newListClone = new ArrayList<>(newData);
+        this.tagComment = tag;
 
         if (voteList != null) {
             newListClone = handleVoteList(newListClone, voteList);
@@ -248,6 +271,11 @@ public class CommentParentAdapter extends RecyclerView.Adapter<CommentParentAdap
             items.addAll(newListClone);
         }
 
+        notifyDataSetChanged();
+    }
+
+    public void clearData() {
+        items.clear();
         notifyDataSetChanged();
     }
 

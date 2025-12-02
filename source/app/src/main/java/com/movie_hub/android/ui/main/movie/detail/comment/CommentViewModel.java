@@ -17,6 +17,7 @@ import com.movie_hub.android.data.model.api.response.comment.VoteListResponse;
 import com.movie_hub.android.data.model.api.response.movie.MovieResponse;
 import com.movie_hub.android.ui.base.activity.BaseViewModel;
 import com.movie_hub.android.ui.main.MainCallback;
+import com.movie_hub.android.ui.main.movie.detail.comment.model.TagComment;
 import com.movie_hub.android.utils.NetworkUtils;
 
 import java.text.ParseException;
@@ -42,6 +43,8 @@ public class CommentViewModel extends BaseViewModel {
     MovieResponse movieDetails = new MovieResponse();
     public MutableLiveData<List<CommentResponse>> commentList = new MutableLiveData<>();
     public MutableLiveData<List<VoteListResponse>> voteList = new MutableLiveData<>();
+    List<TagComment> tagComments = new ArrayList<>();
+    TagComment tagCommentSelect = new TagComment();
 
     public CommentResponse replyTo = new CommentResponse();
     public MutableLiveData<Long> totalComment = new MutableLiveData<>(0L);
@@ -49,6 +52,34 @@ public class CommentViewModel extends BaseViewModel {
         super(repository, application);
     }
 
+    public CommentRequest getCommentRequest() {
+        CommentRequest request = new CommentRequest();
+        request.setSize(10000);
+        if (movieDetails.getType() == Constants.TYPE_MOVIE_SINGLE) {
+            request.setMovieId(movieDetails.getId());
+        } else {
+            if (tagCommentSelect.getMovieItemId()  == -1) {
+                request.setMovieId(movieDetails.getId());
+            } else {
+                request.setMovieItemId(tagCommentSelect.getMovieItemId());
+            }
+        }
+        return request;
+    }
+
+    public CreateCommentRequest getCreateCommentRequest() {
+        CreateCommentRequest request = new CreateCommentRequest();
+        if (movieDetails.getType() == Constants.TYPE_MOVIE_SINGLE) {
+            request.setMovieId(movieDetails.getId());
+        } else {
+            if (tagCommentSelect.getMovieItemId()  == -1) {
+                request.setMovieId(movieDetails.getId());
+            } else {
+                request.setMovieItemId(tagCommentSelect.getMovieItemId());
+            }
+        }
+        return request;
+    }
     public void mergeOrUpdateComments(List<CommentResponse> newList) {
         if (commentList.getValue() == null) {
             commentList.setValue(new ArrayList<>(newList));

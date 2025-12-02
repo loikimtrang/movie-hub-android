@@ -8,223 +8,243 @@
     android:id="@+id/layout_setting"
     android:windowIsFloating="true">
 
-    <LinearLayout
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
-        android:background="@drawable/bg_choose_season"
-        android:orientation="vertical"
-        android:focusableInTouchMode="true">
-
-        <ImageView
-            android:layout_width="@dimen/_20sdp"
-            android:layout_height="@dimen/_20sdp"
-            android:src="@drawable/ic_remove"
-            android:layout_gravity="center_horizontal"/>
-
-        <FrameLayout
+        android:background="@drawable/bg_choose_season">
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:background="@drawable/bg_choose_season"
+            android:orientation="vertical"
+            android:focusableInTouchMode="true"
+            android:paddingTop="@dimen/_12sdp">
 
-            <LinearLayout
+            <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:id="@+id/layout_content"
-                android:background="@drawable/bg_choose_season">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    style="@style/Text_14_Normal"
-                    android:text="@string/add_to_list"
-                    android:layout_marginHorizontal="@dimen/_12sdp"/>
-
-                <androidx.recyclerview.widget.RecyclerView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginVertical="@dimen/_12sdp"
-                    android:id="@+id/rv_playlist"/>
+                android:layout_height="wrap_content">
 
                 <LinearLayout
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:paddingHorizontal="@dimen/_12sdp"
-                    android:paddingVertical="@dimen/_6sdp"
-                    android:id="@+id/btn_add_new"
-                    android:gravity="center_vertical">
-
-                    <ImageView
-                        android:layout_width="@dimen/_10sdp"
-                        android:layout_height="@dimen/_10sdp"
-                        android:src="@drawable/ic_plus_add_to_list"/>
+                    android:orientation="vertical"
+                    android:id="@+id/layout_content"
+                    android:background="@drawable/bg_choose_season">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textColor="@color/bg_item_add_to_list_ic_select"
-                        android:text="@string/add_new"
-                        style="@style/Text_12_Normal"
-                        android:layout_marginStart="@dimen/_6sdp"/>
+                        style="@style/Text_14_Normal"
+                        android:text="@string/add_to_list"
+                        android:layout_marginHorizontal="@dimen/_12sdp"/>
 
-
-                </LinearLayout>
-
-
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:layout_marginBottom="@dimen/_20sdp"
-                    android:layout_marginTop="@dimen/_12sdp"
-                    android:paddingHorizontal="@dimen/_12sdp">
-
-
-                    <FrameLayout
-                        android:id="@+id/btn_choose"
-                        android:layout_width="0dp"
-                        android:layout_height="@dimen/_36sdp"
-                        android:background="@drawable/bg_btn_white_radius_3sdp"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:onClick="onClick"
-                        android:layout_weight="1"
-                        android:foreground="?attr/selectableItemBackground">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            style="@style/Text_12_Bold"
-                            android:text="@string/choose"
-                            android:textColor="@color/black"
-                            />
-
-                    </FrameLayout>
-
-                </LinearLayout>
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:paddingHorizontal="@dimen/_12sdp"
-                android:visibility="gone"
-                android:id="@+id/layout_create"
-                android:background="@drawable/bg_choose_season">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    style="@style/Text_14_Normal"
-                    android:text="@string/create_list"/>
-
-                <com.google.android.material.textfield.TextInputLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    style="@style/CustomOutlinedAddPlayList"
-                    app:endIconMode="custom"
-                    android:layout_marginTop="@dimen/_6sdp">
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/title"
+                    <androidx.recyclerview.widget.RecyclerView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="@string/enter_title"
-                        style="@style/Text_12_Normal"
-                        android:clickable="true"
+                        android:layout_marginVertical="@dimen/_12sdp"
+                        android:id="@+id/rv_playlist"/>
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
                         android:paddingHorizontal="@dimen/_12sdp"
-                        android:singleLine="true"
-                        android:ellipsize="end"
-                        />
-                </com.google.android.material.textfield.TextInputLayout>
+                        android:paddingVertical="@dimen/_6sdp"
+                        android:id="@+id/btn_add_new"
+                        android:gravity="center_vertical">
+
+                        <ImageView
+                            android:layout_width="@dimen/_10sdp"
+                            android:layout_height="@dimen/_10sdp"
+                            android:src="@drawable/ic_plus_add_to_list"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="@color/bg_item_add_to_list_ic_select"
+                            android:text="@string/add_new"
+                            style="@style/Text_12_Normal"
+                            android:layout_marginStart="@dimen/_6sdp"/>
 
 
-                <LinearLayout
-                    android:id="@+id/l_count_char"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:layout_marginTop="@dimen/_6sdp"
-                    android:layout_gravity="end"
-                    android:visibility="invisible">
-                
-                    <TextView
-                        android:layout_width="wrap_content"
+                    </LinearLayout>
+
+
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        style="@style/Text_10_Normal"
-                        android:id="@+id/tv_count"
-                        />
+                        android:orientation="horizontal"
+                        android:layout_marginBottom="@dimen/_20sdp"
+                        android:layout_marginTop="@dimen/_12sdp"
+                        android:paddingHorizontal="@dimen/_12sdp">
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        style="@style/Text_10_Normal"
-                        android:id="@+id/tv_max_length"/>
-                    
+
+                        <FrameLayout
+                            android:id="@+id/btn_choose"
+                            android:layout_width="0dp"
+                            android:layout_height="@dimen/_36sdp"
+                            android:background="@drawable/bg_btn_white_radius_3sdp"
+                            android:clickable="true"
+                            android:focusable="true"
+                            android:onClick="onClick"
+                            android:layout_weight="1"
+                            android:foreground="?attr/selectableItemBackground">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                style="@style/Text_12_Bold"
+                                android:text="@string/choose"
+                                android:textColor="@color/black"
+                                />
+
+                        </FrameLayout>
+
+                    </LinearLayout>
 
                 </LinearLayout>
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:layout_marginBottom="@dimen/_20sdp"
-                    android:layout_marginTop="@dimen/_12sdp">
+                    android:orientation="vertical"
+                    android:paddingHorizontal="@dimen/_12sdp"
+                    android:visibility="gone"
+                    android:id="@+id/layout_create"
+                    android:background="@drawable/bg_choose_season">
 
-                    <FrameLayout
-                        android:id="@+id/btn_create"
-                        android:layout_width="0dp"
-                        android:layout_height="@dimen/_36sdp"
-                        android:background="@drawable/bg_btn_yellow_radius_3sdp"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:onClick="onClick"
-                        android:layout_weight="1"
-                        android:layout_marginEnd="@dimen/_6sdp"
-                        android:foreground="?attr/selectableItemBackground">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        style="@style/Text_14_Normal"
+                        android:text="@string/create_list"/>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        style="@style/CustomOutlinedAddPlayList"
+                        app:endIconMode="custom"
+                        android:layout_marginTop="@dimen/_6sdp">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/title"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="@string/enter_title"
+                            style="@style/Text_12_Normal"
+                            android:clickable="true"
+                            android:paddingHorizontal="@dimen/_12sdp"
+                            android:singleLine="true"
+                            android:ellipsize="end"
+                            />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+
+                    <LinearLayout
+                        android:id="@+id/l_count_char"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginTop="@dimen/_6sdp"
+                        android:layout_gravity="end"
+                        android:visibility="invisible">
 
                         <TextView
-                            style="@style/Text_12_Bold"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            android:text="@string/create_new"
-                            android:textColor="@color/black" />
-
-                    </FrameLayout>
-
-                    <FrameLayout
-                        android:id="@+id/btn_cancel_create"
-                        android:layout_width="0dp"
-                        android:layout_height="@dimen/_36sdp"
-                        android:background="@drawable/bg_btn_white_radius_3sdp"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:onClick="onClick"
-                        android:layout_weight="1"
-                        android:layout_marginStart="@dimen/_6sdp"
-                        android:foreground="?attr/selectableItemBackground">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            style="@style/Text_12_Bold"
-                            android:text="@string/cancel_create"
-                            android:textColor="@color/black"
+                            style="@style/Text_10_Normal"
+                            android:id="@+id/tv_count"
                             />
 
-                    </FrameLayout>
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            style="@style/Text_10_Normal"
+                            android:id="@+id/tv_max_length"/>
 
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginBottom="@dimen/_20sdp"
+                        android:layout_marginTop="@dimen/_12sdp">
+
+                        <FrameLayout
+                            android:id="@+id/btn_create"
+                            android:layout_width="0dp"
+                            android:layout_height="@dimen/_36sdp"
+                            android:background="@drawable/bg_btn_yellow_radius_3sdp"
+                            android:clickable="true"
+                            android:focusable="true"
+                            android:onClick="onClick"
+                            android:layout_weight="1"
+                            android:layout_marginEnd="@dimen/_6sdp"
+                            android:foreground="?attr/selectableItemBackground">
+
+                            <TextView
+                                style="@style/Text_12_Bold"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:text="@string/create_new"
+                                android:textColor="@color/black" />
+
+                        </FrameLayout>
+
+                        <FrameLayout
+                            android:id="@+id/btn_cancel_create"
+                            android:layout_width="0dp"
+                            android:layout_height="@dimen/_36sdp"
+                            android:background="@drawable/bg_btn_white_radius_3sdp"
+                            android:clickable="true"
+                            android:focusable="true"
+                            android:onClick="onClick"
+                            android:layout_weight="1"
+                            android:layout_marginStart="@dimen/_6sdp"
+                            android:foreground="?attr/selectableItemBackground">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                style="@style/Text_12_Bold"
+                                android:text="@string/cancel_create"
+                                android:textColor="@color/black"
+                                />
+
+                        </FrameLayout>
+
+                    </LinearLayout>
                 </LinearLayout>
-            </LinearLayout>
 
+            </FrameLayout>
+
+        </LinearLayout>
+
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/_6sdp"
+            android:layout_gravity="end"
+            android:layout_margin="@dimen/_6sdp"
+            android:background="@drawable/bg_btn_press_tran"
+            android:clickable="true"
+            android:focusable="true"
+            android:id="@+id/btn_close">
+            <ImageView
+                android:layout_width="@dimen/_12sdp"
+                android:layout_height="@dimen/_12sdp"
+                android:src="@drawable/ic_close"/>
         </FrameLayout>
+    </FrameLayout>
 
-    </LinearLayout>
+
+
 
 </FrameLayout>

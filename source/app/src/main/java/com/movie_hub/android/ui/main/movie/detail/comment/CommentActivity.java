@@ -46,25 +46,34 @@ import com.movie_hub.android.ui.main.MainCallback;
 import com.movie_hub.android.ui.main.account.login.LoginActivity;
 import com.movie_hub.android.ui.main.movie.detail.comment.adapter.CommentChildAdapter;
 import com.movie_hub.android.ui.main.movie.detail.comment.adapter.CommentParentAdapter;
+import com.movie_hub.android.ui.main.movie.detail.comment.adapter.EpisodeCommentItemAdapter;
+import com.movie_hub.android.ui.main.movie.detail.comment.model.TagComment;
 import com.movie_hub.android.ui.main.movie.detail.comment.shimmer.CommentShimmerAdapter;
+import com.movie_hub.android.ui.main.movie.detail.comment.shimmer.EpisodeCommentShimmerAdapter;
 import com.movie_hub.android.utils.ClickUtils;
 import com.movie_hub.android.utils.DialogUtils;
 import com.movie_hub.android.utils.GsonUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class CommentActivity extends BaseActivity<ActivityCommentBinding, CommentViewModel>
         implements SystemBarColorProvider, View.OnClickListener,
         CommentParentAdapter.OnCommentParentClickListener,
-        CommentChildAdapter.OnCommentChildClickListener {
+        CommentChildAdapter.OnCommentChildClickListener,
+        EpisodeCommentItemAdapter.OnEpisodeCommentClickListener {
 
     private static final float SHEET_TRANSLATE_Y_DP = 200f;
     public int pageSize = 1000;
     private CommentParentAdapter commentParentAdapter;
     private CommentShimmerAdapter commentShimmerAdapter;
+
+    private EpisodeCommentItemAdapter episodeCommentItemAdapter;
+    private EpisodeCommentShimmerAdapter episodeCommentShimmerAdapter;
     private ActivityResultLauncher<Intent> loginLauncher;
     private boolean isStateReply = false;
     private boolean isShowShimmer = false;
+    private boolean isShowShimmerComment = false;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -79,13 +88,25 @@ public class CommentActivity extends BaseActivity<ActivityCommentBinding, Commen
             viewModel.movieDetails = movieResponse;
             setUpAdapter();
             showShimmer();
+            if (viewModel.movieDetails.getType() == Constants.TYPE_MOVIE_SERIES) {
+                viewModel.tagComments = viewModel.movieDetails.getListLabelEpisode(this);
+                TagComment tagCommentAll = new TagComment();
+                tagCommentAll.setLabel(getString(R.string.all));
+                tagCommentAll.setMovieId(viewModel.movieDetails.getId());
+                tagCommentAll.setMovieItemId(-1L);
+                tagCommentAll.setSelect(true);
+
+                viewModel.tagComments.add(0, tagCommentAll);
+                viewModel.tagCommentSelect = viewModel.tagComments.get(0);
+
+                viewBinding.rvEpisode.setVisibility(View.VISIBLE);
+                episodeCommentItemAdapter.setData(viewModel.tagComments);
+            }
+
             if (viewModel.isLogin()) {
                 getVoteList();
             } else {
-                CommentRequest request = new CommentRequest();
-                request.setSize(pageSize);
-                request.setMovieId(viewModel.movieDetails.getId());
-                getListComment(request);
+                getListComment(viewModel.getCommentRequest());
             }
         }
 
@@ -107,17 +128,53 @@ public class CommentActivity extends BaseActivity<ActivityCommentBinding, Commen
     }
 
     @Override
+    public void onEpisodeClick(TagComment tagComment) {
+        for (TagComment comment: viewModel.tagComments) {
+            comment.setSelect(false);
+            if (tagComment.getMovieItemId().equals(comment.getMovieItemId())) {
+                comment.setSelect(true);
+                viewModel.tagCommentSelect = tagComment;
+            }
+        }
+        reset();
+        if (viewModel.isLogin()) {
+            getVoteList();
+        } else {
+            getListComment(viewModel.getCommentRequest());
+        }
+    }
+    public void reset() {
+        viewModel.commentList.setValue(new ArrayList<>());
+        viewModel.voteList.setValue(new ArrayList<>());
+        viewModel.replyTo = new CommentResponse();
+        isShowShimmerComment = false;
+        commentParentAdapter.clearData();
+        showShimmerComment();
+    }
+    @Override
     protected void onResume() {
         super.onResume();
 
     }
 
     public void showShimmer() {
+        showShimmerComment();
+        if (viewModel.movieDetails.getType() == Constants.TYPE_MOVIE_SERIES) {
+            viewBinding.rvEpisode.setAdapter(episodeCommentShimmerAdapter);
+        }
+    }
+
+    public void showShimmerComment() {
         viewBinding.rvComment.setAdapter(commentShimmerAdapter);
     }
 
     public void hideShimmer() {
         isShowShimmer = true;
+        hideShimmerComment();
+        viewBinding.rvEpisode.setAdapter(episodeCommentItemAdapter);
+    }
+
+    public void hideShimmerComment() {
         viewBinding.rvComment.setAdapter(commentParentAdapter);
     }
 
@@ -127,7 +184,16 @@ public class CommentActivity extends BaseActivity<ActivityCommentBinding, Commen
         viewModel.commentList.observe(this, commentList -> {
             if (commentList.isEmpty()) return;
             List<VoteListResponse> voteList = viewModel.voteList.getValue();
-            commentParentAdapter.setData(commentList, viewModel.voteList.getValue());
+            commentParentAdapter.setData(commentList, viewModel.voteList.getValue(), viewModel.tagCommentSelect);
+
+            if (!isShowShimmer) {
+                hideShimmer();
+                isShowShimmerComment = true;
+            }
+
+            if (!isShowShimmerComment) {
+                hideShimmerComment();
+            }
         });
 
         viewModel.totalComment.observe(this, total -> {
@@ -142,6 +208,12 @@ public class CommentActivity extends BaseActivity<ActivityCommentBinding, Commen
         commentParentAdapter = new CommentParentAdapter(this, this);
         commentShimmerAdapter = new CommentShimmerAdapter(6);
         viewBinding.rvComment.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
+
+        if (viewModel.movieDetails.getType() == Constants.TYPE_MOVIE_SERIES) {
+            episodeCommentItemAdapter = new EpisodeCommentItemAdapter(this, this);
+            episodeCommentShimmerAdapter = new EpisodeCommentShimmerAdapter(6, this);
+            viewBinding.rvEpisode.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+        }
     }
 
     public void createComment(CreateCommentRequest request) {
@@ -160,11 +232,7 @@ public class CommentActivity extends BaseActivity<ActivityCommentBinding, Commen
             @Override
             public void doSuccess(ResponseWrapper object) {
                 if (object.isResult()) {
-                    CommentRequest request = new CommentRequest();
-                    request.setSize(pageSize);
-                    request.setMovieId(viewModel.movieDetails.getId());
-
-                    getListComment(request);
+                    getListComment(viewModel.getCommentRequest());
                     viewBinding.edtComment.setText("");
                 }
             }
@@ -183,9 +251,6 @@ public class CommentActivity extends BaseActivity<ActivityCommentBinding, Commen
             public void doSuccess(ResponseListObj<CommentResponse> data) {
                 hideLoading();
                 if (data.getContent() != null && !data.getContent().isEmpty()) {
-                    if (!isShowShimmer) {
-                        hideShimmer();
-                    }
                     viewBinding.layoutEmpty.setVisibility(View.GONE);
                     viewBinding.rvComment.setVisibility(View.VISIBLE);
 
@@ -202,7 +267,14 @@ public class CommentActivity extends BaseActivity<ActivityCommentBinding, Commen
                     });
 
                 } else {
-                    hideShimmer();
+                    if (!isShowShimmer) {
+                        hideShimmer();
+                        isShowShimmerComment = true;
+                    }
+
+                    if (!isShowShimmerComment) {
+                        hideShimmerComment();
+                    }
                     viewBinding.rvComment.setVisibility(View.GONE);
                     viewBinding.layoutEmpty.setVisibility(View.VISIBLE);
                 }
@@ -468,11 +540,7 @@ public class CommentActivity extends BaseActivity<ActivityCommentBinding, Commen
             @Override
             public void doSuccess(List<VoteListResponse> response) {
                 viewModel.voteList.postValue(response);
-
-                CommentRequest request = new CommentRequest();
-                request.setSize(pageSize);
-                request.setMovieId(viewModel.movieDetails.getId());
-                getListComment(request);
+                getListComment(viewModel.getCommentRequest());
             }
 
             @Override
@@ -553,9 +621,8 @@ public class CommentActivity extends BaseActivity<ActivityCommentBinding, Commen
             case R.id.btn_create_comment:
                 String content = viewBinding.edtComment.getText().toString().trim();
                 if (!content.isEmpty()) {
-                    CreateCommentRequest request = new CreateCommentRequest();
+                    CreateCommentRequest request = viewModel.getCreateCommentRequest();
                     request.setContent(content);
-                    request.setMovieId(viewModel.movieDetails.getId());
 
                     if (isStateReply) {
                         if (viewModel.replyTo.getParent() != null && viewModel.replyTo.getParent().getId() != null) {

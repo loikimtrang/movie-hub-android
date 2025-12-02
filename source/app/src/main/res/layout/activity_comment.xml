@@ -92,6 +92,13 @@
 
                 </RelativeLayout>
 
+                <androidx.recyclerview.widget.RecyclerView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/rv_episode"
+                    android:layout_marginBottom="@dimen/_12sdp"
+                    android:visibility="gone"/>
+
                 <FrameLayout
                     android:id="@+id/l_comment"
                     android:layout_width="match_parent"

@@ -77,6 +77,7 @@
                         android:layout_height="wrap_content"
                         android:id="@+id/age_rating"
                         style="@style/Text_10_Normal"
+                        android:textColor="@color/black"
                         android:gravity="center"
                         android:layout_gravity="center"/>
 
@@ -108,7 +109,6 @@
                     android:clickable="true"
                     android:focusable="true"
                     android:background="@drawable/bg_btn_yellow_radius_3sdp"
-                    android:layout_marginEnd="@dimen/_3sdp"
                     android:onClick="@{(v) -> a.onClick(v)}">
 
                     <LinearLayout
