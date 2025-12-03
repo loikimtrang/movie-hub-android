@@ -17,15 +17,23 @@ public class GridSpacingItemDecoration extends RecyclerView.ItemDecoration {
 
     @Override
     public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
-        int position = parent.getChildAdapterPosition(view); // item position
-        int column = position % spanCount; // item column
+        int position = parent.getChildAdapterPosition(view); // vị trí item
+        int column = position % spanCount; // cột
 
-        outRect.left = column * spacing / spanCount; // column * ((1f / spanCount) * spacing)
+        outRect.left = column * spacing / spanCount;
         outRect.right = spacing - (column + 1) * spacing / spanCount;
 
-        // chỉ thêm top spacing nếu không phải hàng đầu tiên
         if (position >= spanCount) {
-            outRect.top = spacing;
+            outRect.top = spacing; // spacing giữa các hàng
+        }
+
+        // 👉 THÊM SPACING CHO HÀNG CUỐI
+        int itemCount = parent.getAdapter() != null ? parent.getAdapter().getItemCount() : 0;
+        int rowCount = (int) Math.ceil((double) itemCount / spanCount);
+        int currentRow = (position / spanCount) + 1;
+
+        if (currentRow == rowCount) {
+            outRect.bottom = spacing; // hàng cuối
         }
     }
 }

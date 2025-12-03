@@ -138,12 +138,6 @@ public class MovieHistoryHomeAdapter extends RecyclerView.Adapter<MovieHistoryHo
         }
     }
 
-
-    @Override
-    public void onViewDetachedFromWindow(@NonNull MovieHistoryHomeViewHolder holder) {
-        holder.itemView.clearAnimation();
-    }
-
     @SuppressLint("NewApi")
     public void setData(List<MovieHistoryResponse> newData) {
         items.clear();

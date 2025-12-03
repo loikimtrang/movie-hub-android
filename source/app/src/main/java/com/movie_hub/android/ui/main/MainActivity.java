@@ -20,6 +20,7 @@ import com.movie_hub.android.data.model.api.request.login.UserLoginRequest;
 import com.movie_hub.android.data.model.api.request.login.UserRegisterRequest;
 import com.movie_hub.android.data.model.api.request.user.UserLoginGoogleRequest;
 import com.movie_hub.android.data.model.api.response.MovieItem.MovieItemResponse;
+import com.movie_hub.android.data.model.api.response.collection.CollectionResponse;
 import com.movie_hub.android.data.model.api.response.history.ListWatchHistoryResponse;
 import com.movie_hub.android.data.model.api.response.history.WatchHistoryResponse;
 import com.movie_hub.android.data.model.api.response.login.UserLoginResponse;
@@ -40,6 +41,7 @@ import com.movie_hub.android.ui.main.account.manage_account.ManageAccountActivit
 import com.movie_hub.android.ui.main.account.playlist.PlayListActivity;
 import com.movie_hub.android.ui.main.account.updateapp.CheckUpdateActivity;
 import com.movie_hub.android.ui.main.home.HomeFragment;
+import com.movie_hub.android.ui.main.home.detail.HomeSideBarDetailActivity;
 import com.movie_hub.android.ui.main.movie.detail.MovieDetailActivity;
 import com.movie_hub.android.ui.main.movie.watch.WatchMovieActivity;
 import com.movie_hub.android.ui.main.schedule.ScheduleFragment;
@@ -95,15 +97,7 @@ public class MainActivity extends BaseActivity<ActivityMainBinding, MainViewMode
     }
     private void initFragments() {
         fm = getSupportFragmentManager();
-
-        String bannerJson = getIntent().getStringExtra("home_banner");
-
-        Bundle bundle = new Bundle();
-        bundle.putString("banner_json", bannerJson);
-
         homeFragment = new HomeFragment();
-        homeFragment.setArguments(bundle);
-
         fm.beginTransaction()
                 .add(R.id.fragment_container, homeFragment, Constants.HOME)
                 .commit();
@@ -174,6 +168,12 @@ public class MainActivity extends BaseActivity<ActivityMainBinding, MainViewMode
 
     public void navigateToFavourite() {
         Intent intent = new Intent(this, FavouriteActivity.class);
+        startActivity(intent);
+    }
+
+    public void navigateToHomeSideBarDetail(CollectionResponse collectionResponse) {
+        Intent intent = new Intent(this, HomeSideBarDetailActivity.class);
+        intent.putExtra("collection", GsonUtils.toJson(collectionResponse));
         startActivity(intent);
     }
 

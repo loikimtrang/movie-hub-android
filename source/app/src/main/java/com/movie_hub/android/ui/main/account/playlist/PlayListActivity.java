@@ -254,7 +254,6 @@ public class PlayListActivity extends BaseActivity <ActivityPlayListBinding, Pla
         showLoading();
         if (currentPage == 0 && isLoaded) {
             viewBinding.layoutEmptyMovie.setVisibility(View.GONE);
-            showShimmerMovie();
         }
 
         viewModel.getListPlaylistMovie(new MainCallback<ResponseListObj<MovieResponse>>() {
@@ -270,8 +269,6 @@ public class PlayListActivity extends BaseActivity <ActivityPlayListBinding, Pla
                         moviePlaylistAdapter.setData(viewModel.movieList);
                     } else {
                         if (currentPage == 0) {
-                            hideShimmerMovie();
-
                             viewModel.movieList.clear();
                             viewModel.movieList.addAll(data.getContent());
                             moviePlaylistAdapter.setData(viewModel.movieList);

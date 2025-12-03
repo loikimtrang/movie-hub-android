@@ -12,6 +12,7 @@ import com.bumptech.glide.Glide;
 import com.movie_hub.android.R;
 import com.movie_hub.android.data.model.api.response.side_bar.SidebarResponse;
 import com.movie_hub.android.databinding.ItemBannerBinding;
+import com.movie_hub.android.ui.main.home.OnMovieClickCallback;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,11 +20,13 @@ import java.util.List;
 public class MovieBannerAdapter extends RecyclerView.Adapter<MovieBannerAdapter.MovieBannerViewHolder> {
 
     private final List<SidebarResponse> items = new ArrayList<>();
+    OnMovieClickCallback movieClickCallback;
     private Context context;
 
-    public MovieBannerAdapter(Context context) {
+    public MovieBannerAdapter(Context context, OnMovieClickCallback movieClickCallback) {
         super();
         this.context = context;
+        this.movieClickCallback = movieClickCallback;
     }
 
     @NonNull
@@ -39,8 +42,13 @@ public class MovieBannerAdapter extends RecyclerView.Adapter<MovieBannerAdapter.
     @Override
     public void onBindViewHolder(@NonNull MovieBannerViewHolder holder, @SuppressLint("RecyclerView") int position) {
         SidebarResponse item = items.get(position);
+        holder.binding.image.setOnClickListener(v ->{
+            if (movieClickCallback == null) return;
+            movieClickCallback.onMovieClick(item.getMovie());
+        });
+
         Glide.with(holder.binding.getRoot().getContext())
-                .load(item.getMobileThumbnailUrl())
+                .load(item.getMovie().getPosterUrl())
                 .placeholder(R.drawable.place_holder_2_3)
                 .error(R.drawable.place_holder_2_3)
                 .into(holder.binding.image);
@@ -56,12 +64,6 @@ public class MovieBannerAdapter extends RecyclerView.Adapter<MovieBannerAdapter.
 
             notifyItemRangeChanged(position, items.size());
         }
-    }
-
-
-    @Override
-    public void onViewDetachedFromWindow(@NonNull MovieBannerViewHolder holder) {
-        holder.itemView.clearAnimation();
     }
 
     @SuppressLint("NewApi")

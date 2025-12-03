@@ -39,6 +39,19 @@
         <item name="cornerFamily">rounded</item>
         <item name="cornerSize">5%</item>
     </style>
+    <style name="movieCollectionImg_type1">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">@dimen/_12sdp</item>
+    </style>
+    <style name="movieCollectionImg_type2">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">@dimen/_6sdp</item>
+    </style>
+
+    <style name="movieCollectionImg_type4">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">@dimen/_12sdp</item>
+    </style>
 
     <style name="movieBannerImg">
         <item name="cornerFamily">rounded</item>

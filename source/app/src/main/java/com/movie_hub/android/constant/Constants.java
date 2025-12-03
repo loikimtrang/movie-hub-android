@@ -58,6 +58,10 @@ public class Constants {
     public static final int MaxPlaylist = 5;
     public static final int MaxLengthNamePlaylist = 25;
 
+    public static final int TYPE_COLLECTION_1 = 1;
+    public static final int TYPE_COLLECTION_2 = 2;
+    public static final int TYPE_COLLECTION_3 = 3;
+    public static final int TYPE_COLLECTION_4 = 4;
     private Constants(){
 
     }

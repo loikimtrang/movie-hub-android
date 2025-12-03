@@ -7,6 +7,7 @@ import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.GridLayoutManager;
 
 import com.movie_hub.android.R;
+import com.movie_hub.android.data.model.api.response.collection.CollectionResponse;
 import com.movie_hub.android.data.model.api.response.history.ListWatchHistoryResponse;
 import com.movie_hub.android.data.model.api.response.movie.MovieResponse;
 import com.movie_hub.android.databinding.ActivityHomeSideBarDetailBinding;
@@ -20,8 +21,6 @@ import com.movie_hub.android.ui.main.search.topTrending.adapter.MovieVerticalAda
 import com.movie_hub.android.ui.main.search.topTrending.shimmer.MovieVerticalShimmerAdapter;
 import com.movie_hub.android.utils.GridUtil;
 import com.movie_hub.android.utils.GsonUtils;
-
-import java.util.List;
 
 import eu.davidea.flexibleadapter.databinding.BR;
 
@@ -65,11 +64,14 @@ public class HomeSideBarDetailActivity extends BaseActivity<ActivityHomeSideBarD
         setUpAdapter();
         showShimmer();
 
-        String json = getIntent().getStringExtra("movie_list");
-        List<MovieResponse> listMovie = GsonUtils.fromJsonToList(json, MovieResponse.class);
+        String json = getIntent().getStringExtra("collection");
+        CollectionResponse collectionResponse = GsonUtils.fromJson(json, CollectionResponse.class);
 
-        if (listMovie != null && !listMovie.isEmpty()) {
-            viewModel.listMovie = listMovie;
+        if (collectionResponse != null && collectionResponse.getMovies() != null &&
+                !collectionResponse.getMovies().isEmpty()) {
+            viewBinding.tvTitle.setSelected(true);
+            viewBinding.tvTitle.setText(collectionResponse.getName());
+            viewModel.listMovie = collectionResponse.getMovies();
             movieVerticalAdapter.setData(viewModel.listMovie);
             hideShimmer();
         }

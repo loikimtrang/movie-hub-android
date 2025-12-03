@@ -68,7 +68,7 @@ public class SplashActivity extends BaseActivity<ActivitySplashBinding, SplashVi
                 getUserProfile();
             }
         } else {
-            new Handler().postDelayed(this::showLoginAndSkip, 3000);
+            new Handler().postDelayed(this::showLoginAndSkip, 1000);
         }
     }
     public void showLoginAndSkip() {
@@ -133,9 +133,9 @@ public class SplashActivity extends BaseActivity<ActivitySplashBinding, SplashVi
         });
     }
     public void navigateToMainActivity() {
-//        startActivity(new Intent(this, MainActivity.class));
-//        finish();
-        getListSideBar();
+        startActivity(new Intent(this, MainActivity.class));
+        finish();
+//        getListSideBar();
     }
 
     public void navigateToLoginActivity() {
