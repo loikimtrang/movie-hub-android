@@ -20,6 +20,7 @@ import com.movie_hub.android.data.model.api.request.user.UserLoginGoogleRequest;
 import com.movie_hub.android.data.model.api.request.user.UserUpdateProfileRequest;
 import com.movie_hub.android.data.model.api.response.MovieItem.MovieItemResponse;
 import com.movie_hub.android.data.model.api.response.appversion.CheckAppVersionResponse;
+import com.movie_hub.android.data.model.api.response.collection.CollectionResponse;
 import com.movie_hub.android.data.model.api.response.comment.CommentResponse;
 import com.movie_hub.android.data.model.api.response.comment.VoteListResponse;
 import com.movie_hub.android.data.model.api.response.favourite.FavouriteResponse;
@@ -31,6 +32,7 @@ import com.movie_hub.android.data.model.api.response.person.PersonResponse;
 import com.movie_hub.android.data.model.api.response.login.UserLoginResponse;
 import com.movie_hub.android.data.model.api.response.movie.MovieResponse;
 import com.movie_hub.android.data.model.api.response.playlist.PlayListResponse;
+import com.movie_hub.android.data.model.api.response.side_bar.SidebarResponse;
 import com.movie_hub.android.data.model.api.response.user.UserResponse;
 import com.movie_hub.android.data.model.api.response.user.UserUploadImageResponse;
 
@@ -187,4 +189,14 @@ public interface ApiService {
 
     @POST("v1/playlist/update-item")
     Observable<ResponseWrapper> updateItemPlayList(@Body UpdatePlayListItemRequest request);
+
+    // SideBar
+    @GET("v1/sidebar/list")
+    Observable<ResponseWrapper<ResponseListObj<SidebarResponse>>> getSideBarList(@QueryMap Map<String, Object> query);
+
+    @GET("v1/collection/list")
+    Observable<ResponseWrapper<ResponseListObj<CollectionResponse>>> getCollectionList(@QueryMap Map<String, Object> query);
+
+    @GET("v1/collection/topic")
+    Observable<ResponseWrapper<ResponseListObj<CollectionResponse>>> getTopicList(@QueryMap Map<String, Object> query);
 }

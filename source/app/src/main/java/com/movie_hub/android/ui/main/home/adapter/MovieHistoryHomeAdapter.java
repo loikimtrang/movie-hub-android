@@ -1,4 +1,4 @@
-package com.movie_hub.android.ui.main.account.history.adapter;
+package com.movie_hub.android.ui.main.home.adapter;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -16,23 +16,21 @@ import com.movie_hub.android.R;
 import com.movie_hub.android.constant.Constants;
 import com.movie_hub.android.data.model.api.response.history.MovieHistoryResponse;
 import com.movie_hub.android.data.model.api.response.movie.MovieResponse;
-import com.movie_hub.android.databinding.ItemMovieFavouriteBinding;
-import com.movie_hub.android.databinding.ItemMovieHistoryBinding;
+import com.movie_hub.android.databinding.ItemMovieHistoryHomeBinding;
+import com.movie_hub.android.databinding.ItemMovieHistoryHomeBinding;
+import com.movie_hub.android.ui.main.home.OnMovieClickCallback;
 import com.movie_hub.android.utils.DisplayUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class MovieHistoryAdapter extends RecyclerView.Adapter<MovieHistoryAdapter.MovieHistoryViewHolder> {
+public class MovieHistoryHomeAdapter extends RecyclerView.Adapter<MovieHistoryHomeAdapter.MovieHistoryHomeViewHolder> {
 
     private final List<MovieHistoryResponse> items = new ArrayList<>();
-    private OnMovieClickListener listener;
+    private OnMovieClickCallback listener;
     private Context context;
-    public interface OnMovieClickListener {
-        void onMovieClick(MovieHistoryResponse movieHistoryResponse);
-    }
 
-    public MovieHistoryAdapter(OnMovieClickListener listener, Context context) {
+    public MovieHistoryHomeAdapter(OnMovieClickCallback listener, Context context) {
         super();
         this.listener = listener;
         this.context = context;
@@ -40,22 +38,21 @@ public class MovieHistoryAdapter extends RecyclerView.Adapter<MovieHistoryAdapte
 
     @NonNull
     @Override
-    public MovieHistoryViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public MovieHistoryHomeViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-        ItemMovieHistoryBinding binding = ItemMovieHistoryBinding.inflate(inflater, parent, false);
-        return new MovieHistoryViewHolder(binding);
+        ItemMovieHistoryHomeBinding binding = ItemMovieHistoryHomeBinding.inflate(inflater, parent, false);
+        return new MovieHistoryHomeViewHolder(binding);
     }
     private int lastPosition = -1;
 
     @SuppressLint({"SetTextI18n", "ResourceAsColor", "ClickableViewAccessibility"})
     @Override
-    public void onBindViewHolder(@NonNull MovieHistoryViewHolder holder, @SuppressLint("RecyclerView") int position) {
+    public void onBindViewHolder(@NonNull MovieHistoryHomeViewHolder holder, @SuppressLint("RecyclerView") int position) {
         MovieHistoryResponse movieHistoryResponse = items.get(position);
         MovieResponse movieResponse = items.get(position).getMovie();
         holder.binding.seekBar.setOnTouchListener((v, event) -> true);
 
         holder.binding.tvTitle.setText(movieResponse.getTitle());
-        holder.binding.tvSubTitle.setText(movieResponse.getOriginalTitle());
 
         if (movieHistoryResponse.getMovieItem().getKind() == Constants.TYPE_MOVIE_SINGLE) {
             holder.binding.tvSeasonEpisode.setVisibility(View.GONE);
@@ -92,7 +89,7 @@ public class MovieHistoryAdapter extends RecyclerView.Adapter<MovieHistoryAdapte
         holder.binding.tvTotalTime.setText(DisplayUtils.formatSecondsToHHMMSS(totalTime));
 
         holder.binding.getRoot().setOnClickListener(v -> {
-            if (listener != null) listener.onMovieClick(movieHistoryResponse);
+            if (listener != null) listener.onMovieClick(movieHistoryResponse.getMovie());
         });
 
 
@@ -105,12 +102,27 @@ public class MovieHistoryAdapter extends RecyclerView.Adapter<MovieHistoryAdapte
         if (position > lastPosition) {
             holder.itemView.setAlpha(0f);
             holder.itemView.postDelayed(() -> {
-                Animation animation = AnimationUtils.loadAnimation(holder.itemView.getContext(), R.anim.item_slide_in_bottom);
+                Animation animation = AnimationUtils.loadAnimation(holder.itemView.getContext(), R.anim.item_slide_in_right);
                 holder.itemView.startAnimation(animation);
                 holder.itemView.setAlpha(1f);
             }, 50L);
             lastPosition = position;
         }
+
+        ViewGroup.MarginLayoutParams layoutParams =
+                (ViewGroup.MarginLayoutParams) holder.binding.getRoot().getLayoutParams();
+
+        int margin = (int) context.getResources().getDimension(R.dimen._6sdp);
+        layoutParams.setMarginStart(margin);
+        layoutParams.setMarginEnd(margin);
+        if (position == 0) {
+            layoutParams.setMarginStart(margin * 2);
+        }
+        if (position == items.size() - 1) {
+            layoutParams.setMarginEnd(margin * 2);
+        }
+
+        holder.binding.getRoot().setLayoutParams(layoutParams);
     }
     public boolean isNumericLabel(String label) {
         if (label == null || label.isEmpty()) return false;
@@ -128,7 +140,7 @@ public class MovieHistoryAdapter extends RecyclerView.Adapter<MovieHistoryAdapte
 
 
     @Override
-    public void onViewDetachedFromWindow(@NonNull MovieHistoryViewHolder holder) {
+    public void onViewDetachedFromWindow(@NonNull MovieHistoryHomeViewHolder holder) {
         holder.itemView.clearAnimation();
     }
 
@@ -143,15 +155,22 @@ public class MovieHistoryAdapter extends RecyclerView.Adapter<MovieHistoryAdapte
         notifyDataSetChanged();
     }
 
+    public void addData(List<MovieHistoryResponse> moreItems) {
+        int startPos = items.size();
+        items.addAll(moreItems);
+        notifyItemRangeInserted(startPos, moreItems.size());
+    }
+
+
     @Override
     public int getItemCount() {
         return items.size();
     }
 
-    static class MovieHistoryViewHolder extends RecyclerView.ViewHolder {
-        private final ItemMovieHistoryBinding binding;
+    static class MovieHistoryHomeViewHolder extends RecyclerView.ViewHolder {
+        private final ItemMovieHistoryHomeBinding binding;
 
-        public MovieHistoryViewHolder(@NonNull ItemMovieHistoryBinding binding) {
+        public MovieHistoryHomeViewHolder(@NonNull ItemMovieHistoryHomeBinding binding) {
             super(binding.getRoot());
             this.binding = binding;
         }

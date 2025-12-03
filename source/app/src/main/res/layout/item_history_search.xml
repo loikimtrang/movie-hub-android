@@ -3,15 +3,15 @@
     android:id="@+id/bg_item"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:background="@drawable/bg_item_search_history">
+    android:background="@drawable/bg_item_search_history"
+    android:paddingHorizontal="@dimen/_8sdp"
+    android:paddingVertical="@dimen/_6sdp">
 
     <TextView
         android:id="@+id/text_history"
-        style="@style/Text_10_Normal"
+        style="@style/Text_12_Normal"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingHorizontal="@dimen/_6sdp"
-        android:paddingVertical="@dimen/_3sdp"
         android:text="@string/most_viewed" />
 
 </RelativeLayout>

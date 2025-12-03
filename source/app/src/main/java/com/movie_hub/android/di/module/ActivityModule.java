@@ -20,6 +20,8 @@ import com.movie_hub.android.ui.main.account.playlist.PlayListViewModel;
 import com.movie_hub.android.ui.main.account.register.RegisterViewModel;
 import com.movie_hub.android.ui.main.account.updateapp.CheckUpdateViewModel;
 import com.movie_hub.android.ui.main.account.verifyotp.VerifyOtpViewModel;
+import com.movie_hub.android.ui.main.home.detail.HomeSideBarDetailActivity;
+import com.movie_hub.android.ui.main.home.detail.HomeSideBarDetailViewModel;
 import com.movie_hub.android.ui.main.movie.detail.MovieDetailViewModel;
 import com.movie_hub.android.ui.main.movie.detail.comment.CommentViewModel;
 import com.movie_hub.android.ui.main.movie.watch.WatchMovieViewModel;
@@ -172,5 +174,13 @@ public class ActivityModule {
         Supplier<CommentViewModel> supplier = () -> new CommentViewModel(repository, (MVVMApplication)application);
         ViewModelProviderFactory<CommentViewModel> factory = new ViewModelProviderFactory<>(CommentViewModel.class, supplier);
         return new ViewModelProvider(activity, factory).get(CommentViewModel.class);
+    }
+
+    @Provides
+    @ActivityScope
+    HomeSideBarDetailViewModel provideHomeSideBarDetailViewModel(Repository repository, Context application) {
+        Supplier<HomeSideBarDetailViewModel> supplier = () -> new HomeSideBarDetailViewModel(repository, (MVVMApplication)application);
+        ViewModelProviderFactory<HomeSideBarDetailViewModel> factory = new ViewModelProviderFactory<>(HomeSideBarDetailViewModel.class, supplier);
+        return new ViewModelProvider(activity, factory).get(HomeSideBarDetailViewModel.class);
     }
 }

@@ -34,7 +34,7 @@
             android:ellipsize="end"
             android:layout_marginTop="@dimen/_6sdp"
             android:gravity="center"
-            android:background="@drawable/bg_shimmer_radius_6sdp"
+            android:background="@drawable/bg_shimmer_radius_3sdp"
             android:layout_marginHorizontal="@dimen/_12sdp"/>
 
     </LinearLayout>

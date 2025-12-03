@@ -2,7 +2,6 @@ package com.movie_hub.android.ui.main.splash;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
-import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -16,16 +15,18 @@ import android.view.WindowInsetsController;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.core.view.WindowCompat;
 
 import com.movie_hub.android.BR;
 import com.movie_hub.android.BuildConfig;
 import com.movie_hub.android.R;
+import com.movie_hub.android.data.model.api.ResponseListObj;
 import com.movie_hub.android.data.model.api.ResponseWrapper;
 import com.movie_hub.android.data.model.api.request.appversion.CheckAppVersionRequest;
-import com.movie_hub.android.data.model.api.request.movie.MovieRequest;
+import com.movie_hub.android.data.model.api.request.side_bar.SideBarRequest;
 import com.movie_hub.android.data.model.api.response.appversion.CheckAppVersionResponse;
-import com.movie_hub.android.data.model.api.response.movie.MovieResponse;
+import com.movie_hub.android.data.model.api.response.side_bar.SidebarResponse;
 import com.movie_hub.android.data.model.api.response.user.UserResponse;
 import com.movie_hub.android.data.model.other.ToastMessage;
 import com.movie_hub.android.databinding.ActivitySplashBinding;
@@ -41,7 +42,6 @@ import com.movie_hub.android.utils.GsonUtils;
 
 import java.io.File;
 import java.net.ConnectException;
-import java.util.List;
 
 @SuppressLint("CustomSplashScreen")
 public class SplashActivity extends BaseActivity<ActivitySplashBinding, SplashViewModel> implements View.OnClickListener, SystemBarColorProvider, UpdateVersionBottomSheetDialog.UpdateVersionBottomSheetCallback {
@@ -135,7 +135,7 @@ public class SplashActivity extends BaseActivity<ActivitySplashBinding, SplashVi
     public void navigateToMainActivity() {
 //        startActivity(new Intent(this, MainActivity.class));
 //        finish();
-        getListMovie();
+        getListSideBar();
     }
 
     public void navigateToLoginActivity() {
@@ -296,8 +296,9 @@ public class SplashActivity extends BaseActivity<ActivitySplashBinding, SplashVi
     public void hideSystemUI() {
         Window window = getWindow();
         WindowCompat.setDecorFitsSystemWindows(window, false);
-        window.setStatusBarColor(Color.TRANSPARENT);
-        window.setNavigationBarColor(Color.TRANSPARENT);
+        window.setStatusBarColor(ContextCompat.getColor(this, R.color.bg_app));
+        window.setNavigationBarColor(ContextCompat.getColor(this, R.color.bg_app));
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             getWindow().setDecorFitsSystemWindows(false);
             getWindow().getInsetsController().hide(WindowInsets.Type.systemBars());
@@ -316,14 +317,14 @@ public class SplashActivity extends BaseActivity<ActivitySplashBinding, SplashVi
         }
     }
 
-    public void getListMovie() {
+    public void getListSideBar() {
         showLoading();
-        viewModel.getListMovie(new MainCallback<List<MovieResponse>>() {
+        viewModel.getListSideBar(new MainCallback<ResponseListObj<SidebarResponse>>() {
             @Override
-            public void doSuccess(List<MovieResponse> data) {
+            public void doSuccess(ResponseListObj<SidebarResponse> data) {
                 hideLoading();
                 Intent it = new Intent(SplashActivity.this, MainActivity.class);
-                it.putExtra("home_banner", GsonUtils.toJson(data));
+                it.putExtra("home_banner", GsonUtils.toJson(data.getContent()));
                 startActivity(it);
                 finish();
             }
@@ -344,6 +345,6 @@ public class SplashActivity extends BaseActivity<ActivitySplashBinding, SplashVi
                 hideLoading();
                 showError(getString(R.string.an_error_occurred));
             }
-        }, new MovieRequest());
+        }, new SideBarRequest());
     }
 }

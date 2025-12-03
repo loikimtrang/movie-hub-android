@@ -53,14 +53,14 @@
                 android:layout_width="@dimen/_80sdp"
                 android:layout_height="wrap_content"
                 style="@style/Text_14_Normal"
-                android:background="@drawable/bg_shimmer_radius_6sdp"/>
+                android:background="@drawable/bg_shimmer_radius_3sdp"/>
 
             <TextView
                 android:id="@+id/tv_sub_title"
                 android:layout_width="@dimen/_60sdp"
                 android:layout_height="wrap_content"
                 style="@style/Text_12_Normal"
-                android:background="@drawable/bg_shimmer_radius_6sdp"
+                android:background="@drawable/bg_shimmer_radius_3sdp"
                 android:layout_marginTop="@dimen/_3sdp"/>
 
             <View
@@ -79,7 +79,7 @@
                     android:layout_width="@dimen/_80sdp"
                     android:layout_height="wrap_content"
                     style="@style/Text_12_Normal"
-                    android:background="@drawable/bg_shimmer_radius_6sdp"/>
+                    android:background="@drawable/bg_shimmer_radius_3sdp"/>
 
 
             </LinearLayout>

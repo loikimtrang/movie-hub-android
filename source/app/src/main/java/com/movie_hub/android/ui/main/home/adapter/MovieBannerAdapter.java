@@ -4,26 +4,21 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.movie_hub.android.R;
-import com.movie_hub.android.data.model.api.response.movie.MovieResponse;
+import com.movie_hub.android.data.model.api.response.side_bar.SidebarResponse;
 import com.movie_hub.android.databinding.ItemBannerBinding;
-import com.movie_hub.android.databinding.ItemBannerBinding;
-import com.movie_hub.android.utils.DisplayUtils;
-import com.movie_hub.android.utils.HtmlUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class MovieBannerAdapter extends RecyclerView.Adapter<MovieBannerAdapter.MovieBannerViewHolder> {
 
-    private final List<MovieResponse> items = new ArrayList<>();
+    private final List<SidebarResponse> items = new ArrayList<>();
     private Context context;
 
     public MovieBannerAdapter(Context context) {
@@ -43,14 +38,14 @@ public class MovieBannerAdapter extends RecyclerView.Adapter<MovieBannerAdapter.
     @SuppressLint({"SetTextI18n", "ResourceAsColor"})
     @Override
     public void onBindViewHolder(@NonNull MovieBannerViewHolder holder, @SuppressLint("RecyclerView") int position) {
-        MovieResponse item = items.get(position);
+        SidebarResponse item = items.get(position);
         Glide.with(holder.binding.getRoot().getContext())
-                .load(item.getPosterUrl())
+                .load(item.getMobileThumbnailUrl())
                 .placeholder(R.drawable.place_holder_2_3)
                 .error(R.drawable.place_holder_2_3)
                 .into(holder.binding.image);
     }
-    public MovieResponse getItem(int position) {
+    public SidebarResponse getItem(int position) {
         return items != null && position < items.size() ? items.get(position) : null;
     }
 
@@ -70,7 +65,7 @@ public class MovieBannerAdapter extends RecyclerView.Adapter<MovieBannerAdapter.
     }
 
     @SuppressLint("NewApi")
-    public void setData(List<MovieResponse> newData) {
+    public void setData(List<SidebarResponse> newData) {
         items.clear();
 
         if (newData != null) {
@@ -80,7 +75,7 @@ public class MovieBannerAdapter extends RecyclerView.Adapter<MovieBannerAdapter.
         notifyDataSetChanged();
     }
 
-    public void addData(List<MovieResponse> moreItems) {
+    public void addData(List<SidebarResponse> moreItems) {
         int startPos = items.size();
         items.addAll(moreItems);
         notifyItemRangeInserted(startPos, moreItems.size());

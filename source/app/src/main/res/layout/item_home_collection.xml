@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingBottom="@dimen/_12sdp">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingStart="@dimen/_12sdp"
+            android:paddingEnd="@dimen/_3sdp"
+            android:paddingVertical="@dimen/_3sdp">
+
+            <TextView
+                android:id="@+id/tv_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/Text_14_Bold"
+                android:text="@string/menu_watch_now"
+                android:layout_alignParentStart="true"
+                android:layout_centerVertical="true"/>
+
+            <FrameLayout
+                android:id="@+id/btn_more_history"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_btn_press_tran"
+                android:layout_centerVertical="true"
+                android:layout_alignParentEnd="true"
+                android:clickable="true"
+                android:focusable="true"
+                android:padding="@dimen/_10sdp">
+
+                <ImageView
+                    android:layout_width="@dimen/_12sdp"
+                    android:layout_height="@dimen/_12sdp"
+                    android:src="@drawable/ic_arrow_right"/>
+
+            </FrameLayout>
+
+
+        </RelativeLayout>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/rv_history"/>
+
+        <LinearLayout
+            android:id="@+id/layout_btn"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/_38sdp"
+            android:orientation="horizontal"
+            android:layout_marginTop="@dimen/_20sdp"
+            android:paddingHorizontal="@dimen/_24sdp">
+
+            <FrameLayout
+                android:id="@+id/btn_watch_now"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:foreground="?attr/selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true"
+                android:background="@drawable/bg_btn_yellow_radius_6sdp"
+                android:layout_marginEnd="@dimen/_3sdp">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_gravity="center">
+
+                    <ImageView
+                        android:layout_width="@dimen/_12sdp"
+                        android:layout_height="@dimen/_12sdp"
+                        android:src="@drawable/ic_play_now"
+                        android:layout_gravity="center"/>
+
+                    <TextView
+                        android:id="@+id/tv_watch"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/watch_now"
+                        style="@style/Text_12_Bold"
+                        android:textColor="@color/black"
+                        android:gravity="center"
+                        android:layout_marginStart="@dimen/_12sdp"/>
+                </LinearLayout>
+
+            </FrameLayout>
+
+            <FrameLayout
+                android:id="@+id/btn_inf"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:foreground="?attr/selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true"
+                android:background="@drawable/bg_btn_white_radius_6sdp"
+                android:layout_marginStart="@dimen/_3sdp">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_gravity="center">
+
+                    <ImageView
+                        android:layout_width="@dimen/_12sdp"
+                        android:layout_height="@dimen/_12sdp"
+                        android:src="@drawable/ic_information"
+                        android:layout_gravity="center"/>
+
+                    <TextView
+                        android:id="@+id/tv_inf"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/info"
+                        style="@style/Text_12_Bold"
+                        android:textColor="@color/black"
+                        android:gravity="center"
+                        android:layout_marginStart="@dimen/_12sdp"
+                        android:ellipsize="end"/>
+                </LinearLayout>
+
+            </FrameLayout>
+
+
+        </LinearLayout>
+
+
+    </LinearLayout>
+
+</FrameLayout>

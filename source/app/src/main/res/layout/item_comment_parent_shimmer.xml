@@ -51,7 +51,7 @@
                             style="@style/Text_10_Bold"
                             android:layout_width="@dimen/_100sdp"
                             android:layout_height="wrap_content"
-                            android:background="@drawable/bg_shimmer_radius_6sdp"
+                            android:background="@drawable/bg_shimmer_radius_3sdp"
                             android:ellipsize="end"
                             android:maxLines="1" />
 
@@ -66,7 +66,7 @@
                         android:maxLines="1"
                         android:ellipsize="end"
                         style="@style/Text_10_Normal"
-                        android:background="@drawable/bg_shimmer_radius_6sdp"
+                        android:background="@drawable/bg_shimmer_radius_3sdp"
                         android:layout_alignParentEnd="true"
                         android:layout_marginStart="@dimen/_6sdp"/>
 
@@ -89,7 +89,7 @@
                         android:layout_height="@dimen/_14sdp"
                         android:orientation="horizontal"
                         android:gravity="center_vertical"
-                        android:background="@drawable/bg_shimmer_radius_6sdp">
+                        android:background="@drawable/bg_shimmer_radius_3sdp">
 
                     </LinearLayout>
 

@@ -12,6 +12,7 @@ import com.movie_hub.android.ui.main.account.playlist.PlayListActivity;
 import com.movie_hub.android.ui.main.account.register.RegisterActivity;
 import com.movie_hub.android.ui.main.account.updateapp.CheckUpdateActivity;
 import com.movie_hub.android.ui.main.account.verifyotp.VerifyOtpActivity;
+import com.movie_hub.android.ui.main.home.detail.HomeSideBarDetailActivity;
 import com.movie_hub.android.ui.main.movie.detail.MovieDetailActivity;
 import com.movie_hub.android.ui.main.movie.detail.comment.CommentActivity;
 import com.movie_hub.android.ui.main.movie.watch.WatchMovieActivity;
@@ -39,5 +40,6 @@ public interface ActivityComponent {
     void inject(PlayListActivity activity);
     void inject(HistoryActivity activity);
     void inject(CommentActivity activity);
+    void inject(HomeSideBarDetailActivity activity);
 }
 

@@ -24,6 +24,7 @@
             android:layout_height="match_parent">
 
             <androidx.core.widget.NestedScrollView
+                android:id="@+id/scroll_main"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
 
@@ -31,12 +32,14 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:orientation="vertical">
+                    
                     <LinearLayout
                         android:id="@+id/layout_banner"
                         android:orientation="vertical"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:paddingBottom="@dimen/_12sdp">
+                        android:paddingBottom="@dimen/_12sdp"
+                        android:visibility="gone">
 
                         <FrameLayout
                             android:layout_width="match_parent"
@@ -258,6 +261,73 @@
                             app:dotsSpacing="@dimen/_3sdp"/>
 
                     </LinearLayout>
+                    
+                    <LinearLayout
+                        android:id="@+id/layout_history"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:paddingBottom="@dimen/_12sdp"
+                        android:visibility="gone">
+
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:paddingStart="@dimen/_12sdp"
+                            android:paddingEnd="@dimen/_3sdp"
+                            android:paddingVertical="@dimen/_3sdp">
+
+                            <TextView
+                                android:id="@+id/tv_history"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                style="@style/Text_14_Bold"
+                                android:text="@string/menu_watch_now"
+                                android:layout_alignParentStart="true"
+                                android:layout_centerVertical="true"/>
+
+                            <FrameLayout
+                                android:id="@+id/btn_more_history"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:background="@drawable/bg_btn_press_tran"
+                                android:layout_centerVertical="true"
+                                android:layout_alignParentEnd="true"
+                                android:clickable="true"
+                                android:focusable="true"
+                                android:padding="@dimen/_10sdp">
+
+                                <ImageView
+                                    android:layout_width="@dimen/_12sdp"
+                                    android:layout_height="@dimen/_12sdp"
+                                    android:src="@drawable/ic_arrow_right"/>
+
+                            </FrameLayout>
+
+
+                        </RelativeLayout>
+
+                        <androidx.recyclerview.widget.RecyclerView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:id="@+id/rv_history"/>
+                        
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/layout_collection"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:paddingBottom="@dimen/_12sdp">
+
+                        <androidx.recyclerview.widget.RecyclerView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:id="@+id/rv_collection"/>
+
+                    </LinearLayout>
 
                 </LinearLayout>
 
@@ -266,13 +336,19 @@
 
         </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
+        <include
+            android:id="@+id/shimmer_banner"
+            layout="@layout/layout_fragment_home_shimmer"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingHorizontal="@dimen/_12sdp"
             android:paddingVertical="@dimen/_6sdp"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:background="@drawable/bg_home_header">
 
             <TextView
                 android:layout_width="wrap_content"
@@ -289,6 +365,7 @@
                 />
 
         </LinearLayout>
+
 
     </FrameLayout>
 </layout>

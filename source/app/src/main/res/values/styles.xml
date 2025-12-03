@@ -45,6 +45,11 @@
         <item name="cornerSize">@dimen/_12sdp</item>
     </style>
 
+    <style name="movieHistoryHomeImg">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">@dimen/_6sdp</item>
+    </style>
+
     <style name="thumbnailVtt">
         <item name="cornerFamily">rounded</item>
         <item name="cornerSize">5%</item>

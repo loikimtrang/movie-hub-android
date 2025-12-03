@@ -3,11 +3,15 @@ package com.movie_hub.android.ui.main.splash;
 import com.movie_hub.android.MVVMApplication;
 import com.movie_hub.android.data.Repository;
 import com.movie_hub.android.data.model.api.RequestToMapConverter;
+import com.movie_hub.android.data.model.api.ResponseListObj;
 import com.movie_hub.android.data.model.api.ResponseWrapper;
 import com.movie_hub.android.data.model.api.request.appversion.CheckAppVersionRequest;
+import com.movie_hub.android.data.model.api.request.comment.CommentRequest;
 import com.movie_hub.android.data.model.api.request.movie.MovieRequest;
+import com.movie_hub.android.data.model.api.request.side_bar.SideBarRequest;
 import com.movie_hub.android.data.model.api.response.appversion.CheckAppVersionResponse;
 import com.movie_hub.android.data.model.api.response.movie.MovieResponse;
+import com.movie_hub.android.data.model.api.response.side_bar.SidebarResponse;
 import com.movie_hub.android.data.model.api.response.user.UserResponse;
 import com.movie_hub.android.data.model.mapper.UserMapper;
 import com.movie_hub.android.data.model.room.UserEntity;
@@ -139,6 +143,37 @@ public class SplashViewModel extends BaseViewModel {
                                     callback.doError(throwable);
                                 }
                         )
+        );
+    }
+
+    public void getListSideBar(MainCallback<ResponseListObj<SidebarResponse>> callback, SideBarRequest request) {
+        Map<String, Object> query = RequestToMapConverter.convert(request);
+        request.setSize(1000);
+        compositeDisposable.add(repository.getApiService().getSideBarList(query)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .retryWhen(throwable ->
+                        throwable.flatMap((Function<Throwable, ObservableSource<?>>) throwable1 -> {
+                            if (NetworkUtils.checkNetworkError(throwable1)) {
+                                hideLoading();
+                                return application.showDialogNoInternetAccess();
+                            } else {
+                                return Observable.error(throwable1);
+                            }
+                        })
+                )
+                .subscribe(
+                        response -> {
+                            if (response.isResult()) {
+                                callback.doSuccess(response.getData());
+                            } else {
+                                callback.doFail();
+                            }
+                        }, throwable -> {
+                            Timber.e(throwable);
+                            callback.doError(throwable);
+                        }
+                )
         );
     }
 }

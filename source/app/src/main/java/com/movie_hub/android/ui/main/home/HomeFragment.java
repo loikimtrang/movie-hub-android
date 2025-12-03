@@ -1,12 +1,10 @@
 package com.movie_hub.android.ui.main.home;
 
-import android.annotation.SuppressLint;
-import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.Log;
 import android.view.View;
 
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.viewpager2.widget.CompositePageTransformer;
 import androidx.viewpager2.widget.MarginPageTransformer;
 import androidx.viewpager2.widget.ViewPager2;
@@ -14,9 +12,14 @@ import androidx.viewpager2.widget.ViewPager2;
 import com.bumptech.glide.Glide;
 import com.movie_hub.android.BR;
 import com.movie_hub.android.R;
+import com.movie_hub.android.data.model.api.ResponseListObj;
+import com.movie_hub.android.data.model.api.request.collection.CollectionRequest;
+import com.movie_hub.android.data.model.api.request.side_bar.SideBarRequest;
+import com.movie_hub.android.data.model.api.response.collection.CollectionResponse;
 import com.movie_hub.android.data.model.api.response.history.ListWatchHistoryResponse;
+import com.movie_hub.android.data.model.api.response.history.MovieHistoryResponse;
 import com.movie_hub.android.data.model.api.response.movie.MovieResponse;
-import com.movie_hub.android.data.model.other.ToastMessage;
+import com.movie_hub.android.data.model.api.response.side_bar.SidebarResponse;
 import com.movie_hub.android.databinding.FragmentHomeBinding;
 import com.movie_hub.android.di.component.FragmentComponent;
 import com.movie_hub.android.ui.base.activity.SystemBarColorProvider;
@@ -24,15 +27,18 @@ import com.movie_hub.android.ui.base.fragment.BaseFragment;
 import com.movie_hub.android.ui.main.MainActivity;
 import com.movie_hub.android.ui.main.MainCallback;
 import com.movie_hub.android.ui.main.home.adapter.MovieBannerAdapter;
+import com.movie_hub.android.ui.main.home.adapter.MovieHistoryHomeAdapter;
 import com.movie_hub.android.utils.DisplayUtils;
 import com.movie_hub.android.utils.GsonUtils;
 import com.movie_hub.android.utils.HtmlUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
-public class HomeFragment extends BaseFragment<FragmentHomeBinding, HomeViewModel> implements SystemBarColorProvider {
-
+public class HomeFragment extends BaseFragment<FragmentHomeBinding, HomeViewModel>
+        implements SystemBarColorProvider,
+        OnMovieClickCallback {
 
     @Override
     public int getBindingVariable() {
@@ -48,7 +54,15 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding, HomeViewMode
     protected void performDependencyInjection(FragmentComponent buildComponent) {
         buildComponent.inject(this);
     }
+    @Override
+    public int getStatusBarColor() {
+        return R.color.header_app;
+    }
 
+    @Override
+    public int getNavigationBarColor() {
+        return R.color.bg_tab_bar;
+    }
     private MovieBannerAdapter movieBannerAdapter;
     private final Handler bannerHandler = new Handler();
     private Runnable bannerRunnable;
@@ -58,35 +72,57 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding, HomeViewMode
     public static final int NavigateToMovieDetails = 1;
     public static final int NavigateToWatchMovie = 2;
 
+    // history
+    private MovieHistoryHomeAdapter movieHistoryHomeAdapter;
     @Override
     protected void performDataBinding() {
         binding.setF(this);
         binding.setVm(viewModel);
 
         binding.swipeRefreshLayout.setOnRefreshListener(() -> {
-            loadPlaylistData();
+            reloadDataHome();
         });
 
         Bundle args = getArguments();
         if (args != null) {
             String bannerJson = args.getString("banner_json", null);
             if (bannerJson != null) {
-                List<MovieResponse> bannerList = GsonUtils.fromJsonToList(bannerJson, MovieResponse.class);
+                List<SidebarResponse> bannerList = GsonUtils.fromJsonToList(bannerJson, SidebarResponse.class);
                 if (bannerList != null) {
                     viewModel.movieBannerList.postValue(bannerList);
-                } else {
-                    Log.e("HomeFragment", "Banner list is null after parsing!");
                 }
             }
         }
 
-        setUpBanner();
+        setUpView();
+
         observeMovieBanner();
+        observeHistory();
+
         bindingClick();
     }
-    public void reloadSwipeBanner() {
-        stopAutoBannerSlide();
-        startAutoBannerSlide();
+
+    public void setUpView() {
+        showLayout();
+        setUpAdapter();
+        showShimmer();
+
+        if (viewModel.isLogin()) {
+            getListMovieHistory();
+        } else {
+            binding.layoutHistory.setVisibility(View.GONE);
+        }
+
+        setUpBanner();
+
+        CollectionRequest request = new CollectionRequest();
+        request.setSize(1000);
+        getListCollection(request);
+    }
+    public void setUpAdapter() {
+        movieHistoryHomeAdapter = new MovieHistoryHomeAdapter(this, getContext());
+        binding.rvHistory.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
+        binding.rvHistory.setAdapter(movieHistoryHomeAdapter);
     }
     public void bindingClick() {
         binding.btnBannerWatchNow.setOnClickListener(v -> {
@@ -98,14 +134,71 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding, HomeViewMode
             reloadSwipeBanner();
             getMovieDetail(viewModel.currentBannerMovie, NavigateToMovieDetails);
         });
+
+        binding.btnMoreHistory.setOnClickListener(( v-> {
+            if (viewModel.isLogin()) {
+                showLoading();
+                ((MainActivity) requireActivity()).navigateToHistory();
+            }
+        }));
+    }
+
+    private void reloadDataHome() {
+        showShimmer();
+
+        viewModel.currentBannerMovie = new MovieResponse();
+        viewModel.movieHistory.setValue(new ArrayList<>());
+        viewModel.movieBannerList.setValue(new ArrayList<>());
+
+        getListSideBar();
+        binding.swipeRefreshLayout.setRefreshing(false);
+
+        if (viewModel.isLogin()) {
+            getListMovieHistory();
+        } else {
+            viewModel.movieHistory.postValue(new ArrayList<>());
+            binding.layoutHistory.setVisibility(View.GONE);
+        }
+    }
+
+    public void showLayout() {
+        binding.layoutBanner.setVisibility(View.VISIBLE);
+    }
+    public void showShimmer() {
+        binding.shimmerBanner.shimmerLayout.setVisibility(View.VISIBLE);
+    }
+
+    public void hideShimmer() {
+        binding.shimmerBanner.shimmerLayout.setVisibility(View.GONE);
+        hideLoading();
     }
 
     public void observeMovieBanner() {
         viewModel.movieBannerList.observe(getViewLifecycleOwner(), bannerList -> {
             if (bannerList == null || bannerList.isEmpty()) return;
             movieBannerAdapter.setData(bannerList);
-            startAutoBannerSlide();
+            reloadSwipeBanner();
+            binding.viewPagerBanner.setCurrentItem(0);
+            hideShimmer();
         });
+    }
+
+    public void observeHistory() {
+        viewModel.movieHistory.observe(getViewLifecycleOwner(), histories -> {
+            if (histories == null || histories.isEmpty()) return;
+
+            List<MovieHistoryResponse> top5 = histories.size() > 5
+                    ? histories.subList(0, 5)
+                    : histories;
+
+            movieHistoryHomeAdapter.setData(top5);
+            binding.layoutHistory.setVisibility(View.VISIBLE);
+        });
+    }
+
+    public void reloadSwipeBanner() {
+        stopAutoBannerSlide();
+        startAutoBannerSlide();
     }
 
     public void setUpBanner() {
@@ -132,7 +225,7 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding, HomeViewMode
 
             @Override
             public void onPageSelected(int position) {
-                MovieResponse currentMovie = movieBannerAdapter.getItem(position);
+                SidebarResponse currentMovie = movieBannerAdapter.getItem(position);
                 if (currentMovie != null) {
                     updateBanner(currentMovie);
                 }
@@ -168,7 +261,6 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding, HomeViewMode
 
         binding.viewPagerBanner.setPageTransformer(transformer);
     }
-
     private void startAutoBannerSlide() {
         if (isAutoSliding || movieBannerAdapter == null || movieBannerAdapter.getItemCount() <= 1)
             return;
@@ -183,16 +275,14 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding, HomeViewMode
         bannerHandler.postDelayed(bannerRunnable, timeSwipeBanner);
         isAutoSliding = true;
     }
-
     private void stopAutoBannerSlide() {
         if (isAutoSliding) {
             bannerHandler.removeCallbacks(bannerRunnable);
             isAutoSliding = false;
         }
     }
-
-
-    public void updateBanner(MovieResponse item) {
+    public void updateBanner(SidebarResponse sidebarResponse) {
+        MovieResponse item = sidebarResponse.getMovie();
         viewModel.currentBannerMovie = item;
         binding.tvName.setText(item.getTitle());
         binding.tvOtherName.setText(item.getOriginalTitle());
@@ -201,19 +291,10 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding, HomeViewMode
         binding.tvDescription.setText(HtmlUtils.convertPtoStrong(item.getDescription()));
 
         Glide.with(getContext())
-                .load(item.getPosterUrl())
+                .load(sidebarResponse.getMobileThumbnailUrl())
                 .transform(new jp.wasabeef.glide.transformations.BlurTransformation(10, 3)) // radius=25, sampling=3
                 .into(binding.bgBlur);
     }
-
-    private void loadPlaylistData() {
-        // Ví dụ gọi lại adapter setData
-       new ToastMessage(ToastMessage.TYPE_NORMAL, "ReLoad").showMessage(getContext());
-
-        // Tắt refresh icon
-        binding.swipeRefreshLayout.setRefreshing(false);
-    }
-
     public void getMovieDetail(MovieResponse movieResponse, int typeNavigate) {
         showLoading();
         viewModel.getMovie(new MainCallback<MovieResponse>() {
@@ -282,6 +363,88 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding, HomeViewMode
         }, movieResponse.getId());
     }
 
+    public void getListSideBar() {
+        showLoading();
+        viewModel.getListSideBar(new MainCallback<ResponseListObj<SidebarResponse>>() {
+            @Override
+            public void doSuccess(ResponseListObj<SidebarResponse> data) {
+                viewModel.movieBannerList.postValue(data.getContent());
+            }
+            @Override
+            public void doError(Throwable error) {
+                hideLoading();
+                showError(getString(R.string.an_error_occurred));
+            }
+
+            @Override
+            public void doSuccess() {
+                hideLoading();
+
+            }
+
+            @Override
+            public void doFail() {
+                hideLoading();
+                showError(getString(R.string.an_error_occurred));
+            }
+        }, new SideBarRequest());
+    }
+
+    public void getListMovieHistory() {
+        viewModel.getListMovieHistory(new MainCallback<List<MovieHistoryResponse>>() {
+            @Override
+            public void doError(Throwable error) {
+                hideLoading();
+                showError(getString(R.string.an_error_occurred));
+            }
+
+            @Override
+            public void doSuccess() {
+
+            }
+
+            @Override
+            public void doSuccess(List<MovieHistoryResponse> data) {
+                if (data != null && !data.isEmpty()) {
+                    viewModel.movieHistory.postValue(data);
+                } else {
+                    binding.layoutHistory.setVisibility(View.GONE);
+                }
+            }
+
+            @Override
+            public void doFail() {
+                hideLoading();
+                showError(getString(R.string.an_error_occurred));
+            }
+        });
+    }
+
+    public void getListCollection(CollectionRequest request) {
+        viewModel.getListCollection(new MainCallback<ResponseListObj<CollectionResponse>>() {
+            @Override
+            public void doError(Throwable error) {
+                hideLoading();
+                showError(getString(R.string.an_error_occurred));
+            }
+
+            @Override
+            public void doSuccess() {
+
+            }
+
+            @Override
+            public void doSuccess(ResponseListObj<CollectionResponse> data) {
+
+            }
+
+            @Override
+            public void doFail() {
+                hideLoading();
+                showError(getString(R.string.an_error_occurred));
+            }
+        }, request);
+    }
     public void navigateToMovieDetails(MovieResponse movieResponse, ListWatchHistoryResponse listWatchHistoryResponse) {
         ((MainActivity) requireActivity()).navigateToMovieDetail(movieResponse, listWatchHistoryResponse);
     }
@@ -315,6 +478,13 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding, HomeViewMode
         super.onResume();
         startAutoBannerSlide();
         hideLoading();
+
+        if (viewModel.isLogin()) {
+            getListMovieHistory();
+        } else {
+            viewModel.movieHistory.postValue(new ArrayList<>());
+            binding.layoutHistory.setVisibility(View.GONE);
+        }
     }
 
     @Override
@@ -324,12 +494,9 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding, HomeViewMode
     }
 
     @Override
-    public int getStatusBarColor() {
-        return R.color.bg_tab_bar;
-    }
-
-    @Override
-    public int getNavigationBarColor() {
-        return R.color.bg_app;
+    public void onMovieClick(MovieResponse movieResponse) {
+        if (movieResponse != null) {
+            getMovieDetail(movieResponse, NavigateToMovieDetails);
+        }
     }
 }

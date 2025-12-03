@@ -209,7 +209,7 @@ public class MainActivity extends BaseActivity<ActivityMainBinding, MainViewMode
 
     @Override
     public int getStatusBarColor() {
-        return R.color.bg_app;
+        return R.color.header_app;
     }
 
     @Override
@@ -274,7 +274,6 @@ public class MainActivity extends BaseActivity<ActivityMainBinding, MainViewMode
         }
         startActivity(it);
     }
-
     public void navigateToWatchMovie(MovieResponse movieResponse, ListWatchHistoryResponse listWatchHistoryResponse) {
         Intent it = new Intent(this, WatchMovieActivity.class);
         if (viewModel.isLogin()) {

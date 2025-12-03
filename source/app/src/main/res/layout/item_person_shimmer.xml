@@ -40,14 +40,14 @@
                 android:layout_width="@dimen/_80sdp"
                 android:layout_height="wrap_content"
                 style="@style/Text_12_Bold"
-                android:background="@drawable/bg_shimmer_radius_6sdp"
+                android:background="@drawable/bg_shimmer_radius_3sdp"
                 />
 
             <TextView
                 android:layout_width="@dimen/_90sdp"
                 android:layout_height="wrap_content"
                 style="@style/Text_10_Bold"
-                android:background="@drawable/bg_shimmer_radius_6sdp"
+                android:background="@drawable/bg_shimmer_radius_3sdp"
                 android:layout_marginTop="@dimen/_3sdp"/>
 
         </LinearLayout>
