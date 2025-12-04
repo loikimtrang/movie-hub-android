@@ -1,6 +1,5 @@
-package com.movie_hub.android.ui.main.search.suggestion.shimmer;
+package com.movie_hub.android.ui.main.home.topic.shimmer;
 
-import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,18 +10,17 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.movie_hub.android.R;
 import com.movie_hub.android.constant.Constants;
 
-public class MovieSuggestShimmerAdapter extends RecyclerView.Adapter<MovieSuggestShimmerAdapter.ViewHolder> {
+public class TopicShimmerAdapter extends RecyclerView.Adapter<TopicShimmerAdapter.ViewHolder> {
     private final int shimmerItemCount;
 
-    public MovieSuggestShimmerAdapter(int count, Context context) {
-        this.context = context;
+    public TopicShimmerAdapter(int count) {
         this.shimmerItemCount = count;
     }
-    Context context;
+
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_movie_suggestion_shimmer, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_topic_shimmer, parent, false);
         return new ViewHolder(view);
     }
 
@@ -33,20 +31,6 @@ public class MovieSuggestShimmerAdapter extends RecyclerView.Adapter<MovieSugges
         float alpha = startAlpha - (endAlpha * position);
 
         holder.itemView.setAlpha(alpha);
-
-        ViewGroup.MarginLayoutParams layoutParams =
-                (ViewGroup.MarginLayoutParams) holder.itemView.getLayoutParams();
-        int margin = (int) context.getResources().getDimension(R.dimen._6sdp);
-        layoutParams.setMarginStart(margin);
-        layoutParams.setMarginEnd(margin);
-        if (position == 0) {
-            layoutParams.setMarginStart(margin * 2);
-        }
-        if (position == shimmerItemCount - 1) {
-            layoutParams.setMarginEnd(margin * 2);
-        }
-
-        holder.itemView.setLayoutParams(layoutParams);
     }
 
     @Override

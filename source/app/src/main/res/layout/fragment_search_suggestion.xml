@@ -72,8 +72,7 @@
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/rv_movie"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginHorizontal="@dimen/_12sdp"/>
+                    android:layout_height="wrap_content"/>
 
             </LinearLayout>
 
@@ -83,8 +82,6 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:visibility="visible">
-
-
 
                 <FrameLayout
                     android:layout_width="wrap_content"
@@ -123,8 +120,7 @@
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/rv_actor"
                     android:layout_width="match_parent"
-                    android:layout_height="@dimen/_80sdp"
-                    android:layout_marginHorizontal="@dimen/_12sdp"/>
+                    android:layout_height="@dimen/_83sdp"/>
 
             </LinearLayout>
 

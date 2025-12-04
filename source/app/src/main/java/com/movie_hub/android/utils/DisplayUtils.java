@@ -62,41 +62,36 @@ public class DisplayUtils {
 
     public static String displayAgeRating(int ageRating) {
         switch (ageRating) {
-            case Constants.AGE_RATING_G:
-                return "G";
-            case Constants.AGE_RATING_PG:
-                return "PG";
-            case Constants.AGE_RATING_PG13:
-                return "PG-13";
-            case Constants.AGE_RATING_R:
-                return "R";
-            case Constants.AGE_RATING_NC17:
-                return "NC-17";
-            case Constants.AGE_RATING_18:
-                return "18+";
+            case Constants.AGE_RATING_P:
+                return "P";
+            case Constants.AGE_RATING_K:
+                return "K";
+            case Constants.AGE_RATING_T13:
+                return "T13";
+            case Constants.AGE_RATING_T16:
+                return "T16";
+            case Constants.AGE_RATING_T18:
+                return "T18";
             default:
                 return "N/A";
         }
     }
     public static String displayAgeRatingDescription(Context context, int ageRating) {
         switch (ageRating) {
-            case Constants.AGE_RATING_G:
-                return context.getString(R.string.age_rating_g);
-            case Constants.AGE_RATING_PG:
-                return context.getString(R.string.age_rating_pg);
-            case Constants.AGE_RATING_PG13:
-                return context.getString(R.string.age_rating_pg13);
-            case Constants.AGE_RATING_R:
-                return context.getString(R.string.age_rating_r);
-            case Constants.AGE_RATING_NC17:
-                return context.getString(R.string.age_rating_nc17);
-            case Constants.AGE_RATING_18:
-                return context.getString(R.string.age_rating_age18);
+            case Constants.AGE_RATING_P:
+                return context.getString(R.string.age_rating_p);
+            case Constants.AGE_RATING_K:
+                return context.getString(R.string.age_rating_k);
+            case Constants.AGE_RATING_T13:
+                return context.getString(R.string.age_rating_t13);
+            case Constants.AGE_RATING_T16:
+                return context.getString(R.string.age_rating_t16);
+            case Constants.AGE_RATING_T18:
+                return context.getString(R.string.age_rating_t18);
             default:
                 return "N/A";
         }
     }
-
     @SuppressLint("NewApi")
     public static String getYearFromReleaseDate(String releaseDate) {
         if (releaseDate == null || releaseDate.isEmpty()) return "";

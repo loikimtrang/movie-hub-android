@@ -33,6 +33,7 @@ public class HomeViewModel extends BaseFragmentViewModel {
     public MutableLiveData<List<SidebarResponse>> movieBannerList = new MutableLiveData<>();
     public MutableLiveData<List<MovieHistoryResponse>> movieHistory = new MutableLiveData<>();
     public MutableLiveData<List<CollectionResponse>> collectionList = new MutableLiveData<>();
+    public MutableLiveData<List<CollectionResponse>> topicList = new MutableLiveData<>();
     public MovieResponse currentBannerMovie = new MovieResponse();
     public HomeViewModel(Repository repository, MVVMApplication application) {
         super(repository, application);
@@ -158,6 +159,30 @@ public class HomeViewModel extends BaseFragmentViewModel {
         Map<String, Object> query = RequestToMapConverter.convert(request);
         compositeDisposable.add(
                 repository.getApiService().getCollectionList(query)
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(
+                                response -> {
+                                    hideLoading();
+                                    if (response.isResult()) {
+                                        callback.doSuccess(response.getData());
+                                    } else {
+                                        callback.doFail();
+                                    }
+                                },
+                                throwable -> {
+                                    hideLoading();
+                                    Timber.e(throwable);
+                                    callback.doError(throwable);
+                                }
+                        )
+        );
+    }
+
+    public void getListTopic(MainCallback<ResponseListObj<CollectionResponse>> callback, CollectionRequest request) {
+        Map<String, Object> query = RequestToMapConverter.convert(request);
+        compositeDisposable.add(
+                repository.getApiService().getTopicList(query)
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(

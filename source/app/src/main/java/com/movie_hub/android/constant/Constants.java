@@ -41,12 +41,11 @@ public class Constants {
     public static int MOVIE_ITEM_KIND_SEASON = 1;
     public static int MOVIE_ITEM_KIND_EPISODE = 2;
     public static int MOVIE_ITEM_KIND_TRAILER = 3;
-    public static final int AGE_RATING_G = 1;
-    public static final int AGE_RATING_PG = 2;
-    public static final int AGE_RATING_PG13 = 3;
-    public static final int AGE_RATING_R = 4;
-    public static final int AGE_RATING_NC17 = 5;
-    public static final int AGE_RATING_18 = 6;
+    public static final int AGE_RATING_P = 1;
+    public static final int AGE_RATING_K = 2;
+    public static final int AGE_RATING_T13 = 3;
+    public static final int AGE_RATING_T16 = 4;
+    public static final int AGE_RATING_T18 = 5;
 
     public static final int FAVOURITE_TYPE_MOVIE = 1;
     public static final int FAVOURITE_TYPE_PERSON = 2;

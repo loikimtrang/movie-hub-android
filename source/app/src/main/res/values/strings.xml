@@ -175,12 +175,12 @@
     <string name="age_rating">Age Rating:</string>
     <string name="episode_if">Episode:</string>
     <string name="season_if">Season:</string>
-    <string name="age_rating_age18">Classified according to local regulations</string>
-    <string name="age_rating_g">Suitable for all ages</string>
-    <string name="age_rating_nc17">No one 17 and under admitted</string>
-    <string name="age_rating_pg">Parental guidance suggested</string>
-    <string name="age_rating_pg13">Not suitable for children under 13</string>
-    <string name="age_rating_r">Restricted (under 17 requires accompanying adult)</string>
+    <string name="age_rating_p">All ages</string>
+    <string name="age_rating_k">Under 13</string>
+    <string name="age_rating_t13">13 and above</string>
+    <string name="age_rating_t16">16 and above</string>
+    <string name="age_rating_t18">18 and above</string>
+
     <string name="other_name_display">Other name:</string>
     <string name="gender_display">Gender:</string>
     <string name="birthday_display">Date of Birth:</string>
@@ -235,5 +235,5 @@
     <string name="permission_install">You need permission to install the application</string>
     <string name="slogan_app">Phim hay cả rổ</string>
     <string name="all">All</string>
-
+    <string name="what_are_you_interested">What are you interested in?</string>
 </resources>

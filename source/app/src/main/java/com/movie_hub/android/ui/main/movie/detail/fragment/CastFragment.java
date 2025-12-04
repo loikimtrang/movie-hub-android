@@ -53,7 +53,6 @@ public class CastFragment extends BaseFragment<FragmentCastBinding, CastFragment
     private PersonAdapter personAdapter;
     private PersonFavouriteAdapter personFavouriteAdapter;
     private boolean isLoaded = false;
-    private boolean isLoading = false;
     private MovieDetailViewModel sharedViewModel;
     public static final int TYPE_SEARCH = 0;
     public static final int TYPE_MOVIE_DETAIL = 1;
@@ -66,8 +65,9 @@ public class CastFragment extends BaseFragment<FragmentCastBinding, CastFragment
     private String keyword;
 
     int currentPage = 0;
-    int pageSize = 16;
+    int pageSize = 20;
     boolean isLastPage = false;
+    private boolean isLoading = false;
 
     private PersonFavoriteShimmerAdapter shimmerAdapter;
 
@@ -79,10 +79,45 @@ public class CastFragment extends BaseFragment<FragmentCastBinding, CastFragment
         if (!isLoaded) {
             if (displayFrom == TYPE_MOVIE_DETAIL) {
                 getListMoviePersonTypeMovieDetail();
+
+                binding.rvCast.addOnScrollListener(new RecyclerView.OnScrollListener() {
+                    @Override
+                    public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                        super.onScrolled(recyclerView, dx, dy);
+                        if (dy <= 0) return;
+
+                        LinearLayoutManager lm = (LinearLayoutManager) recyclerView.getLayoutManager();
+                        if (lm == null || moviePersonAdapter == null) return;
+
+                        int totalItemCount = lm.getItemCount();
+                        int lastVisibleItemPosition = lm.findLastVisibleItemPosition();
+
+                        if (!isLoading && !isLastPage && lastVisibleItemPosition >= totalItemCount - 5) {
+                            getListMoviePersonTypeMovieDetail();
+                        }
+                    }
+                });
             } else if (displayFrom == TYPE_SEARCH) {
                 getListMoviePersonTypeSearch();
+
+                binding.rvCast.addOnScrollListener(new RecyclerView.OnScrollListener() {
+                    @Override
+                    public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                        super.onScrolled(recyclerView, dx, dy);
+                        if (dy <= 0) return;
+
+                        LinearLayoutManager lm = (LinearLayoutManager) recyclerView.getLayoutManager();
+                        if (lm == null || personAdapter == null) return;
+
+                        int totalItemCount = lm.getItemCount();
+                        int lastVisibleItemPosition = lm.findLastVisibleItemPosition();
+
+                        if (!isLoading && !isLastPage && lastVisibleItemPosition >= totalItemCount - 5) {
+                            getListMoviePersonTypeSearch();
+                        }
+                    }
+                });
             } else {
-                isLoading = true;
                 getListFavoritePersonTypeFavourite();
                 binding.rvCast.addOnScrollListener(new RecyclerView.OnScrollListener() {
                     @Override
@@ -96,14 +131,15 @@ public class CastFragment extends BaseFragment<FragmentCastBinding, CastFragment
                         int totalItemCount = lm.getItemCount();
                         int lastVisibleItemPosition = lm.findLastVisibleItemPosition();
 
-                        if (!isLoading && !isLastPage && lastVisibleItemPosition >= totalItemCount - 1) {
-                            isLoading = true;
+                        if (!isLoading && !isLastPage && lastVisibleItemPosition >= totalItemCount - 5) {
                             getListFavoritePersonTypeFavourite();
                         }
                     }
                 });
             }
         }
+
+
     }
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -167,80 +203,117 @@ public class CastFragment extends BaseFragment<FragmentCastBinding, CastFragment
     }
 
     public void getListMoviePersonTypeMovieDetail() {
+        isLoading = true;
         sharedViewModel = new ViewModelProvider(requireActivity()).get(MovieDetailViewModel.class);
         MovieResponse movie = sharedViewModel.movieDetails;
         if (movie == null || movie.getId() == 0) return;
 
         MoviePersonRequest request = new MoviePersonRequest();
+        request.setPage(currentPage);
+        request.setSize(pageSize);
         request.setMovieId(String.valueOf(movie.getId()));
         request.setKind(1);
-        ((MovieDetailActivity) requireActivity()).showLoading();
-        viewModel.getListMoviePerson(new MainCallback<List<MoviePersonResponse>>() {
-            @Override public void doSuccess(List<MoviePersonResponse> data) {
-                ((MovieDetailActivity) requireActivity()).hideLoading();
-                if (data != null && !data.isEmpty()) {
-                    hideShimmer();
-                    moviePersonAdapter.setData(data);
+        
+        viewModel.getListMoviePerson(new MainCallback<ResponseListObj<MoviePersonResponse>>() {
+            @Override public void doSuccess(ResponseListObj<MoviePersonResponse> data) {
+                hideLoading();
+                if (data.getContent() != null && !data.getContent().isEmpty()) {
+                    if (currentPage == 0) {
+                        binding.layoutEmpty.setVisibility(View.GONE);
+                        hideShimmer();
+                        moviePersonAdapter.setData(data.getContent());
+                    } else {
+                        moviePersonAdapter.addData(data.getContent());
+                    }
+
                     binding.layoutEmpty.setVisibility(View.GONE);
                     isLoaded = true;
+                    currentPage++;
+
+                    if (currentPage == data.getTotalPages()) {
+                        isLastPage = true;
+                    }
+
                 } else {
-                    binding.layoutEmpty.setVisibility(View.VISIBLE);
+                    if (currentPage == 0) binding.layoutEmpty.setVisibility(View.VISIBLE);
+                    isLastPage = true;
                 }
+
+                isLoading = false;
             }
 
             @Override public void doError(Throwable throwable) {
-                ((MovieDetailActivity) requireActivity()).hideLoading();
+                hideLoading();
                 if (!isAdded()) return;
                 showError(getString(R.string.fetch_data_failed));
+                isLoading = false;
 
             }
             @Override public void doFail() {
                 showError(getString(R.string.fetch_data_failed));
-                ((MovieDetailActivity) requireActivity()).hideLoading();
+                hideLoading();
+
+                isLoading = false;
             }
             @Override public void doSuccess() {}
         }, request);
     }
     public void getListMoviePersonTypeSearch() {
         if (keyword == null || keyword.isEmpty()) return;
-
-        showLoading();
+        isLoading = true;
         PersonRequest personRequest = new PersonRequest();
+        personRequest.setPage(currentPage);
+        personRequest.setSize(pageSize);
         personRequest.setName(keyword);
         personRequest.setKind(1);
 
-        viewModel.getListPerson(new MainCallback<List<PersonResponse>>() {
-            @Override public void doSuccess(List<PersonResponse> data) {
+        viewModel.getListPerson(new MainCallback<ResponseListObj<PersonResponse>>() {
+            @Override public void doSuccess(ResponseListObj<PersonResponse> data) {
                 hideLoading();
-                if (data != null && !data.isEmpty()) {
-                    hideShimmer();
-                    personAdapter.setData(data);
+                if (data.getContent() != null && !data.getContent().isEmpty()) {
+                    if (currentPage == 0) {
+                        binding.layoutEmpty.setVisibility(View.GONE);
+                        hideShimmer();
+                        personAdapter.setData(data.getContent());
+                    } else {
+                        personAdapter.addData(data.getContent());
+                    }
+
                     binding.layoutEmpty.setVisibility(View.GONE);
                     isLoaded = true;
+                    currentPage++;
+
+                    if (currentPage == data.getTotalPages()) {
+                        isLastPage = true;
+                    }
+
                 } else {
-                    binding.layoutEmpty.setVisibility(View.VISIBLE);
+                    if (currentPage == 0) binding.layoutEmpty.setVisibility(View.VISIBLE);
+                    isLastPage = true;
                 }
+
+                isLoading = false;
             }
 
             @Override public void doError(Throwable throwable) {
                 hideLoading();
                 if (!isAdded()) return;
                 showError(getString(R.string.fetch_data_failed));
-
+                isLoading = false;
             }
             @Override public void doFail() {
                 showError(getString(R.string.fetch_data_failed));
                 hideLoading();
+                isLoading = false;
             }
             @Override public void doSuccess() {}
         }, personRequest);
     }
     public void getListFavoritePersonTypeFavourite() {
-        showLoading();
+        isLoading = true;
         FavouriteListRequest request = new FavouriteListRequest();
         request.setPage(currentPage);
         request.setSize(pageSize);
-        request.setPaged(true);
         request.setType(Constants.FAVOURITE_TYPE_PERSON);
 
         viewModel.getFavoritePersonList(new MainCallback<ResponseListObj<FavouriteResponse>>() {

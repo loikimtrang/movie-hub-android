@@ -162,10 +162,10 @@ public class SearchSuggestionFragment extends BaseFragment<FragmentSearchSuggest
     }
 
     public void setUpAdapter() {
-        movieAdapter = new MovieSuggestAdapter(this);
-        actorAdapter = new ActorAdapter(this);
-        movieSuggestShimmerAdapter = new MovieSuggestShimmerAdapter(6);
-        actorShimmerAdapter = new ActorShimmerAdapter(6);
+        movieAdapter = new MovieSuggestAdapter(this, requireContext());
+        actorAdapter = new ActorAdapter(this, requireContext());
+        movieSuggestShimmerAdapter = new MovieSuggestShimmerAdapter(6, requireContext());
+        actorShimmerAdapter = new ActorShimmerAdapter(6, requireContext());
 
         binding.rvMovie.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
         binding.rvActor.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));

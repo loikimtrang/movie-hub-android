@@ -23,9 +23,10 @@ public class GridSpacingItemDecoration extends RecyclerView.ItemDecoration {
         outRect.left = column * spacing / spanCount;
         outRect.right = spacing - (column + 1) * spacing / spanCount;
 
-        if (position >= spanCount) {
-            outRect.top = spacing; // spacing giữa các hàng
-        }
+//        if (position >= spanCount) {
+//        }
+        outRect.top = spacing; // spacing giữa các hàng
+
 
         // 👉 THÊM SPACING CHO HÀNG CUỐI
         int itemCount = parent.getAdapter() != null ? parent.getAdapter().getItemCount() : 0;

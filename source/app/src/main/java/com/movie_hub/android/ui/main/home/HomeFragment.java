@@ -31,6 +31,7 @@ import com.movie_hub.android.ui.base.fragment.BaseFragment;
 import com.movie_hub.android.ui.main.MainActivity;
 import com.movie_hub.android.ui.main.MainCallback;
 import com.movie_hub.android.ui.main.home.adapter.CollectionAdapter;
+import com.movie_hub.android.ui.main.home.adapter.CollectionType_Topic_Adapter;
 import com.movie_hub.android.ui.main.home.adapter.MovieBannerAdapter;
 import com.movie_hub.android.ui.main.home.adapter.MovieHistoryHomeAdapter;
 import com.movie_hub.android.utils.DisplayUtils;
@@ -45,7 +46,8 @@ import java.util.Objects;
 public class HomeFragment extends BaseFragment<FragmentHomeBinding, HomeViewModel>
         implements SystemBarColorProvider,
         OnMovieClickCallback,
-        CollectionAdapter.OnCollectionClickListener {
+        CollectionAdapter.OnCollectionClickListener,
+        CollectionType_Topic_Adapter.OnTopicClickCallback {
 
     @Override
     public int getBindingVariable() {
@@ -84,6 +86,7 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding, HomeViewMode
 
     // collection
     private CollectionAdapter collectionAdapter;
+    private CollectionType_Topic_Adapter collectionTypeTopicAdapter;
 
     int currentPage = 0;
     int pageSize = 4;
@@ -99,7 +102,7 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding, HomeViewMode
         observeMovieBanner();
         observeHistory();
         observeCollection();
-
+        observeTopic();
         bindingClick();
     }
 
@@ -125,6 +128,10 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding, HomeViewMode
         collectionAdapter = new CollectionAdapter(this, this, getContext());
         binding.rvCollection.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false));
         binding.rvCollection.setAdapter(collectionAdapter);
+
+        collectionTypeTopicAdapter = new CollectionType_Topic_Adapter(this, getContext());
+        binding.rvTopic.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
+        binding.rvTopic.setAdapter(collectionTypeTopicAdapter);
     }
     public void bindingClick() {
         binding.swipeRefreshLayout.setOnRefreshListener(this::reloadDataHome);
@@ -146,19 +153,21 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding, HomeViewMode
             }
         }));
 
+        binding.btnMoreTopic.setOnClickListener(v -> {
+            showLoading();
+            ((MainActivity) requireActivity()).navigateToMoreTopic();
+        });
+
         binding.scrollMain.setOnScrollChangeListener((NestedScrollView.OnScrollChangeListener) (v, scrollX, scrollY, oldScrollX, oldScrollY) -> {
             View child = binding.scrollMain.getChildAt(0);
             if (child != null) {
                 int distanceToBottom = child.getBottom() - (binding.scrollMain.getHeight() + scrollY);
-
 
                 if (distanceToBottom < 400 && !isLoading && !isLastPage) {
                     getListCollection();
                 }
             }
         });
-
-
     }
 
     private void reloadDataHome() {
@@ -173,6 +182,7 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding, HomeViewMode
         viewModel.currentBannerMovie = new MovieResponse();
         viewModel.movieHistory.setValue(new ArrayList<>());
         viewModel.movieBannerList.setValue(new ArrayList<>());
+        viewModel.topicList.setValue(new ArrayList<>());
 
         getListSideBar();
         binding.swipeRefreshLayout.setRefreshing(false);
@@ -183,12 +193,14 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding, HomeViewMode
             viewModel.movieHistory.postValue(new ArrayList<>());
             binding.layoutHistory.setVisibility(View.GONE);
         }
-
-
     }
 
     public void showLayout() {
         binding.layoutBanner.setVisibility(View.VISIBLE);
+        binding.layoutTopic.setVisibility(View.VISIBLE);
+        binding.layoutCollection.setVisibility(View.VISIBLE);
+
+        binding.tvTopic.setSelected(true);
     }
     public void showShimmer() {
         binding.shimmerBanner.shimmerLayout.setVisibility(View.VISIBLE);
@@ -226,6 +238,13 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding, HomeViewMode
         viewModel.collectionList.observe(getViewLifecycleOwner(), collections -> {
             if (collections == null || collections.isEmpty()) return;
             collectionAdapter.setData(collections);
+        });
+    }
+
+    public void observeTopic() {
+        viewModel.topicList.observe(getViewLifecycleOwner(), collections -> {
+            if (collections == null || collections.isEmpty()) return;
+            collectionTypeTopicAdapter.setData(collections);
         });
     }
 
@@ -403,6 +422,7 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding, HomeViewMode
             public void doSuccess(ResponseListObj<SidebarResponse> data) {
                 viewModel.movieBannerList.postValue(data.getContent());
                 getListCollection();
+                getListTopic();
             }
             @Override
             public void doError(Throwable error) {
@@ -509,6 +529,43 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding, HomeViewMode
             }
         }, request);
     }
+
+    public void getListTopic() {
+        CollectionRequest request = new CollectionRequest();
+        request.setSize(10);
+        request.setPage(0);
+
+        viewModel.getListTopic(new MainCallback<ResponseListObj<CollectionResponse>>() {
+            @Override
+            public void doError(Throwable error) {
+                hideLoading();
+                showError(getString(R.string.an_error_occurred));
+            }
+
+            @Override
+            public void doSuccess() {
+                hideLoading();
+
+            }
+
+            @Override
+            public void doSuccess(ResponseListObj<CollectionResponse> data) {
+                if (data.getContent() != null && !data.getContent().isEmpty()) {
+                    viewModel.topicList.setValue(new ArrayList<>(data.getContent()));
+                } else {
+                    binding.layoutTopic.setVisibility(View.GONE);
+                }
+            }
+
+
+            @Override
+            public void doFail() {
+                hideLoading();
+                showError(getString(R.string.an_error_occurred));
+            }
+        }, request);
+    }
+
     public void navigateToMovieDetails(MovieResponse movieResponse, ListWatchHistoryResponse listWatchHistoryResponse) {
         ((MainActivity) requireActivity()).navigateToMovieDetail(movieResponse, listWatchHistoryResponse);
     }
@@ -565,7 +622,20 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding, HomeViewMode
     }
 
     @Override
+    public void onWatchMovieClick(MovieResponse movieResponse) {
+        if (movieResponse != null) {
+            getMovieDetail(movieResponse, NavigateToWatchMovie);
+        }
+    }
+
+    @Override
     public void onMoreClick(CollectionResponse collectionResponse) {
         ((MainActivity) requireActivity()).navigateToHomeSideBarDetail(collectionResponse);
+    }
+
+    @Override
+    public void onTopicClick(CollectionResponse collectionResponse) {
+        showLoading();
+        ((MainActivity) requireActivity()).navigateToTopicDetail(collectionResponse);
     }
 }

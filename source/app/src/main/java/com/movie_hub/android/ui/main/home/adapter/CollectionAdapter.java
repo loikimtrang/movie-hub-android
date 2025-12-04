@@ -9,6 +9,7 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
@@ -86,19 +87,6 @@ public class CollectionAdapter extends RecyclerView.Adapter<CollectionAdapter.Co
         holder.binding.layoutBtn.setVisibility(View.GONE);
     }
 
-    private void setupRecycler(CollectionType_1_ViewHolder holder, RecyclerView.Adapter<?> adapter, List<MovieResponse> data) {
-        holder.binding.rvCollection.setVisibility(View.VISIBLE);
-        holder.binding.rvCollection.setLayoutManager(new LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false));
-        holder.binding.rvCollection.setAdapter(adapter);
-
-        if (adapter instanceof CollectionType_1_Adapter)
-            ((CollectionType_1_Adapter) adapter).setData(data);
-        else if (adapter instanceof CollectionType_2_Adapter)
-            ((CollectionType_2_Adapter) adapter).setData(data);
-        else if (adapter instanceof CollectionType_3_Adapter)
-            ((CollectionType_3_Adapter) adapter).setData(data);
-    }
-
     private void showMoreButton(CollectionType_1_ViewHolder holder, CollectionResponse item) {
         holder.binding.btnMore.setVisibility(View.VISIBLE);
         holder.binding.btnMore.setOnClickListener(v -> listener.onMoreClick(item));
@@ -109,24 +97,79 @@ public class CollectionAdapter extends RecyclerView.Adapter<CollectionAdapter.Co
         holder.binding.btnMore.setVisibility(View.VISIBLE);
         holder.binding.viewPager.setVisibility(View.VISIBLE);
 
-        CollectionType_4_Adapter adapter = new CollectionType_4_Adapter(onMovieClickCallback, context);
-        adapter.setData(data);
-
         ViewPager2 viewPager = holder.binding.viewPager;
-        RecyclerView recyclerView = (RecyclerView) viewPager.getChildAt(0);
 
+        RecyclerView recyclerView = (RecyclerView) viewPager.getChildAt(0);
         recyclerView.setClipToPadding(false);
         recyclerView.setClipChildren(false);
         recyclerView.setOverScrollMode(View.OVER_SCROLL_NEVER);
 
-        viewPager.setClipToPadding(false);
-        viewPager.setClipChildren(false);
-        viewPager.setAdapter(adapter);
-        viewPager.setOrientation(ViewPager2.ORIENTATION_HORIZONTAL);
-        viewPager.setOffscreenPageLimit(3);
-        viewPager.setPageTransformer(new RevealPageTransformer());
+        if (viewPager.getAdapter() == null || !(viewPager.getAdapter() instanceof CollectionType_4_Adapter)) {
+            CollectionType_4_Adapter adapter = new CollectionType_4_Adapter(onMovieClickCallback, context);
+            viewPager.setAdapter(adapter);
+            viewPager.setOffscreenPageLimit(3);
+            viewPager.setPageTransformer(new RevealPageTransformer());
+        }
+
+        final MovieResponse[] currentMovie = {new MovieResponse()};
+        viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
+            @Override
+            public void onPageSelected(int position) {
+                super.onPageSelected(position);
+
+                CollectionType_4_Adapter adapter = (CollectionType_4_Adapter) viewPager.getAdapter();
+                if (adapter != null && position < adapter.getItemCount()) {
+                    currentMovie[0] = adapter.getItemAt(position);
+                }
+            }
+        });
+
+        holder.binding.btnInf.setOnClickListener(v -> {
+            int currentPosition = viewPager.getCurrentItem();
+            CollectionType_4_Adapter adapter = (CollectionType_4_Adapter) viewPager.getAdapter();
+            if (adapter != null && currentPosition < adapter.getItemCount()) {
+                MovieResponse movie = adapter.getItemAt(currentPosition);
+                onMovieClickCallback.onMovieClick(movie);
+            }
+        });
+
+        holder.binding.btnWatchNow.setOnClickListener(v -> {
+            int currentPosition = viewPager.getCurrentItem();
+            CollectionType_4_Adapter adapter = (CollectionType_4_Adapter) viewPager.getAdapter();
+            if (adapter != null && currentPosition < adapter.getItemCount()) {
+                MovieResponse movie = adapter.getItemAt(currentPosition);
+                onMovieClickCallback.onWatchMovieClick(movie);
+            }
+        });
+
+        CollectionType_4_Adapter adapter = (CollectionType_4_Adapter) viewPager.getAdapter();
+        adapter.setData(data);
     }
 
+    private void setupRecycler(CollectionType_1_ViewHolder holder, RecyclerView.Adapter<?> adapterTemplate, List<MovieResponse> data) {
+        holder.binding.rvCollection.setVisibility(View.VISIBLE);
+
+        RecyclerView rv = holder.binding.rvCollection;
+
+        if (rv.getLayoutManager() == null) {
+            rv.setLayoutManager(new LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false));
+        }
+
+        RecyclerView.Adapter<?> currentAdapter = rv.getAdapter();
+
+        if (currentAdapter == null || !currentAdapter.getClass().equals(adapterTemplate.getClass())) {
+            rv.setAdapter(adapterTemplate);
+            currentAdapter = adapterTemplate;
+        }
+
+        if (currentAdapter instanceof CollectionType_1_Adapter) {
+            ((CollectionType_1_Adapter) currentAdapter).setData(data);
+        } else if (currentAdapter instanceof CollectionType_2_Adapter) {
+            ((CollectionType_2_Adapter) currentAdapter).setData(data);
+        } else if (currentAdapter instanceof CollectionType_3_Adapter) {
+            ((CollectionType_3_Adapter) currentAdapter).setData(data);
+        }
+    }
 
     public void removeItem(int position) {
         if (position >= 0 && position < items.size()) {

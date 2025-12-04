@@ -174,12 +174,11 @@
     <string name="age_rating">Độ tuổi:</string>
     <string name="episode_if">Tập:</string>
     <string name="season_if">Mùa:</string>
-    <string name="age_rating_age18">Phân loại theo quy định địa phương</string>
-    <string name="age_rating_g">Dành cho mọi lứa tuổi</string>
-    <string name="age_rating_nc17">Cấm khán giả 17 tuổi trở xuống</string>
-    <string name="age_rating_pg">Khuyến nghị có sự hướng dẫn của phụ huynh</string>
-    <string name="age_rating_pg13">Không dành cho trẻ dưới 13 tuổi</string>
-    <string name="age_rating_r">Hạn chế (dưới 17 tuổi cần có người lớn đi kèm)</string>
+    <string name="age_rating_p">Mọi lứa tuổi</string>
+    <string name="age_rating_k">Dưới 13 tuổi</string>
+    <string name="age_rating_t13">13 tuổi trở lên</string>
+    <string name="age_rating_t16">16 tuổi trở lên</string>
+    <string name="age_rating_t18">18 tuổi trở lên</string>
     <string name="other_name_display">Tên gọi khác:</string>
     <string name="gender_display">Giới tính:</string>
     <string name="birthday_display">Ngày sinh:</string>
@@ -233,4 +232,6 @@
     <string name="permission_install">Bạn cần cấp quyền để cài ứng dụng</string>
     <string name="slogan_app">Phim hay cả rổ</string>
     <string name="all">Tất cả</string>
+    <string name="what_are_you_interested">Bạn đang quan tâm gì?</string>
+
 </resources>

@@ -42,6 +42,8 @@ import com.movie_hub.android.ui.main.account.playlist.PlayListActivity;
 import com.movie_hub.android.ui.main.account.updateapp.CheckUpdateActivity;
 import com.movie_hub.android.ui.main.home.HomeFragment;
 import com.movie_hub.android.ui.main.home.detail.HomeSideBarDetailActivity;
+import com.movie_hub.android.ui.main.home.topic.HomeMoreTopicActivity;
+import com.movie_hub.android.ui.main.home.topic.topic_detail.HomeTopicDetailActivity;
 import com.movie_hub.android.ui.main.movie.detail.MovieDetailActivity;
 import com.movie_hub.android.ui.main.movie.watch.WatchMovieActivity;
 import com.movie_hub.android.ui.main.schedule.ScheduleFragment;
@@ -175,6 +177,17 @@ public class MainActivity extends BaseActivity<ActivityMainBinding, MainViewMode
         Intent intent = new Intent(this, HomeSideBarDetailActivity.class);
         intent.putExtra("collection", GsonUtils.toJson(collectionResponse));
         startActivity(intent);
+    }
+
+    public void navigateToMoreTopic() {
+        Intent intent = new Intent(this, HomeMoreTopicActivity.class);
+        startActivity(intent);
+    }
+
+    public void navigateToTopicDetail(CollectionResponse collectionResponse) {
+        Intent it = new Intent(this, HomeTopicDetailActivity.class);
+        it.putExtra("collection", GsonUtils.toJson(collectionResponse));
+        startActivity(it);
     }
 
     @Override

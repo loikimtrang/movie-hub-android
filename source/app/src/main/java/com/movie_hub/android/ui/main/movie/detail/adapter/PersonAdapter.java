@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.movie_hub.android.R;
 import com.movie_hub.android.constant.Constants;
+import com.movie_hub.android.data.model.api.response.favourite.FavouriteResponse;
 import com.movie_hub.android.data.model.api.response.person.PersonResponse;
 import com.movie_hub.android.databinding.ItemMoviePersonBinding;
 
@@ -79,7 +80,11 @@ public class PersonAdapter extends RecyclerView.Adapter<PersonAdapter.PersonView
         notifyDataSetChanged();
     }
 
-
+    public void addData(List<PersonResponse> moreItems) {
+        int startPos = personList.size();
+        personList.addAll(moreItems);
+        notifyItemRangeInserted(startPos, moreItems.size());
+    }
     @Override
     public int getItemCount() {
         return personList.size();

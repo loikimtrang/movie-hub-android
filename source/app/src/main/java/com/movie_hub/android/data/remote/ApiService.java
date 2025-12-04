@@ -197,6 +197,9 @@ public interface ApiService {
     @GET("v1/collection/list")
     Observable<ResponseWrapper<ResponseListObj<CollectionResponse>>> getCollectionList(@QueryMap Map<String, Object> query);
 
-    @GET("v1/collection/topic")
+    @GET("v1/collection/topics")
     Observable<ResponseWrapper<ResponseListObj<CollectionResponse>>> getTopicList(@QueryMap Map<String, Object> query);
+
+    @GET("v1/collection-item/list")
+    Observable<ResponseWrapper<ResponseListObj<MovieResponse>>> getCollectionItemList(@QueryMap Map<String, Object> query);
 }

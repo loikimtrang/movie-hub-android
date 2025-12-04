@@ -51,7 +51,7 @@ public class RecommendationFragment extends BaseFragment<FragmentRecommendationB
     private Long idMovie;
 
     int currentPage = 0;
-    int pageSize = 12;
+    int pageSize = 20;
     boolean isLastPage = false;
 
 
@@ -86,7 +86,7 @@ public class RecommendationFragment extends BaseFragment<FragmentRecommendationB
                 int totalItemCount = lm.getItemCount();
                 int lastVisibleItemPosition = lm.findLastVisibleItemPosition();
 
-                if (!isLoading && !isLastPage && lastVisibleItemPosition >= totalItemCount - 1) {
+                if (!isLoading && !isLastPage && lastVisibleItemPosition >= totalItemCount - 5) {
                     isLoading = true;
                     getListMovieTypeSearch();
                 }
@@ -181,7 +181,6 @@ public class RecommendationFragment extends BaseFragment<FragmentRecommendationB
     public void getListMovieTypeSearch() {
         if (keyword == null || keyword.isEmpty()) return;
 
-        ((MainActivity) requireActivity()).showLoading();
         MovieRequest request = new MovieRequest();
         request.setPage(currentPage);
         request.setSize(pageSize);

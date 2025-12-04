@@ -22,6 +22,8 @@ import com.movie_hub.android.ui.main.account.updateapp.CheckUpdateViewModel;
 import com.movie_hub.android.ui.main.account.verifyotp.VerifyOtpViewModel;
 import com.movie_hub.android.ui.main.home.detail.HomeSideBarDetailActivity;
 import com.movie_hub.android.ui.main.home.detail.HomeSideBarDetailViewModel;
+import com.movie_hub.android.ui.main.home.topic.HomeMoreTopicViewModel;
+import com.movie_hub.android.ui.main.home.topic.topic_detail.HomeTopicDetailViewModel;
 import com.movie_hub.android.ui.main.movie.detail.MovieDetailViewModel;
 import com.movie_hub.android.ui.main.movie.detail.comment.CommentViewModel;
 import com.movie_hub.android.ui.main.movie.watch.WatchMovieViewModel;
@@ -182,5 +184,20 @@ public class ActivityModule {
         Supplier<HomeSideBarDetailViewModel> supplier = () -> new HomeSideBarDetailViewModel(repository, (MVVMApplication)application);
         ViewModelProviderFactory<HomeSideBarDetailViewModel> factory = new ViewModelProviderFactory<>(HomeSideBarDetailViewModel.class, supplier);
         return new ViewModelProvider(activity, factory).get(HomeSideBarDetailViewModel.class);
+    }
+
+    @Provides
+    @ActivityScope
+    HomeMoreTopicViewModel provideHomeMoreTopicViewModel(Repository repository, Context application) {
+        Supplier<HomeMoreTopicViewModel> supplier = () -> new HomeMoreTopicViewModel(repository, (MVVMApplication)application);
+        ViewModelProviderFactory<HomeMoreTopicViewModel> factory = new ViewModelProviderFactory<>(HomeMoreTopicViewModel.class, supplier);
+        return new ViewModelProvider(activity, factory).get(HomeMoreTopicViewModel.class);
+    }
+    @Provides
+    @ActivityScope
+    HomeTopicDetailViewModel provideHomeTopicDetailViewModel(Repository repository, Context application) {
+        Supplier<HomeTopicDetailViewModel> supplier = () -> new HomeTopicDetailViewModel(repository, (MVVMApplication)application);
+        ViewModelProviderFactory<HomeTopicDetailViewModel> factory = new ViewModelProviderFactory<>(HomeTopicDetailViewModel.class, supplier);
+        return new ViewModelProvider(activity, factory).get(HomeTopicDetailViewModel.class);
     }
 }

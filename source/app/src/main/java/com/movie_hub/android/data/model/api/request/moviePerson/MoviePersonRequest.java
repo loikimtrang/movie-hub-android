@@ -9,7 +9,7 @@ public class MoviePersonRequest {
     private String movieId;         // string
     private Long offset;            // integer($int64)
     private Integer page;     // integer($int32)
-    private Integer pageSize;       // integer($int32)
+    private Integer size;       // integer($int32)
     private Boolean paged;          // boolean
     private String personId;        // string
     private Boolean sortSorted;     // boolean

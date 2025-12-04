@@ -32,8 +32,9 @@ public class CastFragmentViewModel extends BaseFragmentViewModel {
         super(repository, application);
     }
 
-    public void getListMoviePerson(MainCallback<List<MoviePersonResponse>> callback, MoviePersonRequest request) {
+    public void getListMoviePerson(MainCallback<ResponseListObj<MoviePersonResponse>> callback, MoviePersonRequest request) {
         Map<String, Object> query = RequestToMapConverter.convert(request);
+
         compositeDisposable.add(repository.getApiService().getListMoviePerson(query)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -50,7 +51,7 @@ public class CastFragmentViewModel extends BaseFragmentViewModel {
                 .subscribe(
                         response -> {
                             if (response.isResult()) {
-                                callback.doSuccess(response.getData().getContent());
+                                callback.doSuccess(response.getData());
                             } else {
                                 callback.doFail();
                             }
@@ -62,7 +63,7 @@ public class CastFragmentViewModel extends BaseFragmentViewModel {
         );
 
     }
-    public void getListPerson(MainCallback<List<PersonResponse>> callback, PersonRequest request) {
+    public void getListPerson(MainCallback<ResponseListObj<PersonResponse>> callback, PersonRequest request) {
         Map<String, Object> query = RequestToMapConverter.convert(request);
 
         compositeDisposable.add(repository.getApiService().getListPerson(query)
@@ -81,7 +82,7 @@ public class CastFragmentViewModel extends BaseFragmentViewModel {
                 .subscribe(
                         response -> {
                             if (response.isResult()) {
-                                callback.doSuccess(response.getData().getContent());
+                                callback.doSuccess(response.getData());
                             } else {
                                 callback.doFail();
                             }
@@ -121,7 +122,6 @@ public class CastFragmentViewModel extends BaseFragmentViewModel {
         );
     }
     public void getFavoritePersonList(MainCallback<ResponseListObj<FavouriteResponse>> callback, FavouriteListRequest request) {
-
         Map<String, Object> query = RequestToMapConverter.convert(request);
         compositeDisposable.add(repository.getApiService().getFavouriteList(query)
                 .subscribeOn(Schedulers.io())

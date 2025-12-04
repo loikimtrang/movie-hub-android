@@ -66,10 +66,8 @@
             android:clipChildren="false"
             android:clipToPadding="false"
             android:overScrollMode="never"
-            android:paddingHorizontal="@dimen/_15sdp"
-            />
-
-
+            android:paddingStart="@dimen/_15sdp"
+            android:paddingEnd="@dimen/_15sdp"/>
 
 
         <LinearLayout

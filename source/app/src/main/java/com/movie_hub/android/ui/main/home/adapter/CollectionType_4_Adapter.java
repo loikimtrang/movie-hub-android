@@ -53,49 +53,19 @@ public class CollectionType_4_Adapter extends RecyclerView.Adapter<CollectionTyp
         
         Glide.with(holder.binding.getRoot().getContext())
                 .load(item.getThumbnailUrl())
-                .placeholder(R.drawable.place_holder_2_3)
-                .error(R.drawable.place_holder_2_3)
+                .placeholder(R.drawable.place_holder_16_9)
+                .error(R.drawable.place_holder_16_9)
                 .into(holder.binding.image);
 
         if (position > lastPosition) {
             holder.itemView.setAlpha(0f);
-            holder.itemView.postDelayed(() -> {
-                Animation animation = AnimationUtils.loadAnimation(holder.itemView.getContext(), R.anim.item_slide_in_right);
-                holder.itemView.startAnimation(animation);
-                holder.itemView.setAlpha(1f);
-            }, 50L);
+            holder.itemView.animate()
+                    .alpha(1f)
+                    .setDuration(300)
+                    .start();
             lastPosition = position;
         }
-
-        ViewGroup.MarginLayoutParams layoutParams =
-                (ViewGroup.MarginLayoutParams) holder.binding.getRoot().getLayoutParams();
-
-        int margin = (int) context.getResources().getDimension(R.dimen._6sdp);
-        layoutParams.setMarginStart(margin);
-        layoutParams.setMarginEnd(margin);
-        if (position == 0) {
-            layoutParams.setMarginStart(margin * 2);
-        }
-        if (position == items.size() - 1) {
-            layoutParams.setMarginEnd(margin * 2);
-        }
-
-        holder.binding.getRoot().setLayoutParams(layoutParams);
     }
-    public boolean isNumericLabel(String label) {
-        if (label == null || label.isEmpty()) return false;
-        return label.matches("\\d+");
-    }
-
-    public void removeItem(int position) {
-        if (position >= 0 && position < items.size()) {
-            items.remove(position);
-            notifyItemRemoved(position);
-
-            notifyItemRangeChanged(position, items.size());
-        }
-    }
-
 
     @SuppressLint("NewApi")
     public void setData(List<MovieResponse> newData) {
@@ -112,6 +82,13 @@ public class CollectionType_4_Adapter extends RecyclerView.Adapter<CollectionTyp
         int startPos = items.size();
         items.addAll(moreItems);
         notifyItemRangeInserted(startPos, moreItems.size());
+    }
+
+    public MovieResponse getItemAt(int position) {
+        if (position >= 0 && position < items.size()) {
+            return items.get(position);
+        }
+        return null;
     }
 
 
