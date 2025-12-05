@@ -20,6 +20,7 @@ import com.movie_hub.android.data.model.api.request.user.UserLoginGoogleRequest;
 import com.movie_hub.android.data.model.api.request.user.UserUpdateProfileRequest;
 import com.movie_hub.android.data.model.api.response.MovieItem.MovieItemResponse;
 import com.movie_hub.android.data.model.api.response.appversion.CheckAppVersionResponse;
+import com.movie_hub.android.data.model.api.response.category.CategoryResponse;
 import com.movie_hub.android.data.model.api.response.collection.CollectionResponse;
 import com.movie_hub.android.data.model.api.response.comment.CommentResponse;
 import com.movie_hub.android.data.model.api.response.comment.VoteListResponse;
@@ -92,6 +93,9 @@ public interface ApiService {
     // MOVIE CONTROLLER
     @GET("v1/movie/list")
     Observable<ResponseWrapper<ResponseListObj<MovieResponse>>> getListMovie(@QueryMap Map<String, Object> query);
+
+    @GET("v1/category/list")
+    Observable<ResponseWrapper<ResponseListObj<CategoryResponse>>> getListCategory(@QueryMap Map<String, Object> query);
     @GET("v1/movie/recommendations/{id}")
     Observable<ResponseWrapper<List<MovieResponse>>> getListMovieRecommendation(@Path("id") Long id);
 

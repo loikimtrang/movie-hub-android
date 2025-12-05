@@ -1,0 +1,78 @@
+[
+  {
+    "value": "ar",
+    "label": "Tiếng Ả Rập"
+  },
+  {
+    "value": "af",
+    "label": "Tiếng Afrikaans"
+  },
+  {
+    "value": "sq",
+    "label": "Tiếng Albania"
+  },
+  {
+    "value": "am",
+    "label": "Tiếng Amharic"
+  },
+  {
+    "value": "en",
+    "label": "Tiếng Anh"
+  },
+  {
+    "value": "vi",
+    "label": "Tiếng Việt"
+  },
+  {
+    "value": "ja",
+    "label": "Tiếng Nhật"
+  },
+  {
+    "value": "zh",
+    "label": "Tiếng Trung"
+  },
+  {
+    "value": "fr",
+    "label": "Tiếng Pháp"
+  },
+  {
+    "value": "es",
+    "label": "Tiếng Tây Ban Nha"
+  },
+  {
+    "value": "ru",
+    "label": "Tiếng Nga"
+  },
+  {
+    "value": "ko",
+    "label": "Tiếng Hàn"
+  },
+  {
+    "value": "de",
+    "label": "Tiếng Đức"
+  },
+  {
+    "value": "it",
+    "label": "Tiếng Ý"
+  },
+  {
+    "value": "pt",
+    "label": "Tiếng Bồ Đào Nha"
+  },
+  {
+    "value": "hi",
+    "label": "Tiếng Hindi"
+  },
+  {
+    "value": "th",
+    "label": "Tiếng Thái"
+  },
+  {
+    "value": "zh-CN",
+    "label": "Tiếng Trung (Giản thể)"
+  },
+  {
+    "value": "zh-TW",
+    "label": "Tiếng Trung (Phồn thể)"
+  }
+]

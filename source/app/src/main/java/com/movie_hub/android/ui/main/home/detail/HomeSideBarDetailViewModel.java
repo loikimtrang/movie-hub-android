@@ -1,9 +1,14 @@
 package com.movie_hub.android.ui.main.home.detail;
 
+import androidx.lifecycle.MutableLiveData;
+
 import com.movie_hub.android.MVVMApplication;
 import com.movie_hub.android.data.Repository;
 import com.movie_hub.android.data.model.api.RequestToMapConverter;
+import com.movie_hub.android.data.model.api.ResponseListObj;
+import com.movie_hub.android.data.model.api.request.collection.CollectionItemRequest;
 import com.movie_hub.android.data.model.api.request.history.ListWatchHistoryRequest;
+import com.movie_hub.android.data.model.api.response.collection.CollectionResponse;
 import com.movie_hub.android.data.model.api.response.history.ListWatchHistoryResponse;
 import com.movie_hub.android.data.model.api.response.movie.MovieResponse;
 import com.movie_hub.android.ui.base.activity.BaseViewModel;
@@ -22,11 +27,43 @@ import io.reactivex.rxjava3.schedulers.Schedulers;
 import timber.log.Timber;
 
 public class HomeSideBarDetailViewModel extends BaseViewModel {
-    List<MovieResponse> listMovie = new ArrayList<>();
+    CollectionResponse collectionResponse = new CollectionResponse();
+    MutableLiveData<List<MovieResponse>> listMovieResponse = new MutableLiveData<>();
     public HomeSideBarDetailViewModel(Repository repository, MVVMApplication application) {
         super(repository, application);
     }
-
+    public void getListCollectionItem(MainCallback<ResponseListObj<MovieResponse>> callback, CollectionItemRequest request) {
+        Map<String, Object> query = RequestToMapConverter.convert(request);
+        compositeDisposable.add(
+                repository.getApiService().getCollectionItemList(query)
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .retryWhen(throwable ->
+                                throwable.flatMap((Function<Throwable, ObservableSource<?>>) throwable1 -> {
+                                    if (NetworkUtils.checkNetworkError(throwable1)) {
+                                        return application.showDialogNoInternetAccess();
+                                    }else{
+                                        return Observable.error(throwable1);
+                                    }
+                                })
+                        )
+                        .subscribe(
+                                response -> {
+                                    hideLoading();
+                                    if (response.isResult()) {
+                                        callback.doSuccess(response.getData());
+                                    } else {
+                                        callback.doFail();
+                                    }
+                                },
+                                throwable -> {
+                                    hideLoading();
+                                    Timber.e(throwable);
+                                    callback.doError(throwable);
+                                }
+                        )
+        );
+    }
     public void getMovie(MainCallback<MovieResponse> callback, Long id) {
         compositeDisposable.add(repository.getApiService().getMovie(id)
                 .subscribeOn(Schedulers.io())

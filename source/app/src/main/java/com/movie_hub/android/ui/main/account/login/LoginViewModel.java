@@ -44,6 +44,7 @@ public class LoginViewModel extends BaseViewModel {
                             if (response.getAccess_token() != null) {
                                 repository.getSharedPreferences().setToken(response.getAccess_token());
                                 repository.getSharedPreferences().saveAccessTokenObject(response);
+                                repository.getSharedPreferences().setRefreshToken(response.getRefresh_token());
 
                                 compositeDisposable.add(repository.getApiService().getUserProfile()
                                         .subscribeOn(Schedulers.io())
@@ -123,6 +124,7 @@ public class LoginViewModel extends BaseViewModel {
                             hideLoading();
                             if (response.getAccess_token() != null) {
                                 repository.getSharedPreferences().setToken(response.getAccess_token());
+                                repository.getSharedPreferences().setRefreshToken(response.getRefresh_token());
                                 repository.getSharedPreferences().saveAccessTokenObject(response);
                                 compositeDisposable.add(repository.getApiService().getUserProfile()
                                         .subscribeOn(Schedulers.io())

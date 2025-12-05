@@ -13,6 +13,7 @@ import com.movie_hub.android.ui.main.account.register.RegisterActivity;
 import com.movie_hub.android.ui.main.account.updateapp.CheckUpdateActivity;
 import com.movie_hub.android.ui.main.account.verifyotp.VerifyOtpActivity;
 import com.movie_hub.android.ui.main.home.detail.HomeSideBarDetailActivity;
+import com.movie_hub.android.ui.main.home.filter.FilterActivity;
 import com.movie_hub.android.ui.main.home.topic.HomeMoreTopicActivity;
 import com.movie_hub.android.ui.main.home.topic.topic_detail.HomeTopicDetailActivity;
 import com.movie_hub.android.ui.main.movie.detail.MovieDetailActivity;
@@ -45,5 +46,6 @@ public interface ActivityComponent {
     void inject(HomeSideBarDetailActivity activity);
     void inject(HomeMoreTopicActivity activity);
     void inject(HomeTopicDetailActivity activity);
+    void inject(FilterActivity activity);
 }
 

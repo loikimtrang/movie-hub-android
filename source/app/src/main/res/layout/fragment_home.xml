@@ -70,7 +70,7 @@
                                     android:clipChildren="false"
                                     android:overScrollMode="never"
                                     android:paddingHorizontal="@dimen/_70sdp"
-                                    android:layout_marginTop="@dimen/_100sdp"
+                                    android:layout_marginTop="@dimen/_120sdp"
                                     android:layout_gravity="center"/>
 
                                 <TextView
@@ -402,24 +402,32 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingHorizontal="@dimen/_12sdp"
             android:paddingVertical="@dimen/_6sdp"
             android:orientation="vertical"
             android:background="@drawable/bg_home_header">
+
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 style="@style/Text_16_Bold"
                 android:text="@string/app_name"
-                />
+                android:layout_marginHorizontal="@dimen/_12sdp"/>
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 style="@style/Text_12_Normal"
+                android:textColor="@color/text_slogan"
                 android:text="@string/slogan_app"
-                />
+                android:layout_marginHorizontal="@dimen/_12sdp"/>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/rv_filter"
+                android:layout_marginTop="@dimen/_6sdp"
+                android:visibility="gone"/>
 
         </LinearLayout>
 

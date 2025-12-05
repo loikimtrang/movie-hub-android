@@ -1,0 +1,469 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="false"
+    android:background="@android:color/transparent"
+    android:id="@+id/layout_setting"
+    android:windowIsFloating="true">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="bottom"
+        android:background="@drawable/bg_choose_season"
+        android:layout_marginTop="@dimen/_90sdp"
+        android:clickable="true"
+        android:focusable="true">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/bg_choose_season"
+            android:orientation="vertical"
+            android:focusableInTouchMode="true"
+            android:paddingTop="@dimen/_12sdp"
+            android:paddingBottom="@dimen/_20sdp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:id="@+id/layout_content"
+                android:background="@drawable/bg_choose_season"
+                android:layout_above="@+id/btn_filter"
+                android:layout_alignParentTop="true">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:layout_marginHorizontal="@dimen/_12sdp">
+
+                    <ImageView
+                        android:layout_width="@dimen/_10sdp"
+                        android:layout_height="@dimen/_10sdp"
+                        android:src="@drawable/ic_filter"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        style="@style/Text_12_Normal"
+                        android:text="@string/filter"
+                        android:layout_marginStart="@dimen/_6sdp"/>
+
+                </LinearLayout>
+
+                <androidx.core.widget.NestedScrollView
+                    android:id="@+id/scroll_content"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:fillViewport="true">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="vertical">
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:paddingVertical="@dimen/_6sdp"
+                            android:paddingHorizontal="@dimen/_12sdp">
+
+                            <RelativeLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    style="@style/Text_12_Normal"
+                                    android:text="@string/filter_country"
+                                    android:layout_alignParentStart="true"
+                                    android:layout_centerVertical="true"/>
+
+                                <LinearLayout
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_alignParentEnd="true"
+                                    android:layout_centerVertical="true"
+                                    android:gravity="center_vertical"
+                                    android:id="@+id/btn_filter_country"
+                                    android:clickable="true"
+                                    android:focusable="true"
+                                    android:background="@drawable/bg_btn_press_tran"
+                                    android:paddingVertical="@dimen/_6sdp"
+                                    android:paddingHorizontal="@dimen/_12sdp">
+
+                                    <TextView
+                                        android:id="@+id/tv_country"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        style="@style/Text_12_Normal"
+                                        android:text="@string/all"/>
+
+                                    <ImageView
+                                        android:id="@+id/arrow_country"
+                                        android:layout_width="@dimen/_10sdp"
+                                        android:layout_height="@dimen/_10sdp"
+                                        android:src="@drawable/ic_arrow_right"
+                                        android:rotation="90"
+                                        android:layout_marginStart="@dimen/_6sdp"/>
+                                </LinearLayout>
+
+                            </RelativeLayout>
+                            <androidx.recyclerview.widget.RecyclerView
+                                android:id="@+id/rv_filter_country"
+                                android:layout_width="match_parent"
+                                android:layout_height="@dimen/_180sdp"
+                                android:layout_marginTop="@dimen/_6sdp"
+                                android:visibility="gone"/>
+
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:paddingVertical="@dimen/_6sdp"
+                            android:paddingHorizontal="@dimen/_12sdp"
+                            android:id="@+id/layout_type">
+
+                            <RelativeLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    style="@style/Text_12_Normal"
+                                    android:text="@string/filter_type"
+                                    android:layout_alignParentStart="true"
+                                    android:layout_centerVertical="true"/>
+
+                                <LinearLayout
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_alignParentEnd="true"
+                                    android:layout_centerVertical="true"
+                                    android:gravity="center_vertical"
+                                    android:id="@+id/btn_filter_type"
+                                    android:clickable="true"
+                                    android:focusable="true"
+                                    android:background="@drawable/bg_btn_press_tran"
+                                    android:paddingVertical="@dimen/_6sdp"
+                                    android:paddingHorizontal="@dimen/_12sdp">
+
+                                    <TextView
+                                        android:id="@+id/tv_type"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        style="@style/Text_12_Normal"
+                                        android:text="@string/all"/>
+
+                                    <ImageView
+                                        android:id="@+id/arrow_type"
+                                        android:layout_width="@dimen/_10sdp"
+                                        android:layout_height="@dimen/_10sdp"
+                                        android:src="@drawable/ic_arrow_right"
+                                        android:rotation="90"
+                                        android:layout_marginStart="@dimen/_6sdp"/>
+                                </LinearLayout>
+
+                            </RelativeLayout>
+                            <androidx.recyclerview.widget.RecyclerView
+                                android:id="@+id/rv_filter_type"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="@dimen/_6sdp"
+                                android:visibility="gone"/>
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:paddingVertical="@dimen/_6sdp"
+                            android:paddingHorizontal="@dimen/_12sdp">
+
+                            <RelativeLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    style="@style/Text_12_Normal"
+                                    android:text="@string/filter_category"
+                                    android:layout_alignParentStart="true"
+                                    android:layout_centerVertical="true"/>
+
+                                <LinearLayout
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_alignParentEnd="true"
+                                    android:layout_centerVertical="true"
+                                    android:gravity="center_vertical"
+                                    android:id="@+id/btn_filter_category"
+                                    android:clickable="true"
+                                    android:focusable="true"
+                                    android:background="@drawable/bg_btn_press_tran"
+                                    android:paddingVertical="@dimen/_6sdp"
+                                    android:paddingHorizontal="@dimen/_12sdp">
+
+                                    <TextView
+                                        android:id="@+id/tv_cate"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        style="@style/Text_12_Normal"
+                                        android:text="@string/all"/>
+
+                                    <ImageView
+                                        android:id="@+id/arrow_cate"
+                                        android:layout_width="@dimen/_10sdp"
+                                        android:layout_height="@dimen/_10sdp"
+                                        android:src="@drawable/ic_arrow_right"
+                                        android:rotation="90"
+                                        android:layout_marginStart="@dimen/_6sdp"/>
+                                </LinearLayout>
+
+                            </RelativeLayout>
+                            <androidx.recyclerview.widget.RecyclerView
+                                android:id="@+id/rv_filter_category"
+                                android:layout_width="match_parent"
+                                android:layout_height="@dimen/_180sdp"
+                                android:layout_marginTop="@dimen/_6sdp"
+                                android:visibility="gone"/>
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:paddingVertical="@dimen/_6sdp"
+                            android:paddingHorizontal="@dimen/_12sdp">
+
+                            <RelativeLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    style="@style/Text_12_Normal"
+                                    android:text="@string/filter_year"
+                                    android:layout_alignParentStart="true"
+                                    android:layout_centerVertical="true"/>
+
+                                <LinearLayout
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_alignParentEnd="true"
+                                    android:layout_centerVertical="true"
+                                    android:gravity="center_vertical"
+                                    android:id="@+id/btn_filter_year_release"
+                                    android:clickable="true"
+                                    android:focusable="true"
+                                    android:background="@drawable/bg_btn_press_tran"
+                                    android:paddingVertical="@dimen/_6sdp"
+                                    android:paddingHorizontal="@dimen/_12sdp">
+
+                                    <TextView
+                                        android:id="@+id/tv_year_release"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        style="@style/Text_12_Normal"
+                                        android:text="@string/all"/>
+
+                                    <ImageView
+                                        android:id="@+id/arrow_year_release"
+                                        android:layout_width="@dimen/_10sdp"
+                                        android:layout_height="@dimen/_10sdp"
+                                        android:src="@drawable/ic_arrow_right"
+                                        android:rotation="90"
+                                        android:layout_marginStart="@dimen/_6sdp"/>
+                                </LinearLayout>
+
+                            </RelativeLayout>
+                            <androidx.recyclerview.widget.RecyclerView
+                                android:id="@+id/rv_filter_year_release"
+                                android:layout_width="match_parent"
+                                android:layout_height="@dimen/_180sdp"
+                                android:layout_marginTop="@dimen/_6sdp"
+                                android:visibility="gone"/>
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:paddingVertical="@dimen/_6sdp"
+                            android:paddingHorizontal="@dimen/_12sdp">
+
+                            <RelativeLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    style="@style/Text_12_Normal"
+                                    android:text="@string/filter_age"
+                                    android:layout_alignParentStart="true"
+                                    android:layout_centerVertical="true"/>
+
+                                <LinearLayout
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_alignParentEnd="true"
+                                    android:layout_centerVertical="true"
+                                    android:gravity="center_vertical"
+                                    android:id="@+id/btn_filter_age_rating"
+                                    android:clickable="true"
+                                    android:focusable="true"
+                                    android:background="@drawable/bg_btn_press_tran"
+                                    android:paddingVertical="@dimen/_6sdp"
+                                    android:paddingHorizontal="@dimen/_12sdp">
+
+                                    <TextView
+                                        android:id="@+id/tv_age_rating"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        style="@style/Text_12_Normal"
+                                        android:text="@string/all"/>
+
+                                    <ImageView
+                                        android:id="@+id/arrow_age_rating"
+                                        android:layout_width="@dimen/_10sdp"
+                                        android:layout_height="@dimen/_10sdp"
+                                        android:src="@drawable/ic_arrow_right"
+                                        android:rotation="90"
+                                        android:layout_marginStart="@dimen/_6sdp"/>
+                                </LinearLayout>
+
+                            </RelativeLayout>
+                            <androidx.recyclerview.widget.RecyclerView
+                                android:id="@+id/rv_filter_age_rating"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="@dimen/_6sdp"
+                                android:visibility="gone"/>
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:paddingVertical="@dimen/_6sdp"
+                            android:paddingHorizontal="@dimen/_12sdp">
+
+                            <RelativeLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    style="@style/Text_12_Normal"
+                                    android:text="@string/filter_language"
+                                    android:layout_alignParentStart="true"
+                                    android:layout_centerVertical="true"/>
+
+                                <LinearLayout
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_alignParentEnd="true"
+                                    android:layout_centerVertical="true"
+                                    android:gravity="center_vertical"
+                                    android:id="@+id/btn_filter_language"
+                                    android:clickable="true"
+                                    android:focusable="true"
+                                    android:background="@drawable/bg_btn_press_tran"
+                                    android:paddingVertical="@dimen/_6sdp"
+                                    android:paddingHorizontal="@dimen/_12sdp">
+
+                                    <TextView
+                                        android:id="@+id/tv_language"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        style="@style/Text_12_Normal"
+                                        android:text="@string/all"/>
+
+                                    <ImageView
+                                        android:id="@+id/arrow_language"
+                                        android:layout_width="@dimen/_10sdp"
+                                        android:layout_height="@dimen/_10sdp"
+                                        android:layout_marginStart="@dimen/_6sdp"
+                                        android:rotation="90"
+                                        android:src="@drawable/ic_arrow_right" />
+                                </LinearLayout>
+
+                            </RelativeLayout>
+                            <androidx.recyclerview.widget.RecyclerView
+                                android:id="@+id/rv_filter_language"
+                                android:layout_width="match_parent"
+                                android:layout_height="@dimen/_180sdp"
+                                android:layout_marginTop="@dimen/_6sdp"
+                                android:visibility="gone"/>
+
+                        </LinearLayout>
+                    </LinearLayout>
+
+                </androidx.core.widget.NestedScrollView>
+
+
+            </LinearLayout>
+
+            <FrameLayout
+                android:id="@+id/btn_filter"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/_36sdp"
+                android:background="@drawable/bg_btn_white_radius_3sdp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
+                android:layout_marginHorizontal="@dimen/_20sdp"
+                android:layout_marginTop="@dimen/_20sdp"
+                android:layout_alignParentBottom="true">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    style="@style/Text_12_Bold"
+                    android:text="@string/filter_results"
+                    android:textColor="@color/black"
+                    />
+
+            </FrameLayout>
+
+        </RelativeLayout>
+
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/_6sdp"
+            android:layout_gravity="end"
+            android:layout_margin="@dimen/_6sdp"
+            android:background="@drawable/bg_btn_press_tran"
+            android:clickable="true"
+            android:focusable="true"
+            android:id="@+id/btn_close">
+            <ImageView
+                android:layout_width="@dimen/_12sdp"
+                android:layout_height="@dimen/_12sdp"
+                android:src="@drawable/ic_close"/>
+        </FrameLayout>
+    </FrameLayout>
+
+
+
+
+</FrameLayout>

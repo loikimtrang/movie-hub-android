@@ -38,6 +38,15 @@ public class HomeTopicDetailViewModel extends BaseViewModel {
                 repository.getApiService().getCollectionItemList(query)
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
+                        .retryWhen(throwable ->
+                                throwable.flatMap((Function<Throwable, ObservableSource<?>>) throwable1 -> {
+                                    if (NetworkUtils.checkNetworkError(throwable1)) {
+                                        return application.showDialogNoInternetAccess();
+                                    }else{
+                                        return Observable.error(throwable1);
+                                    }
+                                })
+                        )
                         .subscribe(
                                 response -> {
                                     hideLoading();

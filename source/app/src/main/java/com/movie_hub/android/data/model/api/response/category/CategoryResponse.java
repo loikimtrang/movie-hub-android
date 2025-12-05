@@ -13,4 +13,5 @@ public class CategoryResponse {
     private Integer status;
     private String createdDate;
     private String modifiedDate;
+    private boolean isSelect;
 }

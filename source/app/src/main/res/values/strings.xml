@@ -236,4 +236,18 @@
     <string name="slogan_app">Phim hay cả rổ</string>
     <string name="all">All</string>
     <string name="what_are_you_interested">What are you interested in?</string>
+
+    <string name="label_series">TV Series</string>
+    <string name="label_movie">Movie</string>
+    <string name="label_genre">Genre</string>
+    <string name="filter">Filter</string>
+
+    <string name="filter_country">Country</string>
+    <string name="filter_type">Type</string>
+    <string name="filter_category">Category</string>
+    <string name="filter_year">Release Year</string>
+    <string name="filter_age">Age Rating</string>
+    <string name="filter_language">Language</string>
+    <string name="selected">Selected</string>
+    <string name="filter_results">Filter results</string>
 </resources>

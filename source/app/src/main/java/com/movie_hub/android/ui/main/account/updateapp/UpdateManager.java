@@ -51,7 +51,7 @@ public class UpdateManager {
                         if (status == DownloadManager.STATUS_SUCCESSFUL) {
                             new android.os.Handler(android.os.Looper.getMainLooper()).post(onDownloadSuccess);
                         } else {
-                            new ToastMessage(ToastMessage.TYPE_ERROR, context.getString(R.string.download_failed)).showMessage(context);
+                            new ToastMessage(ToastMessage.TYPE_WARNING, context.getString(R.string.download_failed)).showMessage(context);
                         }
                         cursor.close();
                     }

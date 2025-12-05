@@ -16,10 +16,13 @@ import com.movie_hub.android.R;
 import com.movie_hub.android.constant.Constants;
 import com.movie_hub.android.data.model.api.ResponseWrapper;
 import com.movie_hub.android.data.model.api.request.appversion.CheckAppVersionRequest;
+import com.movie_hub.android.data.model.api.request.category.CategoryRequest;
 import com.movie_hub.android.data.model.api.request.login.UserLoginRequest;
 import com.movie_hub.android.data.model.api.request.login.UserRegisterRequest;
+import com.movie_hub.android.data.model.api.request.movie.MovieRequest;
 import com.movie_hub.android.data.model.api.request.user.UserLoginGoogleRequest;
 import com.movie_hub.android.data.model.api.response.MovieItem.MovieItemResponse;
+import com.movie_hub.android.data.model.api.response.category.CategoryResponse;
 import com.movie_hub.android.data.model.api.response.collection.CollectionResponse;
 import com.movie_hub.android.data.model.api.response.history.ListWatchHistoryResponse;
 import com.movie_hub.android.data.model.api.response.history.WatchHistoryResponse;
@@ -42,6 +45,8 @@ import com.movie_hub.android.ui.main.account.playlist.PlayListActivity;
 import com.movie_hub.android.ui.main.account.updateapp.CheckUpdateActivity;
 import com.movie_hub.android.ui.main.home.HomeFragment;
 import com.movie_hub.android.ui.main.home.detail.HomeSideBarDetailActivity;
+import com.movie_hub.android.ui.main.home.filter.FilterActivity;
+import com.movie_hub.android.ui.main.home.filter.model.FilterTypeModel;
 import com.movie_hub.android.ui.main.home.topic.HomeMoreTopicActivity;
 import com.movie_hub.android.ui.main.home.topic.topic_detail.HomeTopicDetailActivity;
 import com.movie_hub.android.ui.main.movie.detail.MovieDetailActivity;
@@ -50,6 +55,8 @@ import com.movie_hub.android.ui.main.schedule.ScheduleFragment;
 import com.movie_hub.android.ui.main.search.SearchFragment;
 import com.movie_hub.android.ui.main.splash.SplashActivity;
 import com.movie_hub.android.utils.GsonUtils;
+
+import java.util.List;
 
 
 public class MainActivity extends BaseActivity<ActivityMainBinding, MainViewModel> implements SystemBarColorProvider, View.OnClickListener {
@@ -190,6 +197,16 @@ public class MainActivity extends BaseActivity<ActivityMainBinding, MainViewMode
         startActivity(it);
     }
 
+    public void navigateToFilter(FilterTypeModel filterTypeModel, List<CategoryResponse> categoryResponseList, MovieRequest request) {
+        Intent it = new Intent(MainActivity.this, FilterActivity.class);
+        it.putExtra("filter_type", GsonUtils.toJson(filterTypeModel));
+        it.putExtra("cate_list", GsonUtils.toJson(categoryResponseList));
+        it.putExtra("movie_request", GsonUtils.toJson(request));
+
+        startActivity(it);
+    }
+
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -323,7 +340,7 @@ public class MainActivity extends BaseActivity<ActivityMainBinding, MainViewMode
                                 WatchHistoryResponse watchHistoryNoComplete = listWatchHistoryResponse.getWatchHistoryNoComplete();
 
                                 if (watchHistoryNoComplete == null) {
-                                    remainingEpisode = null;
+                                    remaining = null;
                                 } else {
                                     remaining = movieResponse.getEpisodeById(watchHistoryNoComplete.getMovieItemId());
                                 }

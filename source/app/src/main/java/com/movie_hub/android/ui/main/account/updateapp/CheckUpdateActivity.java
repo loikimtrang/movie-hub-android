@@ -91,7 +91,7 @@ public class CheckUpdateActivity extends BaseActivity<ActivityCheckUpdateBinding
             @Override
             public void doError(Throwable error) {
                 hideLoading();
-                showMgs(ToastMessage.TYPE_ERROR, getString(R.string.an_error_occurred));
+                showMgs(ToastMessage.TYPE_WARNING, getString(R.string.an_error_occurred));
             }
 
             @Override
@@ -108,14 +108,14 @@ public class CheckUpdateActivity extends BaseActivity<ActivityCheckUpdateBinding
                         showMgs(ToastMessage.TYPE_NORMAL, getString(R.string.current_version_is_lasted));
                     }
                 } else {
-                    showMgs(ToastMessage.TYPE_ERROR, getString(R.string.an_error_occurred));
+                    showMgs(ToastMessage.TYPE_WARNING, getString(R.string.an_error_occurred));
                 }
             }
 
             @Override
             public void doFail() {
                 hideLoading();
-                showMgs(ToastMessage.TYPE_ERROR, getString(R.string.an_error_occurred));
+                showMgs(ToastMessage.TYPE_WARNING, getString(R.string.an_error_occurred));
             }
         }, request);
     }

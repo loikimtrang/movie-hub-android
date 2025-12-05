@@ -22,6 +22,7 @@ import com.movie_hub.android.ui.main.account.updateapp.CheckUpdateViewModel;
 import com.movie_hub.android.ui.main.account.verifyotp.VerifyOtpViewModel;
 import com.movie_hub.android.ui.main.home.detail.HomeSideBarDetailActivity;
 import com.movie_hub.android.ui.main.home.detail.HomeSideBarDetailViewModel;
+import com.movie_hub.android.ui.main.home.filter.FilterViewModel;
 import com.movie_hub.android.ui.main.home.topic.HomeMoreTopicViewModel;
 import com.movie_hub.android.ui.main.home.topic.topic_detail.HomeTopicDetailViewModel;
 import com.movie_hub.android.ui.main.movie.detail.MovieDetailViewModel;
@@ -199,5 +200,13 @@ public class ActivityModule {
         Supplier<HomeTopicDetailViewModel> supplier = () -> new HomeTopicDetailViewModel(repository, (MVVMApplication)application);
         ViewModelProviderFactory<HomeTopicDetailViewModel> factory = new ViewModelProviderFactory<>(HomeTopicDetailViewModel.class, supplier);
         return new ViewModelProvider(activity, factory).get(HomeTopicDetailViewModel.class);
+    }
+
+    @Provides
+    @ActivityScope
+    FilterViewModel provideFilterViewModel(Repository repository, Context application) {
+        Supplier<FilterViewModel> supplier = () -> new FilterViewModel(repository, (MVVMApplication)application);
+        ViewModelProviderFactory<FilterViewModel> factory = new ViewModelProviderFactory<>(FilterViewModel.class, supplier);
+        return new ViewModelProvider(activity, factory).get(FilterViewModel.class);
     }
 }

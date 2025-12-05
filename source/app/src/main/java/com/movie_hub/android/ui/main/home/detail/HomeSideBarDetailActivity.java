@@ -2,12 +2,18 @@ package com.movie_hub.android.ui.main.home.detail;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.movie_hub.android.BR;
 import com.movie_hub.android.R;
+import com.movie_hub.android.data.model.api.ResponseListObj;
+import com.movie_hub.android.data.model.api.request.collection.CollectionItemRequest;
 import com.movie_hub.android.data.model.api.response.collection.CollectionResponse;
 import com.movie_hub.android.data.model.api.response.history.ListWatchHistoryResponse;
 import com.movie_hub.android.data.model.api.response.movie.MovieResponse;
@@ -22,6 +28,9 @@ import com.movie_hub.android.ui.main.search.topTrending.adapter.MovieVerticalAda
 import com.movie_hub.android.ui.main.search.topTrending.shimmer.MovieVerticalShimmerAdapter;
 import com.movie_hub.android.utils.GridUtil;
 import com.movie_hub.android.utils.GsonUtils;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class HomeSideBarDetailActivity extends BaseActivity<ActivityHomeSideBarDetailBinding, HomeSideBarDetailViewModel>
@@ -53,6 +62,10 @@ public class HomeSideBarDetailActivity extends BaseActivity<ActivityHomeSideBarD
         buildComponent.inject(this);
     }
 
+    int currentPage = 0;
+    int pageSize = 20;
+    boolean isLastPage = false;
+    private boolean isLoading = false;
     private MovieVerticalAdapter movieVerticalAdapter;
     private MovieVerticalShimmerAdapter movieVerticalShimmerAdapter;
 
@@ -67,14 +80,31 @@ public class HomeSideBarDetailActivity extends BaseActivity<ActivityHomeSideBarD
         String json = getIntent().getStringExtra("collection");
         CollectionResponse collectionResponse = GsonUtils.fromJson(json, CollectionResponse.class);
 
-        if (collectionResponse != null && collectionResponse.getMovies() != null &&
-                !collectionResponse.getMovies().isEmpty()) {
+        if (collectionResponse != null) {
             viewBinding.tvTitle.setSelected(true);
             viewBinding.tvTitle.setText(collectionResponse.getName());
-            viewModel.listMovie = collectionResponse.getMovies();
-            movieVerticalAdapter.setData(viewModel.listMovie);
-            hideShimmer();
+
+            viewModel.collectionResponse = collectionResponse;
+            getListMovie();
         }
+
+        viewBinding.rvMovie.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                if (dy <= 0) return;
+
+                LinearLayoutManager lm = (LinearLayoutManager) recyclerView.getLayoutManager();
+                if (lm == null || movieVerticalAdapter == null) return;
+
+                int totalItemCount = lm.getItemCount();
+                int lastVisibleItemPosition = lm.findLastVisibleItemPosition();
+
+                if (!isLoading && !isLastPage && lastVisibleItemPosition >= totalItemCount - 5) {
+                    getListMovie();
+                }
+            }
+        });
     }
 
     public void showShimmer() {
@@ -94,6 +124,71 @@ public class HomeSideBarDetailActivity extends BaseActivity<ActivityHomeSideBarD
         GridLayoutManager layoutManager = new GridLayoutManager(this, spanCount);
         viewBinding.rvMovie.setLayoutManager(layoutManager);
         viewBinding.rvMovie.addItemDecoration(new GridSpacingItemDecoration(spanCount, spacing));
+    }
+
+    public void getListMovie() {
+        isLoading = true;
+        CollectionItemRequest request = new CollectionItemRequest();
+        request.setCollectionId(viewModel.collectionResponse.getId());
+        request.setSize(pageSize);
+        request.setPage(currentPage);
+
+        viewModel.getListCollectionItem(new MainCallback<ResponseListObj<MovieResponse>>() {
+            @Override
+            public void doError(Throwable error) {
+                hideLoading();
+                showError(getString(R.string.an_error_occurred));
+                isLoading = false;
+            }
+
+            @Override
+            public void doSuccess() {
+                hideLoading();
+                isLoading = false;
+            }
+
+            @Override
+            public void doSuccess(ResponseListObj<MovieResponse> data) {
+                hideLoading();
+                if (data.getContent() != null && !data.getContent().isEmpty()) {
+                    if (currentPage == 0) {
+                        viewBinding.layoutEmpty.setVisibility(View.GONE);
+                        hideShimmer();
+                        viewModel.listMovieResponse.setValue(new ArrayList<>(data.getContent()));
+
+                        movieVerticalAdapter.setData(data.getContent());
+                    } else {
+                        List<MovieResponse> currentList = viewModel.listMovieResponse.getValue();
+                        if (currentList == null) currentList = new ArrayList<>();
+
+                        currentList.addAll(data.getContent());
+                        viewModel.listMovieResponse.postValue(currentList);
+
+                        movieVerticalAdapter.addData(data.getContent());
+                    }
+
+                    currentPage++;
+
+                    if (currentPage >= data.getTotalPages()) {
+                        isLastPage = true;
+                    }
+                } else {
+                    if (currentPage == 0) {
+                        hideShimmer();
+                        viewBinding.layoutEmpty.setVisibility(View.VISIBLE);
+                    }
+                    isLastPage = true;
+                }
+                isLoading = false;
+            }
+
+            @Override
+            public void doFail() {
+                hideLoading();
+                showError(getString(R.string.an_error_occurred));
+                isLoading = false;
+            }
+        }, request);
     }
 
     @Override

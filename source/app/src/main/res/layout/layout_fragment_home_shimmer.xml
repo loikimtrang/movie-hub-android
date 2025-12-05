@@ -28,7 +28,7 @@
                 android:clipChildren="false"
                 android:overScrollMode="never"
                 android:paddingHorizontal="@dimen/_70sdp"
-                android:layout_marginTop="@dimen/_100sdp"
+                android:layout_marginTop="@dimen/_120sdp"
                 android:layout_gravity="center">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
@@ -45,7 +45,7 @@
                         app:layout_constraintDimensionRatio="2:3"
                         android:background="@drawable/bg_shimmer_radius_12sdp"
                         android:padding="@dimen/_2sdp"
-                        android:alpha="0.8">
+                        android:alpha="0.6">
 
                     </FrameLayout>
 
@@ -64,7 +64,7 @@
                 android:ellipsize="end"
                 android:gravity="center"
                 android:background="@drawable/bg_shimmer_radius_3sdp"
-                android:alpha="0.7"/>
+                android:alpha="0.5"/>
 
             <TextView
                 android:id="@+id/tv_other_name"
@@ -79,7 +79,7 @@
                 android:gravity="center"
                 android:background="@drawable/bg_shimmer_radius_3sdp"
                 android:layout_marginTop="@dimen/_6sdp"
-                android:alpha="0.6"/>
+                android:alpha="0.4"/>
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -95,7 +95,7 @@
                     android:layout_weight="1"
                     android:background="@drawable/bg_shimmer_radius_6sdp"
                     android:layout_marginEnd="@dimen/_3sdp"
-                    android:alpha="0.5"/>
+                    android:alpha="0.3"/>
 
                 <FrameLayout
                     android:id="@+id/btn_banner_inf"
@@ -104,7 +104,7 @@
                     android:layout_weight="1"
                     android:background="@drawable/bg_shimmer_radius_6sdp"
                     android:layout_marginStart="@dimen/_3sdp"
-                    android:alpha="0.5"/>
+                    android:alpha="0.3"/>
 
 
 
@@ -117,7 +117,7 @@
                 android:layout_gravity="center"
                 android:layout_marginTop="@dimen/_12sdp"
                 android:background="@drawable/bg_shimmer_radius_3sdp"
-                android:alpha="0.4"/>
+                android:alpha="0.2"/>
 
             <TextView
                 android:id="@+id/tv_description"
@@ -132,7 +132,7 @@
                 android:gravity="center_horizontal"
                 android:background="@drawable/bg_shimmer_radius_3sdp"
                 android:layout_marginHorizontal="@dimen/_30sdp"
-                android:alpha="0.3"/>
+                android:alpha="0.1"/>
 
             <com.tbuonomo.viewpagerdotsindicator.DotsIndicator
                 android:id="@+id/dotsIndicatorBanner"
@@ -145,7 +145,7 @@
                 android:paddingHorizontal="@dimen/_20sdp"
                 app:dotsSize="@dimen/_8sdp"
                 app:dotsSpacing="@dimen/_3sdp"
-                android:alpha="0.2"/>
+                android:alpha="0.1"/>
 
         </LinearLayout>
     </com.facebook.shimmer.ShimmerFrameLayout>

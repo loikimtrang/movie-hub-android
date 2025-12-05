@@ -179,7 +179,7 @@ public class SplashActivity extends BaseActivity<ActivitySplashBinding, SplashVi
             @Override
             public void doError(Throwable error) {
                 hideLoading();
-                showMgs(ToastMessage.TYPE_ERROR, getString(R.string.an_error_occurred));
+                showMgs(ToastMessage.TYPE_WARNING, getString(R.string.an_error_occurred));
             }
 
             @Override
@@ -206,7 +206,7 @@ public class SplashActivity extends BaseActivity<ActivitySplashBinding, SplashVi
             @Override
             public void doFail() {
                 hideLoading();
-                showMgs(ToastMessage.TYPE_ERROR, getString(R.string.an_error_occurred));
+                showMgs(ToastMessage.TYPE_WARNING, getString(R.string.an_error_occurred));
             }
         }, request);
     }

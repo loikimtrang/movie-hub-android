@@ -124,7 +124,6 @@ public class HomeTopicDetailActivity extends BaseActivity<ActivityHomeTopicDetai
     }
 
     public void getListMovie() {
-        showLoading();
         isLoading = true;
         CollectionItemRequest request = new CollectionItemRequest();
         request.setCollectionId(viewModel.collectionResponse.getId());

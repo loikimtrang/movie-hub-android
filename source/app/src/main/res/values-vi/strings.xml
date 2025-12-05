@@ -233,5 +233,17 @@
     <string name="slogan_app">Phim hay cả rổ</string>
     <string name="all">Tất cả</string>
     <string name="what_are_you_interested">Bạn đang quan tâm gì?</string>
+    <string name="label_series">Phim bộ</string>
+    <string name="label_movie">Phim lẻ</string>
+    <string name="label_genre">Thể loại</string>
+    <string name="filter">Lọc</string>
+    <string name="filter_country">Quốc gia</string>
+    <string name="filter_type">Loại phim</string>
+    <string name="filter_category">Thể loại</string>
+    <string name="filter_year">Năm sản xuất</string>
+    <string name="filter_age">Độ tuổi</string>
+    <string name="filter_language">Ngôn ngữ</string>
 
+    <string name="selected">Đã chọn</string>
+    <string name="filter_results">Lọc kết quả</string>
 </resources>

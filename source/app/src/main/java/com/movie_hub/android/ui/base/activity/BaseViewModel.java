@@ -6,13 +6,19 @@ import androidx.lifecycle.ViewModel;
 
 import com.movie_hub.android.MVVMApplication;
 import com.movie_hub.android.data.Repository;
+import com.movie_hub.android.data.model.api.request.user.RefreshTokenRequest;
 import com.movie_hub.android.data.model.other.ToastMessage;
+import com.movie_hub.android.utils.NetworkUtils;
 
 import java.util.Objects;
 
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 import lombok.Getter;
 import lombok.Setter;
+import timber.log.Timber;
 
 public class BaseViewModel extends ViewModel {
     protected CompositeDisposable compositeDisposable;
@@ -77,5 +83,37 @@ public class BaseViewModel extends ViewModel {
     }
     public String getLanguage() {
         return repository.getSharedPreferences().getAppLanguage();
+    }
+
+    public void refreshToken() {
+        if (!isLogin()) {
+            return;
+        }
+
+        RefreshTokenRequest request = new RefreshTokenRequest();
+        request.setRefresh_token(repository.getSharedPreferences().getRefreshToken());
+        request.setGrant_type("refresh_token");
+
+        compositeDisposable.add(repository.getMasterApiService().refreshToken(request)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .retryWhen(throwable ->
+                        throwable.flatMap(throwable1 -> {
+                            if (NetworkUtils.checkNetworkError(throwable1)) {
+                                return application.showDialogNoInternetAccess();
+                            } else {
+                                return Observable.error(throwable1);
+                            }
+                        })
+                )
+                .subscribe(
+                        response -> {
+                            repository.getSharedPreferences().setToken(response.getAccess_token());
+                            repository.getSharedPreferences().setRefreshToken(response.getRefresh_token());
+                        },
+                        throwable -> {
+                            Timber.e(throwable, "");
+                        }
+                ));
     }
 }

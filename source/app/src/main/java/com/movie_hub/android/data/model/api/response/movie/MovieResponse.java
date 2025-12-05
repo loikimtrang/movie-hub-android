@@ -108,19 +108,25 @@ public class MovieResponse {
     public MovieItemResponse getEpisodeById(Long movieItemId) {
         if (seasons == null) return null;
 
-        for (int i = 0; i<seasons.size(); i++) {
-            for (MovieItemResponse e: seasons.get(i).getEpisodes()) {
-                if (e.getId().equals(movieItemId)) {
-                    e.getParent().setId(seasons.get(i).getId());
-                    e.getParent().setLabel(String.valueOf((i + 1)));
+        for (int i = 0; i < seasons.size(); i++) {
+            SeasonResponse season = seasons.get(i);
+            if (season == null || season.getEpisodes() == null) continue;
 
+            for (MovieItemResponse e : season.getEpisodes()) {
+                if (e.getId().equals(movieItemId)) {
+                    if (e.getParent() == null) {
+                        e.setParent(new SeasonResponse());
+                    }
+
+                    e.getParent().setId(season.getId());
+                    e.getParent().setLabel(String.valueOf(i + 1));
                     return e;
                 }
             }
         }
-
-        return null;
+        return seasons.get(0).getEpisodes().get(0);
     }
+
 
     public boolean isLastEpisode(Long episodeId) {
         if (seasons == null || episodeId == null) return false;

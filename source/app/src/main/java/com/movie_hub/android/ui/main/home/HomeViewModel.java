@@ -6,9 +6,11 @@ import com.movie_hub.android.MVVMApplication;
 import com.movie_hub.android.data.Repository;
 import com.movie_hub.android.data.model.api.RequestToMapConverter;
 import com.movie_hub.android.data.model.api.ResponseListObj;
+import com.movie_hub.android.data.model.api.request.category.CategoryRequest;
 import com.movie_hub.android.data.model.api.request.collection.CollectionRequest;
 import com.movie_hub.android.data.model.api.request.history.ListWatchHistoryRequest;
 import com.movie_hub.android.data.model.api.request.side_bar.SideBarRequest;
+import com.movie_hub.android.data.model.api.response.category.CategoryResponse;
 import com.movie_hub.android.data.model.api.response.collection.CollectionResponse;
 import com.movie_hub.android.data.model.api.response.history.ListWatchHistoryResponse;
 import com.movie_hub.android.data.model.api.response.history.MovieHistoryResponse;
@@ -16,8 +18,10 @@ import com.movie_hub.android.data.model.api.response.movie.MovieResponse;
 import com.movie_hub.android.data.model.api.response.side_bar.SidebarResponse;
 import com.movie_hub.android.ui.base.fragment.BaseFragmentViewModel;
 import com.movie_hub.android.ui.main.MainCallback;
+import com.movie_hub.android.ui.main.home.filter.model.FilterTypeModel;
 import com.movie_hub.android.utils.NetworkUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -200,6 +204,39 @@ public class HomeViewModel extends BaseFragmentViewModel {
                                     callback.doError(throwable);
                                 }
                         )
+        );
+    }
+
+    List<CategoryResponse> categoryResponses = new ArrayList<>();
+    FilterTypeModel filterTypeModel = new FilterTypeModel();
+    public void getListCategory(MainCallback<List<CategoryResponse>> callback, CategoryRequest request) {
+        request.setSize(1000);
+        Map<String, Object> query = RequestToMapConverter.convert(request);
+        compositeDisposable.add(repository.getApiService().getListCategory(query)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .retryWhen(throwable ->
+                        throwable.flatMap((Function<Throwable, ObservableSource<?>>) throwable1 -> {
+                            if (NetworkUtils.checkNetworkError(throwable1)) {
+                                hideLoading();
+                                return application.showDialogNoInternetAccess();
+                            }else{
+                                return Observable.error(throwable1);
+                            }
+                        })
+                )
+                .subscribe(
+                        response -> {
+                            if (response.isResult()) {
+                                callback.doSuccess(response.getData().getContent());
+                            } else {
+                                callback.doFail();
+                            }
+                        }, throwable -> {
+                            Timber.e(throwable);
+                            callback.doError(throwable);
+                        }
+                )
         );
     }
 }

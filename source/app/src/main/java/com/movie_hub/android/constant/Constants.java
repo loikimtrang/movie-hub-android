@@ -38,6 +38,8 @@ public class Constants {
     public static int TYPE_MOVIE_SINGLE = 1;
     public static int TYPE_MOVIE_SERIES = 2;
     public static int TYPE_MOVIE_TRAILER = 3;
+    public static int TYPE_GENRE = 3;
+
     public static int MOVIE_ITEM_KIND_SEASON = 1;
     public static int MOVIE_ITEM_KIND_EPISODE = 2;
     public static int MOVIE_ITEM_KIND_TRAILER = 3;

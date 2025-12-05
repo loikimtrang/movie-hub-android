@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.View;
+import android.view.animation.AccelerateDecelerateInterpolator;
 
 import androidx.annotation.NonNull;
 import androidx.core.widget.NestedScrollView;
@@ -16,9 +17,13 @@ import androidx.viewpager2.widget.ViewPager2;
 import com.bumptech.glide.Glide;
 import com.movie_hub.android.BR;
 import com.movie_hub.android.R;
+import com.movie_hub.android.constant.Constants;
 import com.movie_hub.android.data.model.api.ResponseListObj;
+import com.movie_hub.android.data.model.api.request.category.CategoryRequest;
 import com.movie_hub.android.data.model.api.request.collection.CollectionRequest;
+import com.movie_hub.android.data.model.api.request.movie.MovieRequest;
 import com.movie_hub.android.data.model.api.request.side_bar.SideBarRequest;
+import com.movie_hub.android.data.model.api.response.category.CategoryResponse;
 import com.movie_hub.android.data.model.api.response.collection.CollectionResponse;
 import com.movie_hub.android.data.model.api.response.history.ListWatchHistoryResponse;
 import com.movie_hub.android.data.model.api.response.history.MovieHistoryResponse;
@@ -34,6 +39,10 @@ import com.movie_hub.android.ui.main.home.adapter.CollectionAdapter;
 import com.movie_hub.android.ui.main.home.adapter.CollectionType_Topic_Adapter;
 import com.movie_hub.android.ui.main.home.adapter.MovieBannerAdapter;
 import com.movie_hub.android.ui.main.home.adapter.MovieHistoryHomeAdapter;
+import com.movie_hub.android.ui.main.home.filter.adapter.HomeTopFilterItemAdapter;
+import com.movie_hub.android.ui.main.home.filter.fragment.FilterCategoryFragmentDialog;
+import com.movie_hub.android.ui.main.home.filter.fragment.FilterFragmentDialog;
+import com.movie_hub.android.ui.main.home.filter.model.FilterTypeModel;
 import com.movie_hub.android.utils.DisplayUtils;
 import com.movie_hub.android.utils.GsonUtils;
 import com.movie_hub.android.utils.HtmlUtils;
@@ -47,7 +56,9 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding, HomeViewMode
         implements SystemBarColorProvider,
         OnMovieClickCallback,
         CollectionAdapter.OnCollectionClickListener,
-        CollectionType_Topic_Adapter.OnTopicClickCallback {
+        CollectionType_Topic_Adapter.OnTopicClickCallback,
+        HomeTopFilterItemAdapter.OnFilterTopClickListener,
+        FilterCategoryFragmentDialog.FilterCategoryDialogCallback {
 
     @Override
     public int getBindingVariable() {
@@ -83,7 +94,7 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding, HomeViewMode
 
     // history
     private MovieHistoryHomeAdapter movieHistoryHomeAdapter;
-
+    private HomeTopFilterItemAdapter homeTopFilterItemAdapter;
     // collection
     private CollectionAdapter collectionAdapter;
     private CollectionType_Topic_Adapter collectionTypeTopicAdapter;
@@ -132,6 +143,26 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding, HomeViewMode
         collectionTypeTopicAdapter = new CollectionType_Topic_Adapter(this, getContext());
         binding.rvTopic.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
         binding.rvTopic.setAdapter(collectionTypeTopicAdapter);
+
+        homeTopFilterItemAdapter = new HomeTopFilterItemAdapter(this, getContext());
+        binding.rvFilter.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
+        binding.rvFilter.setAdapter(homeTopFilterItemAdapter);
+        homeTopFilterItemAdapter.setData(getFilterType());
+    }
+
+    public List<FilterTypeModel> getFilterType() {
+        List<FilterTypeModel> filterTypeModels = new ArrayList<>();
+        FilterTypeModel filterTypeModel1 = new FilterTypeModel(getString(R.string.recommend), -1, true);
+        FilterTypeModel filterTypeModel2 = new FilterTypeModel(getString(R.string.label_movie), Constants.TYPE_MOVIE_SINGLE, false);
+        FilterTypeModel filterTypeModel3 = new FilterTypeModel(getString(R.string.label_series), Constants.TYPE_MOVIE_SERIES, false);
+        FilterTypeModel filterTypeModel4 = new FilterTypeModel(getString(R.string.label_genre), Constants.TYPE_GENRE, false);
+
+        filterTypeModels.add(filterTypeModel1);
+        filterTypeModels.add(filterTypeModel2);
+        filterTypeModels.add(filterTypeModel3);
+        filterTypeModels.add(filterTypeModel4);
+
+        return filterTypeModels;
     }
     public void bindingClick() {
         binding.swipeRefreshLayout.setOnRefreshListener(this::reloadDataHome);
@@ -166,9 +197,52 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding, HomeViewMode
                 if (distanceToBottom < 400 && !isLoading && !isLastPage) {
                     getListCollection();
                 }
+
+                if (scrollY > oldScrollY + 5) {
+                    hideRvFilter();
+                }
+
+                if (scrollY < 100) {
+                    showRvFilter();
+                }
             }
         });
+
     }
+
+    private boolean isRvFilterVisible = true;
+
+    private void hideRvFilter() {
+        if (isRvFilterVisible) {
+            isRvFilterVisible = false;
+
+            binding.rvFilter.animate()
+                    .translationY(-binding.rvFilter.getHeight())
+                    .alpha(0f)
+                    .setDuration(300)
+                    .setInterpolator(new AccelerateDecelerateInterpolator())
+                    .withEndAction(() -> binding.rvFilter.setVisibility(View.GONE))
+                    .start();
+        }
+    }
+
+    private void showRvFilter() {
+        if (!isRvFilterVisible) {
+            isRvFilterVisible = true;
+
+            binding.rvFilter.setVisibility(View.VISIBLE);
+            binding.rvFilter.setAlpha(0f);
+            binding.rvFilter.setTranslationY(-binding.rvFilter.getHeight());
+
+            binding.rvFilter.animate()
+                    .translationY(0f)
+                    .alpha(1f)
+                    .setDuration(300)
+                    .setInterpolator(new AccelerateDecelerateInterpolator())
+                    .start();
+        }
+    }
+
 
     private void reloadDataHome() {
         showShimmer();
@@ -201,6 +275,7 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding, HomeViewMode
         binding.layoutCollection.setVisibility(View.VISIBLE);
 
         binding.tvTopic.setSelected(true);
+        binding.rvFilter.setVisibility(View.VISIBLE);
     }
     public void showShimmer() {
         binding.shimmerBanner.shimmerLayout.setVisibility(View.VISIBLE);
@@ -637,5 +712,60 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding, HomeViewMode
     public void onTopicClick(CollectionResponse collectionResponse) {
         showLoading();
         ((MainActivity) requireActivity()).navigateToTopicDetail(collectionResponse);
+    }
+
+    public void getListCategory(FilterTypeModel filterTypeModel) {
+        showLoading();
+        viewModel.getListCategory(new MainCallback<List<CategoryResponse>>() {
+            @Override
+            public void doError(Throwable error) {
+                showError(getString(R.string.an_error_occurred));
+                hideLoading();
+            }
+            @Override
+            public void doSuccess(List<CategoryResponse> data) {
+                viewModel.categoryResponses = data;
+                if (filterTypeModel.getType() == Constants.TYPE_GENRE) {
+                    showFilterCategoryDialog(viewModel.categoryResponses);
+                } else {
+                    ((MainActivity) requireActivity()).navigateToFilter(filterTypeModel, data, new MovieRequest());
+                }
+            }
+            @Override
+            public void doSuccess() {
+                hideLoading();
+            }
+
+            @Override
+            public void doFail() {
+                showError(getString(R.string.an_error_occurred));
+                hideLoading();
+            }
+        }, new CategoryRequest());
+    }
+    @Override
+    public void onFilterClick(FilterTypeModel filterTypeModel) {
+        showLoading();
+        viewModel.filterTypeModel = filterTypeModel;
+        getListCategory(viewModel.filterTypeModel);
+    }
+
+    public void showFilterCategoryDialog(List<CategoryResponse> categoryResponseList) {
+        FilterCategoryFragmentDialog dialog = new FilterCategoryFragmentDialog(
+                this,
+                categoryResponseList
+
+        );
+        dialog.show(getChildFragmentManager(), "FilterFragmentDialog");
+    }
+
+    @Override
+    public void onFilterCategoryClick(MovieRequest request) {
+        ((MainActivity) requireActivity()).navigateToFilter(viewModel.filterTypeModel, viewModel.categoryResponses, request);
+    }
+
+    @Override
+    public void onDialogDismiss() {
+        hideLoading();
     }
 }

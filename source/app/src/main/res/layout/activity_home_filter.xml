@@ -6,11 +6,11 @@
     <data>
         <variable
             name="a"
-            type="com.movie_hub.android.ui.main.home.topic.topic_detail.HomeTopicDetailActivity" />
+            type="com.movie_hub.android.ui.main.home.filter.FilterActivity" />
 
         <variable
             name="vm"
-            type="com.movie_hub.android.ui.main.home.topic.topic_detail.HomeTopicDetailViewModel" />
+            type="com.movie_hub.android.ui.main.home.filter.FilterViewModel" />
 
         <import type="android.view.View" />
     </data>
@@ -26,7 +26,7 @@
             android:layout_height="match_parent"
             android:orientation="vertical">
 
-            <LinearLayout
+            <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/_40sdp"
                 android:background="@color/header_app">
@@ -35,7 +35,9 @@
                     android:id="@+id/back"
                     android:layout_width="@dimen/_36sdp"
                     android:layout_height="@dimen/_40sdp"
-                    android:onClick="@{(v)->a.finish()}">
+                    android:onClick="@{(v)->a.finish()}"
+                    android:layout_centerVertical="true"
+                    android:layout_alignParentStart="true">
                     <ImageView
                         android:layout_width="@dimen/_12sdp"
                         android:layout_height="@dimen/_12sdp"
@@ -55,10 +57,40 @@
                     android:singleLine="true"
                     android:focusable="true"
                     android:focusableInTouchMode="true"
-                    android:scrollHorizontally="true"/>
+                    android:scrollHorizontally="true"
+                    android:layout_centerVertical="true"
+                    android:layout_toEndOf="@id/back"
+                    android:layout_toStartOf="@+id/btn_filter"/>
+
+                <LinearLayout
+                    android:id="@+id/btn_filter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_alignParentEnd="true"
+                    android:gravity="center_vertical"
+                    android:layout_marginHorizontal="@dimen/_12sdp"
+                    android:background="@drawable/bg_btn_press_tran"
+                    android:padding="@dimen/_6sdp"
+                    android:clickable="true"
+                    android:focusable="true">
+
+                    <ImageView
+                        android:layout_width="@dimen/_10sdp"
+                        android:layout_height="@dimen/_10sdp"
+                        android:src="@drawable/ic_filter"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        style="@style/Text_12_Normal"
+                        android:text="@string/filter"
+                        android:layout_marginStart="@dimen/_6sdp"/>
+
+                </LinearLayout>
 
 
-            </LinearLayout>
+            </RelativeLayout>
 
             <FrameLayout
                 android:layout_width="match_parent"
@@ -67,8 +99,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:id="@+id/rv_movie"
-                    android:layout_marginHorizontal="@dimen/_12sdp"
-                    android:layout_marginTop="@dimen/_12sdp"/>
+                    android:layout_marginHorizontal="@dimen/_12sdp"/>
 
                 <FrameLayout
                     android:id="@+id/layout_empty"
