@@ -6,11 +6,11 @@
     <data>
         <variable
             name="a"
-            type="com.movie_hub.android.ui.main.movie.detail.comment.CommentActivity" />
+            type="com.movie_hub.android.ui.main.movie.detail.review.ReviewActivity" />
 
         <variable
             name="vm"
-            type="com.movie_hub.android.ui.main.movie.detail.comment.CommentViewModel" />
+            type="com.movie_hub.android.ui.main.movie.detail.review.ReviewViewModel" />
 
         <import type="android.view.View" />
     </data>
@@ -51,10 +51,10 @@
                     android:layout_height="wrap_content">
 
                     <ImageView
-                        android:id="@+id/ic_comment"
+                        android:id="@+id/ic_review"
                         android:layout_width="@dimen/_16sdp"
                         android:layout_height="@dimen/_16sdp"
-                        android:src="@drawable/ic_comment"
+                        android:src="@drawable/ic_rate"
                         android:layout_centerVertical="true"
                         android:layout_marginStart="@dimen/_12sdp"
                         android:layout_marginVertical="@dimen/_20sdp"/>
@@ -64,9 +64,9 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_centerVertical="true"
-                        android:layout_toEndOf="@+id/ic_comment"
+                        android:layout_toEndOf="@+id/ic_review"
                         style="@style/Text_14_Normal"
-                        android:text="@string/comment"
+                        android:text="@string/rating"
                         android:layout_marginStart="@dimen/_6sdp"/>
 
                     <FrameLayout
@@ -93,13 +93,6 @@
 
                 </RelativeLayout>
 
-                <androidx.recyclerview.widget.RecyclerView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/rv_episode"
-                    android:layout_marginBottom="@dimen/_12sdp"
-                    android:visibility="gone"/>
-
                 <FrameLayout
                     android:id="@+id/l_comment"
                     android:layout_width="match_parent"
@@ -109,7 +102,7 @@
                     <androidx.recyclerview.widget.RecyclerView
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:id="@+id/rv_comment"/>
+                        android:id="@+id/rv_review"/>
 
                     <FrameLayout
                         android:id="@+id/layout_empty"
@@ -166,126 +159,34 @@
                         app:trackColor="@android:color/transparent"
                         style="@style/Widget.MaterialComponents.LinearProgressIndicator"/>
 
-                    <LinearLayout
-                        android:id="@+id/l_reply_to"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:layout_marginTop="@dimen/_12sdp"
-                        android:layout_marginHorizontal="@dimen/_12sdp"
-                        android:gravity="center_vertical"
-                        android:visibility="gone">
 
-                        <TextView
-                            android:id="@+id/tv_reply_to"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            style="@style/Text_10_Normal"
-                            android:text="@string/replying_to"/>
-
-                        <FrameLayout
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:id="@+id/btn_cancel_cmt"
-                            android:layout_marginStart="@dimen/_6sdp"
-                            android:clickable="true"
-                            android:focusable="true"
-                            android:onClick="onClick">
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                style="@style/Text_10_Normal"
-                                android:text="@string/cancel"
-                                android:textColor="@color/text_comment"
-                                />
-
-                        </FrameLayout>
-
-
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:id="@+id/l_input"
+                    <FrameLayout
+                        android:id="@+id/btn_open_review"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
+                        android:layout_height="@dimen/_36sdp"
+                        android:background="@drawable/bg_btn_white_radius_3sdp"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:onClick="onClick"
+                        android:foreground="?attr/selectableItemBackground"
                         android:layout_marginHorizontal="@dimen/_12sdp"
-                        android:layout_marginBottom="@dimen/_6sdp"
-                        android:layout_marginTop="@dimen/_6sdp"
-                        android:layout_below="@+id/l_reply_to">
+                        android:layout_marginTop="@dimen/_12sdp"
+                        android:layout_marginBottom="@dimen/_20sdp">
 
-                        <EditText
-                            android:id="@+id/edt_comment"
-                            android:layout_width="0dp"
+                        <TextView
+                            android:id="@+id/tv_skip"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:background="@drawable/bg_input_comment"
-                            android:padding="@dimen/_12sdp"
-                            android:hint="@string/comment_here"
-                            android:textColorHint="@color/text_comment"
-                            android:maxLines="5"
-                            android:minLines="1"
-                            android:maxLength="300"
-                            android:layout_weight="1"
-                            android:gravity="top|start"
-                            android:inputType="textMultiLine"
-                            android:imeOptions="actionDone"
-                            android:scrollbars="vertical"
+                            android:layout_gravity="center"
                             style="@style/Text_12_Normal"
+                            android:text="@string/rating"
+                            android:textColor="@color/black"
                             />
+                    </FrameLayout>
 
-                        <FrameLayout
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center_vertical"
-                            android:layout_marginStart="@dimen/_12sdp"
-                            android:padding="@dimen/_6sdp"
-                            android:background="@drawable/bg_btn_press_tran"
-                            android:clickable="true"
-                            android:focusable="true"
-                            android:onClick="onClick"
-                            android:id="@+id/btn_create_comment"
-                            android:visibility="gone">
-
-                            <ImageView
-                                android:layout_width="@dimen/_20sdp"
-                                android:layout_height="@dimen/_20sdp"
-                                android:src="@drawable/ic_send"
-                                android:layout_gravity="center"/>
-
-                        </FrameLayout>
-                    </LinearLayout>
-
-
-                    <LinearLayout
-                        android:id="@+id/l_count_char"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_below="@+id/l_input"
-                        android:layout_marginBottom="@dimen/_6sdp"
-                        android:layout_marginEnd="@dimen/_12sdp"
-                        android:layout_alignParentEnd="true"
-                        android:orientation="horizontal"
-                        android:visibility="invisible">
-
-                        <TextView
-                            android:id="@+id/tv_count_char"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="0"
-                            style="@style/Text_10_Normal"/>
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="/300"
-                            style="@style/Text_10_Normal" />
-
-
-                    </LinearLayout>
                 </RelativeLayout>
 
             </LinearLayout>
-
 
 
             <FrameLayout

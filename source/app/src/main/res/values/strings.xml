@@ -254,4 +254,15 @@
     <string name="authentication_code">Authentication code</string>
     <string name="enter_email_forgot_password">Enter the email you used to register your account</string>
     <string name="incorrect_email">Email does not exist</string>
+
+    <string name="awesome">Awesome</string>
+    <string name="good_movie">Great Movie</string>
+    <string name="decent">Pretty Good</string>
+    <string name="boring_movie">Boring Movie</string>
+    <string name="terrible">Terrible</string>
+    <string name="write_review">Write a review about the movie</string>
+    <string name="submit_review">Submit review</string>
+    <string name="review">review</string>
+    <string name="please_write_review">Please write a review</string>
+    <string name="once_rate">You can only rate once</string>
 </resources>

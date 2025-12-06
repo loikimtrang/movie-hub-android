@@ -63,6 +63,13 @@ public class Constants {
     public static final int TYPE_COLLECTION_2 = 2;
     public static final int TYPE_COLLECTION_3 = 3;
     public static final int TYPE_COLLECTION_4 = 4;
+
+    public static final int TYPE_RATING_1 = 1;
+    public static final int TYPE_RATING_2 = 2;
+    public static final int TYPE_RATING_3 = 3;
+    public static final int TYPE_RATING_4 = 4;
+    public static final int TYPE_RATING_5 = 5;
+
     private Constants(){
 
     }

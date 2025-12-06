@@ -8,6 +8,7 @@ import com.movie_hub.android.data.model.api.response.MovieItem.MovieItemResponse
 import com.movie_hub.android.data.model.api.response.category.CategoryResponse;
 import com.movie_hub.android.data.model.api.response.history.ListWatchHistoryResponse;
 import com.movie_hub.android.data.model.api.response.history.WatchHistoryResponse;
+import com.movie_hub.android.data.model.api.response.review.ReviewStatisticsResponse;
 import com.movie_hub.android.data.model.api.response.season.SeasonResponse;
 import com.movie_hub.android.ui.main.movie.detail.comment.model.TagComment;
 
@@ -39,6 +40,13 @@ public class MovieResponse {
     private String modifiedDate;
     private List<CategoryResponse> categories;
     private List<SeasonResponse> seasons;
+    private Long reviewCount;
+    private Double averageRating;
+
+    public Double getAverageRating() {
+        return averageRating == null ? 0.0 : Math.round(averageRating * 10) / 10.0;
+    }
+
     public String getPosterUrl() {
         return Constants.MEDIA_URL + posterUrl;
     }

@@ -67,6 +67,16 @@
             android:screenOrientation="portrait"
             android:exported="true"/>
 
+        <activity android:name=".ui.main.account.contact.ContactActivity"
+            android:windowSoftInputMode="adjustResize"
+            android:screenOrientation="portrait"
+            android:exported="true"/>
+
+        <activity android:name=".ui.main.account.privacy.PrivacyActivity"
+            android:windowSoftInputMode="adjustResize"
+            android:screenOrientation="portrait"
+            android:exported="true"/>
+
         <activity
             android:name=".ui.main.movie.detail.comment.CommentActivity"
             android:theme="@style/TransparentActivity"
@@ -74,6 +84,12 @@
             android:screenOrientation="portrait"
             android:exported="true"/>
 
+        <activity
+            android:name=".ui.main.movie.detail.review.ReviewActivity"
+            android:theme="@style/TransparentActivity"
+            android:windowSoftInputMode="adjustResize"
+            android:screenOrientation="portrait"
+            android:exported="true"/>
 
         <activity android:name=".ui.main.account.favourite.FavouriteActivity"
             android:windowSoftInputMode="adjustResize"

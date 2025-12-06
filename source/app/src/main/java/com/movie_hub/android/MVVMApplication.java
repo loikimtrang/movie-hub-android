@@ -70,14 +70,17 @@ public class MVVMApplication extends Application implements LifecycleObserver {
     }
 
 
-    public PublishSubject<Integer> showDialogNoInternetAccess(){
+    public PublishSubject<Integer> showDialogNoInternetAccess() {
         final PublishSubject<Integer> subject = PublishSubject.create();
         currentActivity.runOnUiThread(() ->
-                DialogUtils.dialogConfirm(currentActivity, currentActivity.getResources().getString(R.string.newtwork_error),
-                        currentActivity.getResources().getString(R.string.newtwork_error_button_retry),
-                        (dialogInterface, i) -> subject.onNext(1), currentActivity.getResources().getString(R.string.newtwork_error_button_exit),
-                        (dialogInterface, i) -> System.exit(0))
+                DialogUtils.dialogConfirmSingleButton(
+                        currentActivity,
+                        currentActivity.getString(R.string.newtwork_error),
+                        currentActivity.getString(R.string.newtwork_error_button_retry),
+                        (dialogInterface, i) -> subject.onNext(1)
+                )
         );
         return subject;
     }
+
 }

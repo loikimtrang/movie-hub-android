@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="@dimen/_100sdp"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_item_review_type"
+    android:orientation="vertical"
+    android:gravity="center_horizontal"
+    android:padding="@dimen/_12sdp"
+    android:clickable="true"
+    android:focusable="true"
+    android:id="@+id/layout_content">
+
+    <ImageView
+        android:id="@+id/ic_review"
+        android:layout_width="@dimen/_64sdp"
+        android:layout_height="@dimen/_64sdp"
+        android:src="@drawable/ic_rate_5" />
+
+    <TextView
+        android:id="@+id/tv_review"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        style="@style/Text_12_Normal"
+        android:layout_marginTop="@dimen/_6sdp"
+        android:text="@string/good_movie"
+        android:layout_gravity="center_horizontal"
+        android:singleLine="true"
+        android:ellipsize="end"/>
+
+</LinearLayout>

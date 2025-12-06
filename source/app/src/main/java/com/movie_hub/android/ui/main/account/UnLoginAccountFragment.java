@@ -79,14 +79,17 @@ public class UnLoginAccountFragment extends BaseFragment<FragmentUnLoginAccountB
     @Override
     public void onItemClick(MenuItemModel item) {
         switch (item.title) {
+
             case R.string.menu_watch_now:
             case R.string.menu_my_movies:
             case R.string.menu_favorites:
                 showLoginRequiredDialog();
                 break;
             case R.string.menu_privacy_policy:
+                ((MainActivity) requireActivity()).navigateToPrivacy();
                 break;
             case R.string.menu_contact:
+                ((MainActivity) requireActivity()).navigateToContact();
                 break;
             case R.string.menu_language:
                 ((MainActivity) requireActivity()).navigateToLanguage();

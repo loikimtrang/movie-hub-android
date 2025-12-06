@@ -11,6 +11,7 @@ import com.movie_hub.android.data.Repository;
 import com.movie_hub.android.di.scope.ActivityScope;
 import com.movie_hub.android.ui.base.activity.BaseActivity;
 import com.movie_hub.android.ui.main.MainViewModel;
+import com.movie_hub.android.ui.main.account.contact.ContactViewModel;
 import com.movie_hub.android.ui.main.account.favourite.FavouriteViewModel;
 import com.movie_hub.android.ui.main.account.forgot_password.ForgotPasswordViewModel;
 import com.movie_hub.android.ui.main.account.history.HistoryViewModel;
@@ -18,6 +19,7 @@ import com.movie_hub.android.ui.main.account.language.LanguageViewModel;
 import com.movie_hub.android.ui.main.account.login.LoginViewModel;
 import com.movie_hub.android.ui.main.account.manage_account.ManageAccountViewModel;
 import com.movie_hub.android.ui.main.account.playlist.PlayListViewModel;
+import com.movie_hub.android.ui.main.account.privacy.PrivacyViewModel;
 import com.movie_hub.android.ui.main.account.register.RegisterViewModel;
 import com.movie_hub.android.ui.main.account.updateapp.CheckUpdateViewModel;
 import com.movie_hub.android.ui.main.account.verifyotp.VerifyOtpViewModel;
@@ -28,6 +30,7 @@ import com.movie_hub.android.ui.main.home.topic.HomeMoreTopicViewModel;
 import com.movie_hub.android.ui.main.home.topic.topic_detail.HomeTopicDetailViewModel;
 import com.movie_hub.android.ui.main.movie.detail.MovieDetailViewModel;
 import com.movie_hub.android.ui.main.movie.detail.comment.CommentViewModel;
+import com.movie_hub.android.ui.main.movie.detail.review.ReviewViewModel;
 import com.movie_hub.android.ui.main.movie.watch.WatchMovieViewModel;
 import com.movie_hub.android.ui.main.person.PersonDetailViewModel;
 import com.movie_hub.android.ui.main.splash.SplashViewModel;
@@ -217,5 +220,29 @@ public class ActivityModule {
         Supplier<ForgotPasswordViewModel> supplier = () -> new ForgotPasswordViewModel(repository, (MVVMApplication)application);
         ViewModelProviderFactory<ForgotPasswordViewModel> factory = new ViewModelProviderFactory<>(ForgotPasswordViewModel.class, supplier);
         return new ViewModelProvider(activity, factory).get(ForgotPasswordViewModel.class);
+    }
+
+    @Provides
+    @ActivityScope
+    ReviewViewModel provideReviewViewModel(Repository repository, Context application) {
+        Supplier<ReviewViewModel> supplier = () -> new ReviewViewModel(repository, (MVVMApplication)application);
+        ViewModelProviderFactory<ReviewViewModel> factory = new ViewModelProviderFactory<>(ReviewViewModel.class, supplier);
+        return new ViewModelProvider(activity, factory).get(ReviewViewModel.class);
+    }
+
+    @Provides
+    @ActivityScope
+    ContactViewModel provideContactViewModel(Repository repository, Context application) {
+        Supplier<ContactViewModel> supplier = () -> new ContactViewModel(repository, (MVVMApplication)application);
+        ViewModelProviderFactory<ContactViewModel> factory = new ViewModelProviderFactory<>(ContactViewModel.class, supplier);
+        return new ViewModelProvider(activity, factory).get(ContactViewModel.class);
+    }
+
+    @Provides
+    @ActivityScope
+    PrivacyViewModel providePrivacyViewModel(Repository repository, Context application) {
+        Supplier<PrivacyViewModel> supplier = () -> new PrivacyViewModel(repository, (MVVMApplication)application);
+        ViewModelProviderFactory<PrivacyViewModel> factory = new ViewModelProviderFactory<>(PrivacyViewModel.class, supplier);
+        return new ViewModelProvider(activity, factory).get(PrivacyViewModel.class);
     }
 }

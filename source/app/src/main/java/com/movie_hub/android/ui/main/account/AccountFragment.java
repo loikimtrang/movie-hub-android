@@ -119,8 +119,10 @@ public class AccountFragment extends BaseFragment<FragmentAccountBinding, Accoun
                 ((MainActivity) requireActivity()).navigateToFavourite();
                 break;
             case R.string.menu_privacy_policy:
+                ((MainActivity) requireActivity()).navigateToPrivacy();
                 break;
             case R.string.menu_contact:
+                ((MainActivity) requireActivity()).navigateToContact();
                 break;
             case R.string.menu_language:
                 ((MainActivity) requireActivity()).navigateToLanguage();

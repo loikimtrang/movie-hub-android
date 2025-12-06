@@ -17,6 +17,8 @@ import com.movie_hub.android.data.model.api.request.playlist.GetListMoviePlayLis
 import com.movie_hub.android.data.model.api.request.playlist.RemoveItemPlaylistRequest;
 import com.movie_hub.android.data.model.api.request.playlist.UpdatePlayListItemRequest;
 import com.movie_hub.android.data.model.api.request.playlist.UpdatePlaylistRequest;
+import com.movie_hub.android.data.model.api.request.review.CreateReviewReactionRequest;
+import com.movie_hub.android.data.model.api.request.review.CreateReviewRequest;
 import com.movie_hub.android.data.model.api.request.user.UserChangePasswordRequest;
 import com.movie_hub.android.data.model.api.request.user.UserLoginGoogleRequest;
 import com.movie_hub.android.data.model.api.request.user.UserUpdateProfileRequest;
@@ -35,6 +37,7 @@ import com.movie_hub.android.data.model.api.response.person.PersonResponse;
 import com.movie_hub.android.data.model.api.response.login.UserLoginResponse;
 import com.movie_hub.android.data.model.api.response.movie.MovieResponse;
 import com.movie_hub.android.data.model.api.response.playlist.PlayListResponse;
+import com.movie_hub.android.data.model.api.response.review.ReviewResponse;
 import com.movie_hub.android.data.model.api.response.side_bar.SidebarResponse;
 import com.movie_hub.android.data.model.api.response.user.UserResponse;
 import com.movie_hub.android.data.model.api.response.user.UserUploadImageResponse;
@@ -169,6 +172,21 @@ public interface ApiService {
     @GET("v1/comment/vote-list/{movieId}")
     Observable<ResponseWrapper<List<VoteListResponse>>> getVoteList(@Path("movieId") Long movieId);
 
+    // Review
+    @GET("v1/review/list")
+    Observable<ResponseWrapper<ResponseListObj<ReviewResponse>>> getReviewList(@QueryMap Map<String, Object> query);
+
+    @POST("v1/review/create")
+    Observable<ResponseWrapper<ReviewResponse>> createReview(@Body CreateReviewRequest request);
+
+    @PATCH("v1/review/vote")
+    Observable<ResponseWrapper> voteReview(@Body CreateReviewReactionRequest request);
+
+    @GET("v1/review/vote-list/{movieId}")
+    Observable<ResponseWrapper<List<VoteListResponse>>> getVoteListReview(@Path("movieId") Long movieId);
+
+    @GET("v1/review/check/{movieId}")
+    Observable<ResponseWrapper<ReviewResponse>> checkReview(@Path("movieId") Long id);
     // Playlist
     @GET("v1/playlist/list")
     Observable<ResponseWrapper<List<PlayListResponse>>> getPlaylistList();

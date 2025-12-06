@@ -12,6 +12,7 @@
     <color name="primary_color">#0D72FF</color>
     <color name="secondary_color">#ffffff</color>
     <color name="tertiary_color">#F5F5F5</color>
+    <color name="gray">#BDBDBD</color>
 
     <color name="bg_app">#12161F</color>
     <color name="bg_tab_bar">#100F14</color>
@@ -90,4 +91,9 @@
     <color name="text_slogan">#A0A1AB</color>
     <color name="filter_select">#F9D897</color>
     <color name="filter_un_select">#777A8A</color>
+
+    <color name="review_select">#3B59DB</color>
+    <color name="review_un_select">#3C404C</color>
+    <color name="bg_dialog_comment">#272A3B</color>
+
 </resources>

@@ -363,4 +363,33 @@ public class MovieDetailViewModel extends BaseViewModel {
                 )
         );
     }
+
+    public void getMovie(MainCallback<MovieResponse> callback, Long id) {
+        compositeDisposable.add(repository.getApiService().getMovie(id)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .retryWhen(throwable ->
+                        throwable.flatMap((Function<Throwable, ObservableSource<?>>) throwable1 -> {
+                            if (NetworkUtils.checkNetworkError(throwable1)) {
+                                return application.showDialogNoInternetAccess();
+                            }else{
+                                return Observable.error(throwable1);
+                            }
+                        })
+                )
+                .subscribe(
+                        response -> {
+                            if (response.isResult()) {
+                                callback.doSuccess(response.getData());
+                            } else {
+                                callback.doFail();
+                            }
+                        }, throwable -> {
+                            Timber.e(throwable);
+                            hideLoading();
+                            callback.doError(throwable);
+                        }
+                )
+        );
+    }
 }

@@ -19,6 +19,7 @@ import com.movie_hub.android.ui.main.movie.detail.fragment.CastFragmentViewModel
 import com.movie_hub.android.ui.main.movie.detail.fragment.EpisodesFragmentViewModel;
 import com.movie_hub.android.ui.main.movie.detail.fragment.RecommendationFragment;
 import com.movie_hub.android.ui.main.movie.detail.fragment.RecommendationFragmentViewModel;
+import com.movie_hub.android.ui.main.movie.detail.review.ReviewViewModel;
 import com.movie_hub.android.ui.main.person.fragment.InformationFragmentViewModel;
 import com.movie_hub.android.ui.main.person.fragment.MoviesInvolvedFragmentViewModel;
 import com.movie_hub.android.ui.main.schedule.ScheduleViewModel;

@@ -250,5 +250,15 @@
     <string name="next">Tiếp tục</string>
     <string name="authentication_code">Mã xác thực</string>
     <string name="enter_email_forgot_password">Nhập email bạn đã sử dụng để đăng ký tài khoản</string>
+    <string name="awesome">Tuyệt vời</string>
+    <string name="good_movie">Phim hay</string>
+    <string name="decent">Khá ổn</string>
+    <string name="boring_movie">Phim chán</string>
+    <string name="terrible">Dở tệ</string>
+    <string name="write_review">Viết nhận xét về phim</string>
+    <string name="submit_review">Gửi đánh giá</string>
+    <string name="review">đánh giá</string>
+    <string name="please_write_review">Vui lòng viết đánh giá</string>
+    <string name="once_rate">Bạn chỉ có thể đánh giá một lần</string>
 
 </resources>

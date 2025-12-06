@@ -63,6 +63,7 @@ import com.movie_hub.android.ui.main.movie.detail.dialog.InformationMovieBottomS
 import com.movie_hub.android.ui.main.movie.detail.fragment.CastFragment;
 import com.movie_hub.android.ui.main.movie.detail.fragment.EpisodesFragment;
 import com.movie_hub.android.ui.main.movie.detail.fragment.RecommendationFragment;
+import com.movie_hub.android.ui.main.movie.detail.review.ReviewActivity;
 import com.movie_hub.android.ui.main.movie.watch.WatchMovieActivity;
 import com.movie_hub.android.ui.main.search.topTrending.FlexSpacingItemDecoration;
 import com.movie_hub.android.utils.ClickUtils;
@@ -265,6 +266,10 @@ public class MovieDetailActivity extends BaseActivity<ActivityMovieDetailBinding
         }
 
         viewModel.startTokenAutoRefresh();
+
+        if (viewModel.movieDetails != null && viewModel.movieDetails.getId() != null) {
+            getMovieDetail(viewModel.movieDetails);
+        }
     }
 
     @SuppressLint({"SetTextI18n", "ClickableViewAccessibility"})
@@ -288,6 +293,13 @@ public class MovieDetailActivity extends BaseActivity<ActivityMovieDetailBinding
         viewBinding.includeMovieHeader.description.setText(HtmlUtils.convertPtoStrong(viewModel.movieDetails.getDescription()));
         viewBinding.includeMovieHeader.ageRating.setText(DisplayUtils.displayAgeRating(viewModel.movieDetails.getAgeRating()));
         viewBinding.includeMovieHeader.seekBarRemaining.setOnTouchListener((v, event) -> true);
+
+        if (viewModel.movieDetails.getReviewCount() != null && viewModel.movieDetails.getReviewCount() > 0L) {
+            viewBinding.includeMovieHeader.tvAvgRv.setText(viewModel.movieDetails.getAverageRating().toString());
+            viewBinding.includeMovieHeader.layoutReview.setVisibility(View.VISIBLE);
+        } else {
+            viewBinding.includeMovieHeader.layoutReview.setVisibility(View.GONE);
+        }
 
         if (viewModel.movieDetails.getType() == Constants.TYPE_MOVIE_SINGLE) {
             viewBinding.includeMovieHeader.dateRelease.setText(DisplayUtils.getYearFromReleaseDate(viewModel.movieDetails.getReleaseDate()));
@@ -648,10 +660,15 @@ public class MovieDetailActivity extends BaseActivity<ActivityMovieDetailBinding
                 }
                 break;
             case R.id.btn_cmt:
+                showLoading();
                 ClickUtils.debounceClick(viewBinding.includeMovieHeader.btnCmt);
                 Intent it = new Intent(this, CommentActivity.class);
                 it.putExtra("movie_details", GsonUtils.toJson(viewModel.movieDetails));
                 startActivity(it);
+                break;
+
+            case R.id.btn_rating:
+                navigateToReview();
                 break;
 
             case R.id.btn_playlist:
@@ -664,6 +681,13 @@ public class MovieDetailActivity extends BaseActivity<ActivityMovieDetailBinding
             default:
                 break;
         }
+    }
+
+    public void navigateToReview() {
+        ClickUtils.debounceClick(viewBinding.includeMovieHeader.btnRating);
+        Intent it = new Intent(this, ReviewActivity.class);
+        it.putExtra("movie_details", GsonUtils.toJson(viewModel.movieDetails));
+        startActivity(it);
     }
     public void showLoginRequiredDialog() {
         DialogUtils.dialogConfirm(
@@ -899,5 +923,40 @@ public class MovieDetailActivity extends BaseActivity<ActivityMovieDetailBinding
     public void onChooseClicked(UpdatePlayListItemRequest request) {
         if (request.getActions().isEmpty() || request.getActions() == null) return;
         updatePlayListItem(request);
+    }
+
+
+    public void getMovieDetail(MovieResponse movieResponse) {
+        viewModel.getMovie(new MainCallback<MovieResponse>() {
+
+            @SuppressLint("SetTextI18n")
+            @Override
+            public void doSuccess(MovieResponse data) {
+                viewModel.movieDetails = data;
+                if (viewModel.movieDetails.getReviewCount() != null && viewModel.movieDetails.getReviewCount() > 0L) {
+                    viewBinding.includeMovieHeader.tvAvgRv.setText(viewModel.movieDetails.getAverageRating().toString());
+                    viewBinding.includeMovieHeader.layoutReview.setVisibility(View.VISIBLE);
+                } else {
+                    viewBinding.includeMovieHeader.layoutReview.setVisibility(View.GONE);
+                }
+            }
+
+            @Override
+            public void doError(Throwable error) {
+                hideLoading();
+                showError(getString(R.string.an_error_occurred));
+            }
+
+            @Override
+            public void doSuccess() {
+                hideLoading();
+            }
+
+            @Override
+            public void doFail() {
+                hideLoading();
+                showError(getString(R.string.an_error_occurred));
+            }
+        }, movieResponse.getId());
     }
 }
