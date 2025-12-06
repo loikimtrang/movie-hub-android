@@ -1,7 +1,10 @@
 package com.movie_hub.android.ui.main.splash;
 
 import android.annotation.SuppressLint;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -17,10 +20,12 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.WindowCompat;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.movie_hub.android.BR;
 import com.movie_hub.android.BuildConfig;
 import com.movie_hub.android.R;
+import com.movie_hub.android.constant.Constants;
 import com.movie_hub.android.data.model.api.ResponseListObj;
 import com.movie_hub.android.data.model.api.ResponseWrapper;
 import com.movie_hub.android.data.model.api.request.appversion.CheckAppVersionRequest;
@@ -39,6 +44,7 @@ import com.movie_hub.android.ui.main.account.login.LoginActivity;
 import com.movie_hub.android.ui.main.account.updateapp.UpdateManager;
 import com.movie_hub.android.ui.main.account.updateapp.dialog.UpdateVersionBottomSheetDialog;
 import com.movie_hub.android.utils.GsonUtils;
+import com.movie_hub.android.utils.LogService;
 
 import java.io.File;
 import java.net.ConnectException;
@@ -47,6 +53,14 @@ import java.net.ConnectException;
 public class SplashActivity extends BaseActivity<ActivitySplashBinding, SplashViewModel> implements View.OnClickListener, SystemBarColorProvider, UpdateVersionBottomSheetDialog.UpdateVersionBottomSheetCallback {
     private static final int REQUEST_STORAGE_PERMISSION = 123;
 
+    private final BroadcastReceiver expiredTokenReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            LogService.i("Received expired token broadcast, logging out user");
+            userSignOut();
+        }
+    };
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -54,6 +68,10 @@ public class SplashActivity extends BaseActivity<ActivitySplashBinding, SplashVi
         viewBinding.setVm(viewModel);
         handleCheckUpdate();
         hideSystemUI();
+
+        LocalBroadcastManager.getInstance(this)
+                .registerReceiver(expiredTokenReceiver, new IntentFilter(Constants.ACTION_EXPIRED_TOKEN));
+
     }
 
     public void handleCheckUpdate() {
@@ -113,7 +131,7 @@ public class SplashActivity extends BaseActivity<ActivitySplashBinding, SplashVi
         viewModel.userSignOut(new MainCallback<Void>() {
             @Override
             public void doSuccess(Void unused) {
-                navigateToMainActivity();
+                showLoginAndSkip();
             }
 
             @Override
@@ -128,7 +146,7 @@ public class SplashActivity extends BaseActivity<ActivitySplashBinding, SplashVi
 
             @Override
             public void doSuccess() {
-                navigateToMainActivity();
+                showLoginAndSkip();
             }
         });
     }
@@ -347,4 +365,11 @@ public class SplashActivity extends BaseActivity<ActivitySplashBinding, SplashVi
             }
         }, new SideBarRequest());
     }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(expiredTokenReceiver);
+    }
+
 }

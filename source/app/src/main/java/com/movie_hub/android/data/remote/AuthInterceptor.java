@@ -94,13 +94,13 @@ public class AuthInterceptor implements Interceptor {
 
         Response response = chain.proceed(newRequest.build());
 
-//        if (response.code() == 401 || response.code() == 403) {
-//            LogService.i("Auth error code: " + response.code());
-//            appPreferences.removeKey(PreferencesService.KEY_BEARER_TOKEN);
-//
-//            Intent intent = new Intent(Constants.ACTION_EXPIRED_TOKEN);
-//            LocalBroadcastManager.getInstance(application.getApplicationContext()).sendBroadcast(intent);
-//        }
+        if (response.code() == 401 || response.code() == 403) {
+            LogService.i("Token expired or unauthorized. Logging out…");
+            appPreferences.clearAuthData(); // Xoá cả access lẫn refresh token
+
+            Intent intent = new Intent(Constants.ACTION_EXPIRED_TOKEN);
+            LocalBroadcastManager.getInstance(application.getApplicationContext()).sendBroadcast(intent);
+        }
 
         return response;
     }
