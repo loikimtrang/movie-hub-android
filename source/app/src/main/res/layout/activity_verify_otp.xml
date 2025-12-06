@@ -233,7 +233,8 @@
                     android:padding="@dimen/_6sdp"
                     android:layout_gravity="center_horizontal"
                     android:layout_marginTop="@dimen/_16sdp"
-                    android:onClick="onClick"/>
+                    android:onClick="onClick"
+                    android:background="@drawable/bg_btn_press_tran"/>
                 
 
             </LinearLayout>

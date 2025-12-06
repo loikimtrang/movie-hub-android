@@ -1,5 +1,6 @@
 package com.movie_hub.android.ui.main.account.login;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.InputType;
@@ -26,6 +27,7 @@ import com.movie_hub.android.ui.base.activity.BaseActivity;
 import com.movie_hub.android.ui.base.activity.SystemBarColorProvider;
 import com.movie_hub.android.ui.main.MainActivity;
 import com.movie_hub.android.ui.main.MainCallback;
+import com.movie_hub.android.ui.main.account.forgot_password.ForgotPasswordActivity;
 import com.movie_hub.android.ui.main.account.register.RegisterActivity;
 import com.movie_hub.android.ui.main.splash.SplashActivity;
 import com.movie_hub.android.utils.ClickUtils;
@@ -65,7 +67,7 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding, LoginViewM
 
                 @Override
                 public void doFail() {
-                    showLoginError(getString(R.string.incorrect_username_or_password));
+                    showLoginError(getString(R.string.incorrect_email_or_password));
                 }
 
                 public void doError(Throwable throwable) {
@@ -227,6 +229,7 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding, LoginViewM
         return R.color.bg_app;
     }
 
+    @SuppressLint("NonConstantResourceId")
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
@@ -238,6 +241,10 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding, LoginViewM
                 break;
             case R.id.registerNow:
                 onRegisterNowClick();
+                break;
+            case R.id.btn_forgot_password:
+                Intent it = new Intent(this, ForgotPasswordActivity.class);
+                startActivity(it);
                 break;
             default:
                 break;

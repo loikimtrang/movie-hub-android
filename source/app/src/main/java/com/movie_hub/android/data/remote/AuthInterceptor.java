@@ -89,7 +89,7 @@ public class AuthInterceptor implements Interceptor {
                 newRequest.addHeader("Authorization", "Bearer " + token);
             }
         }
-        
+
         newRequest.addHeader("X-tenant", "moviehub");
 
         Response response = chain.proceed(newRequest.build());

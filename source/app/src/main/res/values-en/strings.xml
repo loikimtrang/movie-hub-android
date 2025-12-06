@@ -248,4 +248,9 @@
 
     <string name="selected">Selected</string>
     <string name="filter_results">Filter results</string>
+    <string name="next">Next</string>
+    <string name="authentication_code">Authentication code</string>
+    <string name="enter_email_forgot_password">Enter the email you used to register your account</string>
+    <string name="incorrect_email">Email does not exist</string>
+
 </resources>

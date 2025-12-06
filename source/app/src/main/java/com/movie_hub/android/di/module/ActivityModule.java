@@ -12,6 +12,7 @@ import com.movie_hub.android.di.scope.ActivityScope;
 import com.movie_hub.android.ui.base.activity.BaseActivity;
 import com.movie_hub.android.ui.main.MainViewModel;
 import com.movie_hub.android.ui.main.account.favourite.FavouriteViewModel;
+import com.movie_hub.android.ui.main.account.forgot_password.ForgotPasswordViewModel;
 import com.movie_hub.android.ui.main.account.history.HistoryViewModel;
 import com.movie_hub.android.ui.main.account.language.LanguageViewModel;
 import com.movie_hub.android.ui.main.account.login.LoginViewModel;
@@ -208,5 +209,13 @@ public class ActivityModule {
         Supplier<FilterViewModel> supplier = () -> new FilterViewModel(repository, (MVVMApplication)application);
         ViewModelProviderFactory<FilterViewModel> factory = new ViewModelProviderFactory<>(FilterViewModel.class, supplier);
         return new ViewModelProvider(activity, factory).get(FilterViewModel.class);
+    }
+
+    @Provides
+    @ActivityScope
+    ForgotPasswordViewModel provideForgotPasswordViewModel(Repository repository, Context application) {
+        Supplier<ForgotPasswordViewModel> supplier = () -> new ForgotPasswordViewModel(repository, (MVVMApplication)application);
+        ViewModelProviderFactory<ForgotPasswordViewModel> factory = new ViewModelProviderFactory<>(ForgotPasswordViewModel.class, supplier);
+        return new ViewModelProvider(activity, factory).get(ForgotPasswordViewModel.class);
     }
 }

@@ -47,6 +47,7 @@
     <string name="enter_your_username">Tên đăng nhập</string>
     <string name="incorrect_username_or_password">Tài khoản hoặc mật khẩu không đúng</string>
     <string name="incorrect_email_or_password">Email hoặc mật khẩu không đúng</string>
+    <string name="incorrect_email">Email không tồn tại</string>
     <string name="login_error_please_try_again">Lỗi đăng nhập. Vui lòng thử lại</string>
     <string name="register_error_please_try_again">Lỗi đăng ký. Vui lòng thử lại</string>
     <string name="login_successful">Đăng nhập thành công</string>
@@ -246,4 +247,8 @@
 
     <string name="selected">Đã chọn</string>
     <string name="filter_results">Lọc kết quả</string>
+    <string name="next">Tiếp tục</string>
+    <string name="authentication_code">Mã xác thực</string>
+    <string name="enter_email_forgot_password">Nhập email bạn đã sử dụng để đăng ký tài khoản</string>
+
 </resources>

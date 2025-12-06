@@ -6,6 +6,8 @@ import com.movie_hub.android.data.model.api.ResponseListObj;
 import com.movie_hub.android.data.model.api.ResponseWrapper;
 import com.movie_hub.android.data.model.api.request.comment.CreateCommentReactionRequest;
 import com.movie_hub.android.data.model.api.request.comment.CreateCommentRequest;
+import com.movie_hub.android.data.model.api.request.forgot.ForgotChangePasswordRequest;
+import com.movie_hub.android.data.model.api.request.forgot.ForgotPasswordRequest;
 import com.movie_hub.android.data.model.api.request.history.TrackingWatchHistoryRequest;
 import com.movie_hub.android.data.model.api.request.login.UserLoginRequest;
 import com.movie_hub.android.data.model.api.request.login.UserRegisterRequest;
@@ -76,7 +78,10 @@ public interface ApiService {
 
     @POST("v1/user/verify-otp")
     Observable<ResponseWrapper> verifyOtp(@Body VerifyOtpRequest request);
-
+    @POST("v1/user/request-forgot-password")
+    Observable<ResponseWrapper> requestForgotPassword(@Body ForgotPasswordRequest request);
+    @POST("v1/user/forgot-password")
+    Observable<ResponseWrapper> forgotPassword(@Body ForgotChangePasswordRequest request);
     @POST("v1/user/resend-otp")
     Observable<ResponseWrapper> resendOtp(@Body VerifyOtpRequest request);
 

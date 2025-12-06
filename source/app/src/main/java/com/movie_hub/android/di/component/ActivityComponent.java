@@ -4,6 +4,8 @@ import com.movie_hub.android.di.module.ActivityModule;
 import com.movie_hub.android.di.scope.ActivityScope;
 import com.movie_hub.android.ui.main.MainActivity;
 import com.movie_hub.android.ui.main.account.favourite.FavouriteActivity;
+import com.movie_hub.android.ui.main.account.forgot_password.ChangePasswordActivity;
+import com.movie_hub.android.ui.main.account.forgot_password.ForgotPasswordActivity;
 import com.movie_hub.android.ui.main.account.history.HistoryActivity;
 import com.movie_hub.android.ui.main.account.language.LanguageActivity;
 import com.movie_hub.android.ui.main.account.login.LoginActivity;
@@ -47,5 +49,7 @@ public interface ActivityComponent {
     void inject(HomeMoreTopicActivity activity);
     void inject(HomeTopicDetailActivity activity);
     void inject(FilterActivity activity);
+    void inject(ChangePasswordActivity activity);
+    void inject(ForgotPasswordActivity activity);
 }
 

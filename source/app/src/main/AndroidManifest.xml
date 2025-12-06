@@ -140,6 +140,16 @@
             android:screenOrientation="portrait"
             android:exported="true"/>
 
+        <activity android:name=".ui.main.account.forgot_password.ChangePasswordActivity"
+            android:windowSoftInputMode="adjustResize"
+            android:screenOrientation="portrait"
+            android:exported="true"/>
+
+        <activity android:name=".ui.main.account.forgot_password.ForgotPasswordActivity"
+            android:windowSoftInputMode="adjustResize"
+            android:screenOrientation="portrait"
+            android:exported="true"/>
+
         <activity android:name=".ui.main.account.register.RegisterActivity"
             android:windowSoftInputMode="adjustResize"
             android:screenOrientation="portrait"
