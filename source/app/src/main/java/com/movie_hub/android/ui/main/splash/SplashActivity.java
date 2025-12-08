@@ -121,7 +121,7 @@ public class SplashActivity extends BaseActivity<ActivitySplashBinding, SplashVi
 
             @Override
             public void doFail() {
-                showError(getString(R.string.an_error_occurred));
+                userSignOut();
             }
         });
     }

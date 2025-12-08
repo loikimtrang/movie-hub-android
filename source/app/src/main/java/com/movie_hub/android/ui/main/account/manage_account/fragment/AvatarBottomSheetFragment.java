@@ -233,14 +233,14 @@ public class AvatarBottomSheetFragment extends BottomSheetDialogFragment impleme
     }
     public void setUpMenu() {
         List<ManageAccountItemModel> menuItems1 = Arrays.asList(
-                new ManageAccountItemModel(R.drawable.ic_user_picture, R.string.view_avatar),
+//                new ManageAccountItemModel(R.drawable.ic_user_picture, R.string.view_avatar),
                 new ManageAccountItemModel(R.drawable.ic_picture_1, R.string.choose_avatar)
         );
 
         List<ManageAccountItemModel> menuItems2 = Arrays.asList(
                 new ManageAccountItemModel(R.drawable.ic_camera, R.string.take_photo),
-                new ManageAccountItemModel(R.drawable.ic_picture_2, R.string.choose_from_library),
-                new ManageAccountItemModel(R.drawable.ic_picture_3, R.string.choose_existing_photo)
+                new ManageAccountItemModel(R.drawable.ic_picture_2, R.string.choose_from_library)
+//                new ManageAccountItemModel(R.drawable.ic_picture_3, R.string.choose_existing_photo)
         );
 
         menu1 = new AvatarMenuAdapter(menuItems1, this);

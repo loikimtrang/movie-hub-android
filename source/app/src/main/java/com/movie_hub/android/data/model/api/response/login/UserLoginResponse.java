@@ -15,4 +15,6 @@ public class UserLoginResponse {
     private String token_type;
     private long user_id;
     private int user_kind;
+    private String code;
+
 }

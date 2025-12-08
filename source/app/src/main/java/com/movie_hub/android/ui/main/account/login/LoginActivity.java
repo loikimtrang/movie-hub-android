@@ -62,7 +62,12 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding, LoginViewM
             viewModel.userLogin(request, new MainCallback<UserLoginResponse>() {
                 @Override
                 public void doSuccess(UserLoginResponse object) {
-                    handleLoginSuccess();
+                    hideLoading();
+                    if (object.getCode() != null && !object.getCode().isEmpty() && object.getCode().equals(Constants.CODE_ACCOUNT_LOCK)) {
+                        showNotificationLockAccount();
+                    } else {
+                        handleLoginSuccess();
+                    }
                 }
 
                 @Override
@@ -123,7 +128,11 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding, LoginViewM
                     @Override
                     public void doSuccess(UserLoginResponse object) {
                         hideLoading();
-                        handleLoginSuccess();
+                        if (object.getCode() != null && !object.getCode().isEmpty() && object.getCode().equals(Constants.CODE_ACCOUNT_LOCK)) {
+                            showNotificationLockAccount();
+                        } else {
+                            handleLoginSuccess();
+                        }
                     }
                     @Override
                     public void doFail() {
@@ -160,7 +169,9 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding, LoginViewM
         }
         return false;
     }
-
+    public void showNotificationLockAccount() {
+        new ToastMessage(ToastMessage.TYPE_NORMAL, getString(R.string.account_has_been_lock)).showMessage(this);
+    }
     private void showLoginError(String message) {
         new ToastMessage(ToastMessage.TYPE_WARNING, message).showMessage(this);
 

@@ -69,7 +69,7 @@ public class Constants {
     public static final int TYPE_RATING_3 = 3;
     public static final int TYPE_RATING_4 = 4;
     public static final int TYPE_RATING_5 = 5;
-
+    public static String CODE_ACCOUNT_LOCK = "ERROR-ACCOUNT-ERROR-0007";
     private Constants(){
 
     }

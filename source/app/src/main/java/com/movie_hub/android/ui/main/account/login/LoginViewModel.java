@@ -1,6 +1,7 @@
 package com.movie_hub.android.ui.main.account.login;
 
 import com.movie_hub.android.MVVMApplication;
+import com.movie_hub.android.constant.Constants;
 import com.movie_hub.android.data.Repository;
 import com.movie_hub.android.data.model.api.request.login.UserLoginRequest;
 import com.movie_hub.android.data.model.api.request.user.UserLoginGoogleRequest;
@@ -10,6 +11,8 @@ import com.movie_hub.android.data.model.room.UserEntity;
 import com.movie_hub.android.ui.base.activity.BaseViewModel;
 import com.movie_hub.android.ui.main.MainCallback;
 import com.movie_hub.android.utils.NetworkUtils;
+
+import java.util.Objects;
 
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.core.Observable;
@@ -83,7 +86,11 @@ public class LoginViewModel extends BaseViewModel {
                                         )
                                 );
                             } else {
-                                callback.doFail();
+                                if (response.getCode() != null && !response.getCode().isEmpty() && response.getCode().equals(Constants.CODE_ACCOUNT_LOCK)) {
+                                    callback.doSuccess(response);
+                                } else {
+                                    callback.doFail();
+                                }
                             }
                         },
                         throwable -> {
@@ -149,7 +156,7 @@ public class LoginViewModel extends BaseViewModel {
                                                                         .subscribe(() -> {
                                                                             repository.getSharedPreferences().setUserId(response.getUser_id());
                                                                             callback.doSuccess(response);
-                                                                        }, throwable -> {
+                                                                            }, throwable -> {
                                                                         })
                                                         );
                                                     } else {
@@ -162,7 +169,11 @@ public class LoginViewModel extends BaseViewModel {
                                         )
                                 );
                             } else {
-                                callback.doFail();
+                                if (response.getCode() != null && !response.getCode().isEmpty() && response.getCode().equals(Constants.CODE_ACCOUNT_LOCK)) {
+                                    callback.doSuccess(response);
+                                } else {
+                                    callback.doFail();
+                                }
                             }
                         },
                         throwable -> {

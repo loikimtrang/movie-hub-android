@@ -265,4 +265,5 @@
     <string name="review">review</string>
     <string name="please_write_review">Please write a review</string>
     <string name="once_rate">You can only rate once</string>
+    <string name="account_has_been_lock">Your account has been locked</string>
 </resources>

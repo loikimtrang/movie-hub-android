@@ -134,7 +134,7 @@ public class CommentActivity extends BaseActivity<ActivityCommentBinding, Commen
             if (total == null || total == 0L) {
                 viewBinding.tvCountCmt.setText(getString(R.string.comment));
             } else {
-                viewBinding.tvCountCmt.setText(getString(R.string.comment) + " (" + viewModel.movieDetails.getCommentCount() + ")");
+                viewBinding.tvCountCmt.setText(getString(R.string.comment) + " (" + total + ")");
             }
         });
     }
@@ -595,7 +595,9 @@ public class CommentActivity extends BaseActivity<ActivityCommentBinding, Commen
         viewModel.replyTo = commentResponse;
         viewBinding.tvReplyTo.setText(getString(R.string.replying_to) + " @" + commentResponse.getAuthor().getFullName());
         viewBinding.lReplyTo.setVisibility(View.VISIBLE);
-        viewBinding.edtComment.setFocusable(true);
+        viewBinding.edtComment.requestFocus();
+        InputMethodManager imm = (InputMethodManager) this.getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.showSoftInput(viewBinding.edtComment, InputMethodManager.SHOW_IMPLICIT);
     }
 
     @SuppressLint("NonConstantResourceId")
@@ -678,6 +680,8 @@ public class CommentActivity extends BaseActivity<ActivityCommentBinding, Commen
         viewModel.replyTo = commentResponse;
         viewBinding.tvReplyTo.setText(getString(R.string.replying_to) + " @" + commentResponse.getAuthor().getFullName());
         viewBinding.lReplyTo.setVisibility(View.VISIBLE);
-        viewBinding.edtComment.setFocusable(true);
+        viewBinding.edtComment.requestFocus();
+        InputMethodManager imm = (InputMethodManager) this.getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.showSoftInput(viewBinding.edtComment, InputMethodManager.SHOW_IMPLICIT);
     }
 }

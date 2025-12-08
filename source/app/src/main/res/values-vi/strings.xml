@@ -260,5 +260,6 @@
     <string name="review">đánh giá</string>
     <string name="please_write_review">Vui lòng viết đánh giá</string>
     <string name="once_rate">Bạn chỉ có thể đánh giá một lần</string>
+    <string name="account_has_been_lock">Tài khoản của bạn đã bị khóa</string>
 
 </resources>
