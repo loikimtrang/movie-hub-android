@@ -9,4 +9,6 @@ public class CreateCommentRequest {
     private Long movieId;
     private Long movieItemId;
     private Long parentId;
+    private Long replyToId;
+    private int replyToKind;
 }

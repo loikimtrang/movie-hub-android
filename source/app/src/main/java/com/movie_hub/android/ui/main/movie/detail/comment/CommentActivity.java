@@ -74,6 +74,7 @@ public class CommentActivity extends BaseActivity<ActivityCommentBinding, Commen
     private boolean isStateReply = false;
     private boolean isShowShimmer = false;
     private boolean isShowShimmerComment = false;
+    @SuppressLint("SetTextI18n")
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -86,6 +87,9 @@ public class CommentActivity extends BaseActivity<ActivityCommentBinding, Commen
         MovieResponse movieResponse = GsonUtils.fromJson(json, MovieResponse.class);
         if (movieResponse != null) {
             viewModel.movieDetails = movieResponse;
+            if (viewModel.movieDetails.getCommentCount() != null && viewModel.movieDetails.getCommentCount() > 0L) {
+                viewModel.totalComment.postValue(viewModel.movieDetails.getCommentCount());
+            }
             setUpAdapter();
             showShimmer();
             if (viewModel.movieDetails.getType() == Constants.TYPE_MOVIE_SERIES) {
@@ -125,6 +129,14 @@ public class CommentActivity extends BaseActivity<ActivityCommentBinding, Commen
         );
 
         observeCommentList();
+
+        viewModel.totalComment.observe(this, total -> {
+            if (total == null || total == 0L) {
+                viewBinding.tvCountCmt.setText(getString(R.string.comment));
+            } else {
+                viewBinding.tvCountCmt.setText(getString(R.string.comment) + " (" + viewModel.movieDetails.getCommentCount() + ")");
+            }
+        });
     }
 
     @Override
@@ -196,13 +208,6 @@ public class CommentActivity extends BaseActivity<ActivityCommentBinding, Commen
             }
         });
 
-        viewModel.totalComment.observe(this, total -> {
-            if (total == null || total == 0) {
-                viewBinding.tvCountCmt.setText(getString(R.string.comment));
-                return;
-            }
-            viewBinding.tvCountCmt.setText(getString(R.string.comment) + " (" + total + ")");
-        });
     }
     public void setUpAdapter() {
         commentParentAdapter = new CommentParentAdapter(this, this);
@@ -234,6 +239,12 @@ public class CommentActivity extends BaseActivity<ActivityCommentBinding, Commen
                 if (object.isResult()) {
                     getListComment(viewModel.getCommentRequest());
                     viewBinding.edtComment.setText("");
+
+                    Long total = viewModel.totalComment.getValue();
+                    if (total != null) {
+                        total++;
+                        viewModel.totalComment.postValue(total);
+                    }
                 }
             }
 
@@ -582,36 +593,9 @@ public class CommentActivity extends BaseActivity<ActivityCommentBinding, Commen
         }
         isStateReply = true;
         viewModel.replyTo = commentResponse;
-        viewBinding.tvReplyTo.setText(getString(R.string.replying_to) + " " + commentResponse.getAuthor().getFullName());
+        viewBinding.tvReplyTo.setText(getString(R.string.replying_to) + " @" + commentResponse.getAuthor().getFullName());
         viewBinding.lReplyTo.setVisibility(View.VISIBLE);
-
-        insertMention(commentResponse.getAuthor().getFullName());
-    }
-    private void insertMention(String fullName) {
-        String mentionText = "@" + fullName + " "; // ← THÊM DẤU CÁCH Ở ĐÂY
-        SpannableString spannable = new SpannableString(mentionText);
-
-        // Màu nền
-        BackgroundColorSpan bgSpan = new BackgroundColorSpan(ContextCompat.getColor(this, R.color.bg_mention));
-        spannable.setSpan(bgSpan, 0, mentionText.length() - 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE); // KHÔNG áp dụng span cho dấu cách
-
-        // Màu chữ
-        ForegroundColorSpan fgSpan = new ForegroundColorSpan(ContextCompat.getColor(this, R.color.black));
-        spannable.setSpan(fgSpan, 0, mentionText.length() - 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-
-        // Optional: chữ đậm
-        StyleSpan boldSpan = new StyleSpan(Typeface.BOLD);
-        spannable.setSpan(boldSpan, 0, mentionText.length() - 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-
-        viewBinding.edtComment.setText(spannable);
-        viewBinding.edtComment.setSelection(spannable.length()); // Đặt con trỏ sau dấu cách
-
-        // Focus + mở bàn phím
-        viewBinding.edtComment.requestFocus();
-        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-        if (imm != null) {
-            imm.showSoftInput(viewBinding.edtComment, InputMethodManager.SHOW_IMPLICIT);
-        }
+        viewBinding.edtComment.setFocusable(true);
     }
 
     @SuppressLint("NonConstantResourceId")
@@ -627,8 +611,12 @@ public class CommentActivity extends BaseActivity<ActivityCommentBinding, Commen
                     if (isStateReply) {
                         if (viewModel.replyTo.getParent() != null && viewModel.replyTo.getParent().getId() != null) {
                             request.setParentId(viewModel.replyTo.getParent().getId());
+                            request.setReplyToKind(viewModel.replyTo.getParent().getAuthor().getKind());
+                            request.setReplyToId(viewModel.replyTo.getParent().getAuthor().getId());
                         } else if (viewModel.replyTo.getId() != null) {
                             request.setParentId(viewModel.replyTo.getId());
+                            request.setReplyToKind(viewModel.replyTo.getAuthor().getKind());
+                            request.setReplyToId(viewModel.replyTo.getAuthor().getId());
                         }
                     }
 
@@ -688,9 +676,8 @@ public class CommentActivity extends BaseActivity<ActivityCommentBinding, Commen
         }
         isStateReply = true;
         viewModel.replyTo = commentResponse;
-        viewBinding.tvReplyTo.setText(getString(R.string.replying_to) + " " + commentResponse.getAuthor().getFullName());
+        viewBinding.tvReplyTo.setText(getString(R.string.replying_to) + " @" + commentResponse.getAuthor().getFullName());
         viewBinding.lReplyTo.setVisibility(View.VISIBLE);
-
-        insertMention(commentResponse.getAuthor().getFullName());
+        viewBinding.edtComment.setFocusable(true);
     }
 }

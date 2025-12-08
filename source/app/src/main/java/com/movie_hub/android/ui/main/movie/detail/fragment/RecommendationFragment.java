@@ -185,6 +185,7 @@ public class RecommendationFragment extends BaseFragment<FragmentRecommendationB
         request.setPage(currentPage);
         request.setSize(pageSize);
         request.setPaged(true);
+        request.setKeyword(keyword);
         viewModel.getListMovie(new MainCallback<ResponseListObj<MovieResponse>>() {
             @Override
             public void doError(Throwable throwable) {

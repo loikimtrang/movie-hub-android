@@ -32,17 +32,36 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
-                <TextView
-                    android:id="@+id/tv_name_author"
-                    android:layout_width="match_parent"
+                <LinearLayout
+                    android:id="@+id/l_name"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:maxLines="1"
-                    android:ellipsize="end"
-                    android:text="name"
-                    style="@style/Text_10_Bold"
                     android:layout_alignParentStart="true"
-                    android:layout_toStartOf="@+id/tv_time"
-                    android:layout_marginEnd="@dimen/_3sdp"/>
+                    android:gravity="center_vertical"
+                    android:layout_toStartOf="@+id/tv_time">
+
+                    <TextView
+                        android:id="@+id/tv_name_author"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:maxLines="1"
+                        android:ellipsize="end"
+                        android:text="name"
+                        style="@style/Text_10_Bold"/>
+
+                    <ImageView
+                        android:layout_width="@dimen/_10sdp"
+                        android:layout_height="@dimen/_10sdp"
+                        android:id="@+id/ic_gender"
+                        android:src="@drawable/ic_gender_male"
+                        android:layout_marginStart="@dimen/_6sdp"
+                        android:visibility="visible"/>
+
+
+
+                </LinearLayout>
+
+
 
                 <TextView
                     android:id="@+id/tv_time"
@@ -56,6 +75,7 @@
                     android:layout_alignParentEnd="true"
                     android:layout_marginStart="@dimen/_6sdp"
                     android:layout_centerVertical="true"/>
+
 
             </RelativeLayout>
 
@@ -165,6 +185,25 @@
                                 android:text="@string/reply"
                                 android:layout_marginStart="@dimen/_3sdp" />
                         </LinearLayout>
+
+                    </FrameLayout>
+
+                    <FrameLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/btn_display"
+                        android:padding="@dimen/_8sdp"
+                        android:layout_gravity="end"
+                        android:layout_marginStart="@dimen/_12sdp"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:background="@drawable/bg_btn_press_tran">
+
+                        <ImageView
+                            android:layout_width="@dimen/_12sdp"
+                            android:layout_height="@dimen/_12sdp"
+                            android:id="@+id/ic_display"
+                            android:src="@drawable/ic_eye_hidden"/>
 
                     </FrameLayout>
 

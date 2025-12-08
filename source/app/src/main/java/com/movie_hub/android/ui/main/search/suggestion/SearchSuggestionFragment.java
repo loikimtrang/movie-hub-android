@@ -68,7 +68,7 @@ public class SearchSuggestionFragment extends BaseFragment<FragmentSearchSuggest
         showShimmerLoading();
         binding.layoutEmpty.setVisibility(View.GONE);
         MovieRequest movieRequest = new MovieRequest();
-        movieRequest.setTitle(keyWord);
+        movieRequest.setKeyword(keyWord);
         getListMovie(movieRequest);
 
         PersonRequest personRequest = new PersonRequest();

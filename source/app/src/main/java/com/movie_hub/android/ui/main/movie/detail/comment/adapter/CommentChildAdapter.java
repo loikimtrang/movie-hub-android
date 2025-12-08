@@ -1,9 +1,15 @@
 package com.movie_hub.android.ui.main.movie.detail.comment.adapter;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
+import android.graphics.BlurMaskFilter;
+import android.graphics.Paint;
 import android.os.Handler;
 import android.os.Looper;
+import android.text.Spannable;
+import android.text.SpannableString;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -17,6 +23,7 @@ import com.movie_hub.android.R;
 import com.movie_hub.android.constant.Constants;
 import com.movie_hub.android.data.model.api.response.comment.CommentResponse;
 import com.movie_hub.android.databinding.ItemCommentChildBinding;
+import com.movie_hub.android.databinding.ItemCommentParentBinding;
 import com.movie_hub.android.utils.DisplayUtils;
 
 import java.util.ArrayList;
@@ -73,16 +80,52 @@ public class CommentChildAdapter extends RecyclerView.Adapter<CommentChildAdapte
         return new CommentChildViewHolder(binding);
     }
 
+    @SuppressLint("SetTextI18n")
     @Override
     public void onBindViewHolder(@NonNull CommentChildViewHolder holder, int position) {
         CommentResponse item = items.get(position);
         if (item == null) return;
 
         holder.binding.tvNameAuthor.setText(item.getAuthor().getFullName());
-        holder.binding.tvContent.setText(item.getContent());
+
+
+        CommentResponse parent = item.getParent();
+
+        String prefix = "";
+        if (parent != null && parent.getAuthor() != null) {
+            prefix = "@" + parent.getAuthor().getFullName() + " ";
+        }
+
+        String finalText = prefix + " " + item.getContent();
+        SpannableString ss = new SpannableString(finalText);
+
+        if (!prefix.isEmpty()) {
+            ss.setSpan(
+                    new RoundedBackgroundSpan(
+                            ContextCompat.getColor(context, R.color.white),   // background
+                            ContextCompat.getColor(context, R.color.black),     // text
+                            10f,   // radius
+                            3f    // padding
+                    ),
+                    0,
+                    prefix.length(),
+                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+            );
+        }
+
+        holder.binding.tvContent.setText(ss);
+
         holder.binding.tvCountLike.setText(String.valueOf(item.getTotalLike()));
         holder.binding.tvCountDisLike.setText(String.valueOf(item.getTotalDislike()));
-        holder.binding.tvTime.setText(DisplayUtils.getTimeAgo(context, item.getModifiedDate()));
+        holder.binding.tvTime.setText(DisplayUtils.getTimeAgo(context, item.getCreatedDate()));
+
+        if (item.getAuthor().getGender() == Constants.GENDER_MALE) {
+            holder.binding.icGender.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_gender_male));
+        } else if (item.getAuthor().getGender() == Constants.GENDER_FEMALE) {
+            holder.binding.icGender.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_gender_female));
+        } else {
+            holder.binding.icGender.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_gender_un));
+        }
 
         Glide.with(holder.itemView.getContext())
                 .load(Constants.MEDIA_URL + item.getAuthor().getAvatarPath())
@@ -156,6 +199,33 @@ public class CommentChildAdapter extends RecyclerView.Adapter<CommentChildAdapte
 
         Animation animation = AnimationUtils.loadAnimation(holder.itemView.getContext(), R.anim.item_slide_in_bottom);
         holder.itemView.startAnimation(animation);
+
+        boolean needDisplayButton = item.getStatus() != null && item.getStatus() == -1;
+        applyBlurText(holder.binding, needDisplayButton && !item.isDisplay());
+
+        holder.binding.icDisplay.setVisibility(needDisplayButton ? View.VISIBLE : View.GONE);
+
+        holder.binding.btnDisplay.setOnClickListener(v -> {
+            if (item.getStatus() == -1) {
+                item.setDisplay(!item.isDisplay());
+                applyBlurText(holder.binding, !item.isDisplay());
+            }
+        });
+    }
+
+    private void applyBlurText(ItemCommentChildBinding binding, boolean blur) {
+        Paint paint = binding.tvContent.getPaint();
+
+        if (blur) {
+            binding.tvContent.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
+            paint.setMaskFilter(new BlurMaskFilter(8f, BlurMaskFilter.Blur.NORMAL));
+            binding.icDisplay.setImageResource(R.drawable.ic_eye_hidden);
+        } else {
+            paint.setMaskFilter(null);
+            binding.icDisplay.setImageResource(R.drawable.ic_eye);
+        }
+
+        binding.tvContent.invalidate();
     }
 
     @Override

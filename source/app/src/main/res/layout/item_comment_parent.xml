@@ -54,6 +54,15 @@
                         android:layout_gravity="center_vertical"
                         android:layout_marginStart="@dimen/_3sdp"/>
 
+                    <ImageView
+                        android:layout_width="@dimen/_10sdp"
+                        android:layout_height="@dimen/_10sdp"
+                        android:id="@+id/ic_gender"
+                        android:src="@drawable/ic_gender_male"
+                        android:layout_marginStart="@dimen/_6sdp"
+                        android:visibility="visible"
+                        android:layout_gravity="center_vertical"/>
+
                     <FrameLayout
                         android:id="@+id/layout_tag_episode"
                         android:layout_width="wrap_content"
@@ -199,6 +208,25 @@
                                 android:text="@string/reply"
                                 android:layout_marginStart="@dimen/_3sdp" />
                         </LinearLayout>
+
+                    </FrameLayout>
+
+                    <FrameLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/btn_display"
+                        android:padding="@dimen/_8sdp"
+                        android:layout_gravity="end"
+                        android:layout_marginStart="@dimen/_12sdp"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:background="@drawable/bg_btn_press_tran">
+
+                        <ImageView
+                            android:layout_width="@dimen/_12sdp"
+                            android:layout_height="@dimen/_12sdp"
+                            android:id="@+id/ic_display"
+                            android:src="@drawable/ic_eye_hidden"/>
 
                     </FrameLayout>
 

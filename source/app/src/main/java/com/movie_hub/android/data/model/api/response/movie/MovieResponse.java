@@ -42,7 +42,7 @@ public class MovieResponse {
     private List<SeasonResponse> seasons;
     private Long reviewCount;
     private Double averageRating;
-
+    private Long commentCount;
     public Double getAverageRating() {
         return averageRating == null ? 0.0 : Math.round(averageRating * 10) / 10.0;
     }

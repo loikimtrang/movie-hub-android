@@ -32,6 +32,7 @@ public class MovieRequest {
     private Boolean sortUnsorted;
     private Integer status;
     private String title;
+    private String keyword;
     private Boolean unpaged;
     private Long collectionId;
 

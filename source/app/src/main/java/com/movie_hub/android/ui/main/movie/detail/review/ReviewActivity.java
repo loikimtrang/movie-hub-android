@@ -473,4 +473,10 @@ public class ReviewActivity extends BaseActivity<ActivityReviewBinding, ReviewVi
 
         createVote(request, reviewResponse, position);
     }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        reviewItemAdapter.stopTimeUpdater();
+    }
 }

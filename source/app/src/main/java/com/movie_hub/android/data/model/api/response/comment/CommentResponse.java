@@ -16,7 +16,7 @@ public class CommentResponse {
     private String createdDate;
     private String modifiedDate;
     private boolean isPinned;
-    private int status;
+    private Integer status;
     private int totalChildren;
     private int totalLike;
     private int totalDislike;
@@ -27,6 +27,8 @@ public class CommentResponse {
     private List<CommentResponse> childComments;
     private boolean isLike;
     private boolean isDislike;
+
+    private boolean isDisplay;
 
     public UserResponse getAuthor() {
         return GsonUtils.fromJson(authorInfo, UserResponse.class);

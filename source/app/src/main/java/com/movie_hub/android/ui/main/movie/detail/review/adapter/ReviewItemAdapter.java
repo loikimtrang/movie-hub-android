@@ -2,11 +2,12 @@ package com.movie_hub.android.ui.main.movie.detail.review.adapter;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.graphics.ColorMatrix;
-import android.graphics.ColorMatrixColorFilter;
+import android.graphics.BlurMaskFilter;
+import android.graphics.Paint;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
@@ -71,12 +72,19 @@ public class ReviewItemAdapter extends RecyclerView.Adapter<ReviewItemAdapter.Re
         holder.binding.icLike.setImageDrawable(item.isLike() ?
                 ContextCompat.getDrawable(context, R.drawable.ic_like_select) :
                 ContextCompat.getDrawable(context, R.drawable.ic_like));
-        holder.binding.tvTime.setText(DisplayUtils.getTimeAgo(context, item.getModifiedDate()));
+        holder.binding.tvTime.setText(DisplayUtils.getTimeAgo(context, item.getCreatedDate()));
 
         holder.binding.icDisLike.setImageDrawable(item.isDislike() ?
                 ContextCompat.getDrawable(context, R.drawable.ic_dislike_select) :
                 ContextCompat.getDrawable(context, R.drawable.ic_dislike));
 
+        if (item.getAuthor().getGender() == Constants.GENDER_MALE) {
+            holder.binding.icGender.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_gender_male));
+        } else if (item.getAuthor().getGender() == Constants.GENDER_FEMALE) {
+            holder.binding.icGender.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_gender_female));
+        } else {
+            holder.binding.icGender.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_gender_un));
+        }
 
         Glide.with(holder.binding.getRoot().getContext())
                 .load(Constants.MEDIA_URL + item.getAuthor().getAvatarPath())
@@ -119,6 +127,33 @@ public class ReviewItemAdapter extends RecyclerView.Adapter<ReviewItemAdapter.Re
 
             listener.onLike(item, position);
         });
+
+        boolean needDisplayButton = item.getStatus() != null && item.getStatus() == -1;
+        applyBlurText(holder.binding, needDisplayButton && !item.isDisplay());
+
+        holder.binding.icDisplay.setVisibility(needDisplayButton ? View.VISIBLE : View.GONE);
+
+        holder.binding.btnDisplay.setOnClickListener(v -> {
+            if (item.getStatus() == -1) {
+                item.setDisplay(!item.isDisplay());
+                applyBlurText(holder.binding, !item.isDisplay());
+            }
+        });
+    }
+
+    private void applyBlurText(ItemReviewBinding binding, boolean blur) {
+        Paint paint = binding.tvContent.getPaint();
+
+        if (blur) {
+            binding.tvContent.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
+            paint.setMaskFilter(new BlurMaskFilter(8f, BlurMaskFilter.Blur.NORMAL));
+            binding.icDisplay.setImageResource(R.drawable.ic_eye_hidden);
+        } else {
+            paint.setMaskFilter(null);
+            binding.icDisplay.setImageResource(R.drawable.ic_eye);
+        }
+
+        binding.tvContent.invalidate();
     }
 
     @Override

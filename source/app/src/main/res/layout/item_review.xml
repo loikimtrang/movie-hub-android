@@ -52,7 +52,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentStart="true"
-                    android:layout_toStartOf="@+id/tv_time">
+                    android:layout_toStartOf="@+id/tv_time"
+                    android:gravity="center_vertical">
                     <TextView
                         android:id="@+id/tv_name_author"
                         android:layout_width="wrap_content"
@@ -61,6 +62,14 @@
                         android:ellipsize="end"
                         android:text="name"
                         style="@style/Text_10_Bold"/>
+
+                    <ImageView
+                        android:layout_width="@dimen/_10sdp"
+                        android:layout_height="@dimen/_10sdp"
+                        android:id="@+id/ic_gender"
+                        android:src="@drawable/ic_gender_male"
+                        android:layout_marginStart="@dimen/_6sdp"
+                        android:visibility="visible"/>
 
                 </LinearLayout>
 
@@ -85,7 +94,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 style="@style/Text_10_Normal"
-                android:layout_marginVertical="@dimen/_6sdp"
                 android:textColor="@color/text_comment"/>
 
             <RelativeLayout
@@ -156,6 +164,25 @@
                         android:textColor="@color/text_comment"
                         android:text="1"
                         android:layout_marginStart="@dimen/_3sdp"/>
+
+                    <FrameLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/btn_display"
+                        android:padding="@dimen/_8sdp"
+                        android:layout_gravity="end"
+                        android:layout_marginStart="@dimen/_12sdp"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:background="@drawable/bg_btn_press_tran">
+
+                        <ImageView
+                            android:layout_width="@dimen/_12sdp"
+                            android:layout_height="@dimen/_12sdp"
+                            android:id="@+id/ic_display"
+                            android:src="@drawable/ic_eye_hidden"/>
+
+                    </FrameLayout>
 
                 </LinearLayout>
 

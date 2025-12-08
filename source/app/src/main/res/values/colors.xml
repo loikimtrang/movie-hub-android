@@ -95,5 +95,6 @@
     <color name="review_select">#3B59DB</color>
     <color name="review_un_select">#3C404C</color>
     <color name="bg_dialog_comment">#272A3B</color>
+    <color name="bg_tran_header_home">#80000000</color>
 
 </resources>

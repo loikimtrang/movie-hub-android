@@ -23,5 +23,6 @@ public class ReviewResponse {
     private boolean isDislike;
 
     private ReviewStatisticsResponse statistics;
+    private boolean isDisplay;
 }
 

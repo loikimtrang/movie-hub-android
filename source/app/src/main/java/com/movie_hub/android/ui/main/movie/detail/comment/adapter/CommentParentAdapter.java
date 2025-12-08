@@ -2,6 +2,8 @@ package com.movie_hub.android.ui.main.movie.detail.comment.adapter;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.graphics.BlurMaskFilter;
+import android.graphics.Paint;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.LayoutInflater;
@@ -21,6 +23,7 @@ import com.movie_hub.android.constant.Constants;
 import com.movie_hub.android.data.model.api.response.comment.CommentResponse;
 import com.movie_hub.android.data.model.api.response.comment.VoteListResponse;
 import com.movie_hub.android.databinding.ItemCommentParentBinding;
+import com.movie_hub.android.databinding.ItemReviewBinding;
 import com.movie_hub.android.ui.main.movie.detail.comment.model.TagComment;
 import com.movie_hub.android.utils.DisplayUtils;
 
@@ -97,14 +100,20 @@ public class CommentParentAdapter extends RecyclerView.Adapter<CommentParentAdap
 
             }
         }
-
+        if (item.getAuthor().getGender() == Constants.GENDER_MALE) {
+            holder.binding.icGender.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_gender_male));
+        } else if (item.getAuthor().getGender() == Constants.GENDER_FEMALE) {
+            holder.binding.icGender.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_gender_female));
+        } else {
+            holder.binding.icGender.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_gender_un));
+        }
         holder.binding.tvNameAuthor.setText(item.getAuthor().getFullName());
         holder.binding.tvContent.setText(item.getContent());
 
         holder.binding.tvCountLike.setText(String.valueOf(item.getTotalLike()));
         holder.binding.tvCountDisLike.setText(String.valueOf(item.getTotalDislike()));
 
-        holder.binding.tvTime.setText(DisplayUtils.getTimeAgo(context, item.getModifiedDate()));
+        holder.binding.tvTime.setText(DisplayUtils.getTimeAgo(context, item.getCreatedDate()));
 
         if (item.isPinned()) {
             holder.binding.icPin.setVisibility(View.VISIBLE);
@@ -228,6 +237,33 @@ public class CommentParentAdapter extends RecyclerView.Adapter<CommentParentAdap
             listener.onOpenChildClick(item, items);
             notifyItemChanged(position);
         });
+
+        boolean needDisplayButton = item.getStatus() != null && item.getStatus() == -1;
+        applyBlurText(holder.binding, needDisplayButton && !item.isDisplay());
+
+        holder.binding.icDisplay.setVisibility(needDisplayButton ? View.VISIBLE : View.GONE);
+
+        holder.binding.btnDisplay.setOnClickListener(v -> {
+            if (item.getStatus() == -1) {
+                item.setDisplay(!item.isDisplay());
+                applyBlurText(holder.binding, !item.isDisplay());
+            }
+        });
+    }
+
+    private void applyBlurText(ItemCommentParentBinding binding, boolean blur) {
+        Paint paint = binding.tvContent.getPaint();
+
+        if (blur) {
+            binding.tvContent.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
+            paint.setMaskFilter(new BlurMaskFilter(8f, BlurMaskFilter.Blur.NORMAL));
+            binding.icDisplay.setImageResource(R.drawable.ic_eye_hidden);
+        } else {
+            paint.setMaskFilter(null);
+            binding.icDisplay.setImageResource(R.drawable.ic_eye);
+        }
+
+        binding.tvContent.invalidate();
     }
     public void notifyParentCommentChanged(long commentId, List<CommentResponse> childComment) {
         for (int i = 0; i < items.size(); i++) {
