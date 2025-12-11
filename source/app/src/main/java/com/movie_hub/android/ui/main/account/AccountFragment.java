@@ -16,6 +16,7 @@ import com.movie_hub.android.ui.main.MainActivity;
 import com.movie_hub.android.ui.main.account.adapter.AccountMenuAdapter;
 import com.movie_hub.android.ui.main.account.manage_account.ManageAccountActivity;
 import com.movie_hub.android.ui.main.account.model.MenuItemModel;
+import com.movie_hub.android.utils.DialogUtils;
 
 import java.util.Arrays;
 import java.util.List;
@@ -103,7 +104,16 @@ public class AccountFragment extends BaseFragment<FragmentAccountBinding, Accoun
         ((MainActivity) requireActivity()).navigateToNewActivity(getContext(), ManageAccountActivity.class);
     }
     public void onSignOutClick() {
-        ((MainActivity) requireActivity()).userSignOut();
+        DialogUtils.dialogConfirm(
+                requireContext(),
+                getString(R.string.do_you_want_log_out), // message
+                getString(R.string.log_out), // btn Positive
+                (dialog, which) -> {
+                    ((MainActivity) requireActivity()).userSignOut();
+                },
+                getString(R.string.cancel), // btn Negative
+                (dialog, which) -> dialog.dismiss()
+        );
     }
     @SuppressLint("NonConstantResourceId")
     @Override

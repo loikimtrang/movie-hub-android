@@ -263,5 +263,7 @@
     <string name="please_write_review">Please write a review</string>
     <string name="once_rate">You can only rate once</string>
     <string name="account_has_been_lock">Your account has been locked</string>
+    <string name="do_you_want_log_out">Do you want to log out?</string>
+    <string name="sign_out_success">Signed out successfully</string>
 
 </resources>

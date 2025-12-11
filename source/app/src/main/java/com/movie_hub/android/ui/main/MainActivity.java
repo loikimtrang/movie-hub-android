@@ -252,6 +252,7 @@ public class MainActivity extends BaseActivity<ActivityMainBinding, MainViewMode
             @Override
             public void doSuccess(Void unused) {
                 startActivity(new Intent(MainActivity.this, SplashActivity.class));
+                new ToastMessage(ToastMessage.TYPE_NORMAL, getString(R.string.sign_out_success)).showMessage(MainActivity.this);
                 finish();
             }
 
