@@ -20,6 +20,7 @@ import com.movie_hub.android.data.model.api.response.history.ListWatchHistoryRes
 import com.movie_hub.android.data.model.api.response.movie.MovieResponse;
 import com.movie_hub.android.ui.base.activity.BaseViewModel;
 import com.movie_hub.android.ui.main.MainCallback;
+import com.movie_hub.android.ui.main.home.filter.model.FilterItemModel;
 import com.movie_hub.android.ui.main.home.filter.model.FilterTypeModel;
 import com.movie_hub.android.utils.NetworkUtils;
 
@@ -44,6 +45,7 @@ public class FilterViewModel extends BaseViewModel {
     public List<TypeMovieRequest> typeMovieRequestList = new ArrayList<>();
     public List<AgeRatingRequest> ageRatingRequestList = new ArrayList<>();
     public List<YearReleaseRequest> yearReleaseRequestList = new ArrayList<>();
+    MutableLiveData<List<FilterItemModel>> listFilter = new MutableLiveData<>(new ArrayList<>());
 
     int currentPage = 0;
     int pageSize = 20;

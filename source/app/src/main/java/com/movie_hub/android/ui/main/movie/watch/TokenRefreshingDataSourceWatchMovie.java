@@ -1,5 +1,7 @@
 package com.movie_hub.android.ui.main.movie.watch;
 
+import android.util.Log;
+
 import androidx.annotation.NonNull;
 import androidx.media3.datasource.DataSpec;
 import androidx.media3.datasource.DefaultHttpDataSource;
@@ -17,7 +19,10 @@ public class TokenRefreshingDataSourceWatchMovie extends DefaultHttpDataSource {
 
     @Override
     public long open(@NonNull DataSpec dataSpec) throws HttpDataSourceException {
-        setRequestProperty("Authorization", viewModel.getTokenVideo());
+        String token = viewModel.getTokenVideo();
+        Log.d("WATCH_MOVIE", "Opening URL: " + dataSpec.uri);
+        Log.d("WATCH_MOVIE", "Token: " + token);
+        setRequestProperty("Authorization", token);
         return super.open(dataSpec);
     }
 }

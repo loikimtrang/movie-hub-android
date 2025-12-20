@@ -129,7 +129,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 style="@style/Text_12_Normal"
-                                android:text="@string/no_comment_yet"
+                                android:text="@string/no_review_yet"
                                 android:textColor="@color/text_empty"
                                 android:layout_gravity="center"
                                 android:layout_marginTop="@dimen/_6sdp"/>
@@ -142,10 +142,11 @@
 
 
                 <RelativeLayout
-                    android:id="@+id/bottom_comment"
+                    android:id="@+id/bottom_review"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@color/bg_input_comment">
+                    android:background="@color/bg_input_comment"
+                    android:visibility="gone">
 
                     <com.google.android.material.progressindicator.LinearProgressIndicator
                         android:id="@+id/bottom_loading_bar"

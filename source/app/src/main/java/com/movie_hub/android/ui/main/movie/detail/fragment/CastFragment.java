@@ -60,9 +60,11 @@ public class CastFragment extends BaseFragment<FragmentCastBinding, CastFragment
 
     private static final String ARG_DISPLAY_FROM = "display_from";
     private static final String ARG_KEYWORD = "keyword";
+    private static final String ARG_KIND = "kind";
 
     private int displayFrom;
     private String keyword;
+    private boolean isDirector;
 
     int currentPage = 0;
     int pageSize = 20;
@@ -147,6 +149,7 @@ public class CastFragment extends BaseFragment<FragmentCastBinding, CastFragment
         if (getArguments() != null) {
             displayFrom = getArguments().getInt(ARG_DISPLAY_FROM, TYPE_MOVIE_DETAIL);
             keyword = getArguments().getString(ARG_KEYWORD);
+            isDirector = getArguments().getBoolean(ARG_KIND);
         }
     }
     @Override
@@ -156,11 +159,12 @@ public class CastFragment extends BaseFragment<FragmentCastBinding, CastFragment
         showShimmer();
     }
 
-    public static CastFragment newInstance(int displayFrom, String keyword) {
+    public static CastFragment newInstance(int displayFrom, String keyword, boolean isGetDirector) {
         CastFragment fragment = new CastFragment();
         Bundle args = new Bundle();
         args.putInt(ARG_DISPLAY_FROM, displayFrom);
         args.putString(ARG_KEYWORD, keyword);
+        args.putBoolean(ARG_KIND, isGetDirector);
         fragment.setArguments(args);
         return fragment;
     }
@@ -213,7 +217,10 @@ public class CastFragment extends BaseFragment<FragmentCastBinding, CastFragment
         request.setSize(pageSize);
         request.setMovieId(String.valueOf(movie.getId()));
         request.setKind(1);
-        
+        if (isDirector) {
+            request.setKind(2);
+        }
+
         viewModel.getListMoviePerson(new MainCallback<ResponseListObj<MoviePersonResponse>>() {
             @Override public void doSuccess(ResponseListObj<MoviePersonResponse> data) {
                 hideLoading();
@@ -422,6 +429,7 @@ public class CastFragment extends BaseFragment<FragmentCastBinding, CastFragment
     public void navigateToPersonDetail(PersonResponse data) {
         Intent intent = new Intent(getContext(), PersonDetailActivity.class);
         intent.putExtra("person", GsonUtils.toJson(data));
+        intent.putExtra("isDirection", isDirector);
         startActivity(intent);
     }
 

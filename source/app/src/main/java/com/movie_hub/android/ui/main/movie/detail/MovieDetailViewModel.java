@@ -17,6 +17,7 @@ import com.movie_hub.android.data.model.api.response.favourite.FavouriteResponse
 import com.movie_hub.android.data.model.api.response.history.ListWatchHistoryResponse;
 import com.movie_hub.android.data.model.api.response.movie.MovieResponse;
 import com.movie_hub.android.data.model.api.response.playlist.PlayListResponse;
+import com.movie_hub.android.data.model.api.response.review.ReviewResponse;
 import com.movie_hub.android.ui.base.activity.BaseViewModel;
 import com.movie_hub.android.ui.main.MainCallback;
 import com.movie_hub.android.utils.NetworkUtils;
@@ -387,6 +388,34 @@ public class MovieDetailViewModel extends BaseViewModel {
                         }, throwable -> {
                             Timber.e(throwable);
                             hideLoading();
+                            callback.doError(throwable);
+                        }
+                )
+        );
+    }
+    public void checkIsReview(MainCallback<ReviewResponse> callback, Long movieId) {
+        compositeDisposable.add(repository.getApiService().checkReview(movieId)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .retryWhen(throwable ->
+                        throwable.flatMap((Function<Throwable, ObservableSource<?>>) throwable1 -> {
+                            if (NetworkUtils.checkNetworkError(throwable1)) {
+                                hideLoading();
+                                return application.showDialogNoInternetAccess();
+                            } else {
+                                return Observable.error(throwable1);
+                            }
+                        })
+                )
+                .subscribe(
+                        response -> {
+                            if (response.isResult()) {
+                                callback.doSuccess(response.getData());
+                            } else {
+                                callback.doFail();
+                            }
+                        }, throwable -> {
+                            Timber.e(throwable);
                             callback.doError(throwable);
                         }
                 )

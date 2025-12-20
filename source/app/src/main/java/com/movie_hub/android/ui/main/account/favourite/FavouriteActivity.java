@@ -36,7 +36,7 @@ public class FavouriteActivity extends BaseActivity<ActivityFavouriteBinding, Fa
     public void setUpTab() {
         fragmentList.clear();
         fragmentList.add(MovieFavoriteFragment.newInstance());
-        fragmentList.add(CastFragment.newInstance(CastFragment.TYPE_FAVORITE, null));
+        fragmentList.add(CastFragment.newInstance(CastFragment.TYPE_FAVORITE, null, false));
         SearchResultTabAdapter tabAdapter = new SearchResultTabAdapter(this, fragmentList);
         viewBinding.viewPager.setAdapter(tabAdapter);
 

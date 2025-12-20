@@ -21,6 +21,7 @@ import com.movie_hub.android.databinding.LayoutBottomSheetChooseSeasonBinding;
 import com.movie_hub.android.databinding.LayoutBottomSheetInformationMovieBinding;
 import com.movie_hub.android.ui.main.movie.detail.adapter.SeasonItemListAdapter;
 import com.movie_hub.android.utils.DisplayUtils;
+import com.movie_hub.android.utils.FileUtils;
 import com.movie_hub.android.utils.GsonUtils;
 import com.movie_hub.android.utils.HtmlUtils;
 
@@ -40,9 +41,10 @@ public class InformationMovieBottomSheetDialog extends BottomSheetDialog  {
     private void init() {
         binding = LayoutBottomSheetInformationMovieBinding.inflate(LayoutInflater.from(getContext()));
         setContentView(binding.getRoot());
+        String updating = getContext().getString(R.string.updating);
 
         binding.description.setText(HtmlUtils.convertPtoStrong(movieDetails.getDescription()));
-        binding.country.setText(movieDetails.getCountry());
+        binding.country.setText(getOrUpdating(FileUtils.getLabelByValue(getContext(), R.raw.country_options, movieDetails.getCountry()), updating));
         binding.ageRating.setText(DisplayUtils.displayAgeRatingDescription(getContext(), movieDetails.getAgeRating()));
 
         if (movieDetails.getType() == Constants.TYPE_MOVIE_SINGLE) {
@@ -73,7 +75,9 @@ public class InformationMovieBottomSheetDialog extends BottomSheetDialog  {
 
         binding.btnClose.setOnClickListener(v -> dismiss());
     }
-
+    private String getOrUpdating(String value, String updating) {
+        return (value != null && !value.trim().isEmpty()) ? value : updating;
+    }
     @Override
     public void dismiss() {
         super.dismiss();

@@ -6,12 +6,14 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.movie_hub.android.BR;
 import com.movie_hub.android.R;
+import com.movie_hub.android.data.model.api.request.movie.filter.CountryRequest;
 import com.movie_hub.android.data.model.api.response.person.PersonResponse;
 import com.movie_hub.android.databinding.FragmentInformationBinding;
 import com.movie_hub.android.di.component.FragmentComponent;
 import com.movie_hub.android.ui.base.fragment.BaseFragment;
 import com.movie_hub.android.ui.main.person.PersonDetailViewModel;
 import com.movie_hub.android.utils.DisplayUtils;
+import com.movie_hub.android.utils.FileUtils;
 import com.movie_hub.android.utils.HtmlUtils;
 
 public class InformationFragment extends BaseFragment<FragmentInformationBinding, InformationFragmentViewModel> {
@@ -38,23 +40,27 @@ public class InformationFragment extends BaseFragment<FragmentInformationBinding
 
         binding.otherName.setText(getOrUpdating(personResponse.getOtherName(), updating));
         binding.description.setText(HtmlUtils.convertPtoStrong(getOrUpdating(personResponse.getBio(), updating)));
-        binding.country.setText(getOrUpdating(personResponse.getCountry(), updating));
-        binding.dob.setText(
-                personResponse.getDateOfBirth() != null
-                        ? DisplayUtils.displayShortDate(personResponse.getDateOfBirth())
-                        : updating
-        );
-        binding.gender.setText(
-                personResponse.getGender() != null
-                        ? DisplayUtils.displayGender(context, personResponse.getGender())
-                        : updating
-        );
+
+        String countryLabel = null;
+        if (personResponse.getCountry() != null) {
+            countryLabel = FileUtils.getLabelByValue(context, R.raw.country_options, personResponse.getCountry());
+        }
+        binding.country.setText(getOrUpdating(countryLabel, updating));
+
+        String dob = personResponse.getDateOfBirth() != null
+                ? DisplayUtils.displayShortDate(personResponse.getDateOfBirth())
+                : updating;
+        binding.dob.setText(dob);
+
+        String gender = personResponse.getGender() != null
+                ? DisplayUtils.displayGender(context, personResponse.getGender())
+                : updating;
+        binding.gender.setText(gender);
     }
 
-    private String getOrUpdating(String value, String updating) {
-        return (value != null && !value.trim().isEmpty()) ? value : updating;
+    private String getOrUpdating(String input, String fallback) {
+        return input == null || input.trim().isEmpty() ? fallback : input;
     }
-
 
     @Override
     public int getBindingVariable() {

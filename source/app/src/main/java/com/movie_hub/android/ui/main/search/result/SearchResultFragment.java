@@ -46,7 +46,7 @@ public class SearchResultFragment extends BaseFragment<FragmentSearchResultBindi
         fragmentList.add(RecommendationFragment.newInstance(RecommendationFragment.TYPE_SEARCH, keyword, 0L));
 
         tabTitles.add(getString(R.string.cast));
-        fragmentList.add(CastFragment.newInstance(CastFragment.TYPE_SEARCH, keyword));
+        fragmentList.add(CastFragment.newInstance(CastFragment.TYPE_SEARCH, keyword, false));
 
         SearchResultTabAdapter tabAdapter = new SearchResultTabAdapter(requireActivity(), fragmentList);
         binding.viewPager.setAdapter(tabAdapter);

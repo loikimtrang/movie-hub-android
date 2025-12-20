@@ -42,7 +42,8 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/_12sdp">
+                android:layout_marginHorizontal="@dimen/_12sdp"
+                android:layout_marginTop="@dimen/_6sdp">
 
 
                 <FrameLayout
@@ -357,10 +358,12 @@
                         android:visibility="gone">
                         <TextView
                             android:id="@+id/tv_avg_rv"
-                            android:layout_width="@dimen/_12sdp"
-                            android:layout_height="@dimen/_12sdp"
+                            android:layout_width="@dimen/_14sdp"
+                            android:layout_height="@dimen/_14sdp"
                             android:gravity="center"
-                            style="@style/Text_8_Normal"/>
+                            android:singleLine="true"
+                            style="@style/Text_8_Normal"
+                            android:textSize="@dimen/_7ssp"/>
                     </FrameLayout>
 
                 </FrameLayout>

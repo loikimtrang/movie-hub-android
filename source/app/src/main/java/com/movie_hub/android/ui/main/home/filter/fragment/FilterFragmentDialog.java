@@ -130,6 +130,10 @@ public class FilterFragmentDialog extends DialogFragment implements OnFilterClic
             dismiss();
         });
 
+        binding.layoutSetting.setOnClickListener(v -> {
+            dismiss();
+        });
+
         if (filterTypeModel.getType() != Constants.TYPE_GENRE) {
             binding.layoutType.setVisibility(View.GONE);
         }
@@ -277,19 +281,23 @@ public class FilterFragmentDialog extends DialogFragment implements OnFilterClic
             movieRequest.setCategoryIds(new ArrayList<>());
         }
 
+        if (movieRequest.getCategoryRequest() == null) {
+            movieRequest.setCategoryRequest(new ArrayList<>());
+        }
+
         if (categoryResponse.isSelect()) {
             // Nếu chưa có thì thêm vào
             if (!movieRequest.getCategoryIds().contains(categoryResponse.getId())) {
                 movieRequest.getCategoryIds().add(categoryResponse.getId());
+                movieRequest.getCategoryRequest().add(categoryResponse);
             }
         } else {
             // Nếu đã có mà user bỏ chọn thì xóa ra
             movieRequest.getCategoryIds().remove(categoryResponse.getId());
+            movieRequest.getCategoryRequest().remove(categoryResponse);
         }
 
         // Optional: sync list object
-        movieRequest.setCategoryRequest(categoryResponseList);
-
         updateFilterUI();
     }
 

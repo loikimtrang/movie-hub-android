@@ -45,6 +45,7 @@ import com.movie_hub.android.data.model.api.response.history.ListWatchHistoryRes
 import com.movie_hub.android.data.model.api.response.history.WatchHistoryResponse;
 import com.movie_hub.android.data.model.api.response.movie.MovieResponse;
 import com.movie_hub.android.data.model.api.response.playlist.PlayListResponse;
+import com.movie_hub.android.data.model.api.response.review.ReviewResponse;
 import com.movie_hub.android.data.model.api.response.season.SeasonResponse;
 import com.movie_hub.android.data.model.api.response.video.VideoResponse;
 import com.movie_hub.android.data.model.other.ToastMessage;
@@ -365,7 +366,10 @@ public class MovieDetailActivity extends BaseActivity<ActivityMovieDetailBinding
         }
 
         tabTitles.add(getString(R.string.cast));
-        fragmentList.add(CastFragment.newInstance(CastFragment.TYPE_MOVIE_DETAIL, null));
+        fragmentList.add(CastFragment.newInstance(CastFragment.TYPE_MOVIE_DETAIL, null, false));
+
+        tabTitles.add(getString(R.string.director_person));
+        fragmentList.add(CastFragment.newInstance(CastFragment.TYPE_MOVIE_DETAIL, null, true));
 
         tabTitles.add(getString(R.string.recommend));
         fragmentList.add(RecommendationFragment.newInstance(RecommendationFragment.TYPE_MOVIE_DETAIL, null, Objects.requireNonNull(viewModel.movieDetails.getId())));
@@ -668,7 +672,11 @@ public class MovieDetailActivity extends BaseActivity<ActivityMovieDetailBinding
                 break;
 
             case R.id.btn_rating:
-                navigateToReview();
+                if (viewModel.isLogin()) {
+                    checkReview();
+                } else {
+                    navigateToReview(false);
+                }
                 break;
 
             case R.id.btn_playlist:
@@ -682,11 +690,38 @@ public class MovieDetailActivity extends BaseActivity<ActivityMovieDetailBinding
                 break;
         }
     }
+    public void checkReview() {
+        viewModel.checkIsReview(new MainCallback<ReviewResponse>() {
+            @Override
+            public void doError(Throwable error) {
+                hideLoading();
+                showError(getString(R.string.an_error_occurred));
+            }
+            @Override
+            public void doSuccess(ReviewResponse data) {
+                if (data != null) {
+                    navigateToReview(true);
+                } else {
+                    navigateToReview(false);
+                }
+            }
+            @Override
+            public void doSuccess() {
 
-    public void navigateToReview() {
+            }
+
+            @Override
+            public void doFail() {
+                hideLoading();
+                showError(getString(R.string.an_error_occurred));
+            }
+        }, viewModel.movieDetails.getId());
+    }
+    public void navigateToReview(Boolean isReview) {
         ClickUtils.debounceClick(viewBinding.includeMovieHeader.btnRating);
         Intent it = new Intent(this, ReviewActivity.class);
         it.putExtra("movie_details", GsonUtils.toJson(viewModel.movieDetails));
+        it.putExtra("is_review", isReview);
         startActivity(it);
     }
     public void showLoginRequiredDialog() {

@@ -170,6 +170,7 @@
                             android:clickable="true"
                             android:focusable="true"
                             android:onClick="onClick"
+                            android:visibility="gone"
                             android:background="?attr/selectableItemBackgroundBorderless">
 
                             <ImageView
@@ -198,6 +199,7 @@
                             android:clickable="true"
                             android:focusable="true"
                             android:onClick="onClick"
+                            android:visibility="gone"
                             android:background="?attr/selectableItemBackgroundBorderless">
 
                             <ImageView
@@ -844,7 +846,7 @@
                     android:layout_height="wrap_content"
                     style="@style/Text_12_Bold"
                     android:gravity="center"
-                    android:text="@string/exit_confirm"
+                    android:text="@string/an_error_occurred"
                     android:maxLines="2"
                     android:layout_marginBottom="@dimen/_12sdp"/>
 

@@ -47,7 +47,16 @@ public class PersonDetailActivity extends BaseActivity<ActivityPersonDetailBindi
         viewBinding.setVm(viewModel);
 
         String json = getIntent().getStringExtra("person");
+        boolean isDirection = getIntent().getBooleanExtra("isDirection", false);
         PersonResponse person = GsonUtils.fromJson(json, PersonResponse.class);
+        viewModel.isDirection = isDirection;
+        if (viewModel.isDirection) {
+            viewBinding.layoutBtn.setVisibility(View.GONE);
+            viewBinding.btnFavourite.setVisibility(View.GONE);
+        } else {
+            viewBinding.layoutBtn.setVisibility(View.VISIBLE);
+            viewBinding.btnFavourite.setVisibility(View.VISIBLE);
+        }
 
         if (person!=null) {
             viewModel.person = person;

@@ -153,6 +153,7 @@ public class PlayListActivity extends BaseActivity <ActivityPlayListBinding, Pla
                 hideLoading();
                 if (data == null || data.isEmpty()) {
                     viewBinding.layoutEmptyMain.setVisibility(View.VISIBLE);
+                    playlistItemAdapter.setData(new ArrayList<>());
                     return;
                 }
                 viewBinding.layoutEmptyMain.setVisibility(View.GONE);

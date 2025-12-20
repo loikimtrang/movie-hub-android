@@ -1,5 +1,7 @@
 package com.movie_hub.android.ui.main.movie.detail.review;
 
+import androidx.lifecycle.MutableLiveData;
+
 import com.movie_hub.android.MVVMApplication;
 import com.movie_hub.android.constant.Constants;
 import com.movie_hub.android.data.Repository;
@@ -31,6 +33,7 @@ public class ReviewViewModel extends BaseViewModel {
     public MovieResponse movieDetails = new MovieResponse();
     public List<ReviewResponse> listReview = new ArrayList<>();
     public List<VoteListResponse> voteListResponses = new ArrayList<>();
+    MutableLiveData<Boolean> isReview = new MutableLiveData<>(false);
     public ReviewViewModel(Repository repository, MVVMApplication application) {
         super(repository, application);
     }

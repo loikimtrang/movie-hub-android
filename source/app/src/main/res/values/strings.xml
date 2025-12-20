@@ -268,5 +268,9 @@
     <string name="account_has_been_lock">Your account has been locked</string>
     <string name="do_you_want_log_out">Do you want to log out?</string>
     <string name="sign_out_success">Signed out successfully</string>
+    <string name="reset_password">Reset password</string>
+    <string name="director_person">Director</string>
+    <string name="no_review_yet">No reviews yet</string>
+    <string name="nationality">Nationality: </string>
 
 </resources>

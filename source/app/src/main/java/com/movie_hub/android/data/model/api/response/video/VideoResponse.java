@@ -31,16 +31,19 @@ public class VideoResponse {
     private boolean isPlaying;
 
     public String getSpriteUrl() {
-        if (vttUrl.contains("http")) return spriteUrl;
+        if (spriteUrl == null || spriteUrl.isEmpty()) return "";
+        if (spriteUrl.contains("http")) return spriteUrl;
         return Constants.MEDIA_URL_VTT + spriteUrl;
     }
 
     public String getThumbnailUrl() {
-        if (vttUrl.contains("http")) return thumbnailUrl;
+        if (thumbnailUrl == null || thumbnailUrl.isEmpty()) return "";
+        if (thumbnailUrl.contains("http")) return thumbnailUrl;
         return Constants.MEDIA_URL + thumbnailUrl;
     }
 
     public String getVttUrl() {
+        if (vttUrl == null || vttUrl.isEmpty()) return "";
         if (vttUrl.contains("http")) return vttUrl;
         return Constants.MEDIA_URL_VTT + vttUrl;
     }

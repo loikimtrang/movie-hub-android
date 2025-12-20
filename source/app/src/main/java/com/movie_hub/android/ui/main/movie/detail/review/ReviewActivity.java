@@ -124,7 +124,6 @@ public class ReviewActivity extends BaseActivity<ActivityReviewBinding, ReviewVi
     private int pageSize = 20;
     private boolean isLoading = false;
     private boolean isLastPage = false;
-
     private ActivityResultLauncher<Intent> loginLauncher;
 
     @SuppressLint("SetTextI18n")
@@ -139,7 +138,9 @@ public class ReviewActivity extends BaseActivity<ActivityReviewBinding, ReviewVi
         showShimmer();
 
         String json = getIntent().getStringExtra("movie_details");
+        boolean isReviewed = getIntent().getBooleanExtra("is_review", false);
         MovieResponse movieResponse = GsonUtils.fromJson(json, MovieResponse.class);
+        viewModel.isReview.postValue(isReviewed);
         if (movieResponse != null) {
             viewModel.movieDetails = movieResponse;
             if (viewModel.movieDetails.getReviewCount() != null && viewModel.movieDetails.getReviewCount() > 0L) {
@@ -162,6 +163,7 @@ public class ReviewActivity extends BaseActivity<ActivityReviewBinding, ReviewVi
                         if (loginSuccess) {
                             new ToastMessage(ToastMessage.TYPE_NORMAL, getString(R.string.login_successful)).showMessage(this);
                             getVoteListForLoginSuccess();
+                            checkReview();
                         }
                     }
                 }
@@ -182,6 +184,14 @@ public class ReviewActivity extends BaseActivity<ActivityReviewBinding, ReviewVi
                 if (!isLoading && !isLastPage && lastVisibleItemPosition >= totalItemCount - 5) {
                     getListReview();
                 }
+            }
+        });
+
+        viewModel.isReview.observe(this, isReview -> {
+            if (isReview) {
+                viewBinding.bottomReview.setVisibility(View.GONE);
+            } else {
+                viewBinding.bottomReview.setVisibility(View.VISIBLE);
             }
         });
     }
@@ -336,6 +346,8 @@ public class ReviewActivity extends BaseActivity<ActivityReviewBinding, ReviewVi
                 if (data.getStatistics().getReviewCount() != null && data.getStatistics().getReviewCount() > 0L) {
                     viewBinding.tvCountCmt.setText(getString(R.string.rating) + " (" + data.getStatistics().getReviewCount().toString() + ")");
                 }
+
+                viewModel.isReview.postValue(true);
             }
 
             @Override
@@ -404,10 +416,10 @@ public class ReviewActivity extends BaseActivity<ActivityReviewBinding, ReviewVi
             }
             @Override
             public void doSuccess(ReviewResponse data) {
-                if (data == null ) {
-                    showDialogReview();
+                if (data != null) {
+                    viewModel.isReview.postValue(true);
                 } else {
-                    new ToastMessage(ToastMessage.TYPE_NORMAL, getString(R.string.once_rate)).showMessage(getApplicationContext());
+                    viewModel.isReview.postValue(false);
                 }
             }
             @Override
@@ -440,7 +452,7 @@ public class ReviewActivity extends BaseActivity<ActivityReviewBinding, ReviewVi
                     showLoginRequiredDialog();
                     return;
                 }
-                checkReview();
+                showDialogReview();
                 break;
             default:
                 break;

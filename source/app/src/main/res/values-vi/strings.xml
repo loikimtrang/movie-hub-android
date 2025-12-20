@@ -95,7 +95,7 @@
     <string name="fetch_data_failed">Lấy dữ liệu thất bại</string>
     <string name="no_result">Không có kết quả</string>
     <string name="watch_now">Xem ngay</string>
-    <string name="episode">Tập Phim</string>
+    <string name="episode">Tập phim</string>
     <string name="episode_index">Tập</string>
     <string name="cast">Diễn viên</string>
     <string name="details">Chi tiết</string>
@@ -222,7 +222,7 @@
     <string name="create_list">Tạo danh sách</string>
     <string name="enter_title">Nhập tiêu đề</string>
     <string name="create_new">Tạo mới</string>
-    <string name="cancel_create">Hủy Tạo</string>
+    <string name="cancel_create">Hủy tạo</string>
     <string name="please_enter_title">Vui lòng nhập tiêu đề</string>
     <string name="create_playlist_succes">Tạo danh sách phát thành công</string>
     <string name="limit_list">Bạn đã đạt đến giới hạn tạo danh sách.</string>
@@ -263,4 +263,9 @@
     <string name="account_has_been_lock">Tài khoản của bạn đã bị khóa</string>
     <string name="do_you_want_log_out">Bạn có muốn đăng xuất?</string>
     <string name="sign_out_success">Đăng xuất thành công</string>
+    <string name="reset_password">Đặt lại mật khẩu</string>
+    <string name="director_person">Đạo diễn</string>
+    <string name="no_review_yet">Chưa có đánh giá nào</string>
+    <string name="nationality">Quốc tịch: </string>
+
 </resources>

@@ -203,7 +203,13 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
 
             viewModel.movieDetails.applyWatchHistory(response);
             if (episodeItemListHoriAdapter != null) {
-                episodeItemListHoriAdapter.setData(viewModel.movieDetails.getSeasons().get(currentSeasonIndex).getEpisodes(), viewBinding.layoutListEpisodes.rvEpisode);
+                if (currentSeasonIndex >= 0 && currentSeasonIndex < viewModel.movieDetails.getSeasons().size()) {
+                    List<MovieItemResponse> episodes = viewModel.movieDetails.getSeasons().get(currentSeasonIndex).getEpisodes();
+                    episodeItemListHoriAdapter.setData(episodes, viewBinding.layoutListEpisodes.rvEpisode);
+                } else {
+                    Log.e("WatchMovie", "Invalid currentSeasonIndex = " + currentSeasonIndex);
+                }
+
             }
 
             if (isStartContinueWatch) return;

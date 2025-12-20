@@ -5,6 +5,10 @@ import android.text.TextUtils;
 
 import androidx.annotation.RawRes;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
@@ -1175,4 +1179,28 @@ public final class FileUtils {
             return null;
         }
     }
+
+    public static String getLabelByValue(
+            Context context,
+            @RawRes int resId,
+            String value
+    ) {
+        try {
+            String json = readRawResource(context, resId);
+            if (json == null) return null;
+
+            JSONArray jsonArray = new JSONArray(json);
+
+            for (int i = 0; i < jsonArray.length(); i++) {
+                JSONObject obj = jsonArray.getJSONObject(i);
+                if (value.equalsIgnoreCase(obj.optString("value"))) {
+                    return obj.optString("label");
+                }
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
 }

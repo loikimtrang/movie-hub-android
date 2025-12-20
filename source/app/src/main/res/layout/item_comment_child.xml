@@ -42,10 +42,10 @@
 
                     <TextView
                         android:id="@+id/tv_name_author"
-                        android:layout_width="wrap_content"
+                        android:layout_width="@dimen/_90sdp"
                         android:layout_height="wrap_content"
-                        android:maxLines="1"
-                        android:ellipsize="end"
+                        android:singleLine="true"
+                        android:ellipsize="marquee"
                         android:text="name"
                         style="@style/Text_10_Bold"/>
 

@@ -70,7 +70,6 @@ public class FilterCategoryItemAdapter extends RecyclerView.Adapter<FilterCatego
                 listener.onCategoryFilterClick(item);
             }
         });
-
     }
 
     @Override

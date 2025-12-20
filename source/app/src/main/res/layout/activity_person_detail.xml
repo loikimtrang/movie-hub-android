@@ -120,13 +120,15 @@
             </FrameLayout>
 
             <LinearLayout
+                android:id="@+id/layout_btn"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/_40sdp"
                 android:orientation="horizontal"
                 android:layout_marginHorizontal="@dimen/_6sdp"
                 android:padding="@dimen/_2sdp"
                 android:background="@drawable/bg_tab_container_search_result"
-                android:layout_marginVertical="@dimen/_12sdp">
+                android:layout_marginVertical="@dimen/_12sdp"
+                android:visibility="gone">
 
                 <FrameLayout
                     android:id="@+id/btn_inf"

@@ -80,7 +80,7 @@ public class CommentParentAdapter extends RecyclerView.Adapter<CommentParentAdap
     @Override
     public void onBindViewHolder(@NonNull CommentParentViewHolder holder, @SuppressLint("RecyclerView") int position) {
         CommentResponse item = items.get(position);
-
+        holder.binding.tvNameAuthor.setSelected(true);
         if (tagComment.getLabel() != null && !tagComment.getLabel().isEmpty()) {
             if (tagComment.getMovieItemId() != -1L) {
                 holder.binding.tvEpisode.setText(tagComment.getLabel());

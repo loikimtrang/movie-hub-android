@@ -46,18 +46,27 @@ public class FilterCategoryFragmentDialog extends DialogFragment implements OnFi
     @Override
     public void onCategoryFilterClick(CategoryResponse categoryResponse) {
         List<Long> categoryIds;
+        List<CategoryResponse> list;
         if (movieRequest.getCategoryIds() == null) {
             categoryIds = new ArrayList<>();
         } else {
             categoryIds = new ArrayList<>(movieRequest.getCategoryIds());
         }
 
+        if (movieRequest.getCategoryRequest() == null) {
+            list = new ArrayList<>();
+        } else {
+            list = new ArrayList<>(movieRequest.getCategoryRequest());
+        }
+
         if (categoryResponse.isSelect()) {
             if (!categoryIds.contains(categoryResponse.getId())) {
                 categoryIds.add(categoryResponse.getId());
+                list.add(categoryResponse);
             }
         } else {
             categoryIds.remove(categoryResponse.getId());
+            list.remove(categoryResponse);
         }
 
         if (categoryIds.isEmpty()) {
@@ -67,6 +76,7 @@ public class FilterCategoryFragmentDialog extends DialogFragment implements OnFi
             binding.tvCate.setVisibility(View.VISIBLE);
         }
         movieRequest.setCategoryIds(categoryIds);
+        movieRequest.setCategoryRequest(list);
     }
     @Override
     public void onCountryFilterClick(CountryRequest request) {

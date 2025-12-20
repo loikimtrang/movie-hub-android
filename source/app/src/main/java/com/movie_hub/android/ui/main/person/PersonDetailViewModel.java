@@ -23,6 +23,7 @@ import timber.log.Timber;
 public class PersonDetailViewModel extends BaseViewModel {
     public PersonResponse person = new PersonResponse();
     public Boolean isFavourite = false;
+    public Boolean isDirection = false;
     public MutableLiveData<FavouriteResponse> favouriteResponseFirst = new MutableLiveData<>();
 
     public FavouriteResponse favourite = new FavouriteResponse();

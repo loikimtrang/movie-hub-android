@@ -87,7 +87,7 @@ public class CommentChildAdapter extends RecyclerView.Adapter<CommentChildAdapte
         if (item == null) return;
 
         holder.binding.tvNameAuthor.setText(item.getAuthor().getFullName());
-
+        holder.binding.tvNameAuthor.setSelected(true);
 
         CommentResponse parent = item.getParent();
 

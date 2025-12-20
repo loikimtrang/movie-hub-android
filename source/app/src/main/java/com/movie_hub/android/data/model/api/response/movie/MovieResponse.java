@@ -221,7 +221,6 @@ public class MovieResponse {
         for (int i = 0; i<seasons.size(); i++) {
             if (seasons.get(i).isSelect()) return i;
         }
-
         return -1;
     }
 

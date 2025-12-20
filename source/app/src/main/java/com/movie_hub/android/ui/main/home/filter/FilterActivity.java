@@ -10,6 +10,12 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.flexbox.AlignItems;
+import com.google.android.flexbox.FlexDirection;
+import com.google.android.flexbox.FlexWrap;
+import com.google.android.flexbox.FlexboxLayoutManager;
+import com.google.android.flexbox.JustifyContent;
+import com.movie_hub.android.BR;
 import com.movie_hub.android.R;
 import com.movie_hub.android.constant.Constants;
 import com.movie_hub.android.data.model.api.ResponseListObj;
@@ -28,9 +34,18 @@ import com.movie_hub.android.ui.base.activity.BaseActivity;
 import com.movie_hub.android.ui.base.activity.SystemBarColorProvider;
 import com.movie_hub.android.ui.main.MainCallback;
 import com.movie_hub.android.ui.main.custom.GridSpacingItemDecoration;
+import com.movie_hub.android.ui.main.home.filter.adapter.FilterAgeRatingAdapter;
+import com.movie_hub.android.ui.main.home.filter.adapter.FilterCategoryItemAdapter;
+import com.movie_hub.android.ui.main.home.filter.adapter.FilterCountryItemAdapter;
+import com.movie_hub.android.ui.main.home.filter.adapter.FilterHomeAdapter;
+import com.movie_hub.android.ui.main.home.filter.adapter.FilterLanguageItemAdapter;
+import com.movie_hub.android.ui.main.home.filter.adapter.FilterTypeItemAdapter;
+import com.movie_hub.android.ui.main.home.filter.adapter.FilterYearReleaseAdapter;
 import com.movie_hub.android.ui.main.home.filter.fragment.FilterFragmentDialog;
+import com.movie_hub.android.ui.main.home.filter.model.FilterItemModel;
 import com.movie_hub.android.ui.main.home.filter.model.FilterTypeModel;
 import com.movie_hub.android.ui.main.movie.detail.MovieDetailActivity;
+import com.movie_hub.android.ui.main.search.topTrending.FlexSpacingItemDecoration;
 import com.movie_hub.android.ui.main.search.topTrending.adapter.MovieVerticalAdapter;
 import com.movie_hub.android.ui.main.search.topTrending.shimmer.MovieVerticalShimmerAdapter;
 import com.movie_hub.android.utils.ClickUtils;
@@ -41,12 +56,11 @@ import com.movie_hub.android.utils.GsonUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-import eu.davidea.flexibleadapter.databinding.BR;
-
 public class FilterActivity extends BaseActivity<ActivityHomeFilterBinding, FilterViewModel> implements
         SystemBarColorProvider,
         MovieVerticalAdapter.OnMovieClickListener,
-        FilterFragmentDialog.FilterDialogCallback {
+        FilterFragmentDialog.FilterDialogCallback,
+        FilterHomeAdapter.OnDeleteFilterClick {
 
     @Override
     public int getLayoutId() {
@@ -76,7 +90,7 @@ public class FilterActivity extends BaseActivity<ActivityHomeFilterBinding, Filt
     private boolean isLoading = false;
     private MovieVerticalAdapter movieVerticalAdapter;
     private MovieVerticalShimmerAdapter movieVerticalShimmerAdapter;
-
+    FilterHomeAdapter filterHomeAdapter;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -102,15 +116,11 @@ public class FilterActivity extends BaseActivity<ActivityHomeFilterBinding, Filt
             if (viewModel.filterType.getType() == Constants.TYPE_MOVIE_SINGLE) {
                 viewBinding.tvTitle.setText(getString(R.string.label_movie));
                 viewModel.movieRequest.setType(Constants.TYPE_MOVIE_SINGLE);
-
                 getListMovie(viewModel.movieRequest);
-
             } else if (viewModel.filterType.getType() == Constants.TYPE_MOVIE_SERIES) {
                 viewBinding.tvTitle.setText(getString(R.string.label_series));
                 viewModel.movieRequest.setType(Constants.TYPE_MOVIE_SERIES);
-
                 getListMovie(viewModel.movieRequest);
-
             } else {
                 if (request != null && request.getCategoryIds() != null && !request.getCategoryIds().isEmpty()) {
                     viewModel.movieRequest = request;
@@ -145,6 +155,16 @@ public class FilterActivity extends BaseActivity<ActivityHomeFilterBinding, Filt
             ClickUtils.debounceClick(viewBinding.btnFilter);
             showFilterDialog();
         });
+
+        viewModel.listFilter.observe(this, filters -> {
+            if (filters == null || filters.isEmpty() || filters.size() == 1) {
+                viewBinding.rvFilter.setVisibility(View.GONE);
+                return;
+            }
+            filterHomeAdapter.setData(filters);
+            viewBinding.rvFilter.setVisibility(View.VISIBLE);
+        });
+
     }
 
     public void resetForFilter() {
@@ -225,6 +245,17 @@ public class FilterActivity extends BaseActivity<ActivityHomeFilterBinding, Filt
         GridLayoutManager layoutManager = new GridLayoutManager(this, spanCount);
         viewBinding.rvMovie.setLayoutManager(layoutManager);
         viewBinding.rvMovie.addItemDecoration(new GridSpacingItemDecoration(spanCount, spacing));
+
+        int a = getResources().getDimensionPixelSize(R.dimen._6sdp);
+        filterHomeAdapter = new FilterHomeAdapter(this, this);
+        FlexboxLayoutManager layout = new FlexboxLayoutManager(this);
+        layout.setFlexDirection(FlexDirection.ROW);
+        layout.setFlexWrap(FlexWrap.WRAP);
+        layout.setJustifyContent(JustifyContent.FLEX_START);
+        layout.setAlignItems(AlignItems.FLEX_START);
+        viewBinding.rvFilter.setLayoutManager(layout);
+        viewBinding.rvFilter.addItemDecoration(new FlexSpacingItemDecoration(a));
+        viewBinding.rvFilter.setAdapter(filterHomeAdapter);
     }
 
     public void showFilterDialog() {
@@ -251,18 +282,72 @@ public class FilterActivity extends BaseActivity<ActivityHomeFilterBinding, Filt
         getListMovie(viewModel.movieRequest);
     }
 
+    public void handleListFilter() {
+        List<FilterItemModel> newFilterList = new ArrayList<>();
+        MovieRequest movieRequest = viewModel.movieRequest;
+
+        if (movieRequest.getCountryRequest() != null) {
+            newFilterList.add(new FilterItemModel(movieRequest.getCountryRequest().getLabel()));
+        }
+
+        if (viewModel.filterType.getType() == Constants.TYPE_GENRE) {
+            if (movieRequest.getTypeMovieRequest() != null) {
+                newFilterList.add(new FilterItemModel(movieRequest.getTypeMovieRequest().getLabel()));
+            }
+        }
+
+        if (movieRequest.getCategoryRequest() != null && !movieRequest.getCategoryRequest().isEmpty()
+                && movieRequest.getCategoryIds() != null && !movieRequest.getCategoryIds().isEmpty()) {
+            for (CategoryResponse categoryResponse: movieRequest.getCategoryRequest()) {
+                newFilterList.add(new FilterItemModel(categoryResponse.getName()));
+            }
+        }
+
+        if (movieRequest.getYearReleaseRequest() != null) {
+            newFilterList.add(new FilterItemModel(movieRequest.getYearReleaseRequest().getReleaseYear().toString()));
+        }
+
+        if (movieRequest.getAgeRatingRequest() != null) {
+            newFilterList.add(new FilterItemModel(movieRequest.getAgeRatingRequest().getLabel()));
+        }
+
+        if (movieRequest.getLanguageRequest() != null) {
+            newFilterList.add(new FilterItemModel(movieRequest.getLanguageRequest().getLabel()));
+        }
+
+        newFilterList.add(new FilterItemModel(getString(R.string.delete)));
+
+        filterHomeAdapter.setData(new ArrayList<>());
+        viewModel.listFilter.postValue(newFilterList);
+    }
+
     public void getListMovie(MovieRequest movieRequest) {
         isLoading = true;
+
         if (viewModel.filterType.getType() != Constants.TYPE_GENRE) {
             movieRequest.setType(viewModel.filterType.getType());
         }
         MovieRequest request = new MovieRequest();
-        request.setCategoryIds(movieRequest.getCategoryIds());
-        request.setType(movieRequest.getType());
-        request.setAgeRating(request.getAgeRating());
-        request.setCountry(movieRequest.getCountry());
-        request.setLanguage(movieRequest.getLanguage());
-        request.setReleaseYear(movieRequest.getReleaseYear());
+        if (movieRequest.getCategoryIds() != null && !movieRequest.getCategoryIds().isEmpty()) {
+            request.setCategoryIds(movieRequest.getCategoryIds());
+        }
+        if (movieRequest.getType() != null) {
+            request.setType(movieRequest.getType());
+        }
+        if (movieRequest.getAgeRating() != null) {
+            request.setAgeRating(movieRequest.getAgeRating());
+        }
+        if (movieRequest.getCountry() != null) {
+            request.setCountry(movieRequest.getCountry());
+        }
+        if (movieRequest.getLanguage() != null) {
+            request.setLanguage(movieRequest.getLanguage());
+        }
+        if (movieRequest.getReleaseYear() != null) {
+            request.setReleaseYear(movieRequest.getReleaseYear());
+        }
+        
+        handleListFilter();
 
         viewModel.getListMovie(new MainCallback<ResponseListObj<MovieResponse>>() {
             @Override
@@ -306,6 +391,7 @@ public class FilterActivity extends BaseActivity<ActivityHomeFilterBinding, Filt
                 } else {
                     if (viewModel.currentPage == 0) {
                         hideShimmer();
+                        movieVerticalAdapter.setData(new ArrayList<>());
                         viewBinding.layoutEmpty.setVisibility(View.VISIBLE);
                     }
                     isLastPage = true;
@@ -396,5 +482,15 @@ public class FilterActivity extends BaseActivity<ActivityHomeFilterBinding, Filt
             it.putExtra("movie_details", GsonUtils.toJson(movieResponse));
         }
         startActivity(it);
+    }
+
+    @Override
+    public void onDeleteClick() {
+        viewModel.listFilter.postValue(new ArrayList<>());
+        viewModel.movieRequest = new MovieRequest();
+        if (viewModel.filterType.getType() != Constants.TYPE_GENRE) {
+            viewModel.movieRequest.setType(viewModel.filterType.getType());
+        }
+        handleDataFilter();
     }
 }
