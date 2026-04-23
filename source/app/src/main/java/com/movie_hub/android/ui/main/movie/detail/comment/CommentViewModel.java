@@ -135,7 +135,7 @@ public class CommentViewModel extends BaseViewModel {
             }
         });
 
-        commentList.postValue(mergedList);
+        commentList.setValue(mergedList);
 
         if (replyTo.getId() != null) {
             CommentRequest request = new CommentRequest();
@@ -195,7 +195,7 @@ public class CommentViewModel extends BaseViewModel {
                 if (Boolean.TRUE.equals(comment.getIsOpenChildComment())) {
                     comment.setIsOpenChildComment(true);
                 }
-                commentList.postValue(list);
+                commentList.setValue(list);
             }
         }
     }

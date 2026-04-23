@@ -2,6 +2,7 @@ package com.movie_hub.android.ui.main.home.notification.adapter;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.os.Build;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
@@ -49,22 +50,34 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
         holder.binding.setItem(item);
 
         if (!item.isRead()) {
-            holder.binding.tvTitle.setTextAppearance(R.style.Text_12_Bold);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                holder.binding.tvTitle.setTextAppearance(R.style.Text_12_Bold);
+            }
             holder.binding.tvTitle.setTextColor(ContextCompat.getColor(context, R.color.text));
 
-            holder.binding.tvTime.setTextAppearance(R.style.Text_10_Bold);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                holder.binding.tvTime.setTextAppearance(R.style.Text_10_Bold);
+            }
             holder.binding.tvTime.setTextColor(ContextCompat.getColor(context, R.color.text));
 
-            holder.binding.tvBody.setTextAppearance(R.style.Text_10_Bold);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                holder.binding.tvBody.setTextAppearance(R.style.Text_10_Bold);
+            }
             holder.binding.tvBody.setTextColor(ContextCompat.getColor(context, R.color.text));
         } else {
-            holder.binding.tvTitle.setTextAppearance(R.style.Text_12_Normal);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                holder.binding.tvTitle.setTextAppearance(R.style.Text_12_Normal);
+            }
             holder.binding.tvTitle.setTextColor(ContextCompat.getColor(context, R.color.text));
 
-            holder.binding.tvTime.setTextAppearance(R.style.Text_10_Normal);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                holder.binding.tvTime.setTextAppearance(R.style.Text_10_Normal);
+            }
             holder.binding.tvTime.setTextColor(ContextCompat.getColor(context, R.color.text_gray));
 
-            holder.binding.tvBody.setTextAppearance(R.style.Text_10_Normal);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                holder.binding.tvBody.setTextAppearance(R.style.Text_10_Normal);
+            }
             holder.binding.tvBody.setTextColor(ContextCompat.getColor(context, R.color.text_gray));
         }
 

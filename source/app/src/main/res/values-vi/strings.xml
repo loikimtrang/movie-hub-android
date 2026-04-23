@@ -298,4 +298,8 @@
     <string name="error_select_at_least_3">Vui lòng chọn ít nhất 3 tác phẩm</string>
     <string name="notification">Thông báo</string>
     <string name="empty_notification">Bạn không có thông báo nào</string>
+    <string name="time_just_now">vừa xong</string>
+    <string name="time_minutes_ago">%d phút trước</string>
+    <string name="time_hours_ago">%d giờ trước</string>
+    <string name="time_yesterday">ngày hôm qua</string>
 </resources>

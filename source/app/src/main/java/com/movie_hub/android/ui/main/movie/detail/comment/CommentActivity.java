@@ -280,12 +280,19 @@ public class CommentActivity extends BaseActivity<ActivityCommentBinding, Commen
                         MessageCommentResponse mCmtResponse = GsonUtils.fromJson(json, MessageCommentResponse.class);
                         long targetId = Long.parseLong(mCmtResponse.getParentId());
                         int targetPosition = -1;
-                        List<CommentResponse> currentList = data.getContent();
+                        List<CommentResponse> currentList = viewModel.commentList.getValue();
 
-                        for (int i = 0; i < currentList.size(); i++) {
-                            if (currentList.get(i).getId() != null && currentList.get(i).getId() == targetId) {
-                                targetPosition = i;
-                                break;
+                        if (currentList != null) {
+                            for (int i = 0; i < currentList.size(); i++) {
+                                if (currentList.get(i).getId() != null && currentList.get(i).getId() == targetId) {
+                                    targetPosition = i;
+                                    currentList.get(i).setIsOpenChildComment(true);
+                                    CommentRequest commentRequest = new CommentRequest();
+                                    commentRequest.setParentId(targetId);
+                                    commentRequest.setIsOpenChildComment(true);
+                                    viewModel.getListChildComment(commentRequest);
+                                    break;
+                                }
                             }
                         }
 
