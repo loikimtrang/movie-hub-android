@@ -10,9 +10,11 @@ import com.movie_hub.android.data.model.api.ResponseWrapper;
 import com.movie_hub.android.data.model.api.request.favourite.CreateFavouriteRequest;
 import com.movie_hub.android.data.model.api.request.history.ListWatchHistoryRequest;
 import com.movie_hub.android.data.model.api.request.history.TrackingWatchHistoryRequest;
+import com.movie_hub.android.data.model.api.request.setting.UserSettingsRequest;
 import com.movie_hub.android.data.model.api.response.MovieItem.MovieItemResponse;
 import com.movie_hub.android.data.model.api.response.history.ListWatchHistoryResponse;
 import com.movie_hub.android.data.model.api.response.movie.MovieResponse;
+import com.movie_hub.android.data.model.api.response.user.UserResponse;
 import com.movie_hub.android.data.model.api.response.video.VideoResponse;
 import com.movie_hub.android.ui.base.activity.BaseViewModel;
 import com.movie_hub.android.ui.main.MainCallback;
@@ -39,6 +41,8 @@ public class WatchMovieViewModel extends BaseViewModel {
     public String nowUriPlay;
     public MovieItemResponse nowEpisodePlay;
     public VideoResponse nowVideoPlay; // Single movie
+
+    public UserSettingsRequest setting = new UserSettingsRequest();
 
     private MutableLiveData<Boolean> isPlaying = new MutableLiveData<>(true);
     public MutableLiveData<ListWatchHistoryResponse> movieDetailsTracking = new MutableLiveData<>();
@@ -204,4 +208,33 @@ public class WatchMovieViewModel extends BaseViewModel {
         );
     }
 
+
+    public void getUserProfile(MainCallback<UserResponse> callback) {
+        compositeDisposable.add(repository.getMasterApiService().getUserProfile()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .retryWhen(throwable ->
+                        throwable.flatMap((Function<Throwable, ObservableSource<?>>) throwable1 -> {
+                            if (NetworkUtils.checkNetworkError(throwable1)) {
+                                hideLoading();
+                                return application.showDialogNoInternetAccess();
+                            }else{
+                                return Observable.error(throwable1);
+                            }
+                        })
+                )
+                .subscribe(
+                        response -> {
+                            if (response.isResult()) {
+                                callback.doSuccess(response.getData());
+                            } else {
+                                callback.doFail();
+                            }
+                        }, throwable -> {
+                            Timber.e(throwable);
+                            callback.doError(throwable);
+                        }
+                )
+        );
+    }
 }

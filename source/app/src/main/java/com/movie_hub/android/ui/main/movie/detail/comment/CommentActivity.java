@@ -37,6 +37,7 @@ import com.movie_hub.android.data.model.api.request.comment.CreateCommentRequest
 import com.movie_hub.android.data.model.api.response.comment.CommentResponse;
 import com.movie_hub.android.data.model.api.response.comment.VoteListResponse;
 import com.movie_hub.android.data.model.api.response.movie.MovieResponse;
+import com.movie_hub.android.data.model.onesignal.MessageCommentResponse;
 import com.movie_hub.android.data.model.other.ToastMessage;
 import com.movie_hub.android.databinding.ActivityCommentBinding;
 import com.movie_hub.android.di.component.ActivityComponent;
@@ -73,6 +74,7 @@ public class CommentActivity extends BaseActivity<ActivityCommentBinding, Commen
     private ActivityResultLauncher<Intent> loginLauncher;
     private boolean isStateReply = false;
     private boolean isShowShimmer = false;
+    public static final String MSG_CMT = "MSG_CMT";
     private boolean isShowShimmerComment = false;
     @SuppressLint("SetTextI18n")
     @Override
@@ -271,11 +273,38 @@ public class CommentActivity extends BaseActivity<ActivityCommentBinding, Commen
                     int offset = firstVisibleView != null ? firstVisibleView.getTop() : 0;
 
                     viewModel.mergeOrUpdateComments(data.getContent());
+                    String json = getIntent().getStringExtra(MSG_CMT);
 
+                    if (json != null && !json.isEmpty() && viewModel.isLogin()) {
+                        getIntent().removeExtra(MSG_CMT);
+                        MessageCommentResponse mCmtResponse = GsonUtils.fromJson(json, MessageCommentResponse.class);
+                        long targetId = Long.parseLong(mCmtResponse.getParentId());
+                        int targetPosition = -1;
+                        List<CommentResponse> currentList = data.getContent();
 
-                    viewBinding.rvComment.post(() -> {
-                        lm.scrollToPositionWithOffset(firstVisible, offset);
-                    });
+                        for (int i = 0; i < currentList.size(); i++) {
+                            if (currentList.get(i).getId() != null && currentList.get(i).getId() == targetId) {
+                                targetPosition = i;
+                                break;
+                            }
+                        }
+
+                        if (targetPosition != -1) {
+                            int finalTargetPosition = targetPosition;
+                            viewBinding.rvComment.post(() -> {
+                                lm.scrollToPositionWithOffset(finalTargetPosition, 0);
+
+                            });
+                        } else {
+                            viewBinding.rvComment.post(() -> {
+                                lm.scrollToPositionWithOffset(firstVisible, offset);
+                            });
+                        }
+                    } else {
+                        viewBinding.rvComment.post(() -> {
+                            lm.scrollToPositionWithOffset(firstVisible, offset);
+                        });
+                    }
 
                 } else {
                     if (!isShowShimmer) {

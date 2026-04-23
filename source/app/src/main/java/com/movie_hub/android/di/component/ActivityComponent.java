@@ -14,10 +14,12 @@ import com.movie_hub.android.ui.main.account.manage_account.ManageAccountActivit
 import com.movie_hub.android.ui.main.account.playlist.PlayListActivity;
 import com.movie_hub.android.ui.main.account.privacy.PrivacyActivity;
 import com.movie_hub.android.ui.main.account.register.RegisterActivity;
+import com.movie_hub.android.ui.main.account.setting.SettingActivity;
 import com.movie_hub.android.ui.main.account.updateapp.CheckUpdateActivity;
 import com.movie_hub.android.ui.main.account.verifyotp.VerifyOtpActivity;
 import com.movie_hub.android.ui.main.home.detail.HomeSideBarDetailActivity;
 import com.movie_hub.android.ui.main.home.filter.FilterActivity;
+import com.movie_hub.android.ui.main.home.notification.NotificationActivity;
 import com.movie_hub.android.ui.main.home.topic.HomeMoreTopicActivity;
 import com.movie_hub.android.ui.main.home.topic.topic_detail.HomeTopicDetailActivity;
 import com.movie_hub.android.ui.main.movie.detail.MovieDetailActivity;
@@ -27,6 +29,7 @@ import com.movie_hub.android.ui.main.movie.watch.WatchMovieActivity;
 import com.movie_hub.android.ui.main.person.PersonDetailActivity;
 import com.movie_hub.android.ui.main.person.PersonDetailViewModel;
 import com.movie_hub.android.ui.main.splash.SplashActivity;
+import com.movie_hub.android.ui.main.splash.survey.SurveyActivity;
 
 import dagger.Component;
 
@@ -57,5 +60,8 @@ public interface ActivityComponent {
     void inject(ReviewActivity activity);
     void inject(ContactActivity activity);
     void inject(PrivacyActivity activity);
+    void inject(SettingActivity activity);
+    void inject(SurveyActivity activity);
+    void inject(NotificationActivity activity);
 }
 

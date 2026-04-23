@@ -19,6 +19,7 @@ import com.movie_hub.android.data.model.api.request.playlist.UpdatePlayListItemR
 import com.movie_hub.android.data.model.api.request.playlist.UpdatePlaylistRequest;
 import com.movie_hub.android.data.model.api.request.review.CreateReviewReactionRequest;
 import com.movie_hub.android.data.model.api.request.review.CreateReviewRequest;
+import com.movie_hub.android.data.model.api.request.survey.MakeSurveyRequest;
 import com.movie_hub.android.data.model.api.request.user.UserChangePasswordRequest;
 import com.movie_hub.android.data.model.api.request.user.UserLoginGoogleRequest;
 import com.movie_hub.android.data.model.api.request.user.UserUpdateProfileRequest;
@@ -33,6 +34,7 @@ import com.movie_hub.android.data.model.api.response.history.ListWatchHistoryRes
 import com.movie_hub.android.data.model.api.response.history.MovieHistoryResponse;
 import com.movie_hub.android.data.model.api.response.history.WatchHistoryResponse;
 import com.movie_hub.android.data.model.api.response.moviePerson.MoviePersonResponse;
+import com.movie_hub.android.data.model.api.response.notification.NotificationResponse;
 import com.movie_hub.android.data.model.api.response.person.PersonResponse;
 import com.movie_hub.android.data.model.api.response.login.UserLoginResponse;
 import com.movie_hub.android.data.model.api.response.movie.MovieResponse;
@@ -63,33 +65,6 @@ import retrofit2.http.QueryMap;
 public interface ApiService {
 
     // USER CONTROLLER
-    @POST("v1/user/login")
-    @Headers({"IgnoreAuth: 1"})
-    Observable<UserLoginResponse> userLogin(@Body UserLoginRequest request);
-    @POST("v1/user/auth/mobile-callback")
-    @Headers({"IgnoreAuth: 1"})
-    Observable<UserLoginResponse> userLoginGoogle(@Body UserLoginGoogleRequest request);
-    @POST("v1/user/register")
-    @Headers({"IgnoreAuth: 1"})
-    Observable<ResponseWrapper> userRegister(@Body UserRegisterRequest request);
-
-    @GET("v1/user/profile")
-    Observable<ResponseWrapper<UserResponse>> getUserProfile();
-
-    @PUT("v1/user/update-profile")
-    Observable<ResponseWrapper> updateUserProfile(@Body UserUpdateProfileRequest request);
-
-    @POST("v1/user/verify-otp")
-    Observable<ResponseWrapper> verifyOtp(@Body VerifyOtpRequest request);
-    @POST("v1/user/request-forgot-password")
-    Observable<ResponseWrapper> requestForgotPassword(@Body ForgotPasswordRequest request);
-    @POST("v1/user/forgot-password")
-    Observable<ResponseWrapper> forgotPassword(@Body ForgotChangePasswordRequest request);
-    @POST("v1/user/resend-otp")
-    Observable<ResponseWrapper> resendOtp(@Body VerifyOtpRequest request);
-
-    @PUT("v1/user/change-password")
-    Observable<ResponseWrapper> changeUserPassword(@Body UserChangePasswordRequest request);
     @Multipart
     @POST("/v1/file/upload")
     Call<ResponseWrapper<UserUploadImageResponse>> uploadAvatar(
@@ -104,7 +79,7 @@ public interface ApiService {
 
     @GET("v1/category/list")
     Observable<ResponseWrapper<ResponseListObj<CategoryResponse>>> getListCategory(@QueryMap Map<String, Object> query);
-    @GET("v1/movie/recommendations/{id}")
+    @GET("v1/movie/suggestion/{id}")
     Observable<ResponseWrapper<List<MovieResponse>>> getListMovieRecommendation(@Path("id") Long id);
 
     @GET("v1/movie/get/{id}")
@@ -112,8 +87,15 @@ public interface ApiService {
 
     @GET("v1/movie/history")
     Observable<ResponseWrapper<List<MovieHistoryResponse>>> getListMovieHistory();
-//    Map<String, Object> query = RequestToMapConverter.convert(movieRequest);
 
+    @GET("v1/movie/list-survey")
+    Observable<ResponseWrapper<List<MovieResponse>>> getListMovieSurvey(@QueryMap Map<String, Object> query);
+
+    @POST("v1/movie/make-survey")
+    Observable<ResponseWrapper> makeSurvey(@Body MakeSurveyRequest request);
+//    Map<String, Object> query = RequestToMapConverter.convert(movieRequest);
+    @GET("v1/movie/schedule")
+    Observable<ResponseWrapper<List<MovieItemResponse>>> getListMovieSchedule(@QueryMap Map<String, Object> query);
 
     // PERSION CONTROLLER
     @GET("v1/person/list")
@@ -229,4 +211,7 @@ public interface ApiService {
 
     @GET("v1/collection-item/list")
     Observable<ResponseWrapper<ResponseListObj<MovieResponse>>> getCollectionItemList(@QueryMap Map<String, Object> query);
+
+    @GET("v1/notification/list")
+    Observable<ResponseWrapper<ResponseListObj<NotificationResponse>>> getNotifications(@QueryMap Map<String, Object> query);
 }

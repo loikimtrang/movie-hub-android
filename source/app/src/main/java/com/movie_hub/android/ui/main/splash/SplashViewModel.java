@@ -2,6 +2,7 @@ package com.movie_hub.android.ui.main.splash;
 
 import com.movie_hub.android.MVVMApplication;
 import com.movie_hub.android.data.Repository;
+import com.movie_hub.android.data.local.prefs.PreferencesService;
 import com.movie_hub.android.data.model.api.RequestToMapConverter;
 import com.movie_hub.android.data.model.api.ResponseListObj;
 import com.movie_hub.android.data.model.api.ResponseWrapper;
@@ -14,6 +15,7 @@ import com.movie_hub.android.data.model.api.response.movie.MovieResponse;
 import com.movie_hub.android.data.model.api.response.side_bar.SidebarResponse;
 import com.movie_hub.android.data.model.api.response.user.UserResponse;
 import com.movie_hub.android.data.model.mapper.UserMapper;
+import com.movie_hub.android.data.model.onesignal.MessageOneSignal;
 import com.movie_hub.android.data.model.room.UserEntity;
 import com.movie_hub.android.ui.base.activity.BaseViewModel;
 import com.movie_hub.android.ui.main.MainCallback;
@@ -30,9 +32,8 @@ import io.reactivex.rxjava3.schedulers.Schedulers;
 import timber.log.Timber;
 
 public class SplashViewModel extends BaseViewModel {
-
     CheckAppVersionResponse checkAppVersionResponse = new CheckAppVersionResponse();
-
+    String messageOneSignal;
     public SplashViewModel(Repository repository, MVVMApplication application) {
         super(repository, application);
     }
@@ -56,7 +57,7 @@ public class SplashViewModel extends BaseViewModel {
         );
     }
     public void getUserProfile(MainCallback<UserResponse> callback) {
-        compositeDisposable.add(repository.getApiService().getUserProfile()
+        compositeDisposable.add(repository.getMasterApiService().getUserProfile()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .retryWhen(throwable ->
@@ -72,7 +73,14 @@ public class SplashViewModel extends BaseViewModel {
                 .subscribe(
                         response -> {
                             if (response.isResult()) {
+                                application.setOneSignalExternalId(String.valueOf(response.getData().getId()));
+
                                 repository.getSharedPreferences().setUserId(response.getData().getId());
+                                if (response.getData().getSettings() != null && !response.getData().getSettings().isEmpty()) {
+                                    repository.getSharedPreferences().setString(PreferencesService.KEY_USER_SETTING + response.getData().getId(), response.getData().getSettings());
+                                } else {
+                                    repository.getSharedPreferences().setString(PreferencesService.KEY_USER_SETTING + response.getData().getId(), "");
+                                }
                                 UserEntity entity = UserMapper.fromResponse(response.getData());
                                 compositeDisposable.add(
                                         repository.getRoomService().userDao().insert(entity)

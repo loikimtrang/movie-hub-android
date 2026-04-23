@@ -47,6 +47,13 @@ public class MovieBannerAdapter extends RecyclerView.Adapter<MovieBannerAdapter.
             movieClickCallback.onMovieClick(item.getMovie());
         });
 
+        holder.binding.image.setOnLongClickListener(v -> {
+            if (movieClickCallback != null) {
+                movieClickCallback.onMovieLongClick(item.getMovie());
+            }
+            return true;
+        });
+
         Glide.with(holder.binding.getRoot().getContext())
                 .load(item.getMovie().getPosterUrl())
                 .placeholder(R.drawable.place_holder_2_3)

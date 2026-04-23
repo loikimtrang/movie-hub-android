@@ -1,6 +1,7 @@
 package com.movie_hub.android.data.model.api.response.movie;
 
 import android.content.Context;
+import android.text.Spanned;
 
 import com.movie_hub.android.R;
 import com.movie_hub.android.constant.Constants;
@@ -11,6 +12,7 @@ import com.movie_hub.android.data.model.api.response.history.WatchHistoryRespons
 import com.movie_hub.android.data.model.api.response.review.ReviewStatisticsResponse;
 import com.movie_hub.android.data.model.api.response.season.SeasonResponse;
 import com.movie_hub.android.ui.main.movie.detail.comment.model.TagComment;
+import com.movie_hub.android.utils.HtmlUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -27,6 +29,7 @@ public class MovieResponse {
     private String description;
     private String posterUrl;
     private String thumbnailUrl;
+    private String imageTitleUrl;
     private String slug;
     private Integer ageRating;
     private Integer status;
@@ -43,16 +46,26 @@ public class MovieResponse {
     private Long reviewCount;
     private Double averageRating;
     private Long commentCount;
+
+    private boolean isSelect;
     public Double getAverageRating() {
         return averageRating == null ? 0.0 : Math.round(averageRating * 10) / 10.0;
     }
 
+    public Spanned getDescription() {
+        return HtmlUtils.convertPtoStrong(description);
+    }
+
     public String getPosterUrl() {
-        return Constants.MEDIA_URL + posterUrl;
+        return Constants.MEDIA_URL + this.posterUrl;
     }
     public String getThumbnailUrl() {
         return Constants.MEDIA_URL + thumbnailUrl;
     }
+    public String getImageTitleUrl() {
+        return Constants.MEDIA_URL + imageTitleUrl;
+    }
+
     public void setSeasonAndEpisodeSelectedAndPlaying(Long episodeId) {
         if (episodeId == null || seasons == null) {
             return;

@@ -24,7 +24,7 @@ public class ForgotPasswordViewModel extends BaseViewModel {
     }
 
     public void resendOtp(MainCallback<ResponseWrapper> callback, VerifyOtpRequest request) {
-        compositeDisposable.add(repository.getApiService().resendOtp(request)
+        compositeDisposable.add(repository.getMasterApiService().resendOtp(request)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .retryWhen(throwable ->
@@ -64,7 +64,7 @@ public class ForgotPasswordViewModel extends BaseViewModel {
 
     public void requestForgotPassword(MainCallback<ResponseWrapper> callback, ForgotPasswordRequest request) {
         showLoading();
-        compositeDisposable.add(repository.getApiService().requestForgotPassword(request)
+        compositeDisposable.add(repository.getMasterApiService().requestForgotPassword(request)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .retryWhen(throwable ->
@@ -103,7 +103,7 @@ public class ForgotPasswordViewModel extends BaseViewModel {
     }
 
     public void changePassword(MainCallback<ResponseWrapper> callback, ForgotChangePasswordRequest request) {
-        compositeDisposable.add(repository.getApiService().forgotPassword(request)
+        compositeDisposable.add(repository.getMasterApiService().forgotPassword(request)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .retryWhen(throwable ->

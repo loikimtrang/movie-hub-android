@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
 
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.MaterialComponents.Light.Bridge">
@@ -37,7 +37,7 @@
 
     <style name="movieVerticalImg">
         <item name="cornerFamily">rounded</item>
-        <item name="cornerSize">5%</item>
+        <item name="cornerSize">@dimen/_12sdp</item>
     </style>
     <style name="movieCollectionImg_type1">
         <item name="cornerFamily">rounded</item>
@@ -68,11 +68,11 @@
         <item name="cornerSize">5%</item>
     </style>
     <style name="SplashTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
-        <item name="android:windowBackground">@drawable/splash_screen</item>
         <item name="android:windowNoTitle">true</item>
-        <item name="android:windowFullscreen">true</item>
-        <item name="android:statusBarColor">@color/bg_app</item>
-        <item name="android:navigationBarColor">@color/bg_app</item>
+        <item name="android:windowBackground">@color/bg_app</item>
+        <item name="android:windowLayoutInDisplayCutoutMode" tools:targetApi="o_mr1">shortEdges</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
     </style>
 
     <style name="TransparentBottomSheetDialog" parent="Theme.Design.BottomSheetDialog">
@@ -239,5 +239,8 @@
         <item name="android:windowEnterAnimation">@anim/slide_in_bottom</item>
         <item name="android:windowExitAnimation">@anim/slide_out_bottom</item>
     </style>
-
+    <style name="DialogAnimationCenter">
+        <item name="android:windowEnterAnimation">@anim/zoom_in</item>
+        <item name="android:windowExitAnimation">@anim/zoom_out</item>
+    </style>
 </resources>

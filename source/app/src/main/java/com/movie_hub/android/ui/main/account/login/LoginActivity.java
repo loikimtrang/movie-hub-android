@@ -119,7 +119,6 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding, LoginViewM
                 }
 
                 String idToken = account.getIdToken();
-
                 UserLoginGoogleRequest request = new UserLoginGoogleRequest();
                 request.setIdToken(idToken);
                 request.setPlatform(Constants.PLATFORM_ANDROID);

@@ -41,7 +41,6 @@ import androidx.media3.common.TrackSelectionOverride;
 import androidx.media3.common.TrackSelectionParameters;
 import androidx.media3.common.Tracks;
 import androidx.media3.common.VideoSize;
-import androidx.media3.datasource.DefaultHttpDataSource;
 import androidx.media3.exoplayer.DefaultRenderersFactory;
 import androidx.media3.exoplayer.ExoPlayer;
 import androidx.media3.exoplayer.mediacodec.MediaCodecInfo;
@@ -57,16 +56,18 @@ import com.google.common.collect.ImmutableList;
 import com.movie_hub.android.R;
 import com.movie_hub.android.constant.Constants;
 import com.movie_hub.android.data.model.api.request.history.TrackingWatchHistoryRequest;
+import com.movie_hub.android.data.model.api.request.setting.UserSettingsRequest;
 import com.movie_hub.android.data.model.api.response.MovieItem.MovieItemResponse;
 import com.movie_hub.android.data.model.api.response.history.ListWatchHistoryResponse;
 import com.movie_hub.android.data.model.api.response.history.WatchHistoryResponse;
 import com.movie_hub.android.data.model.api.response.movie.MovieResponse;
 import com.movie_hub.android.data.model.api.response.season.SeasonResponse;
+import com.movie_hub.android.data.model.api.response.user.UserResponse;
 import com.movie_hub.android.data.model.api.response.video.VideoResponse;
 import com.movie_hub.android.databinding.ActivityWatchMovieBinding;
 import com.movie_hub.android.di.component.ActivityComponent;
 import com.movie_hub.android.ui.base.activity.BaseActivity;
-import com.movie_hub.android.ui.main.movie.detail.TokenRefreshingDataSourceFactoryMovieDetails;
+import com.movie_hub.android.ui.main.MainCallback;
 import com.movie_hub.android.ui.main.movie.watch.Provider.SpriteThumbnailManager;
 import com.movie_hub.android.ui.main.movie.watch.adapter.EpisodeItemListHoriAdapter;
 import com.movie_hub.android.ui.main.movie.watch.adapter.SeasonItemAdapter;
@@ -128,6 +129,8 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE,
+                WindowManager.LayoutParams.FLAG_SECURE);
         viewBinding.setA(this);
         viewBinding.setVm(viewModel);
         hideSystemUI();
@@ -138,7 +141,7 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
 
         if (movie != null) {
             viewModel.movieDetails = movie;
-
+            viewModel.setting = createDefaultSettings();
             thumbnailManager = new SpriteThumbnailManager(this, viewBinding.ivThumbnailPreview, viewBinding.thumbnailPreviewContainer);
 
             isSeries = viewModel.movieDetails != null &&
@@ -162,10 +165,72 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
                 if (listTracking != null) {
                     viewModel.movieDetailsTracking.postValue(listTracking);
                 }
+
+                getUserProfile();
+            } else {
+                initMovie();
+            }
+        }
+    }
+
+    public void getUserProfile() {
+        viewModel.getUserProfile(new MainCallback<UserResponse>() {
+            @Override
+            public void doError(Throwable error) {
+
             }
 
-            initMovie();
+            @Override
+            public void doSuccess() {
+
+            }
+
+            @Override
+            public void doSuccess(UserResponse response) {
+                String settingJson = response.getSettings();
+
+                if (settingJson != null && !settingJson.isEmpty()) {
+                    try {
+                        viewModel.setting = GsonUtils.fromJson(settingJson, UserSettingsRequest.class);
+                    } catch (Exception e) {
+                        viewModel.setting = createDefaultSettings();
+                    }
+                } else {
+                    viewModel.setting = createDefaultSettings();
+                }
+
+                initMovie();
+            }
+
+            @Override
+            public void doFail() {
+
+            }
+        });
+    }
+
+    private UserSettingsRequest createDefaultSettings() {
+        UserSettingsRequest defaultSetting = new UserSettingsRequest();
+        defaultSetting.setPlaybackSpeed(1.0);
+        defaultSetting.setAutoSkipIntro(false);
+        defaultSetting.setAutoNextEpisode(false);
+        defaultSetting.setResolution(0);
+
+        if (audioManager == null) {
+            audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         }
+        int currentVol = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
+        defaultSetting.setAudio(currentVol);
+
+        try {
+            int systemBrightness = Settings.System.getInt(getContentResolver(), Settings.System.SCREEN_BRIGHTNESS);
+            int brightnessPercent = Math.round((systemBrightness / 255f) * 100);
+            defaultSetting.setBrightness(brightnessPercent);
+        } catch (Settings.SettingNotFoundException e) {
+            defaultSetting.setBrightness(50);
+        }
+
+        return defaultSetting;
     }
 
     //region === Init Movie ===
@@ -289,10 +354,14 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
         viewModel.lastPlaybackPosition = 0L;
     }
     public void setUpMovie(String uri) {
-        if (!uri.contains("http")) {
-            uri = Constants.MEDIA_URL_VIDEO + uri;
-        }
+        if (!viewModel.setting.isSetupPlaybackSpeed()) {
+            if (viewModel.setting.getPlaybackSpeed() != null) {
+                float speed = viewModel.setting.getPlaybackSpeed().floatValue();
+                viewModel.settingVideoModel.getPlaySpeed().setSpeed(speed);
+            }
 
+            viewModel.setting.setSetupPlaybackSpeed(true);
+        }
         DefaultMediaSourceFactory mediaSourceFactory =
                 new DefaultMediaSourceFactory(
                         new TokenRefreshingDataSourceFactoryWatchMovie(viewModel)
@@ -351,7 +420,7 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
 
     private String getVideoUri(VideoResponse videoResponse) {
         if (videoResponse != null) {
-            if (!videoResponse.getContent().contains("http")) videoResponse.setContent(Constants.MEDIA_URL_VIDEO + videoResponse.getContent());
+            if (!videoResponse.getContent().contains("http")) videoResponse.setContent(videoResponse.getHostname() + Constants.MEDIA_URL_VIDEO + videoResponse.getContent());
             return videoResponse.getContent();
         }
         return "";
@@ -440,20 +509,51 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
         Collections.sort(viewModel.settingVideoModel.getAvailableQualities(),
                 (q1, q2) -> Integer.compare(q2.height, q1.height));
 
+        boolean isCurrentAuto = viewModel.settingVideoModel.getQuality().isAuto();
+        VideoQuality currentSelected = viewModel.settingVideoModel.getQuality().getResolution();
+
         VideoQuality auto = new VideoQuality();
         auto.label = getString(R.string.auto);
+        auto.isCheck = isCurrentAuto; // Check nếu đang là auto
 
-        if (viewModel.settingVideoModel.getQuality().isAuto()) {
-            auto.isCheck = true;
-        } else {
-            for (VideoQuality quality : viewModel.settingVideoModel.getAvailableQualities()) {
-                if (Objects.equals(quality.label, viewModel.settingVideoModel.getQuality().getResolution().label)) {
+        for (VideoQuality quality : viewModel.settingVideoModel.getAvailableQualities()) {
+            if (!isCurrentAuto && currentSelected != null) {
+                if (quality.height == currentSelected.height) {
                     quality.isCheck = true;
-                    break;
+                } else {
+                    quality.isCheck = false;
                 }
+            } else {
+                quality.isCheck = false;
             }
         }
+
         viewModel.settingVideoModel.getAvailableQualities().add(0, auto);
+    }
+
+    private VideoQuality findBestMatchingQuality(int settingResolutionId) {
+        List<VideoQuality> available = viewModel.settingVideoModel.getAvailableQualities();
+        if (available == null || available.isEmpty()) return null;
+
+        int targetHeight;
+        switch (settingResolutionId) {
+            case 1: targetHeight = 720; break;
+            case 2: targetHeight = 1080; break;
+            case 3: targetHeight = 1440; break;
+            case 4: targetHeight = 4320; break;
+            default: return null;
+        }
+
+        VideoQuality bestMatch = null;
+        for (VideoQuality q : available) {
+            if (q.height == targetHeight) return q;
+
+            if (bestMatch == null || q.height > bestMatch.height) {
+                bestMatch = q;
+            }
+        }
+
+        return bestMatch;
     }
 
     // region === Set Up Listener Video ===
@@ -498,7 +598,13 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
             @Override
             public void onTracksChanged(Tracks tracks) {
                 extractAvailableQualities(tracks);
-                autoSelectQualityOnStart();
+
+                if (!viewModel.setting.isSetupResolution()) {
+                    applyInitialSettingResolution();
+                    refreshCheckStatus();
+                } else {
+                    autoSelectQualityOnStart();
+                }
             }
 
             @Override
@@ -518,6 +624,41 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
         });
     }
 
+    private void refreshCheckStatus() {
+        List<VideoQuality> list = viewModel.settingVideoModel.getAvailableQualities();
+        if (list == null || list.isEmpty()) return;
+
+        boolean isAuto = viewModel.settingVideoModel.getQuality().isAuto();
+        VideoQuality selected = viewModel.settingVideoModel.getQuality().getResolution();
+
+        for (VideoQuality q : list) {
+            if (q.label != null && q.label.equals(getString(R.string.auto))) {
+                q.isCheck = isAuto;
+            } else {
+                q.isCheck = (!isAuto && selected != null && q.height == selected.height);
+            }
+        }
+    }
+    private void applyInitialSettingResolution() {
+        Integer savedResId = viewModel.setting.getResolution();
+
+        if (savedResId == null || savedResId == 0) {
+            viewModel.setting.setSetupResolution(true);
+            autoSelectQualityOnStart();
+            return;
+        }
+
+        VideoQuality target = findBestMatchingQuality(savedResId);
+
+        if (target != null) {
+            viewModel.settingVideoModel.getQuality().setResolution(target);
+            viewModel.settingVideoModel.getQuality().setAuto(false);
+
+            applyQualityFromSetting();
+
+            viewModel.setting.setSetupResolution(true);
+        }
+    }
     private void handlePlaybackError(PlaybackException error) {
         hideLoadingVideo();
         boolean isNetworkAvailable = NetworkUtils.isNetworkAvailable(getApplication());
@@ -657,7 +798,11 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
 
                              if (current >= introStartMs && current < introEndMs && viewBinding.layoutSeekBar.getVisibility() != View.VISIBLE) {
                                 if (viewBinding.btnSkipIntro.getVisibility() != View.VISIBLE) {
+
                                     viewBinding.btnSkipIntro.setVisibility(View.VISIBLE);
+                                    if (viewModel.setting.getAutoSkipIntro()) {
+                                        handleSkipIntro();
+                                    }
                                 }
                             } else {
                                 if (viewBinding.btnSkipIntro.getVisibility() == View.VISIBLE) {
@@ -677,6 +822,9 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
                             if (current >= outroStartMs && current < outroEndMs && viewBinding.layoutSeekBar.getVisibility() != View.VISIBLE) {
                                 if (viewBinding.btnSkipOutro.getVisibility() != View.VISIBLE) {
                                     viewBinding.btnSkipOutro.setVisibility(View.VISIBLE);
+                                    if (viewModel.setting.getAutoNextEpisode()) {
+                                        handleSkipOutro();
+                                    }
                                 }
                             } else {
                                 if (viewBinding.btnSkipOutro.getVisibility() == View.VISIBLE) {
@@ -940,12 +1088,24 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
     // region === Set Up Brightness and Volume SeekBar ===
     public void setupSeekBarBrightNess() {
         Window window = getWindow();
-        float currentBrightness = window.getAttributes().screenBrightness;
-        if (currentBrightness < 0) {
-            currentBrightness = 0.5f;
-        }
-        viewBinding.seekBrightness.setProgress((int) (currentBrightness * 100));
 
+        if (!viewModel.setting.isSetupBrightness() && viewModel.setting.getBrightness() != null) {
+            float brightnessValue = viewModel.setting.getBrightness() / 100f;
+
+            WindowManager.LayoutParams layoutParams = window.getAttributes();
+            layoutParams.screenBrightness = brightnessValue;
+            window.setAttributes(layoutParams);
+            viewBinding.seekBrightness.setProgress(viewModel.setting.getBrightness());
+            updateBrightnessIcon(brightnessValue);
+            viewModel.setting.setSetupBrightness(true);
+
+        } else {
+            float currentBrightness = window.getAttributes().screenBrightness;
+            if (currentBrightness < 0) {
+                currentBrightness = 0.5f;
+            }
+            viewBinding.seekBrightness.setProgress((int) (currentBrightness * 100));
+        }
         viewBinding.seekBrightness.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -954,16 +1114,10 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
 
                     Window window = getWindow();
                     WindowManager.LayoutParams layoutParams = window.getAttributes();
-                    layoutParams.screenBrightness = brightness; // 0.0f = tối, 1.0f = sáng nhất
+                    layoutParams.screenBrightness = brightness;
                     window.setAttributes(layoutParams);
 
-                    if (brightness < 0.33f) {
-                        viewBinding.icBrightness.setImageResource(R.drawable.ic_brightness_low);
-                    } else if (brightness < 0.66f) {
-                        viewBinding.icBrightness.setImageResource(R.drawable.ic_brightness_medium);
-                    } else {
-                        viewBinding.icBrightness.setImageResource(R.drawable.ic_brightness_high);
-                    }
+                   updateBrightnessIcon(brightness);
                 }
             }
 
@@ -986,15 +1140,37 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
             }
         });
     }
+
+    // Hàm phụ trợ để tái sử dụng logic đổi icon
+    private void updateBrightnessIcon(float brightness) {
+        if (brightness < 0.33f) {
+            viewBinding.icBrightness.setImageResource(R.drawable.ic_brightness_low);
+        } else if (brightness < 0.66f) {
+            viewBinding.icBrightness.setImageResource(R.drawable.ic_brightness_medium);
+        } else {
+            viewBinding.icBrightness.setImageResource(R.drawable.ic_brightness_high);
+        }
+    }
     public void setupSeekBarVolume() {
         audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
-        currentVolume = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
 
-        int progress = (int) ((currentVolume / (float) maxVolume) * 100);
-        viewBinding.seekVolume.setProgress(progress);
+        int initialProgress;
 
-        updateVolumeIcon(progress);
+        if (viewModel.setting != null && !viewModel.setting.isSetupAudio() && viewModel.setting.getAudio() != null) {
+            initialProgress = viewModel.setting.getAudio();
+
+            int systemVolume = (int) ((initialProgress / 100f) * maxVolume);
+            audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, systemVolume, 0);
+
+            viewModel.setting.setSetupAudio(true);
+        } else {
+            currentVolume = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
+            initialProgress = (int) ((currentVolume / (float) maxVolume) * 100);
+        }
+
+        viewBinding.seekVolume.setProgress(initialProgress);
+        updateVolumeIcon(initialProgress);
 
         viewBinding.seekVolume.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override

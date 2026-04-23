@@ -54,7 +54,6 @@ public class MoviePlaylistAdapter extends RecyclerView.Adapter<MoviePlaylistAdap
         holder.binding.tvSubTitle.setText(item.getOriginalTitle());
         holder.binding.ageRating.setText(DisplayUtils.displayAgeRating(item.getAgeRating()));
         holder.binding.dateRelease.setText(DisplayUtils.getYearFromReleaseDate(item.getReleaseDate()));
-
         holder.binding.getRoot().setOnClickListener(v -> {
             if (listener != null) {
                 listener.onMovieClick(item);

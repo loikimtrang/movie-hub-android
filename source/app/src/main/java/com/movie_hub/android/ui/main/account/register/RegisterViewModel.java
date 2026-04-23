@@ -23,7 +23,7 @@ public class RegisterViewModel extends BaseViewModel {
 
     public void userRegister(MainCallback<ResponseWrapper> callback, UserRegisterRequest request) {
         showLoading();
-        compositeDisposable.add(repository.getApiService().userRegister(request)
+        compositeDisposable.add(repository.getMasterApiService().userRegister(request)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .retryWhen(throwable ->

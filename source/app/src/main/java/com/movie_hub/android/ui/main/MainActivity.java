@@ -1,5 +1,8 @@
 package com.movie_hub.android.ui.main;
 
+import static com.movie_hub.android.ui.main.home.HomeFragment.NavigateToMovieDetails;
+import static com.movie_hub.android.ui.main.home.HomeFragment.NavigateToWatchMovie;
+
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
@@ -19,6 +22,10 @@ import com.movie_hub.android.data.model.api.response.collection.CollectionRespon
 import com.movie_hub.android.data.model.api.response.history.ListWatchHistoryResponse;
 import com.movie_hub.android.data.model.api.response.history.WatchHistoryResponse;
 import com.movie_hub.android.data.model.api.response.movie.MovieResponse;
+import com.movie_hub.android.data.model.api.response.user.UserResponse;
+import com.movie_hub.android.data.model.onesignal.MessageCommentResponse;
+import com.movie_hub.android.data.model.onesignal.MessageOneSignal;
+import com.movie_hub.android.data.model.onesignal.OneSignalCommand;
 import com.movie_hub.android.data.model.other.ToastMessage;
 import com.movie_hub.android.databinding.ActivityMainBinding;
 import com.movie_hub.android.di.component.ActivityComponent;
@@ -32,11 +39,15 @@ import com.movie_hub.android.ui.main.account.history.HistoryActivity;
 import com.movie_hub.android.ui.main.account.language.LanguageActivity;
 import com.movie_hub.android.ui.main.account.playlist.PlayListActivity;
 import com.movie_hub.android.ui.main.account.privacy.PrivacyActivity;
+import com.movie_hub.android.ui.main.account.setting.SettingActivity;
 import com.movie_hub.android.ui.main.account.updateapp.CheckUpdateActivity;
 import com.movie_hub.android.ui.main.home.HomeFragment;
+import com.movie_hub.android.ui.main.home.OnMovieClickCallback;
 import com.movie_hub.android.ui.main.home.detail.HomeSideBarDetailActivity;
+import com.movie_hub.android.ui.main.home.dialog.MovieDetailDialogFragment;
 import com.movie_hub.android.ui.main.home.filter.FilterActivity;
 import com.movie_hub.android.ui.main.home.filter.model.FilterTypeModel;
+import com.movie_hub.android.ui.main.home.notification.NotificationActivity;
 import com.movie_hub.android.ui.main.home.topic.HomeMoreTopicActivity;
 import com.movie_hub.android.ui.main.home.topic.topic_detail.HomeTopicDetailActivity;
 import com.movie_hub.android.ui.main.movie.detail.MovieDetailActivity;
@@ -47,9 +58,12 @@ import com.movie_hub.android.ui.main.splash.SplashActivity;
 import com.movie_hub.android.utils.GsonUtils;
 
 import java.util.List;
+import java.util.Objects;
+
+import timber.log.Timber;
 
 
-public class MainActivity extends BaseActivity<ActivityMainBinding, MainViewModel> implements SystemBarColorProvider, View.OnClickListener {
+public class MainActivity extends BaseActivity<ActivityMainBinding, MainViewModel> implements SystemBarColorProvider, View.OnClickListener, OnMovieClickCallback {
     private Fragment active;
     private FragmentManager fm;
     private HomeFragment homeFragment;
@@ -67,6 +81,28 @@ public class MainActivity extends BaseActivity<ActivityMainBinding, MainViewMode
 //        if (viewModel.isLogin()) {
 //            getUserProfile();
 //        }
+        String json = getIntent().getStringExtra("msg_onesignal_data");
+        if (json != null && !json.isEmpty() && viewModel.isLogin()) {
+            viewModel.messageOneSignal = GsonUtils.fromJson(json, MessageOneSignal.class);
+
+            if (viewModel.messageOneSignal != null &&
+                    Objects.equals(viewModel.messageOneSignal.getCmd(), OneSignalCommand.CMD_REPLY_COMMENT)) {
+                String dataJson = viewModel.messageOneSignal.getData();
+
+                if (dataJson != null && !dataJson.isEmpty()) {
+                    MessageCommentResponse messageCommentResponse = GsonUtils.fromJson(dataJson, MessageCommentResponse.class);
+                    if (messageCommentResponse != null && messageCommentResponse.getMovieId() != null) {
+                        MovieResponse movieResponse = new MovieResponse();
+                        movieResponse.setId(Long.valueOf(messageCommentResponse.getMovieId()));
+
+                        viewModel.msgCommentData = GsonUtils.toJson(viewModel.messageOneSignal);
+                        getMovieDetail(movieResponse, NavigateToMovieDetails);
+                    } else {
+                        Timber.e("ONESIGNAL_LOG: messageCommentResponse hoặc MovieId bị null sau khi parse");
+                    }
+                }
+            }
+        }
     }
 
     @SuppressLint("NonConstantResourceId")
@@ -80,9 +116,9 @@ public class MainActivity extends BaseActivity<ActivityMainBinding, MainViewMode
                 case R.id.search:
                     handleFragment(Constants.SEARCH);
                     return true;
-//                case R.id.schedule:
-//                    handleFragment(Constants.SCHEDULE);
-//                    return true;
+                case R.id.schedule:
+                    handleFragment(Constants.SCHEDULE);
+                    return true;
                 case R.id.account:
                     if (viewModel.isLogin()) {
                         handleFragment(Constants.ACCOUNT);
@@ -299,7 +335,9 @@ public class MainActivity extends BaseActivity<ActivityMainBinding, MainViewMode
         if (viewModel.isLogin()) {
             it.putExtra("movie_details", GsonUtils.toJson(movieResponse));
             it.putExtra("movie_details_tracking", GsonUtils.toJson(listWatchHistoryResponse));
-            
+            if (viewModel.msgCommentData != null && !viewModel.msgCommentData.isEmpty()) {
+                it.putExtra(MovieDetailActivity.DATA_MSG, viewModel.msgCommentData);
+            }
         } else {
             it.putExtra("movie_details", GsonUtils.toJson(movieResponse));
         }
@@ -369,6 +407,132 @@ public class MainActivity extends BaseActivity<ActivityMainBinding, MainViewMode
                 it.putExtra("episode", GsonUtils.toJson(movieResponse.getSeasons().get(0).getEpisodes().get(0)));
             }
         }
+        startActivity(it);
+    }
+
+    public void getUserProfile() {
+        viewModel.getUserProfile(new MainCallback<UserResponse>() {
+            @Override
+            public void doError(Throwable error) {
+
+            }
+
+            @Override
+            public void doSuccess() {
+
+            }
+
+            @Override
+            public void doSuccess(UserResponse response) {
+                navigateToSetting(response);
+            }
+
+            @Override
+            public void doFail() {
+
+            }
+        });
+    }
+    public void navigateToSetting(UserResponse response) {
+        Intent intent = new Intent(this, SettingActivity.class);
+        intent.putExtra("USER_RESPONSE", GsonUtils.toJson(response));
+
+        startActivity(intent);
+    }
+
+    public void showMovieDialogDetail(MovieResponse movieResponse) {
+        new MovieDetailDialogFragment(movieResponse, this)
+                .show(getSupportFragmentManager(), "MovieDialogDetail");
+    }
+
+    public void getMovieDetail(MovieResponse movieResponse, int typeNavigate) {
+        showLoading();
+        viewModel.getMovie(new MainCallback<MovieResponse>() {
+
+            @Override
+            public void doSuccess(MovieResponse data) {
+                if (viewModel.isLogin()) {
+                    getListMovieTracking(data, typeNavigate);
+                } else {
+                    if (typeNavigate == NavigateToMovieDetails) {
+                        navigateToMovieDetail(data, null);
+                    } else if (typeNavigate == NavigateToWatchMovie) {
+                        navigateToWatchMovie(data, null);
+                    }
+                }
+            }
+
+            @Override
+            public void doError(Throwable error) {
+                hideLoading();
+                showError(getString(R.string.an_error_occurred));
+            }
+
+            @Override
+            public void doSuccess() {
+                hideLoading();
+            }
+
+            @Override
+            public void doFail() {
+                hideLoading();
+                showError(getString(R.string.an_error_occurred));
+            }
+        }, movieResponse.getId());
+    }
+
+    public void getListMovieTracking(MovieResponse movieResponse, int typeNavigate) {
+        showLoading();
+        viewModel.getListMovieTracking(new MainCallback<ListWatchHistoryResponse>() {
+
+            @Override
+            public void doSuccess(ListWatchHistoryResponse data) {
+                if (typeNavigate == NavigateToMovieDetails) {
+                    navigateToMovieDetail(movieResponse, data);
+                } else if (typeNavigate == NavigateToWatchMovie) {
+                    navigateToWatchMovie(movieResponse, data);
+                }
+            }
+
+            @Override
+            public void doError(Throwable error) {
+                hideLoading();
+                showError(getString(R.string.an_error_occurred));
+            }
+
+            @Override
+            public void doSuccess() {
+                hideLoading();
+            }
+
+            @Override
+            public void doFail() {
+                hideLoading();
+                showError(getString(R.string.an_error_occurred));
+            }
+        }, movieResponse.getId());
+    }
+    @Override
+    public void onMovieClick(MovieResponse movieResponse) {
+        if (movieResponse != null) {
+            getMovieDetail(movieResponse, NavigateToMovieDetails);
+        }
+    }
+
+    @Override
+    public void onWatchMovieClick(MovieResponse movieResponse) {
+        if (movieResponse != null) {
+            getMovieDetail(movieResponse, NavigateToWatchMovie);
+        }
+    }
+
+    @Override
+    public void onMovieLongClick(MovieResponse movieResponse) {
+
+    }
+
+    public void navigateToNotification() {
+        Intent it = new Intent(this, NotificationActivity.class);
         startActivity(it);
     }
 }

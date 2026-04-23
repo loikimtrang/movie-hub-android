@@ -26,14 +26,18 @@ public class Constants {
     public static final int GENDER_FEMALE = 2;
     public static final int GENDER_UNSPECIFIED = 3;
 
-    public static final String MEDIA_URL = "https://media.moviehub.biz/v1/file/download";
-    public static final String MEDIA_URL_VTT = "https://media.moviehub.biz/v1/file/public-download"; // vtt,
-    public static final String MEDIA_URL_VIDEO = "https://media.moviehub.biz/v1/file/download-video-resource";
+    public static final String MEDIA_URL = "https://media-api.moviehub.biz/v1/file/download";
+    public static final String MEDIA_URL_VTT = "https://media-api.moviehub.biz/v1/file/public-download"; // vtt,
+    public static final String MEDIA_URL_VIDEO = "/v1/file/download-video-resource";
 
     public static final String ERROR = "ERROR";
     public static final int RC_SIGN_IN = 1001;
+    public static final int SRC_TYPE_VIDEO_EXTERNAL = 2; // có link http
+    public static final int SRC_TYPE_VIDEO_INTERNAL = 1; // sài link nhà
+
 
     public static final String CLIENT_ID = "144532728035-rbu66k0hirdckcp1ato2kff2m83uta4g.apps.googleusercontent.com";
+    public static final String ONESIGNAL_APP_ID = "1a61db28-dca2-483d-9475-4d028b71b6d4";
     public static int PLATFORM_ANDROID = 2;
     public static int TYPE_MOVIE_SINGLE = 1;
     public static int TYPE_MOVIE_SERIES = 2;

@@ -24,6 +24,7 @@
     <color name="header_app">#0F1015</color>
     <color name="bg_dialog">#0F1015</color>
     <color name="btn_login">#FFF09B</color>
+    <color name="btn_login_disabled">#E0E0E0</color>
     <color name="btn_login_google">#2D3038</color>
     <color name="btn_select">#45464F</color>
     <color name="btn_log_out">#3B3F5A</color>
@@ -96,5 +97,12 @@
     <color name="review_un_select">#3C404C</color>
     <color name="bg_dialog_comment">#272A3B</color>
     <color name="bg_tran_header_home">#80000000</color>
+    <color name="bg_schedule">#23232e</color>
+    <color name="text_time_schedule">#9a9b96</color>
+    <color name="schedule_time_select">#fdd875</color>
+    <color name="setting_on">#FBE089</color>
+    <color name="setting_off">#E0E0E0</color>
+    <color name="select_movie">#FFF09B</color>
+    <color name="bg_select_movie">#80000000</color>
 
 </resources>

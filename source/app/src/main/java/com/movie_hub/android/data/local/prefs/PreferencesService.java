@@ -13,6 +13,7 @@ public interface PreferencesService {
     String KEY_ACCESS_TOKEN_OBJECT = "KEY_ACCESS_TOKEN_OBJECT";
     String KEY_USER_RESPONSE = "KEY_USER_RESPONSE";
     String KEY_USER_ID = "KEY_USER_ID";
+    String KEY_USER_SETTING= "KEY_USER_SETTING";
 
     void saveAccessTokenObject(UserLoginResponse userLoginResponse);
     UserLoginResponse getUserAccessTokenObject();

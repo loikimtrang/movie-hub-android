@@ -12,8 +12,8 @@ android {
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
-        buildConfigField "String", "BASE_URL", "\"https://tenant.moviehub.biz/\""
-        buildConfigField "String", "MASTER_URL", "\"https://master.moviehub.biz/\""
+        buildConfigField "String", "BASE_URL", "\"https://movie-api.moviehub.biz/\""
+        buildConfigField "String", "MASTER_URL", "\"https://auth-api.moviehub.biz/\""
 
         javaCompileOptions {
             annotationProcessorOptions {
@@ -162,5 +162,10 @@ dependencies {
     implementation 'com.facebook.shimmer:shimmer:0.5.0'
 
     implementation 'com.tbuonomo:dotsindicator:4.3'
+
+    implementation 'org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.2.5'
+    implementation 'org.eclipse.paho:org.eclipse.paho.android.service:1.1.1'
+
+    implementation 'com.onesignal:OneSignal:4.8.5'
 }
 apply plugin: 'com.google.gms.google-services'

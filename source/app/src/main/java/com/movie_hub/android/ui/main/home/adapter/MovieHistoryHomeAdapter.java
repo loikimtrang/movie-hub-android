@@ -92,6 +92,12 @@ public class MovieHistoryHomeAdapter extends RecyclerView.Adapter<MovieHistoryHo
             if (listener != null) listener.onMovieClick(movieHistoryResponse.getMovie());
         });
 
+        holder.binding.getRoot().setOnLongClickListener(v -> {
+            if (listener != null) {
+                listener.onMovieLongClick(movieResponse);
+            }
+            return true;
+        });
 
         Glide.with(holder.binding.getRoot().getContext())
                 .load(movieResponse.getPosterUrl())

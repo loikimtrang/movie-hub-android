@@ -46,11 +46,18 @@ public class CollectionType_3_Adapter extends RecyclerView.Adapter<CollectionTyp
     public void onBindViewHolder(@NonNull CollectionType_3_ViewHolder holder, @SuppressLint("RecyclerView") int position) {
         MovieResponse item = items.get(position);
         holder.binding.title.setText(item.getTitle());
-        holder.binding.subtitle.setText(item.getTitle());
+        holder.binding.subtitle.setText(item.getOriginalTitle());
 
         holder.binding.getRoot().setOnClickListener(v -> {
             if (listener == null) return;
             listener.onMovieClick(item);
+        });
+
+        holder.binding.getRoot().setOnLongClickListener(v -> {
+            if (listener != null) {
+                listener.onMovieLongClick(item);
+            }
+            return true;
         });
         
         Glide.with(holder.binding.getRoot().getContext())

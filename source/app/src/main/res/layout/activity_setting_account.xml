@@ -1,0 +1,359 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    >
+
+    <data>
+        <variable
+            name="a"
+            type="com.movie_hub.android.ui.main.account.setting.SettingActivity" />
+
+        <variable
+            name="vm"
+            type="com.movie_hub.android.ui.main.account.setting.SettingViewModel" />
+
+        <import type="android.view.View" />
+    </data>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/bg_app"
+        android:fitsSystemWindows="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/_40sdp"
+                android:background="@color/header_app">
+
+                <FrameLayout
+                    android:id="@+id/back"
+                    android:layout_width="@dimen/_36sdp"
+                    android:layout_height="@dimen/_40sdp"
+                    android:onClick="@{(v)->a.finish()}"
+                    >
+                    <ImageView
+                        android:layout_width="@dimen/_12sdp"
+                        android:layout_height="@dimen/_12sdp"
+                        android:src="@drawable/ic_arrow_right"
+                        android:rotation="180"
+                        android:layout_gravity="center"/>
+                </FrameLayout>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/setting"
+                    style="@style/Text_14_Bold"
+                    android:layout_toEndOf="@+id/back"
+                    android:layout_centerVertical="true"
+                    />
+
+                <FrameLayout
+                    android:id="@+id/save"
+                    android:layout_width="@dimen/_36sdp"
+                    android:layout_height="@dimen/_40sdp"
+                    android:layout_alignParentEnd="true">
+                    <ImageView
+                        android:layout_width="@dimen/_16sdp"
+                        android:layout_height="@dimen/_16sdp"
+                        android:src="@drawable/ic_check"
+                        android:layout_gravity="center"/>
+                </FrameLayout>
+
+            </RelativeLayout>
+
+            <androidx.core.widget.NestedScrollView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical">
+
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/_50sdp"
+                        android:paddingHorizontal="@dimen/_12sdp">
+
+                        <TextView
+                            android:id="@+id/tv_auto_skip_intro"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            style="@style/Text_12_Normal"
+                            android:text="@string/auto_skip_intro"
+                            android:layout_centerVertical="true"
+
+                            />
+
+                        <androidx.appcompat.widget.SwitchCompat
+                            android:id="@+id/switch_auto_skip_intro"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:thumb="@drawable/thumb_custom"
+                            app:track="@drawable/track_custom"
+                            android:switchMinWidth="@dimen/_40sdp"
+                            android:checked="false"
+                            android:layout_alignParentEnd="true"
+                            android:layout_centerVertical="true"/>
+
+                    </RelativeLayout>
+
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/_50sdp"
+                        android:paddingHorizontal="@dimen/_12sdp">
+
+                        <TextView
+                            android:id="@+id/tv_auto_next_episode"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            style="@style/Text_12_Normal"
+                            android:text="@string/auto_play_next"
+                            android:layout_centerVertical="true"
+
+                            />
+
+                        <androidx.appcompat.widget.SwitchCompat
+                            android:id="@+id/switch_auto_next_episode"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:thumb="@drawable/thumb_custom"
+                            app:track="@drawable/track_custom"
+                            android:switchMinWidth="@dimen/_40sdp"
+                            android:checked="false"
+                            android:layout_alignParentEnd="true"
+                            android:layout_centerVertical="true"/>
+
+                    </RelativeLayout>
+
+                    <RelativeLayout
+                        android:id="@+id/btn_select_resolution"
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/_50sdp"
+                        android:paddingHorizontal="@dimen/_12sdp"
+                        android:background="@drawable/bg_person_item"
+                        android:clickable="true"
+                        android:focusable="true">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            style="@style/Text_12_Normal"
+                            android:text="@string/resolution"
+                            android:layout_centerVertical="true"
+
+                            />
+
+                        <TextView
+                            android:id="@+id/tv_resolution"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            style="@style/Text_14_Normal"
+                            android:text="@string/quality_1080p"
+                            android:layout_centerVertical="true"
+                            android:layout_alignParentEnd="true"
+
+                            />
+
+                    </RelativeLayout>
+
+                    <RelativeLayout
+                        android:id="@+id/btn_select_play_speed"
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/_50sdp"
+                        android:paddingHorizontal="@dimen/_12sdp"
+                        android:background="@drawable/bg_person_item"
+                        android:clickable="true"
+                        android:focusable="true">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            style="@style/Text_12_Normal"
+                            android:text="@string/playback_speed_setting"
+                            android:layout_centerVertical="true"
+
+                            />
+
+                        <TextView
+                            android:id="@+id/tv_play_speed"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            style="@style/Text_14_Normal"
+                            android:text="1.0x"
+                            android:layout_centerVertical="true"
+                            android:layout_alignParentEnd="true"
+
+                            />
+
+                    </RelativeLayout>
+
+                    <androidx.appcompat.widget.AppCompatSeekBar
+                        android:id="@+id/seekBar_play_speed"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:max="100"
+                        android:progress="36"
+                        android:progressDrawable="@drawable/seekbar_setting"
+                        android:thumb="@drawable/thumb_setting"
+                        android:thumbOffset="0dp"
+                        android:splitTrack="false"
+                        android:maxHeight="@dimen/_8sdp"
+                        android:minHeight="@dimen/_8sdp"/>
+
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/_50sdp"
+                        android:paddingHorizontal="@dimen/_12sdp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            style="@style/Text_12_Normal"
+                            android:text="@string/brightness"
+                            android:layout_centerVertical="true"
+
+                            />
+
+                        <TextView
+                            android:id="@+id/tv_brightness"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            style="@style/Text_14_Normal"
+                            android:text="36%"
+                            android:layout_centerVertical="true"
+                            android:layout_alignParentEnd="true"
+
+                            />
+
+                    </RelativeLayout>
+
+                    <androidx.appcompat.widget.AppCompatSeekBar
+                        android:id="@+id/seekBar_brightness"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:max="100"
+                        android:progress="36"
+                        android:progressDrawable="@drawable/seekbar_setting"
+                        android:thumb="@drawable/thumb_setting"
+                        android:thumbOffset="0dp"
+                        android:splitTrack="false"
+                        android:maxHeight="@dimen/_8sdp"
+                        android:minHeight="@dimen/_8sdp"/>
+
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/_50sdp"
+                        android:paddingHorizontal="@dimen/_12sdp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            style="@style/Text_12_Normal"
+                            android:text="@string/volume"
+                            android:layout_centerVertical="true"
+
+                            />
+
+                        <TextView
+                            android:id="@+id/tv_volume"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            style="@style/Text_14_Normal"
+                            android:text="67%"
+                            android:layout_centerVertical="true"
+                            android:layout_alignParentEnd="true"
+
+                            />
+
+                    </RelativeLayout>
+
+                    <androidx.appcompat.widget.AppCompatSeekBar
+                        android:id="@+id/seekBar_volume"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:max="100"
+                        android:progress="67"
+                        android:progressDrawable="@drawable/seekbar_setting"
+                        android:thumb="@drawable/thumb_setting"
+                        android:thumbOffset="0dp"
+                        android:splitTrack="false"
+                        android:maxHeight="@dimen/_8sdp"
+                        android:minHeight="@dimen/_8sdp"/>
+
+                </LinearLayout>
+            </androidx.core.widget.NestedScrollView>
+
+
+
+        </LinearLayout>
+
+
+        <com.google.android.material.progressindicator.LinearProgressIndicator
+            android:id="@+id/bottom_loading_bar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:indeterminate="true"
+            android:visibility="gone"
+            app:trackThickness="1dp"
+            app:indicatorColor="@color/ic_tab_bar_tint"
+            app:trackColor="@android:color/transparent"
+            style="@style/Widget.MaterialComponents.LinearProgressIndicator"
+            android:layout_marginBottom="@dimen/_25sdp"/>
+
+        <FrameLayout
+            android:id="@+id/loading_overlay"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@android:color/transparent"
+            android:visibility="gone"
+            android:clickable="true"
+            android:focusable="true"/>
+
+        <FrameLayout
+            android:id="@+id/layout_resolution"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/bg_loading"
+            android:visibility="gone"
+            android:clickable="true"
+            android:focusable="true">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginHorizontal="@dimen/_30sdp"
+                android:background="@drawable/bg_setting_account"
+                android:paddingVertical="@dimen/_8sdp"
+                android:orientation="vertical"
+                android:clickable="true"
+                android:focusable="true">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/resolution_2"
+                    style="@style/Text_12_Bold"
+                    android:gravity="center"
+                    android:layout_marginBottom="@dimen/_8sdp"/>
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rv_resolution"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
+
+            </LinearLayout>
+
+        </FrameLayout>
+    </FrameLayout>
+</layout>

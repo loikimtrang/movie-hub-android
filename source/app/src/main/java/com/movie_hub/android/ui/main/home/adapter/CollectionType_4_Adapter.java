@@ -50,6 +50,13 @@ public class CollectionType_4_Adapter extends RecyclerView.Adapter<CollectionTyp
             if (listener == null) return;
             listener.onMovieClick(item);
         });
+
+        holder.binding.getRoot().setOnLongClickListener(v -> {
+            if (listener != null) {
+                listener.onMovieLongClick(item);
+            }
+            return true;
+        });
         
         Glide.with(holder.binding.getRoot().getContext())
                 .load(item.getThumbnailUrl())

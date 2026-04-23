@@ -267,5 +267,35 @@
     <string name="director_person">Đạo diễn</string>
     <string name="no_review_yet">Chưa có đánh giá nào</string>
     <string name="nationality">Quốc tịch: </string>
-
+    <string name="monday">Thứ 2</string>
+    <string name="tuesday">Thứ 3</string>
+    <string name="wednesday">Thứ 4</string>
+    <string name="thursday">Thứ 5</string>
+    <string name="friday">Thứ 6</string>
+    <string name="saturday">Thứ 7</string>
+    <string name="sunday">Chủ nhật</string>
+    <string name="today">Hôm nay</string>
+    <string name="no_showtime_for_day">Không có lịch chiếu nào cho ngày %1$s</string>
+    <string name="setting">Cài đặt</string>
+    <string name="auto_skip_intro">Tự động bỏ qua giới thiệu:</string>
+    <string name="auto_play_next">Tự động phát tập kế tiếp:</string>
+    <string name="resolution">Độ phân giải:</string>
+    <string name="brightness">Độ sáng:</string>
+    <string name="volume">Âm lượng:</string>
+    <string name="playback_speed_setting">Tốc độ phát:</string>
+    <string name="on">Bật</string>
+    <string name="off">Tắt</string>
+    <string name="resolution_2">Độ phân giải</string>
+    <string name="max_resolution">Độ phân giải cao nhất</string>
+    <string name="do_you_want_update_setting">Bạn có muốn thay đổi setting?</string>
+    <string name="setting_have_been_success_update">Đã cập nhật cài đặt thành công</string>
+    <string name="welcome">Chào mừng bạn đến với \n Movie Hub</string>
+    <string name="continue_">Tiếp tục</string>
+    <string name="selected_count">Đã chọn:</string>
+    <string name="survey_title">Hãy chọn ba tác phẩm bạn thích</string>
+    <string name="survey_description">Điều này giúp chúng tôi tìm các bộ phim và series mà bạn sẽ thích. Hãy chọn các nội dung bạn thích.</string>
+    <string name="finish">Hoàn thành</string>
+    <string name="error_select_at_least_3">Vui lòng chọn ít nhất 3 tác phẩm</string>
+    <string name="notification">Thông báo</string>
+    <string name="empty_notification">Bạn không có thông báo nào</string>
 </resources>

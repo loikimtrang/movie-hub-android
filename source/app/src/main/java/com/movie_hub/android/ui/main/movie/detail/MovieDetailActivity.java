@@ -21,7 +21,6 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.media3.common.MediaItem;
 import androidx.media3.common.Player;
-import androidx.media3.datasource.DefaultHttpDataSource;
 import androidx.media3.exoplayer.ExoPlayer;
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory;
 
@@ -34,11 +33,9 @@ import com.google.android.flexbox.JustifyContent;
 import com.google.android.material.tabs.TabLayoutMediator;
 import com.movie_hub.android.R;
 import com.movie_hub.android.constant.Constants;
-import com.movie_hub.android.data.model.api.ResponseListObj;
 import com.movie_hub.android.data.model.api.ResponseWrapper;
 import com.movie_hub.android.data.model.api.request.favourite.CreateFavouriteRequest;
 import com.movie_hub.android.data.model.api.request.playlist.CreatePlaylistRequest;
-import com.movie_hub.android.data.model.api.request.playlist.GetListMoviePlayListRequest;
 import com.movie_hub.android.data.model.api.request.playlist.UpdatePlayListItemRequest;
 import com.movie_hub.android.data.model.api.response.MovieItem.MovieItemResponse;
 import com.movie_hub.android.data.model.api.response.history.ListWatchHistoryResponse;
@@ -48,6 +45,8 @@ import com.movie_hub.android.data.model.api.response.playlist.PlayListResponse;
 import com.movie_hub.android.data.model.api.response.review.ReviewResponse;
 import com.movie_hub.android.data.model.api.response.season.SeasonResponse;
 import com.movie_hub.android.data.model.api.response.video.VideoResponse;
+import com.movie_hub.android.data.model.onesignal.MessageOneSignal;
+import com.movie_hub.android.data.model.onesignal.OneSignalCommand;
 import com.movie_hub.android.data.model.other.ToastMessage;
 import com.movie_hub.android.databinding.ActivityMovieDetailBinding;
 import com.movie_hub.android.di.component.ActivityComponent;
@@ -55,7 +54,6 @@ import com.movie_hub.android.ui.base.activity.BaseActivity;
 import com.movie_hub.android.ui.base.activity.SystemBarColorProvider;
 import com.movie_hub.android.ui.main.MainCallback;
 import com.movie_hub.android.ui.main.account.login.LoginActivity;
-import com.movie_hub.android.ui.main.account.playlist.dialog.CreatePlaylistDialogFragment;
 import com.movie_hub.android.ui.main.movie.detail.adapter.MovieDetailTabAdapter;
 import com.movie_hub.android.ui.main.movie.detail.adapter.TagCategoryAdapter;
 import com.movie_hub.android.ui.main.movie.detail.comment.CommentActivity;
@@ -71,16 +69,13 @@ import com.movie_hub.android.utils.ClickUtils;
 import com.movie_hub.android.utils.DialogUtils;
 import com.movie_hub.android.utils.DisplayUtils;
 import com.movie_hub.android.utils.GsonUtils;
-import com.movie_hub.android.utils.HtmlUtils;
 import com.movie_hub.android.utils.LiveDataUtils;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
 import eu.davidea.flexibleadapter.databinding.BR;
-import timber.log.Timber;
 
 public class MovieDetailActivity extends BaseActivity<ActivityMovieDetailBinding, MovieDetailViewModel> implements SystemBarColorProvider,
         View.OnClickListener,
@@ -95,6 +90,7 @@ public class MovieDetailActivity extends BaseActivity<ActivityMovieDetailBinding
     private Runnable updateSeekBarRunnable;
     private boolean isBuffering = false;
     private boolean isMuted = true;
+    public static String DATA_MSG = "DATA_MSG";
     private ActivityResultLauncher<Intent> loginLauncher;
     @SuppressLint("SetTextI18n")
     @Override
@@ -257,6 +253,22 @@ public class MovieDetailActivity extends BaseActivity<ActivityMovieDetailBinding
                 }
         );
 
+
+        String jsonMsg = getIntent().getStringExtra(DATA_MSG);
+        if (jsonMsg != null) {
+            getIntent().removeExtra(DATA_MSG);
+            MessageOneSignal messageOneSignal = GsonUtils.fromJson(jsonMsg, MessageOneSignal.class);
+            if (messageOneSignal != null && messageOneSignal.getCmd() != null) {
+                if (Objects.equals(messageOneSignal.getCmd(), OneSignalCommand.CMD_REPLY_COMMENT)) {
+                    showLoading();
+                    ClickUtils.debounceClick(viewBinding.includeMovieHeader.btnCmt);
+                    Intent it = new Intent(this, CommentActivity.class);
+                    it.putExtra("movie_details", GsonUtils.toJson(viewModel.movieDetails));
+                    it.putExtra(CommentActivity.MSG_CMT, messageOneSignal.getData());
+                    startActivity(it);
+                }
+            }
+        }
     }
 
     @Override
@@ -291,7 +303,7 @@ public class MovieDetailActivity extends BaseActivity<ActivityMovieDetailBinding
 
         viewBinding.includeMovieHeader.nameMovie.setText(viewModel.movieDetails.getTitle());
         viewBinding.includeMovieHeader.nameMovieOriginal.setText(viewModel.movieDetails.getOriginalTitle());
-        viewBinding.includeMovieHeader.description.setText(HtmlUtils.convertPtoStrong(viewModel.movieDetails.getDescription()));
+        viewBinding.includeMovieHeader.description.setText(viewModel.movieDetails.getDescription());
         viewBinding.includeMovieHeader.ageRating.setText(DisplayUtils.displayAgeRating(viewModel.movieDetails.getAgeRating()));
         viewBinding.includeMovieHeader.seekBarRemaining.setOnTouchListener((v, event) -> true);
 
@@ -327,11 +339,11 @@ public class MovieDetailActivity extends BaseActivity<ActivityMovieDetailBinding
                 VideoResponse video = lastSeason.getTrailer().getVideo();
                 if (video != null && video.getContent() != null) {
                     if (Boolean.TRUE.equals(viewModel.getTokenReady().getValue())) {
-                        setUpTrailer(video.getContent());
+                        setUpTrailer(video);
                     } else {
                         LiveDataUtils.observeOnce(viewModel.getTokenReady(), this, isReady -> {
                             if (Boolean.TRUE.equals(isReady)) {
-                                setUpTrailer(video.getContent());
+                                setUpTrailer(video);
                             }
                         });
                     }
@@ -383,7 +395,8 @@ public class MovieDetailActivity extends BaseActivity<ActivityMovieDetailBinding
 
     }
 
-    public void setUpTrailer(String uri) {
+    public void setUpTrailer(VideoResponse videoResponse) {
+        String uri = videoResponse.getContent();
         if (uri == null || uri.isEmpty()) return;
 
         DefaultMediaSourceFactory mediaSourceFactory =
@@ -400,7 +413,7 @@ public class MovieDetailActivity extends BaseActivity<ActivityMovieDetailBinding
 
         viewModel.getIsPlaying().observe(this, this::updatePlayPauseIcons);
 
-        if (!uri.contains("http")) uri = Constants.MEDIA_URL_VIDEO + uri;
+        if (!uri.contains("http")) uri = videoResponse.getHostname() + Constants.MEDIA_URL_VIDEO + uri;
         MediaItem mediaItem = MediaItem.fromUri(uri);
 
         player.setMediaItem(mediaItem);

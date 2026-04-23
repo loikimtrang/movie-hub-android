@@ -67,20 +67,20 @@
                 <FrameLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginEnd="@dimen/_6sdp"
                     android:background="@drawable/bg_age_rating"
                     android:paddingHorizontal="@dimen/_3sdp"
-                    android:paddingVertical="@dimen/_1sdp"
-                    android:layout_gravity="center_vertical"
-                    android:layout_marginEnd="@dimen/_6sdp">
+                    android:paddingVertical="@dimen/_1sdp">
 
                     <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
                         android:id="@+id/age_rating"
                         style="@style/Text_10_Normal"
-                        android:textColor="@color/black"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
                         android:gravity="center"
-                        android:layout_gravity="center"/>
+                        android:textColor="@color/black" />
 
                 </FrameLayout>
 

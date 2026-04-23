@@ -446,6 +446,22 @@
 
                 </LinearLayout>
 
+                <FrameLayout
+                    android:id="@+id/btn_notification"
+                    android:layout_width="@dimen/_28sdp"
+                    android:layout_height="@dimen/_28sdp"
+                    android:layout_gravity="end|center"
+                    android:layout_marginEnd="@dimen/_12sdp"
+                    android:background="@drawable/bg_btn_press_oval">
+
+                    <ImageView
+                        android:layout_width="@dimen/_16sdp"
+                        android:layout_height="@dimen/_16sdp"
+                        android:src="@drawable/ic_notification"
+                        android:layout_gravity="center"/>
+
+                </FrameLayout>
+
             </FrameLayout>
 
 

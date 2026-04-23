@@ -21,11 +21,13 @@ import com.movie_hub.android.ui.main.account.manage_account.ManageAccountViewMod
 import com.movie_hub.android.ui.main.account.playlist.PlayListViewModel;
 import com.movie_hub.android.ui.main.account.privacy.PrivacyViewModel;
 import com.movie_hub.android.ui.main.account.register.RegisterViewModel;
+import com.movie_hub.android.ui.main.account.setting.SettingViewModel;
 import com.movie_hub.android.ui.main.account.updateapp.CheckUpdateViewModel;
 import com.movie_hub.android.ui.main.account.verifyotp.VerifyOtpViewModel;
 import com.movie_hub.android.ui.main.home.detail.HomeSideBarDetailActivity;
 import com.movie_hub.android.ui.main.home.detail.HomeSideBarDetailViewModel;
 import com.movie_hub.android.ui.main.home.filter.FilterViewModel;
+import com.movie_hub.android.ui.main.home.notification.NotificationModel;
 import com.movie_hub.android.ui.main.home.topic.HomeMoreTopicViewModel;
 import com.movie_hub.android.ui.main.home.topic.topic_detail.HomeTopicDetailViewModel;
 import com.movie_hub.android.ui.main.movie.detail.MovieDetailViewModel;
@@ -34,6 +36,7 @@ import com.movie_hub.android.ui.main.movie.detail.review.ReviewViewModel;
 import com.movie_hub.android.ui.main.movie.watch.WatchMovieViewModel;
 import com.movie_hub.android.ui.main.person.PersonDetailViewModel;
 import com.movie_hub.android.ui.main.splash.SplashViewModel;
+import com.movie_hub.android.ui.main.splash.survey.SurveyViewModel;
 import com.movie_hub.android.utils.GetInfo;
 
 import javax.inject.Named;
@@ -244,5 +247,29 @@ public class ActivityModule {
         Supplier<PrivacyViewModel> supplier = () -> new PrivacyViewModel(repository, (MVVMApplication)application);
         ViewModelProviderFactory<PrivacyViewModel> factory = new ViewModelProviderFactory<>(PrivacyViewModel.class, supplier);
         return new ViewModelProvider(activity, factory).get(PrivacyViewModel.class);
+    }
+
+    @Provides
+    @ActivityScope
+    SettingViewModel provideSettingViewModel(Repository repository, Context application) {
+        Supplier<SettingViewModel> supplier = () -> new SettingViewModel(repository, (MVVMApplication)application);
+        ViewModelProviderFactory<SettingViewModel> factory = new ViewModelProviderFactory<>(SettingViewModel.class, supplier);
+        return new ViewModelProvider(activity, factory).get(SettingViewModel.class);
+    }
+
+    @Provides
+    @ActivityScope
+    SurveyViewModel provideSurveyViewModel(Repository repository, Context application) {
+        Supplier<SurveyViewModel> supplier = () -> new SurveyViewModel(repository, (MVVMApplication)application);
+        ViewModelProviderFactory<SurveyViewModel> factory = new ViewModelProviderFactory<>(SurveyViewModel.class, supplier);
+        return new ViewModelProvider(activity, factory).get(SurveyViewModel.class);
+    }
+
+    @Provides
+    @ActivityScope
+    NotificationModel provideNotificationModel(Repository repository, Context application) {
+        Supplier<NotificationModel> supplier = () -> new NotificationModel(repository, (MVVMApplication)application);
+        ViewModelProviderFactory<NotificationModel> factory = new ViewModelProviderFactory<>(NotificationModel.class, supplier);
+        return new ViewModelProvider(activity, factory).get(NotificationModel.class);
     }
 }

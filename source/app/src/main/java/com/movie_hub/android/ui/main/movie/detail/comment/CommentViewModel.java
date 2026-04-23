@@ -15,6 +15,7 @@ import com.movie_hub.android.data.model.api.request.comment.CreateCommentRequest
 import com.movie_hub.android.data.model.api.response.comment.CommentResponse;
 import com.movie_hub.android.data.model.api.response.comment.VoteListResponse;
 import com.movie_hub.android.data.model.api.response.movie.MovieResponse;
+import com.movie_hub.android.data.model.onesignal.MessageCommentResponse;
 import com.movie_hub.android.ui.base.activity.BaseViewModel;
 import com.movie_hub.android.ui.main.MainCallback;
 import com.movie_hub.android.ui.main.movie.detail.comment.model.TagComment;
@@ -40,6 +41,7 @@ import timber.log.Timber;
 
 
 public class CommentViewModel extends BaseViewModel {
+    MessageCommentResponse messageCommentResponse;
     MovieResponse movieDetails = new MovieResponse();
     public MutableLiveData<List<CommentResponse>> commentList = new MutableLiveData<>();
     public MutableLiveData<List<VoteListResponse>> voteList = new MutableLiveData<>();

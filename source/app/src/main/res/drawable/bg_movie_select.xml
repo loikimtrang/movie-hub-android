@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item android:state_selected="true">
+        <shape>
+            <stroke
+                android:width="@dimen/_2sdp"
+                android:color="@color/select_movie" />
+            <corners
+                android:radius="@dimen/_12sdp"/>
+
+            <solid android:color="@color/bg_select_movie"/>
+        </shape>
+    </item>
+
+    <item>
+        <shape>
+            <corners
+                android:radius="@dimen/_12sdp"/>
+        </shape>
+    </item>
+
+</selector>

@@ -1,5 +1,7 @@
 package com.movie_hub.android.ui.base.activity;
 
+import static com.movie_hub.android.ui.main.home.HomeFragment.NavigateToMovieDetails;
+
 import android.annotation.TargetApi;
 import android.app.Dialog;
 import android.content.BroadcastReceiver;
@@ -9,7 +11,6 @@ import android.content.IntentFilter;
 import android.graphics.Rect;
 import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
@@ -18,7 +19,6 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ProgressBar;
-import android.widget.TextView;
 
 import androidx.annotation.ColorRes;
 import androidx.annotation.LayoutRes;
@@ -28,8 +28,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.databinding.Observable;
-import androidx.databinding.ObservableBoolean;
-import androidx.databinding.ObservableField;
 import androidx.databinding.ViewDataBinding;
 import androidx.fragment.app.Fragment;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
@@ -39,15 +37,25 @@ import com.movie_hub.android.MVVMApplication;
 import com.movie_hub.android.R;
 import com.movie_hub.android.constant.Constants;
 import com.movie_hub.android.data.local.prefs.AppPreferencesService;
+import com.movie_hub.android.data.model.api.response.history.ListWatchHistoryResponse;
+import com.movie_hub.android.data.model.api.response.movie.MovieResponse;
+import com.movie_hub.android.data.model.onesignal.MessageCommentResponse;
+import com.movie_hub.android.data.model.onesignal.MessageOneSignal;
+import com.movie_hub.android.data.model.onesignal.OneSignalCommand;
 import com.movie_hub.android.data.model.other.ToastMessage;
 import com.movie_hub.android.di.component.ActivityComponent;
 import com.movie_hub.android.di.component.DaggerActivityComponent;
 import com.movie_hub.android.di.module.ActivityModule;
 import com.movie_hub.android.helper.LocaleHelper;
+import com.movie_hub.android.ui.main.MainCallback;
+import com.movie_hub.android.ui.main.movie.detail.MovieDetailActivity;
 import com.movie_hub.android.utils.DialogUtils;
+import com.movie_hub.android.utils.GsonUtils;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+
+import timber.log.Timber;
 
 public abstract class BaseActivity<B extends ViewDataBinding, V extends BaseViewModel> extends AppCompatActivity{
 
@@ -116,6 +124,8 @@ public abstract class BaseActivity<B extends ViewDataBinding, V extends BaseView
                 }
             }
         };
+
+        checkNotificationIntent(getIntent());
     }
 
     protected void applySystemBarColors() {
@@ -213,20 +223,6 @@ public abstract class BaseActivity<B extends ViewDataBinding, V extends BaseView
         progressDialog.show();
     }
 
-//    public void changeProgressBarMsg(String msg){
-//        if (progressDialog != null){
-//            ((TextView)progressDialog.findViewById(R.id.progressbar_msg)).setText(msg);
-//        }
-//    }
-//
-//    public void hideProgress() {
-//        if (progressDialog != null) {
-//            progressDialog.dismiss();
-//            progressDialog = null;
-//        }
-//    }
-
-
     private ActivityComponent getBuildComponent() {
         return DaggerActivityComponent.builder()
                 .appComponent(((MVVMApplication)getApplication()).getAppComponent())
@@ -241,26 +237,6 @@ public abstract class BaseActivity<B extends ViewDataBinding, V extends BaseView
         mvvmApplication.setCurrentActivity(this);
     }
 
-    public boolean showHeader(){
-        return false;
-    }
-
-    ObservableField<String> leftTitle;
-    ObservableField<String> centerTitle;
-    public void setCenterTitle(String msg){
-        if (centerTitle == null){
-            centerTitle = new ObservableField<>(msg);
-        } else {
-            centerTitle.set(msg);
-        }
-    }
-    public void setLeftTitle(String msg){
-        if (leftTitle == null){
-            leftTitle = new ObservableField<>(msg);
-        } else {
-            leftTitle.set(msg);
-        }
-    }
     public void navigateToNewActivity(Context from, Class<?> toActivityClass) {
         Intent it = new Intent(from, toActivityClass);
         from.startActivity(it);
@@ -318,5 +294,110 @@ public abstract class BaseActivity<B extends ViewDataBinding, V extends BaseView
 
     public void showMgs(int type, String mgs) {
         new ToastMessage(type,mgs).showMessage(this);
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent); // Cực kỳ quan trọng: Cập nhật intent mới cho Activity
+        checkNotificationIntent(intent);
+    }
+
+    private void checkNotificationIntent(Intent intent) {
+        if (intent != null && intent.getBooleanExtra("is_from_notification", false)) {
+            String json = intent.getStringExtra("msg_onesignal_data");
+            MessageOneSignal message = GsonUtils.fromJson(json, MessageOneSignal.class);
+            if (message != null) {
+                intent.putExtra("is_from_notification", false);
+                handleNotificationData(message);
+            }
+        }
+    }
+
+    /**
+     * Hàm này có thể được override ở Activity con nếu cần logic riêng biệt
+     */
+    protected void handleNotificationData(MessageOneSignal message) {
+        switch (message.getCmd()) {
+            case OneSignalCommand.CMD_REPLY_COMMENT:
+                MessageCommentResponse messageCommentResponse = GsonUtils.fromJson(message.getData(), MessageCommentResponse.class);
+                if (messageCommentResponse != null) {
+                    getMovieDetailByNotification(Long.valueOf(messageCommentResponse.getMovieId()), message);
+                }
+                break;
+            default:
+                break;
+        }
+    }
+
+    public void getMovieDetailByNotification(Long id, MessageOneSignal messageOneSignal) {
+        showLoading();
+        viewModel.getMovie(new MainCallback<MovieResponse>() {
+
+            @Override
+            public void doSuccess(MovieResponse data) {
+                if (viewModel.isLogin()) {
+                    getListMovieTrackingByNotification(data, messageOneSignal);
+                }
+            }
+
+            @Override
+            public void doError(Throwable error) {
+                hideLoading();
+                showError(getString(R.string.an_error_occurred));
+            }
+
+            @Override
+            public void doSuccess() {
+                hideLoading();
+            }
+
+            @Override
+            public void doFail() {
+                hideLoading();
+                showError(getString(R.string.an_error_occurred));
+            }
+        }, id);
+    }
+
+    public void getListMovieTrackingByNotification(MovieResponse movieResponse, MessageOneSignal messageOneSignal) {
+        showLoading();
+        viewModel.getListMovieTracking(new MainCallback<ListWatchHistoryResponse>() {
+
+            @Override
+            public void doSuccess(ListWatchHistoryResponse data) {
+                navigateToMovieDetailByNotification(movieResponse, data, messageOneSignal);
+
+            }
+
+            @Override
+            public void doError(Throwable error) {
+                hideLoading();
+                showError(getString(R.string.an_error_occurred));
+            }
+
+            @Override
+            public void doSuccess() {
+                hideLoading();
+            }
+
+            @Override
+            public void doFail() {
+                hideLoading();
+                showError(getString(R.string.an_error_occurred));
+            }
+        }, movieResponse.getId());
+    }
+
+    public void navigateToMovieDetailByNotification(MovieResponse movieResponse, ListWatchHistoryResponse listWatchHistoryResponse, MessageOneSignal messageOneSignal) {
+        Intent it = new Intent(this, MovieDetailActivity.class);
+        if (viewModel.isLogin()) {
+            it.putExtra("movie_details", GsonUtils.toJson(movieResponse));
+            it.putExtra("movie_details_tracking", GsonUtils.toJson(listWatchHistoryResponse));
+            it.putExtra(MovieDetailActivity.DATA_MSG, GsonUtils.toJson(messageOneSignal));
+        } else {
+            it.putExtra("movie_details", GsonUtils.toJson(movieResponse));
+        }
+        startActivity(it);
     }
 }

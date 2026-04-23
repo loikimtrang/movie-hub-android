@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/bg_item"
+    android:layout_width="@dimen/_100sdp"
+    android:layout_height="@dimen/_50sdp"
+    android:background="@drawable/bg_schedule_time"
+    android:layout_marginHorizontal="@dimen/_3sdp"
+    android:layout_marginVertical="@dimen/_6sdp">
+
+  <LinearLayout
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:orientation="vertical"
+      android:layout_marginHorizontal="@dimen/_8sdp"
+      android:layout_gravity="center">
+
+      <TextView
+          android:id="@+id/date_1"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:text="12/03"
+          style="@style/Text_10_Normal"/>
+
+      <TextView
+          android:id="@+id/date_2"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:text="Chủ nhật"
+          android:gravity="center"
+          style="@style/Text_12_Bold"/>
+
+  </LinearLayout>
+
+
+</FrameLayout>

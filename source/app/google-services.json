@@ -1,20 +1,28 @@
 {
   "project_info": {
-    "project_number": "667165993096",
-    "project_id": "moviehub-android",
-    "storage_bucket": "moviehub-android.firebasestorage.app"
+    "project_number": "144532728035",
+    "project_id": "moviehub-465804",
+    "storage_bucket": "moviehub-465804.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:667165993096:android:3c3005ffc28a0ea523573d",
+        "mobilesdk_app_id": "1:144532728035:android:e44bfb2e0182248d547dd6",
         "android_client_info": {
           "package_name": "com.movie_hub.android"
         }
       },
       "oauth_client": [
         {
-          "client_id": "667165993096-c4m3puare93uln6g094j6887r686uh7f.apps.googleusercontent.com",
+          "client_id": "144532728035-8pts3p4uit41plktsquc9aqsrl3fm5t7.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.movie_hub.android",
+            "certificate_hash": "8ec756ba12db5347912362a3b9e368331b1a7a5b"
+          }
+        },
+        {
+          "client_id": "144532728035-arqe0khdmsv70bid6ncl7c4c2st4886r.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.movie_hub.android",
@@ -22,21 +30,28 @@
           }
         },
         {
-          "client_id": "667165993096-f4qbii9g8o9ikgp4ibb79kars4k0hh25.apps.googleusercontent.com",
+          "client_id": "144532728035-rbu66k0hirdckcp1ato2kff2m83uta4g.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyCY-M1kWtOlVTq0HqNHvjjo6XnjMQYZHcA"
+          "current_key": "AIzaSyBnKnE0CDHuhNnaQjHwNqGbVccNK9x8UH8"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "667165993096-f4qbii9g8o9ikgp4ibb79kars4k0hh25.apps.googleusercontent.com",
+              "client_id": "144532728035-6lvddrcid9a6r45eas7mud03mqu2lgrr.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "144532728035-ug7o416fghvq4dapfuf1qrmppepsqvss.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "nix.moviehub"
+              }
             }
           ]
         }

@@ -29,6 +29,7 @@ public class VideoResponse {
     private String createdDate;
     private String modifiedDate;
     private boolean isPlaying;
+    private String hostname;
 
     public String getSpriteUrl() {
         if (spriteUrl == null || spriteUrl.isEmpty()) return "";

@@ -51,21 +51,42 @@ public class CollectionType_Topic_Adapter extends RecyclerView.Adapter<Collectio
         holder.binding.tvTitle.setText(item.getName());
         holder.binding.tvTitle.setSelected(true);
 
-        List<String> colorList = item.getListColor();
-        int[] colors = new int[colorList.size()];
+        List<String> fullColorList = item.getListColor();
+        List<String> selectedColorStrings = new ArrayList<>();
+        java.util.Random randomizer = new java.util.Random();
 
-        for (int i = 0; i < colorList.size(); i++) {
+        if (fullColorList != null && !fullColorList.isEmpty()) {
+            List<String> temp = new ArrayList<>(fullColorList);
+            java.util.Collections.shuffle(temp, randomizer);
+            int count = Math.min(temp.size(), 3);
+            for (int i = 0; i < count; i++) {
+                selectedColorStrings.add(temp.get(i));
+            }
+        }
+
+        int[] colors = new int[selectedColorStrings.size()];
+        for (int i = 0; i < selectedColorStrings.size(); i++) {
             try {
-                colors[i] = Color.parseColor(colorList.get(i));
+                colors[i] = Color.parseColor(selectedColorStrings.get(i));
             } catch (Exception e) {
                 colors[i] = Color.BLACK;
             }
         }
 
-        GradientDrawable gradient = new GradientDrawable(
+        GradientDrawable.Orientation[] orientations = {
                 GradientDrawable.Orientation.LEFT_RIGHT,
-                colors
-        );
+                GradientDrawable.Orientation.TOP_BOTTOM,
+                GradientDrawable.Orientation.TL_BR,
+                GradientDrawable.Orientation.TR_BL,
+                GradientDrawable.Orientation.BR_TL,
+                GradientDrawable.Orientation.BL_TR,
+                GradientDrawable.Orientation.BOTTOM_TOP,
+                GradientDrawable.Orientation.RIGHT_LEFT
+        };
+
+        GradientDrawable.Orientation randomOrientation = orientations[randomizer.nextInt(orientations.length)];
+
+        GradientDrawable gradient = new GradientDrawable(randomOrientation, colors);
         int radius = (int) context.getResources().getDimension(R.dimen._12sdp);
         gradient.setCornerRadius(radius);
 
@@ -86,9 +107,7 @@ public class CollectionType_Topic_Adapter extends RecyclerView.Adapter<Collectio
             lastPosition = position;
         }
 
-        ViewGroup.MarginLayoutParams layoutParams =
-                (ViewGroup.MarginLayoutParams) holder.binding.getRoot().getLayoutParams();
-
+        ViewGroup.MarginLayoutParams layoutParams = (ViewGroup.MarginLayoutParams) holder.binding.getRoot().getLayoutParams();
         int margin = (int) context.getResources().getDimension(R.dimen._6sdp);
         layoutParams.setMarginStart(margin);
         layoutParams.setMarginEnd(margin);
@@ -99,7 +118,6 @@ public class CollectionType_Topic_Adapter extends RecyclerView.Adapter<Collectio
             layoutParams.setMarginEnd(margin * 2);
         }
         layoutParams.width = (int) context.getResources().getDimension(R.dimen._140sdp);
-
         holder.binding.getRoot().setLayoutParams(layoutParams);
     }
 

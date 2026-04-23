@@ -97,6 +97,7 @@ public class UnLoginAccountFragment extends BaseFragment<FragmentUnLoginAccountB
             case R.string.check_for_update:
                 ((MainActivity) requireActivity()).navigateToCheckUpdate();
                 break;
+
         }
     }
 

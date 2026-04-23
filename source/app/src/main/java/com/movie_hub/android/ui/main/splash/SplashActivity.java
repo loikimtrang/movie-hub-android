@@ -1,10 +1,12 @@
 package com.movie_hub.android.ui.main.splash;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -20,6 +22,7 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.WindowCompat;
+import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.movie_hub.android.BR;
@@ -43,11 +46,14 @@ import com.movie_hub.android.ui.main.MainCallback;
 import com.movie_hub.android.ui.main.account.login.LoginActivity;
 import com.movie_hub.android.ui.main.account.updateapp.UpdateManager;
 import com.movie_hub.android.ui.main.account.updateapp.dialog.UpdateVersionBottomSheetDialog;
+import com.movie_hub.android.ui.main.splash.survey.SurveyActivity;
 import com.movie_hub.android.utils.GsonUtils;
 import com.movie_hub.android.utils.LogService;
 
 import java.io.File;
 import java.net.ConnectException;
+
+import timber.log.Timber;
 
 @SuppressLint("CustomSplashScreen")
 public class SplashActivity extends BaseActivity<ActivitySplashBinding, SplashViewModel> implements View.OnClickListener, SystemBarColorProvider, UpdateVersionBottomSheetDialog.UpdateVersionBottomSheetCallback {
@@ -60,20 +66,69 @@ public class SplashActivity extends BaseActivity<ActivitySplashBinding, SplashVi
             userSignOut();
         }
     };
-
+    private final ActivityResultLauncher<String> requestPermissionLauncher =
+            registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
+                if (isGranted) {
+                    LogService.i("Notification permission granted");
+                } else {
+                    LogService.w("Notification permission denied");
+                }
+                handleCheckUpdate();
+            });
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         viewBinding.setA(this);
         viewBinding.setVm(viewModel);
-        handleCheckUpdate();
-        hideSystemUI();
+        checkNotificationPermission();
+        hideSystemUI();;
 
         LocalBroadcastManager.getInstance(this)
                 .registerReceiver(expiredTokenReceiver, new IntentFilter(Constants.ACTION_EXPIRED_TOKEN));
 
+        handleNotificationIntent(getIntent());
+    }
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        handleNotificationIntent(intent);
     }
 
+    private void handleNotificationIntent(Intent intent) {
+        if (intent != null && intent.hasExtra("msg_onesignal_data")) {
+            String json = intent.getStringExtra("msg_onesignal_data");
+            Timber.d("ONESIGNAL_LOG: SplashActivity nhận được JSON: %s", json);
+            getIntent().removeExtra("msg_onesignal_data");
+
+            if (json != null && !json.isEmpty()) {
+                viewModel.messageOneSignal = json;
+            }
+        } else {
+            Timber.d("ONESIGNAL_LOG: Intent không chứa dữ liệu thông báo.");
+        }
+    }
+    private void checkNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) ==
+                    PackageManager.PERMISSION_GRANTED) {
+                handleCheckUpdate();
+            } else if (shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS)) {
+                requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS);
+            } else {
+                requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS);
+            }
+        } else {
+            handleCheckUpdate();
+        }
+    }
+    public void setupSystemBars() {
+        Window window = getWindow();
+        WindowInsetsControllerCompat controller = WindowCompat.getInsetsController(window, window.getDecorView());
+        if (controller != null) {
+            controller.setAppearanceLightStatusBars(false);
+        }
+    }
     public void handleCheckUpdate() {
         checkUpdate();
     }
@@ -111,7 +166,11 @@ public class SplashActivity extends BaseActivity<ActivitySplashBinding, SplashVi
 
             @Override
             public void doSuccess(UserResponse response) {
-                navigateToMainActivity();
+                if (response.isMakeSurvey()) {
+                    navigateToMainActivity();
+                } else {
+                    getListSideBar();
+                }
             }
 
             @Override
@@ -151,7 +210,15 @@ public class SplashActivity extends BaseActivity<ActivitySplashBinding, SplashVi
         });
     }
     public void navigateToMainActivity() {
-        startActivity(new Intent(this, MainActivity.class));
+        Intent it = new Intent(this, MainActivity.class);
+        it.putExtra("msg_onesignal_data", viewModel.messageOneSignal);
+        startActivity(it);
+        finish();
+//        getListSideBar();
+    }
+
+    public void navigateToSurveyActivity() {
+        startActivity(new Intent(this, SurveyActivity.class));
         finish();
 //        getListSideBar();
     }
@@ -197,7 +264,6 @@ public class SplashActivity extends BaseActivity<ActivitySplashBinding, SplashVi
             @Override
             public void doError(Throwable error) {
                 hideLoading();
-                showMgs(ToastMessage.TYPE_WARNING, getString(R.string.an_error_occurred));
             }
 
             @Override
@@ -224,7 +290,6 @@ public class SplashActivity extends BaseActivity<ActivitySplashBinding, SplashVi
             @Override
             public void doFail() {
                 hideLoading();
-                showMgs(ToastMessage.TYPE_WARNING, getString(R.string.an_error_occurred));
             }
         }, request);
     }
@@ -313,35 +378,34 @@ public class SplashActivity extends BaseActivity<ActivitySplashBinding, SplashVi
 
     public void hideSystemUI() {
         Window window = getWindow();
+
         WindowCompat.setDecorFitsSystemWindows(window, false);
-        window.setStatusBarColor(ContextCompat.getColor(this, R.color.bg_app));
-        window.setNavigationBarColor(ContextCompat.getColor(this, R.color.bg_app));
+
+        window.setStatusBarColor(android.graphics.Color.TRANSPARENT);
+        window.setNavigationBarColor(android.graphics.Color.TRANSPARENT);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            getWindow().setDecorFitsSystemWindows(false);
-            getWindow().getInsetsController().hide(WindowInsets.Type.systemBars());
-            getWindow().getInsetsController().setSystemBarsBehavior(
-                    WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-            );
+            WindowInsetsController controller = window.getInsetsController();
+            if (controller != null) {
+                controller.show(WindowInsets.Type.systemBars());
+            }
         } else {
-            getWindow().getDecorView().setSystemUiVisibility(
-                    View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-                            | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                            | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+            window.getDecorView().setSystemUiVisibility(
+                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                             | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                            | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                            | View.SYSTEM_UI_FLAG_FULLSCREEN
+                            | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
             );
         }
-    }
 
+        setupSystemBars();
+    }
     public void getListSideBar() {
         showLoading();
         viewModel.getListSideBar(new MainCallback<ResponseListObj<SidebarResponse>>() {
             @Override
             public void doSuccess(ResponseListObj<SidebarResponse> data) {
                 hideLoading();
-                Intent it = new Intent(SplashActivity.this, MainActivity.class);
+                Intent it = new Intent(SplashActivity.this, SurveyActivity.class);
                 it.putExtra("home_banner", GsonUtils.toJson(data.getContent()));
                 startActivity(it);
                 finish();

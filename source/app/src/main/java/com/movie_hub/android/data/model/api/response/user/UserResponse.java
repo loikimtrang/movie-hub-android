@@ -2,7 +2,6 @@ package com.movie_hub.android.data.model.api.response.user;
 
 import com.movie_hub.android.data.model.api.response.group.GroupResponse;
 
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -21,5 +20,6 @@ public class UserResponse {
     private String phone;
     private int status;
     private String username;
-
+    private String settings;
+    private boolean isMakeSurvey;
 }

@@ -1,8 +1,11 @@
 package com.movie_hub.android.ui.main.account.login;
 
+import android.content.SharedPreferences;
+
 import com.movie_hub.android.MVVMApplication;
 import com.movie_hub.android.constant.Constants;
 import com.movie_hub.android.data.Repository;
+import com.movie_hub.android.data.local.prefs.PreferencesService;
 import com.movie_hub.android.data.model.api.request.login.UserLoginRequest;
 import com.movie_hub.android.data.model.api.request.user.UserLoginGoogleRequest;
 import com.movie_hub.android.data.model.api.response.login.UserLoginResponse;
@@ -28,7 +31,7 @@ public class LoginViewModel extends BaseViewModel {
     }
     public void userLogin(UserLoginRequest request, MainCallback<UserLoginResponse> callback) {
         showLoading();
-        compositeDisposable.add(repository.getApiService().userLogin(request)
+        compositeDisposable.add(repository.getMasterApiService().userLogin(request)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .retryWhen(throwable ->
@@ -49,7 +52,7 @@ public class LoginViewModel extends BaseViewModel {
                                 repository.getSharedPreferences().saveAccessTokenObject(response);
                                 repository.getSharedPreferences().setRefreshToken(response.getRefresh_token());
 
-                                compositeDisposable.add(repository.getApiService().getUserProfile()
+                                compositeDisposable.add(repository.getMasterApiService().getUserProfile()
                                         .subscribeOn(Schedulers.io())
                                         .observeOn(AndroidSchedulers.mainThread())
                                         .retryWhen(throwable ->
@@ -66,12 +69,18 @@ public class LoginViewModel extends BaseViewModel {
                                                 user -> {
                                                     if (user.isResult()) {
                                                         UserEntity entity = UserMapper.fromResponse(user.getData());
+                                                        application.setOneSignalExternalId(String.valueOf(user.getData().getId()));
 
                                                         compositeDisposable.add(
                                                                 repository.getRoomService().userDao().insert(entity)
                                                                         .subscribeOn(Schedulers.io())
                                                                         .subscribe(() -> {
                                                                             repository.getSharedPreferences().setUserId(response.getUser_id());
+                                                                            if (user.getData().getSettings() != null && !user.getData().getSettings().isEmpty()) {
+                                                                                repository.getSharedPreferences().setString(PreferencesService.KEY_USER_SETTING + user.getData().getId(), user.getData().getSettings());
+                                                                            } else {
+                                                                                repository.getSharedPreferences().setString(PreferencesService.KEY_USER_SETTING + user.getData().getId(), "");
+                                                                            }
                                                                             callback.doSuccess(response);
                                                                         }, throwable -> {
                                                                         })
@@ -113,7 +122,7 @@ public class LoginViewModel extends BaseViewModel {
     }
     public void userLoginGoogle(MainCallback<UserLoginResponse> callback, UserLoginGoogleRequest request) {
         showLoading();
-        compositeDisposable.add(repository.getApiService().userLoginGoogle(request)
+        compositeDisposable.add(repository.getMasterApiService().userLoginGoogle(request)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .retryWhen(throwable ->
@@ -133,7 +142,7 @@ public class LoginViewModel extends BaseViewModel {
                                 repository.getSharedPreferences().setToken(response.getAccess_token());
                                 repository.getSharedPreferences().setRefreshToken(response.getRefresh_token());
                                 repository.getSharedPreferences().saveAccessTokenObject(response);
-                                compositeDisposable.add(repository.getApiService().getUserProfile()
+                                compositeDisposable.add(repository.getMasterApiService().getUserProfile()
                                         .subscribeOn(Schedulers.io())
                                         .observeOn(AndroidSchedulers.mainThread())
                                         .retryWhen(throwable ->
@@ -155,6 +164,11 @@ public class LoginViewModel extends BaseViewModel {
                                                                         .subscribeOn(Schedulers.io())
                                                                         .subscribe(() -> {
                                                                             repository.getSharedPreferences().setUserId(response.getUser_id());
+                                                                            if (user.getData().getSettings() != null && !user.getData().getSettings().isEmpty()) {
+                                                                                repository.getSharedPreferences().setString(PreferencesService.KEY_USER_SETTING + user.getData().getId(), user.getData().getSettings());
+                                                                            } else {
+                                                                                repository.getSharedPreferences().setString(PreferencesService.KEY_USER_SETTING + user.getData().getId(), "");
+                                                                            }
                                                                             callback.doSuccess(response);
                                                                             }, throwable -> {
                                                                         })

@@ -5,6 +5,7 @@ import android.content.Intent;
 
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
+import com.movie_hub.android.BuildConfig;
 import com.movie_hub.android.constant.Constants;
 import com.movie_hub.android.data.local.prefs.PreferencesService;
 import com.movie_hub.android.data.model.api.request.user.RefreshTokenRequest;
@@ -35,20 +36,16 @@ public class AuthInterceptor implements Interceptor {
                 .addInterceptor(chain -> {
                     Request original = chain.request();
                     Request.Builder builder = original.newBuilder();
-
-                    // Thêm Basic Auth
                     String credentials = "abc_client:abc123";
                     String basicAuth = "Basic " + android.util.Base64.encodeToString(credentials.getBytes(), android.util.Base64.NO_WRAP);
                     builder.header("Authorization", basicAuth);
-                    builder.header("UseBasicAuth", "1");
                     builder.header("X-tenant", "moviehub");
-
                     return chain.proceed(builder.build());
                 })
                 .build();
 
         this.refreshRetrofit = new retrofit2.Retrofit.Builder()
-                .baseUrl("https://master.moviehub.biz/")
+                .baseUrl(BuildConfig.MASTER_URL)
                 .addConverterFactory(retrofit2.converter.gson.GsonConverterFactory.create())
                 .client(client)
                 .build();
@@ -60,59 +57,83 @@ public class AuthInterceptor implements Interceptor {
     @Override
     public Response intercept(@NotNull Interceptor.Chain chain) throws IOException {
         Request originalRequest = chain.request();
-        Request.Builder newRequest = originalRequest.newBuilder();
+        Request.Builder requestBuilder = originalRequest.newBuilder();
 
+        // 1. Xử lý Header X-tenant cho tất cả request
+        requestBuilder.header("X-tenant", "moviehub");
+
+        // 2. Kiểm tra các Header đặc biệt (IgnoreAuth/UseBasicAuth)
         if ("1".equals(originalRequest.header("IgnoreAuth"))) {
-            newRequest.removeHeader("IgnoreAuth");
-            newRequest.addHeader("X-tenant", "moviehub");
-            return chain.proceed(newRequest.build());
+            requestBuilder.removeHeader("IgnoreAuth");
+            return chain.proceed(requestBuilder.build());
         }
 
         if ("1".equals(originalRequest.header("UseBasicAuth"))) {
-            newRequest.removeHeader("UseBasicAuth");
-
-            String username = "abc_client";
-            String password = "abc123";
-            String credentials = username + ":" + password;
-
+            requestBuilder.removeHeader("UseBasicAuth");
+            String credentials = "abc_client:abc123";
             String basicAuth = "Basic " + android.util.Base64.encodeToString(credentials.getBytes(), android.util.Base64.NO_WRAP);
-            newRequest.addHeader("Authorization", basicAuth);
+            requestBuilder.header("Authorization", basicAuth);
         } else {
             String token = appPreferences.getToken();
             if (token != null && !token.isEmpty() && !"NULL".equalsIgnoreCase(token)) {
                 if (JwtUtils.isTokenExpiringSoon(token, 2 * 60 * 1000)) {
-                    String newToken = refreshTokenSync();
-                    if (newToken != null) token = newToken;
+                    synchronized (this) {
+                        String freshToken = refreshTokenSync();
+                        if (freshToken != null) token = freshToken;
+                    }
                 }
-                long exp = JwtUtils.getExpiryTime(token);
-                LogService.i("Token sắp hết hạn lúc: " + new java.util.Date(exp));
-                newRequest.addHeader("Authorization", "Bearer " + token);
+                requestBuilder.header("Authorization", "Bearer " + token);
             }
         }
 
-        newRequest.addHeader("X-tenant", "moviehub");
+        Response response = chain.proceed(requestBuilder.build());
 
-        Response response = chain.proceed(newRequest.build());
+        if (response.code() == 401) {
+            synchronized (this) {
+                String latestToken = appPreferences.getToken();
+                String newToken;
 
-        if (response.code() == 401 || response.code() == 403) {
-            LogService.i("Token expired or unauthorized. Logging out…");
-            appPreferences.clearAuthData(); // Xoá cả access lẫn refresh token
+                if (latestToken != null && !latestToken.equals(appPreferences.getToken())) {
+                    newToken = latestToken;
+                } else {
+                    newToken = refreshTokenSync();
+                }
 
-            Intent intent = new Intent(Constants.ACTION_EXPIRED_TOKEN);
-            LocalBroadcastManager.getInstance(application.getApplicationContext()).sendBroadcast(intent);
+                if (newToken != null) {
+                    response.close();
+                    Request retryRequest = originalRequest.newBuilder()
+                            .header("Authorization", "Bearer " + newToken)
+                            .header("X-tenant", "moviehub")
+                            .build();
+
+                    LogService.i("Retrying request with new token...");
+                    return chain.proceed(retryRequest);
+                } else {
+                    LogService.e("Refresh Token failed. User session expired.");
+                    handleLogout();
+                }
+            }
         }
 
         return response;
     }
 
+    private void handleLogout() {
+        appPreferences.clearAuthData();
+        Intent intent = new Intent(Constants.ACTION_EXPIRED_TOKEN);
+        LocalBroadcastManager.getInstance(application.getApplicationContext()).sendBroadcast(intent);
+    }
+
     private synchronized String refreshTokenSync() {
+        String refreshToken = appPreferences.getRefreshToken();
+        if (refreshToken == null || refreshToken.isEmpty()) return null;
+
         RefreshTokenRequest request = new RefreshTokenRequest();
         request.setGrant_type("refresh_token");
-        request.setRefresh_token(appPreferences.getRefreshToken());
+        request.setRefresh_token(refreshToken);
 
         try {
-            retrofit2.Call<UserLoginResponse> call = refreshApiService.refreshTokenSync(request);
-            retrofit2.Response<UserLoginResponse> response = call.execute();
+            retrofit2.Response<UserLoginResponse> response = refreshApiService.refreshTokenSync(request).execute();
 
             if (response.isSuccessful() && response.body() != null) {
                 String newAccessToken = response.body().getAccess_token();
@@ -121,12 +142,12 @@ public class AuthInterceptor implements Interceptor {
                 appPreferences.setToken(newAccessToken);
                 appPreferences.setRefreshToken(newRefreshToken);
 
+                LogService.i("Refresh token successful!");
                 return newAccessToken;
             }
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            LogService.e("Error during refresh: " + e.getMessage());
         }
-
         return null;
     }
 }

@@ -39,6 +39,7 @@ import com.movie_hub.android.ui.main.home.adapter.CollectionAdapter;
 import com.movie_hub.android.ui.main.home.adapter.CollectionType_Topic_Adapter;
 import com.movie_hub.android.ui.main.home.adapter.MovieBannerAdapter;
 import com.movie_hub.android.ui.main.home.adapter.MovieHistoryHomeAdapter;
+import com.movie_hub.android.ui.main.home.dialog.MovieDetailDialogFragment;
 import com.movie_hub.android.ui.main.home.filter.adapter.HomeTopFilterItemAdapter;
 import com.movie_hub.android.ui.main.home.filter.fragment.FilterCategoryFragmentDialog;
 import com.movie_hub.android.ui.main.home.filter.fragment.FilterFragmentDialog;
@@ -192,9 +193,10 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding, HomeViewMode
         binding.scrollMain.setOnScrollChangeListener((NestedScrollView.OnScrollChangeListener) (v, scrollX, scrollY, oldScrollX, oldScrollY) -> {
             View child = binding.scrollMain.getChildAt(0);
             if (child != null) {
+                int threshold = 1000;
                 int distanceToBottom = child.getBottom() - (binding.scrollMain.getHeight() + scrollY);
 
-                if (distanceToBottom < 400 && !isLoading && !isLastPage) {
+                if (distanceToBottom < threshold && !isLoading && !isLastPage) {
                     getListCollection();
                 }
 
@@ -208,6 +210,9 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding, HomeViewMode
             }
         });
 
+        binding.btnNotification.setOnClickListener(v -> {
+            ((MainActivity) requireActivity()).navigateToNotification();
+        });
     }
 
     private boolean isRvFilterVisible = true;
@@ -415,7 +420,7 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding, HomeViewMode
         binding.tvOtherName.setText(item.getOriginalTitle());
         binding.tvAgeRating.setText(DisplayUtils.displayAgeRating(item.getAgeRating()));
         binding.tvDateRelease.setText(DisplayUtils.getYearFromReleaseDate(item.getReleaseDate()));
-        binding.tvDescription.setText(HtmlUtils.convertPtoStrong(item.getDescription()));
+        binding.tvDescription.setText(item.getDescription());
 
         Glide.with(getContext())
                 .load(sidebarResponse.getMobileThumbnailUrl())
@@ -573,25 +578,27 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding, HomeViewMode
             @Override
             public void doSuccess(ResponseListObj<CollectionResponse> data) {
                 if (data.getContent() != null && !data.getContent().isEmpty()) {
-                    if (currentPage == 0) {
-                        viewModel.collectionList.setValue(new ArrayList<>(data.getContent()));
-                    } else {
-                        List<CollectionResponse> currentList = viewModel.collectionList.getValue();
-                        if (currentList == null) currentList = new ArrayList<>();
-
-                        currentList.addAll(data.getContent());
-                        viewModel.collectionList.postValue(currentList);
+                    List<CollectionResponse> filteredContent = new ArrayList<>();
+                    for (CollectionResponse item : data.getContent()) {
+                        if (item.getMovies() != null && !item.getMovies().isEmpty()) {
+                            filteredContent.add(item);
+                        }
                     }
+
+                    List<CollectionResponse> newList = new ArrayList<>();
+                    if (currentPage != 0) {
+                        List<CollectionResponse> currentList = viewModel.collectionList.getValue();
+                        if (currentList != null) newList.addAll(currentList);
+                    }
+
+                    newList.addAll(filteredContent);
+                    viewModel.collectionList.setValue(newList);
 
                     currentPage++;
-
-                    if (currentPage >= data.getTotalPages()) {
-                        isLastPage = true;
-                    }
+                    isLastPage = currentPage >= data.getTotalPages();
                 } else {
                     isLastPage = true;
                 }
-
                 isLoading = false;
             }
 
@@ -704,6 +711,11 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding, HomeViewMode
     }
 
     @Override
+    public void onMovieLongClick(MovieResponse movieResponse) {
+        showDialogMovieDetail(movieResponse);
+    }
+
+    @Override
     public void onMoreClick(CollectionResponse collectionResponse) {
         ((MainActivity) requireActivity()).navigateToHomeSideBarDetail(collectionResponse);
     }
@@ -767,5 +779,9 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding, HomeViewMode
     @Override
     public void onDialogDismiss() {
         hideLoading();
+    }
+
+    public void showDialogMovieDetail(MovieResponse movieResponse) {
+        ((MainActivity) requireActivity()).showMovieDialogDetail(movieResponse);
     }
 }

@@ -29,8 +29,5 @@ public class CommentResponse {
     private boolean isDislike;
 
     private boolean isDisplay;
-
-    public UserResponse getAuthor() {
-        return GsonUtils.fromJson(authorInfo, UserResponse.class);
-    }
+    private UserResponse author;
 }

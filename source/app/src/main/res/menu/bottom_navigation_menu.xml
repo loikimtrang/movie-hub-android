@@ -11,6 +11,14 @@
         android:icon="@drawable/ic_search"
         android:title="@string/search"
         />
+
+    <item
+        android:id="@+id/schedule"
+        android:enabled="true"
+        android:icon="@drawable/ic_schedule"
+        android:title="@string/schedule"
+        />
+
     <item
         android:id="@+id/account"
         android:enabled="true"

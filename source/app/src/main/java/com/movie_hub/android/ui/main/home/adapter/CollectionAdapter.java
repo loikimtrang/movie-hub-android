@@ -10,6 +10,7 @@ import android.view.animation.AnimationUtils;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.DefaultItemAnimator;
+import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
@@ -64,10 +65,7 @@ public class CollectionAdapter extends RecyclerView.Adapter<CollectionAdapter.Co
                 setupRecycler(holder, new CollectionType_1_Adapter(onMovieClickCallback, context), item.getMovies());
                 break;
 
-            case Constants.TYPE_COLLECTION_2:
-                showMoreButton(holder, item);
-                setupRecycler(holder, new CollectionType_2_Adapter(onMovieClickCallback, context), item.getMovies());
-                break;
+
 
             case Constants.TYPE_COLLECTION_3:
                 setupRecycler(holder, new CollectionType_3_Adapter(onMovieClickCallback, context), item.getMovies());
@@ -77,6 +75,12 @@ public class CollectionAdapter extends RecyclerView.Adapter<CollectionAdapter.Co
                 showMoreButton(holder, item);
                 setupViewPager(holder, item.getMovies());
                 break;
+
+            default:
+                showMoreButton(holder, item);
+                setupRecycler(holder, new CollectionType_2_Adapter(onMovieClickCallback, context), item.getMovies());
+                break;
+
         }
     }
 
@@ -182,13 +186,36 @@ public class CollectionAdapter extends RecyclerView.Adapter<CollectionAdapter.Co
 
     @SuppressLint("NewApi")
     public void setData(List<CollectionResponse> newData) {
-        items.clear();
+        DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new DiffUtil.Callback() {
+            @Override
+            public int getOldListSize() {
+                return items.size();
+            }
 
+            @Override
+            public int getNewListSize() {
+                return newData != null ? newData.size() : 0;
+            }
+
+            @Override
+            public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
+                return items.get(oldItemPosition).getId().equals(newData.get(newItemPosition).getId());
+            }
+
+            @Override
+            public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
+                CollectionResponse oldItem = items.get(oldItemPosition);
+                CollectionResponse newItem = newData.get(newItemPosition);
+                return oldItem.getName().equals(newItem.getName())
+                        && oldItem.getMovies().size() == newItem.getMovies().size();
+            }
+        });
+
+        items.clear();
         if (newData != null) {
             items.addAll(newData);
         }
-
-        notifyDataSetChanged();
+        diffResult.dispatchUpdatesTo(this);
     }
 
     public void addData(List<CollectionResponse> moreItems) {

@@ -23,7 +23,7 @@ public class VerifyOtpViewModel extends BaseViewModel {
     }
     public void verifyOtp(MainCallback<ResponseWrapper> callback, VerifyOtpRequest request) {
         showLoading();
-        compositeDisposable.add(repository.getApiService().verifyOtp(request)
+        compositeDisposable.add(repository.getMasterApiService().verifyOtp(request)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .retryWhen(throwable ->
@@ -57,7 +57,7 @@ public class VerifyOtpViewModel extends BaseViewModel {
         );
     }
     public void resendOtp(MainCallback<ResponseWrapper> callback, VerifyOtpRequest request) {
-        compositeDisposable.add(repository.getApiService().resendOtp(request)
+        compositeDisposable.add(repository.getMasterApiService().resendOtp(request)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .retryWhen(throwable ->

@@ -43,7 +43,7 @@ public class InformationMovieBottomSheetDialog extends BottomSheetDialog  {
         setContentView(binding.getRoot());
         String updating = getContext().getString(R.string.updating);
 
-        binding.description.setText(HtmlUtils.convertPtoStrong(movieDetails.getDescription()));
+        binding.description.setText(movieDetails.getDescription());
         binding.country.setText(getOrUpdating(FileUtils.getLabelByValue(getContext(), R.raw.country_options, movieDetails.getCountry()), updating));
         binding.ageRating.setText(DisplayUtils.displayAgeRatingDescription(getContext(), movieDetails.getAgeRating()));
 

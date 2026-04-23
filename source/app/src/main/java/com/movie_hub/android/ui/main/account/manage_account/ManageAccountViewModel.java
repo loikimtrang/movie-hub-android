@@ -61,7 +61,7 @@ public class ManageAccountViewModel extends BaseViewModel {
     }
 
     public void getUserProfile(MainCallback<UserResponse> callback) {
-        compositeDisposable.add(repository.getApiService().getUserProfile()
+        compositeDisposable.add(repository.getMasterApiService().getUserProfile()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
@@ -80,7 +80,7 @@ public class ManageAccountViewModel extends BaseViewModel {
     }
     public void userChangePassWord(MainCallback<ResponseWrapper> callback, UserChangePasswordRequest request) {
         showLoading();
-        compositeDisposable.add(repository.getApiService().changeUserPassword(request)
+        compositeDisposable.add(repository.getMasterApiService().changeUserPassword(request)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .retryWhen(throwable ->
@@ -123,7 +123,7 @@ public class ManageAccountViewModel extends BaseViewModel {
     @SuppressLint("CheckResult")
     public void userChangeInformation(MainCallback<ResponseWrapper> callback, UserUpdateProfileRequest request) {
         showLoading();
-        compositeDisposable.add(repository.getApiService().updateUserProfile(request)
+        compositeDisposable.add(repository.getMasterApiService().updateUserProfile(request)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .retryWhen(throwable ->
@@ -140,7 +140,7 @@ public class ManageAccountViewModel extends BaseViewModel {
                         response -> {
                             hideLoading();
                             if (response.isResult()) {
-                                compositeDisposable.add(repository.getApiService().getUserProfile()
+                                compositeDisposable.add(repository.getMasterApiService().getUserProfile()
                                         .subscribeOn(Schedulers.io())
                                         .observeOn(AndroidSchedulers.mainThread())
                                         .retryWhen(throwable ->
