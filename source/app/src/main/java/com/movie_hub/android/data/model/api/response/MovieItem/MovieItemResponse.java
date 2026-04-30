@@ -27,6 +27,7 @@ public class MovieItemResponse {
     private SeasonResponse parent;
     private boolean isCompleted;
     private Long lastWatchSeconds;
+    private boolean isSelected;
 
     public MovieItemResponse(MovieItemResponse source) {
         this.id = source.id;

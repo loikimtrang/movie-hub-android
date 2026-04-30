@@ -1,7 +1,15 @@
 package com.movie_hub.android.ui.main.home.notification;
 
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.PopupWindow;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -12,7 +20,11 @@ import com.movie_hub.android.BR;
 import com.movie_hub.android.R;
 import com.movie_hub.android.data.model.api.ResponseListObj;
 import com.movie_hub.android.data.model.api.request.notification.NotificationRequest;
+import com.movie_hub.android.data.model.api.request.notification.UpdateReadRequest;
 import com.movie_hub.android.data.model.api.response.notification.NotificationResponse;
+import com.movie_hub.android.data.model.onesignal.MessageCommentResponse;
+import com.movie_hub.android.data.model.onesignal.MessageOneSignal;
+import com.movie_hub.android.data.model.onesignal.OneSignalCommand;
 import com.movie_hub.android.databinding.ActivityNotificationBinding;
 import com.movie_hub.android.di.component.ActivityComponent;
 import com.movie_hub.android.ui.base.activity.BaseActivity;
@@ -20,6 +32,7 @@ import com.movie_hub.android.ui.base.activity.SystemBarColorProvider;
 import com.movie_hub.android.ui.main.MainCallback;
 import com.movie_hub.android.ui.main.home.notification.adapter.NotificationAdapter;
 import com.movie_hub.android.ui.main.home.notification.shimmer.NotificationShimmerAdapter;
+import com.movie_hub.android.utils.GsonUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +44,17 @@ public class NotificationActivity extends BaseActivity<ActivityNotificationBindi
     private final int pageSize = 20;
     private boolean isLoading = false;
     private boolean isLastPage = false;
+
+    private final Handler timeUpdateHandler = new Handler(Looper.getMainLooper());
+    private final Runnable timeUpdateRunnable = new Runnable() {
+        @Override
+        public void run() {
+            if (adapter != null && adapter.getItemCount() > 0) {
+                adapter.notifyItemRangeChanged(0, adapter.getItemCount(), NotificationAdapter.PAYLOAD_UPDATE_TIME);
+            }
+            timeUpdateHandler.postDelayed(this, 60000); // 60 seconds
+        }
+    };
 
     @Override
     public int getLayoutId() {
@@ -57,6 +81,18 @@ public class NotificationActivity extends BaseActivity<ActivityNotificationBindi
         getListNotification(true);
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        timeUpdateHandler.post(timeUpdateRunnable);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        timeUpdateHandler.removeCallbacks(timeUpdateRunnable);
+    }
+
     private void initView() {
         adapter = new NotificationAdapter(this, this);
         viewBinding.rvNotification.setLayoutManager(new LinearLayoutManager(this));
@@ -65,7 +101,7 @@ public class NotificationActivity extends BaseActivity<ActivityNotificationBindi
         viewBinding.swipeRefreshLayout.setOnRefreshListener(() -> {
             getListNotification(true);
         });
-
+        viewBinding.option.setOnClickListener(this::showFilterMenu);
         viewBinding.rvNotification.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
@@ -91,6 +127,9 @@ public class NotificationActivity extends BaseActivity<ActivityNotificationBindi
     }
 
     public void getListNotification(boolean isRefresh) {
+        if (isLoading) return;
+        isLoading = true;
+
         if (isRefresh) {
             currentPage = 0;
             isLastPage = false;
@@ -98,16 +137,18 @@ public class NotificationActivity extends BaseActivity<ActivityNotificationBindi
                 showShimmerLoading();
             }
         } else {
-            isLoading = true;
             viewBinding.bottomLoadingBar.setVisibility(View.VISIBLE);
         }
 
         NotificationRequest request = new NotificationRequest();
         request.setPage(currentPage);
         request.setSize(pageSize);
+        request.setIsRead(viewModel.currentFilterReadStatus);
+
         viewModel.getListMovieHistory(new MainCallback<ResponseListObj<NotificationResponse>>() {
             @Override
             public void doSuccess(ResponseListObj<NotificationResponse> response) {
+                isLoading = false;
                 List<NotificationResponse> data = response.getContent();
 
                 if (isRefresh) {
@@ -122,7 +163,6 @@ public class NotificationActivity extends BaseActivity<ActivityNotificationBindi
                         adapter.setData(data);
                     }
                 } else {
-                    isLoading = false;
                     viewBinding.bottomLoadingBar.setVisibility(View.GONE);
                     if (data != null && !data.isEmpty()) {
                         adapter.addData(data);
@@ -138,17 +178,47 @@ public class NotificationActivity extends BaseActivity<ActivityNotificationBindi
 
             @Override
             public void doError(Throwable error) {
+                isLoading = false;
                 finishLoading();
             }
 
             @Override public void doSuccess() {}
-            @Override public void doFail() { finishLoading(); }
+            @Override public void doFail() {
+                isLoading = false;
+                finishLoading();
+            }
         }, request);
+    }
+    
+    public void updateRead(NotificationResponse item, int position) {
+        UpdateReadRequest updateReadRequest = new UpdateReadRequest();
+        updateReadRequest.getIds().add(item.getId());
+        showLoading();
+        viewModel.updateRead(new MainCallback<Void>() {
+            @Override
+            public void doError(Throwable error) {
+                hideLoading();
+                handleNotificationAction(item);
+            }
+
+            @Override
+            public void doSuccess() {
+                hideLoading();
+                item.setRead(true);
+                adapter.notifyItemChanged(position);
+                handleNotificationAction(item);
+            }
+
+            @Override
+            public void doFail() {
+                hideLoading();
+                handleNotificationAction(item);
+            }
+        }, updateReadRequest);
     }
 
     private void finishLoading() {
         viewBinding.bottomLoadingBar.setVisibility(View.GONE);
-
         isLoading = false;
         viewBinding.swipeRefreshLayout.setRefreshing(false);
         if (viewBinding.rvNotification.getAdapter() instanceof NotificationShimmerAdapter) {
@@ -158,15 +228,84 @@ public class NotificationActivity extends BaseActivity<ActivityNotificationBindi
 
     @Override
     public void onItemClick(NotificationResponse item, int position) {
-        if (!item.isRead()) {
-            // Cập nhật UI ngay lập tức
-            item.setRead(true);
-            adapter.notifyItemChanged(position);
+        if (item.isRead()) {
+            handleNotificationAction(item);
+        } else {
+            updateRead(item, position);
+        }
+    }
 
-            // TODO: Gọi API thông báo cho Server rằng user đã đọc tin này
-            // viewModel.markAsRead(item.getId());
+    private void handleNotificationAction(NotificationResponse item) {
+        if (item.getCmd() == null) return;
+
+        MessageOneSignal messageOneSignal = new MessageOneSignal();
+        messageOneSignal.setCmd(item.getCmd());
+        String jsonData = item.getData() != null ? item.getData() : item.getBody();
+        messageOneSignal.setData(jsonData);
+        messageOneSignal.setTitle(item.getTitle());
+        messageOneSignal.setContent(item.getBody());
+
+        switch (item.getCmd()) {
+            case OneSignalCommand.CMD_REPLY_COMMENT:
+                MessageCommentResponse messageCommentResponse = GsonUtils.fromJson(messageOneSignal.getData(), MessageCommentResponse.class);
+                if (messageCommentResponse != null && messageCommentResponse.getMovieId() != null) {
+                    getMovieDetailByNotification(Long.valueOf(messageCommentResponse.getMovieId()), messageOneSignal);
+                }
+                break;
+            default:
+                break;
+        }
+    }
+
+    public void showFilterMenu(View v) {
+        View popupView = LayoutInflater.from(this).inflate(R.layout.layout_popup_filter, null);
+
+        PopupWindow popupWindow = new PopupWindow(
+                popupView,
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                true
+        );
+
+        popupWindow.setBackgroundDrawable(getDrawable(R.color.bg_dialog));
+        popupWindow.setElevation(20); // Đổ bóng cho pop-up
+
+        ImageView checkAll = popupView.findViewById(R.id.check_all);
+        ImageView checkUnread = popupView.findViewById(R.id.check_un_read);
+        ImageView checkRead = popupView.findViewById(R.id.check_read);
+
+        // Reset ẩn tất cả trước
+        checkAll.setVisibility(View.GONE);
+        checkUnread.setVisibility(View.GONE);
+        checkRead.setVisibility(View.GONE);
+
+        if (viewModel.currentFilterReadStatus == null) {
+            checkAll.setVisibility(View.VISIBLE);
+        } else if (viewModel.currentFilterReadStatus == false) {
+            checkUnread.setVisibility(View.VISIBLE);
+        } else {
+            checkRead.setVisibility(View.VISIBLE);
         }
 
+        popupView.findViewById(R.id.btn_all).setOnClickListener(view -> {
+            viewModel.currentFilterReadStatus = null;
+            getListNotification(true);
+            popupWindow.dismiss();
+        });
+
+        popupView.findViewById(R.id.btn_un_read).setOnClickListener(view -> {
+            viewModel.currentFilterReadStatus = false;
+            getListNotification(true);
+            popupWindow.dismiss();
+        });
+
+        popupView.findViewById(R.id.btn_read).setOnClickListener(view -> {
+            viewModel.currentFilterReadStatus = true;
+            getListNotification(true);
+            popupWindow.dismiss();
+        });
+
+        popupWindow.showAsDropDown(v, 0, 0);
     }
 
     @Override

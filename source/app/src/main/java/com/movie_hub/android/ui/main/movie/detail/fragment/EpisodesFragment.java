@@ -45,11 +45,6 @@ public class EpisodesFragment extends BaseFragment<FragmentEpisodeBinding, Episo
         sharedViewModel = new ViewModelProvider(requireActivity()).get(MovieDetailViewModel.class);
         movieDetail = sharedViewModel.movieDetails;
 
-        // Mặc định là season cuối cùng
-        if (movieDetail != null && movieDetail.getSeasons() != null && !movieDetail.getSeasons().isEmpty()) {
-            currentSeasonIndex = movieDetail.getSeasons().size() - 1;
-        }
-
         setupViews();
         observeTracking();
     }

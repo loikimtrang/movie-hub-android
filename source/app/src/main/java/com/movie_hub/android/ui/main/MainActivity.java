@@ -50,6 +50,7 @@ import com.movie_hub.android.ui.main.home.filter.model.FilterTypeModel;
 import com.movie_hub.android.ui.main.home.notification.NotificationActivity;
 import com.movie_hub.android.ui.main.home.topic.HomeMoreTopicActivity;
 import com.movie_hub.android.ui.main.home.topic.topic_detail.HomeTopicDetailActivity;
+import com.movie_hub.android.ui.main.live.LiveFragment;
 import com.movie_hub.android.ui.main.movie.detail.MovieDetailActivity;
 import com.movie_hub.android.ui.main.movie.watch.WatchMovieActivity;
 import com.movie_hub.android.ui.main.schedule.ScheduleFragment;
@@ -68,6 +69,7 @@ public class MainActivity extends BaseActivity<ActivityMainBinding, MainViewMode
     private FragmentManager fm;
     private HomeFragment homeFragment;
     private SearchFragment searchFragment;
+    private LiveFragment liveFragment;
     private ScheduleFragment scheduleFragment;
     private AccountFragment accountFragment;
     private UnLoginAccountFragment unLoginAccountFragment;
@@ -116,6 +118,9 @@ public class MainActivity extends BaseActivity<ActivityMainBinding, MainViewMode
                 case R.id.search:
                     handleFragment(Constants.SEARCH);
                     return true;
+                case R.id.live:
+                    handleFragment(Constants.LIVE);
+                    return true;
                 case R.id.schedule:
                     handleFragment(Constants.SCHEDULE);
                     return true;
@@ -146,6 +151,7 @@ public class MainActivity extends BaseActivity<ActivityMainBinding, MainViewMode
 //        if (searchFragment == null) searchFragment = new SearchFragment();
         searchFragment = new SearchFragment();
         if (scheduleFragment == null) scheduleFragment = new ScheduleFragment();
+        if (liveFragment == null) liveFragment = new LiveFragment();
         if (accountFragment == null) accountFragment = new AccountFragment();
         if (unLoginAccountFragment == null) unLoginAccountFragment = new UnLoginAccountFragment();
 
@@ -156,6 +162,9 @@ public class MainActivity extends BaseActivity<ActivityMainBinding, MainViewMode
                 break;
             case Constants.SEARCH:
                 target = searchFragment;
+                break;
+            case Constants.LIVE:
+                target = liveFragment;
                 break;
             case Constants.SCHEDULE:
                 target = scheduleFragment;

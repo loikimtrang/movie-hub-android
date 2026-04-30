@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <data>
+        <variable
+            name="f"
+            type="com.movie_hub.android.ui.main.live.LiveFragment"/>
+        <variable
+            name="vm"
+            type="com.movie_hub.android.ui.main.live.LiveViewModel"/>
+
+        <import type="android.view.View"/>
+    </data>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:background="@color/bg_app">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/_40sdp"
+                android:background="@color/header_app">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/watch_together"
+                    style="@style/Text_14_Bold"
+                    android:layout_centerInParent="true"
+                    />
+
+                <FrameLayout
+                    android:id="@+id/option"
+                    android:layout_width="@dimen/_36sdp"
+                    android:layout_height="@dimen/_40sdp"
+                    android:layout_alignParentEnd="true">
+                    <ImageView
+                        android:layout_width="@dimen/_12sdp"
+                        android:layout_height="@dimen/_12sdp"
+                        android:src="@drawable/ic_option_filter"
+                        android:layout_gravity="center"/>
+                </FrameLayout>
+
+            </RelativeLayout>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/rv_type"/>
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:id="@+id/swipeRefreshLayout">
+
+                    <FrameLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent">
+
+                        <androidx.recyclerview.widget.RecyclerView
+                            android:id="@+id/rv_room"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"/>
+
+                        <FrameLayout
+                            android:id="@+id/layout_empty"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:background="@color/bg_app"
+                            android:visibility="gone">
+
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:orientation="vertical"
+                                android:layout_gravity="center|top"
+                                android:layout_marginTop="@dimen/_84sdp"
+                                android:visibility="visible">
+                                <ImageView
+                                    android:layout_width="@dimen/_60sdp"
+                                    android:layout_height="@dimen/_60sdp"
+                                    android:src="@drawable/ic_empty"
+                                    android:layout_gravity="center"/>
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    style="@style/Text_12_Normal"
+                                    android:text="@string/empty_notification"
+                                    android:textColor="@color/text_empty"
+                                    android:layout_gravity="center"
+                                    android:layout_marginTop="@dimen/_6sdp"/>
+                            </LinearLayout>
+
+                        </FrameLayout>
+                    </FrameLayout>
+
+
+
+
+                </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+            </FrameLayout>
+
+        </LinearLayout>
+
+
+    </FrameLayout>
+</layout>

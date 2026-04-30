@@ -13,7 +13,7 @@
     <color name="secondary_color">#ffffff</color>
     <color name="tertiary_color">#F5F5F5</color>
     <color name="gray">#BDBDBD</color>
-
+    <color name="orange">#FF4500</color>
     <color name="bg_app">#12161F</color>
     <color name="bg_tab_bar">#100F14</color>
     <color name="ic_tab_bar">#A4A4A4</color>
@@ -104,5 +104,6 @@
     <color name="setting_off">#E0E0E0</color>
     <color name="select_movie">#FFF09B</color>
     <color name="bg_select_movie">#80000000</color>
+    <color name="bg_ic_live">#40000000</color>
 
 </resources>

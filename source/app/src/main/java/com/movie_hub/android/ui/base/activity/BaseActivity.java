@@ -39,6 +39,7 @@ import com.movie_hub.android.constant.Constants;
 import com.movie_hub.android.data.local.prefs.AppPreferencesService;
 import com.movie_hub.android.data.model.api.response.history.ListWatchHistoryResponse;
 import com.movie_hub.android.data.model.api.response.movie.MovieResponse;
+import com.movie_hub.android.data.model.api.response.notification.CountUnReadResponse;
 import com.movie_hub.android.data.model.onesignal.MessageCommentResponse;
 import com.movie_hub.android.data.model.onesignal.MessageOneSignal;
 import com.movie_hub.android.data.model.onesignal.OneSignalCommand;

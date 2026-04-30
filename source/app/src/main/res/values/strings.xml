@@ -93,7 +93,6 @@
     <string name="actor_list">Actor list</string>
     <string name="fetch_data_failed">Failed to fetch data</string>
     <string name="no_result">No result</string>
-
     <string name="watch_now">Watch Now</string>
     <string name="episode">Episode</string>
     <string name="episode_index">Episode</string>
@@ -104,6 +103,7 @@
     <string name="rating">Rating</string>
     <string name="comment">Comment</string>
     <string name="share">Share</string>
+    <string name="live">Live</string>
 
     <string name="movie">Movie</string>
     <string name="recommend">Recommend</string>
@@ -234,7 +234,6 @@
     <string name="choose">Choose</string>
     <string name="permission_install">You need permission to install the application</string>
     <string name="slogan_app">Phim hay cả rổ</string>
-    <string name="all">All</string>
     <string name="what_are_you_interested">What are you interested in?</string>
 
     <string name="label_series">TV Series</string>
@@ -308,4 +307,21 @@
     <string name="time_minutes_ago">%d mins ago</string>
     <string name="time_hours_ago">%d hours ago</string>
     <string name="time_yesterday">yesterday</string>
+    <string name="un_read">Un read</string>
+    <string name="read">Read</string>
+    <string name="all">All</string>
+    <string name="create_room">Create room</string>
+    <string name="name_room">1. Room name:</string>
+    <string name="time_setting">2. Time setting:</string>
+    <string name="start_mode_description">Can be started manually or automatically according to the set time.</string>
+    <string name="start_automatically_option">I want to start automatically</string>
+    <string name="watch_together">Room</string>
+    <string name="episode_room">3. The episode premiered: </string>
+    <string name="error_input_room_name">Please enter a room name</string>
+    <string name="error_select_episode">Please select an episode to premiere</string>
+    <string name="create_room_success">Room created successfully</string>
+    <string name="error_time_past">Please select a time later than the current time.</string>
+    <string name="status_waiting">Waiting</string>
+    <string name="status_ended">Ended</string>
+    <string name="status_live">LIVE</string>
 </resources>

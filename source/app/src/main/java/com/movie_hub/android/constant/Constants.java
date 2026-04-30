@@ -9,6 +9,8 @@ public class Constants {
     public static final Long VALUE_USER_ID_DEFAULT = -1L;
     public static final String HOME = "HOME";
     public static final String SEARCH = "SEARCH";
+    public static final String LIVE = "LIVE";
+
     public static final String SCHEDULE = "SCHEDULE";
     public static final String ACCOUNT = "ACCOUNT";
     public static final String ACCOUNT_UN_LOGIN = "ACCOUNT_UN_LOGIN";
@@ -74,6 +76,20 @@ public class Constants {
     public static final int TYPE_RATING_4 = 4;
     public static final int TYPE_RATING_5 = 5;
     public static String CODE_ACCOUNT_LOCK = "ERROR-ACCOUNT-ERROR-0007";
+
+    public static final Integer ROOM_KIND_PRIVATE = 0;
+    public static final Integer ROOM_KIND_PUBLIC = 1;
+
+    public static final Integer ROOM_STATE_PENDING = 0;
+    public static final Integer ROOM_STATE_RUNNING = 1;
+    public static final Integer ROOM_STATE_ENDING = 2;
+
+    public static final Integer PARTICIPANT_ROLE_GUEST = 0;
+    public static final Integer PARTICIPANT_ROLE_HOST = 1;
+
+    public static final Integer PARTICIPANT_STATE_PENDING = 0;
+    public static final Integer PARTICIPANT_STATE_JOIN = 1;
+    public static final Integer PARTICIPANT_STATE_LEFT = 2;
     private Constants(){
 
     }

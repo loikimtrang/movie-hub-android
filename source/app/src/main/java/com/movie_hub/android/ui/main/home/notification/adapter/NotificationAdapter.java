@@ -4,9 +4,8 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Build;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
@@ -15,16 +14,21 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.movie_hub.android.R;
 import com.movie_hub.android.data.model.api.response.notification.NotificationResponse;
 import com.movie_hub.android.databinding.ItemNotificationBinding;
+import com.movie_hub.android.utils.DisplayUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapter.NotificationViewHolder> {
 
+    public static final String PAYLOAD_UPDATE_TIME = "PAYLOAD_UPDATE_TIME";
     private final List<NotificationResponse> items = new ArrayList<>();
     private final OnNotificationClickListener listener;
     private final Context context;
-    private int lastPosition = -1;
+
+    public NotificationResponse getItemAt(int position) {
+        return items.get(position);
+    }
 
     public interface OnNotificationClickListener {
         void onItemClick(NotificationResponse item, int position);
@@ -43,43 +47,13 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
         return new NotificationViewHolder(binding);
     }
 
-    @SuppressLint("ResourceAsColor")
     @Override
-    public void onBindViewHolder(@NonNull NotificationViewHolder holder, @SuppressLint("RecyclerView") int position) {
+    public void onBindViewHolder(@NonNull NotificationViewHolder holder, int position) {
         NotificationResponse item = items.get(position);
         holder.binding.setItem(item);
 
-        if (!item.isRead()) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                holder.binding.tvTitle.setTextAppearance(R.style.Text_12_Bold);
-            }
-            holder.binding.tvTitle.setTextColor(ContextCompat.getColor(context, R.color.text));
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                holder.binding.tvTime.setTextAppearance(R.style.Text_10_Bold);
-            }
-            holder.binding.tvTime.setTextColor(ContextCompat.getColor(context, R.color.text));
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                holder.binding.tvBody.setTextAppearance(R.style.Text_10_Bold);
-            }
-            holder.binding.tvBody.setTextColor(ContextCompat.getColor(context, R.color.text));
-        } else {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                holder.binding.tvTitle.setTextAppearance(R.style.Text_12_Normal);
-            }
-            holder.binding.tvTitle.setTextColor(ContextCompat.getColor(context, R.color.text));
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                holder.binding.tvTime.setTextAppearance(R.style.Text_10_Normal);
-            }
-            holder.binding.tvTime.setTextColor(ContextCompat.getColor(context, R.color.text_gray));
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                holder.binding.tvBody.setTextAppearance(R.style.Text_10_Normal);
-            }
-            holder.binding.tvBody.setTextColor(ContextCompat.getColor(context, R.color.text_gray));
-        }
+        updateUI(holder, item);
+        updateTime(holder, item);
 
         holder.binding.getRoot().setOnClickListener(v -> {
             if (listener != null) {
@@ -91,9 +65,36 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
     }
 
     @Override
-    public void onViewDetachedFromWindow(@NonNull NotificationViewHolder holder) {
-        super.onViewDetachedFromWindow(holder);
-        holder.itemView.clearAnimation();
+    public void onBindViewHolder(@NonNull NotificationViewHolder holder, int position, @NonNull List<Object> payloads) {
+        if (payloads.isEmpty()) {
+            super.onBindViewHolder(holder, position, payloads);
+        } else {
+            for (Object payload : payloads) {
+                if (PAYLOAD_UPDATE_TIME.equals(payload)) {
+                    updateTime(holder, items.get(position));
+                }
+            }
+        }
+    }
+
+    private void updateUI(NotificationViewHolder holder, NotificationResponse item) {
+        if (!item.isRead()) {
+            holder.binding.tvTitle.setTypeface(null, android.graphics.Typeface.BOLD);
+            holder.binding.tvTitle.setTextColor(ContextCompat.getColor(context, R.color.text));
+            holder.binding.tvTime.setTextColor(ContextCompat.getColor(context, R.color.text_gray));
+            holder.binding.icUnRead.setVisibility(View.VISIBLE);
+        } else {
+            holder.binding.tvTitle.setTypeface(null, android.graphics.Typeface.NORMAL);
+            holder.binding.tvTitle.setTextColor(ContextCompat.getColor(context, R.color.text_gray));
+
+            holder.binding.tvTime.setTextColor(ContextCompat.getColor(context, R.color.text_gray));
+            holder.binding.icUnRead.setVisibility(View.INVISIBLE);
+        }
+    }
+
+    private void updateTime(NotificationViewHolder holder, NotificationResponse item) {
+        long timestamp = DisplayUtils.parseTimestamp(item.getCreatedDate());
+        holder.binding.tvTime.setText(DisplayUtils.getRelativeTime(context, timestamp));
     }
 
     @SuppressLint("NotifyDataSetChanged")
@@ -107,17 +108,26 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
 
     public void addData(List<NotificationResponse> newList) {
         if (newList == null || newList.isEmpty()) return;
-        int startPos = this.items.size();
-        this.items.addAll(newList);
-        notifyItemRangeInserted(startPos, newList.size());
-    }
 
-    public void removeItem(int position) {
-        if (position >= 0 && position < items.size()) {
-            items.remove(position);
-            notifyItemRemoved(position);
-            notifyItemRangeChanged(position, items.size());
+        List<NotificationResponse> filteredList = new ArrayList<>();
+        for (NotificationResponse newItem : newList) {
+            boolean isDuplicate = false;
+            for (NotificationResponse existingItem : items) {
+                if (existingItem.getId() != null && existingItem.getId().equals(newItem.getId())) {
+                    isDuplicate = true;
+                    break;
+                }
+            }
+            if (!isDuplicate) {
+                filteredList.add(newItem);
+            }
         }
+
+        if (filteredList.isEmpty()) return;
+
+        int startPos = this.items.size();
+        this.items.addAll(filteredList);
+        notifyItemRangeInserted(startPos, filteredList.size());
     }
 
     @Override

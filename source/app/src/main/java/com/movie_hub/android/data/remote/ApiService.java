@@ -11,6 +11,7 @@ import com.movie_hub.android.data.model.api.request.forgot.ForgotPasswordRequest
 import com.movie_hub.android.data.model.api.request.history.TrackingWatchHistoryRequest;
 import com.movie_hub.android.data.model.api.request.login.UserLoginRequest;
 import com.movie_hub.android.data.model.api.request.login.UserRegisterRequest;
+import com.movie_hub.android.data.model.api.request.notification.UpdateReadRequest;
 import com.movie_hub.android.data.model.api.request.otp.VerifyOtpRequest;
 import com.movie_hub.android.data.model.api.request.playlist.CreatePlaylistRequest;
 import com.movie_hub.android.data.model.api.request.playlist.GetListMoviePlayListRequest;
@@ -19,6 +20,7 @@ import com.movie_hub.android.data.model.api.request.playlist.UpdatePlayListItemR
 import com.movie_hub.android.data.model.api.request.playlist.UpdatePlaylistRequest;
 import com.movie_hub.android.data.model.api.request.review.CreateReviewReactionRequest;
 import com.movie_hub.android.data.model.api.request.review.CreateReviewRequest;
+import com.movie_hub.android.data.model.api.request.room.CreateRoomRequest;
 import com.movie_hub.android.data.model.api.request.survey.MakeSurveyRequest;
 import com.movie_hub.android.data.model.api.request.user.UserChangePasswordRequest;
 import com.movie_hub.android.data.model.api.request.user.UserLoginGoogleRequest;
@@ -34,6 +36,7 @@ import com.movie_hub.android.data.model.api.response.history.ListWatchHistoryRes
 import com.movie_hub.android.data.model.api.response.history.MovieHistoryResponse;
 import com.movie_hub.android.data.model.api.response.history.WatchHistoryResponse;
 import com.movie_hub.android.data.model.api.response.moviePerson.MoviePersonResponse;
+import com.movie_hub.android.data.model.api.response.notification.CountUnReadResponse;
 import com.movie_hub.android.data.model.api.response.notification.NotificationResponse;
 import com.movie_hub.android.data.model.api.response.person.PersonResponse;
 import com.movie_hub.android.data.model.api.response.login.UserLoginResponse;
@@ -214,4 +217,13 @@ public interface ApiService {
 
     @GET("v1/notification/list")
     Observable<ResponseWrapper<ResponseListObj<NotificationResponse>>> getNotifications(@QueryMap Map<String, Object> query);
+
+    @PUT("v1/notification/update-read")
+    Observable<ResponseWrapper> updateRead(@Body UpdateReadRequest request);
+
+    @GET("v1/notification/count-unread")
+    Observable<ResponseWrapper<CountUnReadResponse>> countUnRead();
+
+    @POST("v1/room/create")
+    Observable<ResponseWrapper> createRoom(@Body CreateRoomRequest request);
 }

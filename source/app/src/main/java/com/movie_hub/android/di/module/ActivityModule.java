@@ -30,6 +30,7 @@ import com.movie_hub.android.ui.main.home.filter.FilterViewModel;
 import com.movie_hub.android.ui.main.home.notification.NotificationModel;
 import com.movie_hub.android.ui.main.home.topic.HomeMoreTopicViewModel;
 import com.movie_hub.android.ui.main.home.topic.topic_detail.HomeTopicDetailViewModel;
+import com.movie_hub.android.ui.main.live.create.CreateRoomViewModel;
 import com.movie_hub.android.ui.main.movie.detail.MovieDetailViewModel;
 import com.movie_hub.android.ui.main.movie.detail.comment.CommentViewModel;
 import com.movie_hub.android.ui.main.movie.detail.review.ReviewViewModel;
@@ -271,5 +272,13 @@ public class ActivityModule {
         Supplier<NotificationModel> supplier = () -> new NotificationModel(repository, (MVVMApplication)application);
         ViewModelProviderFactory<NotificationModel> factory = new ViewModelProviderFactory<>(NotificationModel.class, supplier);
         return new ViewModelProvider(activity, factory).get(NotificationModel.class);
+    }
+
+    @Provides
+    @ActivityScope
+    CreateRoomViewModel provideCreateRoomViewModel(Repository repository, Context application) {
+        Supplier<CreateRoomViewModel> supplier = () -> new CreateRoomViewModel(repository, (MVVMApplication)application);
+        ViewModelProviderFactory<CreateRoomViewModel> factory = new ViewModelProviderFactory<>(CreateRoomViewModel.class, supplier);
+        return new ViewModelProvider(activity, factory).get(CreateRoomViewModel.class);
     }
 }

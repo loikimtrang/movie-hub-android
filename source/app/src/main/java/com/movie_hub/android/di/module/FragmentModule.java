@@ -15,6 +15,7 @@ import com.movie_hub.android.ui.main.account.UnLoginAccountFragment;
 import com.movie_hub.android.ui.main.account.UnLoginAccountViewModel;
 import com.movie_hub.android.ui.main.account.favourite.fragment.MovieFavoriteViewModel;
 import com.movie_hub.android.ui.main.home.HomeViewModel;
+import com.movie_hub.android.ui.main.live.LiveViewModel;
 import com.movie_hub.android.ui.main.movie.detail.fragment.CastFragmentViewModel;
 import com.movie_hub.android.ui.main.movie.detail.fragment.EpisodesFragmentViewModel;
 import com.movie_hub.android.ui.main.movie.detail.fragment.RecommendationFragment;
@@ -159,5 +160,13 @@ public class FragmentModule {
         Supplier<MovieFavoriteViewModel> supplier = () -> new MovieFavoriteViewModel(repository, (MVVMApplication)application);
         ViewModelProviderFactory<MovieFavoriteViewModel> factory = new ViewModelProviderFactory<>(MovieFavoriteViewModel.class, supplier);
         return new ViewModelProvider(fragment, factory).get(MovieFavoriteViewModel.class);
+    }
+
+    @Provides
+    @FragmentScope
+    LiveViewModel provideLiveViewModel(Repository repository, Context application) {
+        Supplier<LiveViewModel> supplier = () -> new LiveViewModel(repository, (MVVMApplication)application);
+        ViewModelProviderFactory<LiveViewModel> factory = new ViewModelProviderFactory<>(LiveViewModel.class, supplier);
+        return new ViewModelProvider(fragment, factory).get(LiveViewModel.class);
     }
 }

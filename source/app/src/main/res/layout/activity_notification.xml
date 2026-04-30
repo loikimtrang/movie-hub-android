@@ -36,8 +36,7 @@
                     android:id="@+id/back"
                     android:layout_width="@dimen/_36sdp"
                     android:layout_height="@dimen/_40sdp"
-                    android:onClick="@{(v)->a.finish()}"
-                    >
+                    android:onClick="@{(v)->a.finish()}">
                     <ImageView
                         android:layout_width="@dimen/_12sdp"
                         android:layout_height="@dimen/_12sdp"
@@ -54,6 +53,18 @@
                     android:layout_toEndOf="@+id/back"
                     android:layout_centerVertical="true"
                     />
+
+                <FrameLayout
+                    android:id="@+id/option"
+                    android:layout_width="@dimen/_36sdp"
+                    android:layout_height="@dimen/_40sdp"
+                    android:layout_alignParentEnd="true">
+                    <ImageView
+                        android:layout_width="@dimen/_12sdp"
+                        android:layout_height="@dimen/_12sdp"
+                        android:src="@drawable/ic_option_filter"
+                        android:layout_gravity="center"/>
+                </FrameLayout>
 
             </RelativeLayout>
 

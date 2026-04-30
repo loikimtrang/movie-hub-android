@@ -5,6 +5,7 @@ import com.movie_hub.android.data.Repository;
 import com.movie_hub.android.data.model.api.RequestToMapConverter;
 import com.movie_hub.android.data.model.api.ResponseListObj;
 import com.movie_hub.android.data.model.api.request.notification.NotificationRequest;
+import com.movie_hub.android.data.model.api.request.notification.UpdateReadRequest;
 import com.movie_hub.android.data.model.api.response.history.MovieHistoryResponse;
 import com.movie_hub.android.data.model.api.response.notification.NotificationResponse;
 import com.movie_hub.android.ui.base.activity.BaseViewModel;
@@ -18,6 +19,8 @@ import io.reactivex.rxjava3.schedulers.Schedulers;
 import timber.log.Timber;
 
 public class NotificationModel extends BaseViewModel {
+
+    Boolean currentFilterReadStatus = null;
     public NotificationModel(Repository repository, MVVMApplication application) {
         super(repository, application);
     }
@@ -33,6 +36,29 @@ public class NotificationModel extends BaseViewModel {
                                     hideLoading();
                                     if (response.isResult()) {
                                         callback.doSuccess(response.getData());
+                                    } else {
+                                        callback.doFail();
+                                    }
+                                },
+                                throwable -> {
+                                    hideLoading();
+                                    Timber.e(throwable);
+                                    callback.doError(throwable);
+                                }
+                        )
+        );
+    }
+
+    public void updateRead(MainCallback<Void> callback, UpdateReadRequest request) {
+        compositeDisposable.add(
+                repository.getApiService().updateRead(request)
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(
+                                response -> {
+                                    hideLoading();
+                                    if (response.isResult()) {
+                                        callback.doSuccess();
                                     } else {
                                         callback.doFail();
                                     }

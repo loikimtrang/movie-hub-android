@@ -15,6 +15,7 @@ import com.movie_hub.android.data.model.api.response.collection.CollectionRespon
 import com.movie_hub.android.data.model.api.response.history.ListWatchHistoryResponse;
 import com.movie_hub.android.data.model.api.response.history.MovieHistoryResponse;
 import com.movie_hub.android.data.model.api.response.movie.MovieResponse;
+import com.movie_hub.android.data.model.api.response.notification.CountUnReadResponse;
 import com.movie_hub.android.data.model.api.response.side_bar.SidebarResponse;
 import com.movie_hub.android.ui.base.fragment.BaseFragmentViewModel;
 import com.movie_hub.android.ui.main.MainCallback;
@@ -237,6 +238,29 @@ public class HomeViewModel extends BaseFragmentViewModel {
                             callback.doError(throwable);
                         }
                 )
+        );
+    }
+
+    public void countUnReadNotification(MainCallback<CountUnReadResponse> callback) {
+        compositeDisposable.add(
+                repository.getApiService().countUnRead()
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(
+                                response -> {
+                                    hideLoading();
+                                    if (response.isResult()) {
+                                        callback.doSuccess(response.getData());
+                                    } else {
+                                        callback.doFail();
+                                    }
+                                },
+                                throwable -> {
+                                    hideLoading();
+                                    Timber.e(throwable);
+                                    callback.doError(throwable);
+                                }
+                        )
         );
     }
 }

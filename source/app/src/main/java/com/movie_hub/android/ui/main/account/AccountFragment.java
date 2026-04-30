@@ -35,7 +35,7 @@ public class AccountFragment extends BaseFragment<FragmentAccountBinding, Accoun
         viewModel.getUser();
         viewModel.getCurrentUserLiveData().observe(getViewLifecycleOwner(), user -> {
             if (user != null) {
-                Timber.d("👤 Hiển thị user: %s", user.getUsername());
+                Timber.d(" Hiển thị user: %s", user.getUsername());
                 setUpUser(user);
             }
         });

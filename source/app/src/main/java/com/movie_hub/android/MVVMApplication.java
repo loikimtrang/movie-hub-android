@@ -16,6 +16,7 @@ import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleObserver;
 import androidx.lifecycle.OnLifecycleEvent;
 import androidx.lifecycle.ProcessLifecycleOwner;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import es.dmoral.toasty.Toasty;
 import io.reactivex.rxjava3.subjects.PublishSubject;
@@ -117,11 +118,13 @@ public class MVVMApplication extends Application implements LifecycleObserver {
             intent = new Intent(this, SplashActivity.class);
         } else {
             intent = new Intent(this, currentActivity.getClass());
+
+            Intent broadcastIntent = new Intent("NEW_NOTIFICATION_ACTION");
+            LocalBroadcastManager.getInstance(this).sendBroadcast(broadcastIntent);
         }
 
         intent.putExtra("msg_onesignal_data", json);
         intent.putExtra("is_from_notification", true);
-
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         return intent;
     }

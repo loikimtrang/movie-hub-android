@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="@dimen/_120sdp"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@drawable/bg_notification_ft"
+    android:elevation="@dimen/_4sdp"
+    android:padding="@dimen/_6sdp">
+
+    <FrameLayout
+        android:id="@+id/btn_all"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_btn_press_tran">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/_8sdp"
+            android:text="@string/all"
+            style="@style/Text_12_Normal"
+            android:textColor="@color/white" />
+
+        <ImageView
+            android:layout_width="@dimen/_10sdp"
+            android:layout_height="@dimen/_10sdp"
+            android:id="@+id/check_all"
+            android:src="@drawable/ic_check"
+            android:layout_gravity="center_vertical|end"
+            android:layout_marginEnd="@dimen/_8sdp"/>
+    </FrameLayout>
+
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/line" />
+
+    <FrameLayout
+        android:id="@+id/btn_un_read"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_btn_press_tran">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/_8sdp"
+            android:text="@string/un_read"
+            style="@style/Text_12_Normal"
+            android:textColor="@color/white" />
+
+        <ImageView
+            android:layout_width="@dimen/_10sdp"
+            android:layout_height="@dimen/_10sdp"
+            android:id="@+id/check_un_read"
+            android:src="@drawable/ic_check"
+            android:layout_gravity="center_vertical|end"
+            android:layout_marginEnd="@dimen/_8sdp"/>
+    </FrameLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0.5dp"
+        android:background="@color/line" />
+
+    <FrameLayout
+        android:id="@+id/btn_read"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_btn_press_tran">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/_8sdp"
+            android:text="@string/read"
+            style="@style/Text_12_Normal"
+            android:textColor="@color/white" />
+
+        <ImageView
+            android:layout_width="@dimen/_10sdp"
+            android:layout_height="@dimen/_10sdp"
+            android:id="@+id/check_read"
+            android:src="@drawable/ic_check"
+            android:layout_gravity="center_vertical|end"
+            android:layout_marginEnd="@dimen/_8sdp"/>
+    </FrameLayout>
+
+</LinearLayout>

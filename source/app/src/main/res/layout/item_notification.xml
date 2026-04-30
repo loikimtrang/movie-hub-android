@@ -12,48 +12,47 @@
         android:layout_height="wrap_content"
         android:clickable="true"
         android:focusable="true"
-        android:padding="@dimen/_12sdp"
-        android:background="@color/bg_app">
+        android:background="@drawable/bg_btn_press_tran">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:layout_centerVertical="true">
-
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-
-                <TextView
-                    android:id="@+id/tv_title"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:singleLine="true"
-                    android:ellipsize="end"
-                    android:text="@{item.title}"
-                    android:layout_toStartOf="@+id/tv_time"
-                    android:layout_alignParentStart="true"/>
-
-                <TextView
-                    android:id="@+id/tv_time"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:singleLine="true"
-                    android:ellipsize="end"
-                    android:text="@{item.createdDate}"
-                    android:layout_alignParentEnd="true"/>
-
-            </RelativeLayout>
+            android:layout_centerVertical="true"
+            android:layout_marginStart="@dimen/_12sdp"
+            android:layout_marginVertical="@dimen/_12sdp"
+            android:layout_marginEnd="@dimen/_6sdp"
+            android:layout_toStartOf="@+id/ic_un_read">
 
             <TextView
-                android:id="@+id/tv_body"
+                android:id="@+id/tv_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:ellipsize="end"
-                android:text="@{item.body}"
-                android:maxLines="2"/>
+                android:text="@{item.title}"
+                android:maxLines="3"
+                style="@style/Text_14_Normal"/>
+
+            <TextView
+                android:id="@+id/tv_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:singleLine="true"
+                android:ellipsize="end"
+                android:layout_marginTop="@dimen/_3sdp"
+                android:textColor="@color/text_gray"
+                style="@style/Text_10_Normal"/>
 
         </LinearLayout>
+
+        <ImageView
+            android:layout_width="@dimen/_8sdp"
+            android:layout_height="@dimen/_8sdp"
+            android:id="@+id/ic_un_read"
+            android:src="@drawable/ic_un_read"
+            android:layout_centerVertical="true"
+            android:layout_alignParentEnd="true"
+            android:layout_marginEnd="@dimen/_6sdp"/>
+
     </RelativeLayout>
 </layout>

@@ -448,10 +448,10 @@
 
                 <FrameLayout
                     android:id="@+id/btn_notification"
-                    android:layout_width="@dimen/_28sdp"
-                    android:layout_height="@dimen/_28sdp"
+                    android:layout_width="@dimen/_34sdp"
+                    android:layout_height="@dimen/_34sdp"
                     android:layout_gravity="end|center"
-                    android:layout_marginEnd="@dimen/_12sdp"
+                    android:layout_marginEnd="@dimen/_6sdp"
                     android:background="@drawable/bg_btn_press_oval">
 
                     <ImageView
@@ -459,6 +459,28 @@
                         android:layout_height="@dimen/_16sdp"
                         android:src="@drawable/ic_notification"
                         android:layout_gravity="center"/>
+
+                    <FrameLayout
+                        android:id="@+id/bg_count_notification"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/bg_count_notification"
+                        android:layout_gravity="center|top"
+                        android:layout_marginStart="@dimen/_6sdp"
+                        android:layout_marginTop="@dimen/_3sdp"
+                        android:visibility="invisible">
+
+                        <TextView
+                            android:id="@+id/tv_count_notification"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:paddingHorizontal="@dimen/_3sdp"
+                            android:text=""
+                            style="@style/Text_10_Normal"
+                            android:gravity="center"
+                            android:singleLine="true"/>
+
+                    </FrameLayout>
 
                 </FrameLayout>
 

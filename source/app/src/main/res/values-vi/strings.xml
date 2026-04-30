@@ -104,6 +104,7 @@
     <string name="rating">Đánh giá</string>
     <string name="comment">Bình luận</string>
     <string name="share">Chia sẻ</string>
+    <string name="live">Xem chung</string>
 
     <string name="movie">Phim</string>
     <string name="recommend">Đề xuất</string>
@@ -232,7 +233,6 @@
     <string name="choose">Chọn</string>
     <string name="permission_install">Bạn cần cấp quyền để cài ứng dụng</string>
     <string name="slogan_app">Phim hay cả rổ</string>
-    <string name="all">Tất cả</string>
     <string name="what_are_you_interested">Bạn đang quan tâm gì?</string>
     <string name="label_series">Phim bộ</string>
     <string name="label_movie">Phim lẻ</string>
@@ -302,4 +302,23 @@
     <string name="time_minutes_ago">%d phút trước</string>
     <string name="time_hours_ago">%d giờ trước</string>
     <string name="time_yesterday">ngày hôm qua</string>
+
+    <string name="all">Tất cả</string>
+    <string name="un_read">Chưa đọc</string>
+    <string name="read">Đã đọc</string>
+
+    <string name="create_room">Tạo phòng</string>
+    <string name="name_room">1. Tên phòng:</string>
+    <string name="time_setting">2. Cài đặt thời gian:</string>
+    <string name="start_mode_description">Có thể bắt đầu thủ công hoặc tự động theo thời gian cài đặt.</string>
+    <string name="start_automatically_option">Tôi muốn bắt đầu tự động</string>
+    <string name="watch_together">Xem chung</string>
+    <string name="episode_room">3. Tập phim khởi chiếu:</string>
+    <string name="error_input_room_name">Vui lòng nhập tên phòng</string>
+    <string name="error_select_episode">Vui lòng chọn tập phim công chiếu</string>
+    <string name="create_room_success">Tạo phòng thành công</string>
+    <string name="error_time_past">Vui lòng chọn thời gian lớn hơn thời gian hiện tại</string>
+    <string name="status_waiting">Đang chờ</string>
+    <string name="status_ended">Đã kết thúc</string>
+    <string name="status_live">LIVE</string>
 </resources>

@@ -54,6 +54,7 @@ import com.movie_hub.android.ui.base.activity.BaseActivity;
 import com.movie_hub.android.ui.base.activity.SystemBarColorProvider;
 import com.movie_hub.android.ui.main.MainCallback;
 import com.movie_hub.android.ui.main.account.login.LoginActivity;
+import com.movie_hub.android.ui.main.live.create.CreateRoomActivity;
 import com.movie_hub.android.ui.main.movie.detail.adapter.MovieDetailTabAdapter;
 import com.movie_hub.android.ui.main.movie.detail.adapter.TagCategoryAdapter;
 import com.movie_hub.android.ui.main.movie.detail.comment.CommentActivity;
@@ -248,6 +249,7 @@ public class MovieDetailActivity extends BaseActivity<ActivityMovieDetailBinding
                             request.setTargetId(viewModel.movieDetails.getId());
                             request.setType(Constants.FAVOURITE_TYPE_MOVIE);
                             viewModel.getFavourite(request);
+                            viewBinding.includeMovieHeader.btnLive.setVisibility(View.VISIBLE);
                         }
                     }
                 }
@@ -268,6 +270,11 @@ public class MovieDetailActivity extends BaseActivity<ActivityMovieDetailBinding
                     startActivity(it);
                 }
             }
+        }
+
+        if (viewModel.isLogin()) {
+            viewBinding.includeMovieHeader.btnLive.setVisibility(View.VISIBLE);
+
         }
     }
 
@@ -692,6 +699,14 @@ public class MovieDetailActivity extends BaseActivity<ActivityMovieDetailBinding
                 }
                 break;
 
+            case R.id.btn_live:
+                if (viewModel.isLogin()) {
+                    navigateToCreateRoom();
+                } else {
+                    showLoginRequiredDialog();
+                }
+                break;
+
             case R.id.btn_playlist:
                 if (!viewModel.isLogin()) {
                     showLoginRequiredDialog();
@@ -735,6 +750,13 @@ public class MovieDetailActivity extends BaseActivity<ActivityMovieDetailBinding
         Intent it = new Intent(this, ReviewActivity.class);
         it.putExtra("movie_details", GsonUtils.toJson(viewModel.movieDetails));
         it.putExtra("is_review", isReview);
+        startActivity(it);
+    }
+
+    public void navigateToCreateRoom() {
+        ClickUtils.debounceClick(viewBinding.includeMovieHeader.btnLive);
+        Intent it = new Intent(this, CreateRoomActivity.class);
+        it.putExtra("movie_details", GsonUtils.toJson(viewModel.movieDetails));
         startActivity(it);
     }
     public void showLoginRequiredDialog() {

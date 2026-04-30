@@ -1,5 +1,10 @@
 package com.movie_hub.android.ui.main.home;
 
+import android.annotation.SuppressLint;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -8,6 +13,7 @@ import android.view.animation.AccelerateDecelerateInterpolator;
 
 import androidx.annotation.NonNull;
 import androidx.core.widget.NestedScrollView;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.CompositePageTransformer;
@@ -28,6 +34,7 @@ import com.movie_hub.android.data.model.api.response.collection.CollectionRespon
 import com.movie_hub.android.data.model.api.response.history.ListWatchHistoryResponse;
 import com.movie_hub.android.data.model.api.response.history.MovieHistoryResponse;
 import com.movie_hub.android.data.model.api.response.movie.MovieResponse;
+import com.movie_hub.android.data.model.api.response.notification.CountUnReadResponse;
 import com.movie_hub.android.data.model.api.response.side_bar.SidebarResponse;
 import com.movie_hub.android.databinding.FragmentHomeBinding;
 import com.movie_hub.android.di.component.FragmentComponent;
@@ -126,6 +133,7 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding, HomeViewMode
 
         if (viewModel.isLogin()) {
             getListMovieHistory();
+            countUnReadNotification();
         } else {
             binding.layoutHistory.setVisibility(View.GONE);
         }
@@ -268,6 +276,7 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding, HomeViewMode
 
         if (viewModel.isLogin()) {
             getListMovieHistory();
+            countUnReadNotification();
         } else {
             viewModel.movieHistory.postValue(new ArrayList<>());
             binding.layoutHistory.setVisibility(View.GONE);
@@ -684,6 +693,7 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding, HomeViewMode
 
         if (viewModel.isLogin()) {
             getListMovieHistory();
+            countUnReadNotification();
         } else {
             viewModel.movieHistory.postValue(new ArrayList<>());
             binding.layoutHistory.setVisibility(View.GONE);
@@ -783,5 +793,56 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding, HomeViewMode
 
     public void showDialogMovieDetail(MovieResponse movieResponse) {
         ((MainActivity) requireActivity()).showMovieDialogDetail(movieResponse);
+    }
+
+    private BroadcastReceiver messageReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            countUnReadNotification();
+        }
+    };
+
+    public void countUnReadNotification() {
+        if (!viewModel.isLogin()) return;
+        viewModel.countUnReadNotification(new MainCallback<CountUnReadResponse>() {
+            @Override
+            public void doError(Throwable error) {
+
+            }
+
+            @Override
+            public void doSuccess() {
+
+            }
+
+            @Override
+            public void doFail() {
+
+            }
+
+            @SuppressLint("SetTextI18n")
+            @Override
+            public void doSuccess(CountUnReadResponse object) {
+                if (object.getTotalUnread() > 0) {
+                    binding.tvCountNotification.setText(object.getTotalUnread().toString());
+                    binding.bgCountNotification.setVisibility(View.VISIBLE);
+                } else {
+                    binding.bgCountNotification.setVisibility(View.GONE);
+                }
+            }
+        });
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        LocalBroadcastManager.getInstance(getActivity())
+                .registerReceiver(messageReceiver, new IntentFilter("NEW_NOTIFICATION_ACTION"));
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(messageReceiver);
     }
 }

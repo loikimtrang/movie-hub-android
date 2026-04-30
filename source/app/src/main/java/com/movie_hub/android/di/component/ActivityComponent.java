@@ -22,6 +22,7 @@ import com.movie_hub.android.ui.main.home.filter.FilterActivity;
 import com.movie_hub.android.ui.main.home.notification.NotificationActivity;
 import com.movie_hub.android.ui.main.home.topic.HomeMoreTopicActivity;
 import com.movie_hub.android.ui.main.home.topic.topic_detail.HomeTopicDetailActivity;
+import com.movie_hub.android.ui.main.live.create.CreateRoomActivity;
 import com.movie_hub.android.ui.main.movie.detail.MovieDetailActivity;
 import com.movie_hub.android.ui.main.movie.detail.comment.CommentActivity;
 import com.movie_hub.android.ui.main.movie.detail.review.ReviewActivity;
@@ -63,5 +64,6 @@ public interface ActivityComponent {
     void inject(SettingActivity activity);
     void inject(SurveyActivity activity);
     void inject(NotificationActivity activity);
+    void inject(CreateRoomActivity activity);
 }
 

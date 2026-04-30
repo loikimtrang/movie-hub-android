@@ -12,6 +12,7 @@ import com.movie_hub.android.R;
 import com.movie_hub.android.constant.Constants;
 
 import java.text.ParseException;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
@@ -216,9 +217,9 @@ public class DisplayUtils {
             long days = TimeUnit.MILLISECONDS.toDays(diff);
             long weeks = days / 7;
 
-            if (seconds < 60) return context.getString(R.string.just_now);
-            if (minutes < 60) return minutes + " " + context.getString(R.string.minutes_ago);
-            if (hours < 24) return hours + " " + context.getString(R.string.hours_ago);
+            if (seconds < 60) return context.getString(R.string.time_just_now);
+            if (minutes < 60) return context.getString(R.string.time_minutes_ago, (int) minutes);
+            if (hours < 24) return context.getString(R.string.time_hours_ago, (int) hours);
             if (days < 7) return days + " " + context.getString(R.string.days_ago);
             return weeks + " " + context.getString(R.string.weeks_ago);
 
@@ -228,6 +229,46 @@ public class DisplayUtils {
         }
     }
 
+    public static String getRelativeTime(Context context, long timestamp) {
+        long now = System.currentTimeMillis();
+        long diff = now - timestamp;
 
+        if (diff < TimeUnit.MINUTES.toMillis(1)) {
+            return context.getString(R.string.time_just_now);
+        } else if (diff < TimeUnit.HOURS.toMillis(1)) {
+            long minutes = diff / TimeUnit.MINUTES.toMillis(1);
+            return context.getString(R.string.time_minutes_ago, (int) minutes);
+        } else if (diff < TimeUnit.DAYS.toMillis(1)) {
+            long hours = diff / TimeUnit.HOURS.toMillis(1);
+            return context.getString(R.string.time_hours_ago, (int) hours);
+        } else if (isYesterday(timestamp)) {
+            return context.getString(R.string.time_yesterday);
+        } else {
+            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+            return sdf.format(new Date(timestamp));
+        }
+    }
 
+    private static boolean isYesterday(long timestamp) {
+        Calendar now = Calendar.getInstance();
+        Calendar then = Calendar.getInstance();
+        then.setTimeInMillis(timestamp);
+
+        now.add(Calendar.DAY_OF_YEAR, -1);
+        return now.get(Calendar.YEAR) == then.get(Calendar.YEAR)
+                && now.get(Calendar.DAY_OF_YEAR) == then.get(Calendar.DAY_OF_YEAR);
+    }
+
+    public static long parseTimestamp(String dateStr) {
+        if (dateStr == null || dateStr.isEmpty()) return 0;
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault());
+            sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+            Date date = sdf.parse(dateStr);
+            return date != null ? date.getTime() : 0;
+        } catch (ParseException e) {
+            e.printStackTrace();
+            return 0;
+        }
+    }
 }
