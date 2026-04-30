@@ -73,39 +73,6 @@ public class HomeViewModel extends BaseFragmentViewModel {
         );
     }
 
-    public void getListMovieTracking(MainCallback<ListWatchHistoryResponse> callback, long movieId) {
-        ListWatchHistoryRequest request = new ListWatchHistoryRequest();
-        request.setMovieId(movieId);
-
-        Map<String, Object> query = RequestToMapConverter.convert(request);
-        compositeDisposable.add(repository.getApiService().getListWatchHistory(query)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .retryWhen(throwable ->
-                        throwable.flatMap((Function<Throwable, ObservableSource<?>>) throwable1 -> {
-                            if (NetworkUtils.checkNetworkError(throwable1)) {
-                                hideLoading();
-                                return application.showDialogNoInternetAccess();
-                            } else {
-                                return Observable.error(throwable1);
-                            }
-                        })
-                )
-                .subscribe(
-                        response -> {
-                            if (response.isResult()) {
-                                callback.doSuccess(response.getData());
-                            } else {
-                                callback.doFail();
-                            }
-                        }, throwable -> {
-                            Timber.e(throwable);
-                            callback.doError(throwable);
-                        }
-                )
-        );
-    }
-
     public void getListSideBar(MainCallback<ResponseListObj<SidebarResponse>> callback, SideBarRequest request) {
         Map<String, Object> query = RequestToMapConverter.convert(request);
         request.setSize(1000);

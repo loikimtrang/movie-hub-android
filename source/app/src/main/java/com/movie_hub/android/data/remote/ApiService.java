@@ -43,6 +43,7 @@ import com.movie_hub.android.data.model.api.response.login.UserLoginResponse;
 import com.movie_hub.android.data.model.api.response.movie.MovieResponse;
 import com.movie_hub.android.data.model.api.response.playlist.PlayListResponse;
 import com.movie_hub.android.data.model.api.response.review.ReviewResponse;
+import com.movie_hub.android.data.model.api.response.room.RoomResponse;
 import com.movie_hub.android.data.model.api.response.side_bar.SidebarResponse;
 import com.movie_hub.android.data.model.api.response.user.UserResponse;
 import com.movie_hub.android.data.model.api.response.user.UserUploadImageResponse;
@@ -79,6 +80,9 @@ public interface ApiService {
     // MOVIE CONTROLLER
     @GET("v1/movie/list")
     Observable<ResponseWrapper<ResponseListObj<MovieResponse>>> getListMovie(@QueryMap Map<String, Object> query);
+
+    @GET("v1/movie/top-views")
+    Observable<ResponseWrapper<ResponseListObj<MovieResponse>>> getListTopViewsMovie(@QueryMap Map<String, Object> query);
 
     @GET("v1/category/list")
     Observable<ResponseWrapper<ResponseListObj<CategoryResponse>>> getListCategory(@QueryMap Map<String, Object> query);
@@ -225,5 +229,26 @@ public interface ApiService {
     Observable<ResponseWrapper<CountUnReadResponse>> countUnRead();
 
     @POST("v1/room/create")
-    Observable<ResponseWrapper> createRoom(@Body CreateRoomRequest request);
+    Observable<ResponseWrapper<RoomResponse>> createRoom(@Body CreateRoomRequest request);
+
+    @GET("v1/room/list")
+    Observable<ResponseWrapper<ResponseListObj<RoomResponse>>> getListRoom(@QueryMap Map<String, Object> query);
+
+    @GET("v1/room/my-rooms")
+    Observable<ResponseWrapper<ResponseListObj<RoomResponse>>> getListMyRoom(@QueryMap Map<String, Object> query);
+
+    @GET("v1/room/check")
+    Observable<ResponseWrapper<RoomResponse>> checkRoom();
+
+    @DELETE("v1/room/delete/{id}")
+    Observable<ResponseWrapper> deleteRoom(@Path("id") Long id);
+
+    @POST("v1/room/end/{id}")
+    Observable<ResponseWrapper<RoomResponse>> endRoom(@Path("id") Long id);
+
+    @POST("v1/room/join/{id}")
+    Observable<ResponseWrapper<RoomResponse>> joinRoom(@Path("id") Long id);
+
+    @POST("v1/room/start/{id}")
+    Observable<ResponseWrapper<RoomResponse>> startRoom(@Path("id") Long id);
 }

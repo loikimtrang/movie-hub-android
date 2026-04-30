@@ -7,5 +7,7 @@ public class NotificationRequest {
     private Integer page;
     private Integer size;
     private Boolean isRead;
+    private Integer type;
+
 }
 

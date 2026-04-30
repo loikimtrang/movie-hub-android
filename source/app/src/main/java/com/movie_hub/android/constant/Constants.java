@@ -84,12 +84,25 @@ public class Constants {
     public static final Integer ROOM_STATE_RUNNING = 1;
     public static final Integer ROOM_STATE_ENDING = 2;
 
+    // Aliases used by UI filters (Room state)
+    public static final Integer STATE_LOCKED = ROOM_STATE_PENDING;
+    public static final Integer STATE_OPEN = ROOM_STATE_RUNNING;
+    public static final Integer STATE_END = ROOM_STATE_ENDING;
+
     public static final Integer PARTICIPANT_ROLE_GUEST = 0;
     public static final Integer PARTICIPANT_ROLE_HOST = 1;
 
     public static final Integer PARTICIPANT_STATE_PENDING = 0;
     public static final Integer PARTICIPANT_STATE_JOIN = 1;
     public static final Integer PARTICIPANT_STATE_LEFT = 2;
+    public static final String MQTT_BROKER = "tcp://rabbitmq.moviehub.biz:1883";
+    public static final String MQTT_USERNAME = "admin";
+    public static final String MQTT_PASSWORD = "admin@2o23.hcm";
+    public static final String TOPIC = "room/";
+
+    public static final Integer NOTIFICATION_TYPE_MOVIE = 2;
+    public static final Integer NOTIFICATION_TYPE_SOCIAL = 3;
+
     private Constants(){
 
     }

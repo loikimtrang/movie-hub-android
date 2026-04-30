@@ -14,6 +14,7 @@ import com.movie_hub.android.data.model.api.request.setting.UserSettingsRequest;
 import com.movie_hub.android.data.model.api.response.MovieItem.MovieItemResponse;
 import com.movie_hub.android.data.model.api.response.history.ListWatchHistoryResponse;
 import com.movie_hub.android.data.model.api.response.movie.MovieResponse;
+import com.movie_hub.android.data.model.api.response.room.RoomResponse;
 import com.movie_hub.android.data.model.api.response.user.UserResponse;
 import com.movie_hub.android.data.model.api.response.video.VideoResponse;
 import com.movie_hub.android.ui.base.activity.BaseViewModel;
@@ -47,6 +48,10 @@ public class WatchMovieViewModel extends BaseViewModel {
     private MutableLiveData<Boolean> isPlaying = new MutableLiveData<>(true);
     public MutableLiveData<ListWatchHistoryResponse> movieDetailsTracking = new MutableLiveData<>();
     public long lastPlaybackPosition = 0L;
+
+    public boolean isLiveRoom = false;
+    public boolean isHost = false;
+    public RoomResponse roomDetail;
 
     SettingVideoModel settingVideoModel = new SettingVideoModel();
     public WatchMovieViewModel(Repository repository, MVVMApplication application) {

@@ -44,6 +44,8 @@ import com.movie_hub.android.data.model.onesignal.MessageCommentResponse;
 import com.movie_hub.android.data.model.onesignal.MessageOneSignal;
 import com.movie_hub.android.data.model.onesignal.OneSignalCommand;
 import com.movie_hub.android.data.model.other.ToastMessage;
+import com.movie_hub.android.data.mqtt.KittyRealtimeEvent;
+import com.movie_hub.android.data.mqtt.Message;
 import com.movie_hub.android.di.component.ActivityComponent;
 import com.movie_hub.android.di.component.DaggerActivityComponent;
 import com.movie_hub.android.di.module.ActivityModule;
@@ -58,7 +60,7 @@ import javax.inject.Named;
 
 import timber.log.Timber;
 
-public abstract class BaseActivity<B extends ViewDataBinding, V extends BaseViewModel> extends AppCompatActivity{
+public abstract class BaseActivity<B extends ViewDataBinding, V extends BaseViewModel> extends AppCompatActivity implements KittyRealtimeEvent {
 
     protected B viewBinding;
 
@@ -400,5 +402,30 @@ public abstract class BaseActivity<B extends ViewDataBinding, V extends BaseView
             it.putExtra("movie_details", GsonUtils.toJson(movieResponse));
         }
         startActivity(it);
+    }
+
+    @Override
+    public void onConnectionOpened() {
+        Timber.i("MQTT đã kết nối");
+    }
+
+    @Override
+    public void onConnectionClosed() {
+        Timber.w("MQTT đã ngắt kết nối");
+    }
+
+    @Override
+    public void onMessageTimeout(Message message) {
+        Timber.e("Gửi tin nhắn thất bại (Timeout): " + message.getCmd());
+    }
+
+    @Override
+    public void onConnectionFailed() {
+        Timber.e("Kết nối MQTT thất bại");
+    }
+
+    @Override
+    public void onMessageReceived(Message message) {
+        Timber.d("Nhận message tại Base: " + message.getCmd());
     }
 }

@@ -53,6 +53,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.bumptech.glide.Glide;
 import com.google.common.collect.ImmutableList;
+import com.movie_hub.android.MVVMApplication;
 import com.movie_hub.android.R;
 import com.movie_hub.android.constant.Constants;
 import com.movie_hub.android.data.model.api.request.history.TrackingWatchHistoryRequest;
@@ -61,9 +62,14 @@ import com.movie_hub.android.data.model.api.response.MovieItem.MovieItemResponse
 import com.movie_hub.android.data.model.api.response.history.ListWatchHistoryResponse;
 import com.movie_hub.android.data.model.api.response.history.WatchHistoryResponse;
 import com.movie_hub.android.data.model.api.response.movie.MovieResponse;
+import com.movie_hub.android.data.model.api.response.room.RoomResponse;
 import com.movie_hub.android.data.model.api.response.season.SeasonResponse;
 import com.movie_hub.android.data.model.api.response.user.UserResponse;
 import com.movie_hub.android.data.model.api.response.video.VideoResponse;
+import com.movie_hub.android.data.model.mqtt.ParticipantJoinModel;
+import com.movie_hub.android.data.model.mqtt.RoomOptionModel;
+import com.movie_hub.android.data.mqtt.Command;
+import com.movie_hub.android.data.mqtt.Message;
 import com.movie_hub.android.databinding.ActivityWatchMovieBinding;
 import com.movie_hub.android.di.component.ActivityComponent;
 import com.movie_hub.android.ui.base.activity.BaseActivity;
@@ -88,6 +94,7 @@ import java.util.Locale;
 import java.util.Objects;
 
 import eu.davidea.flexibleadapter.databinding.BR;
+import timber.log.Timber;
 
 public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, WatchMovieViewModel> implements View.OnClickListener,
         SettingBottomSheetDialog.SettingBottomSheetCallback,
@@ -125,6 +132,9 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
     private Runnable trackingRunnable;
     private static final long TRACKING_INTERVAL_MS = 5 * 60 * 1000L;
     private int currentSeasonIndex = 0;
+    public static String LiveRoom = "isLiveRoom";
+    public static String Host = "isHost";
+    public static String ROOM = "room_details";
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -159,15 +169,25 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
                 setUpViewForSeriesMovie();
             }
 
-            if (viewModel.isLogin()) {
-                String jsonTracking = getIntent().getStringExtra("movie_details_tracking");
-                ListWatchHistoryResponse listTracking = GsonUtils.fromJson(jsonTracking, ListWatchHistoryResponse.class);
-                if (listTracking != null) {
-                    viewModel.movieDetailsTracking.postValue(listTracking);
-                }
+            viewModel.isLiveRoom = getIntent().getBooleanExtra(LiveRoom, false);
 
-                getUserProfile();
+            if (!viewModel.isLiveRoom) {
+                if (viewModel.isLogin()) {
+                    String jsonTracking = getIntent().getStringExtra("movie_details_tracking");
+                    ListWatchHistoryResponse listTracking = GsonUtils.fromJson(jsonTracking, ListWatchHistoryResponse.class);
+                    if (listTracking != null) {
+                        viewModel.movieDetailsTracking.postValue(listTracking);
+                    }
+
+                    getUserProfile();
+                } else {
+                    initMovie();
+                }
             } else {
+                viewModel.isHost = getIntent().getBooleanExtra(Host, false);
+                String roomJson = getIntent().getStringExtra(ROOM);
+                viewModel.roomDetail = GsonUtils.fromJson(roomJson, RoomResponse.class);
+
                 initMovie();
             }
         }
@@ -557,6 +577,7 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
     }
 
     // region === Set Up Listener Video ===
+    private boolean isPlayLiveRoom = false;
     private void setupPlayerListener() {
         player.addListener(new Player.Listener() {
             @Override
@@ -565,6 +586,18 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
                     viewBinding.btnReplay.setVisibility(View.GONE);
                     showLoadingVideo();
                 } else if (state == Player.STATE_READY) {
+
+                    if (!isPlayLiveRoom && viewModel.isLiveRoom && !viewModel.isHost) {
+                        isPlayLiveRoom = true;
+
+                        Message message = new Message();
+                        message.setCmd(Command.CMD_PARTICIPANT_JOIN);
+                        ParticipantJoinModel participantJoinModel = new ParticipantJoinModel();
+                        participantJoinModel.setId(viewModel.getUserId().toString());
+
+                        message.setData(participantJoinModel);
+                        sendMqttMessage(message, Constants.TOPIC + viewModel.roomDetail.getId().toString());
+                    }
 
                     if (isStartContinueWatch) {
                         updateVideoTracking();
@@ -1479,6 +1512,7 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
         stopTrackingLoop();
         viewModel.stopTokenAutoRefresh();
 
+        ((MVVMApplication) application).destroyMqtt();
     }
 
     // region === Click ===
@@ -1887,5 +1921,63 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
         }
     }
 
+    @Override
+    public void onMessageReceived(Message message) {
+        super.onMessageReceived(message);
+        Log.d("MQTT_LOG", Objects.requireNonNull(GsonUtils.toJson(message)));
+        if (!viewModel.isLiveRoom) return;
+        switch (message.getCmd()) {
+            case Command.CMD_PARTICIPANT_JOIN:
+                participantJoin(message);
+                break;
+            case Command.CMD_ROOM_OPTION:
+                roomOption(message);
+                break;
+            default:
+                break;
+        }
+    }
+
+    private void sendMqttMessage(Message message, String topic) {
+        Timber.w("MQTT_LOG: MESSAGE SEND! Topic: %s | Payload: %s", topic, GsonUtils.toJson(message));
+        ((MVVMApplication) application).sendMessageMqtt(message, topic);
+    }
+    public void participantJoin(Message message) {
+        if (!viewModel.isHost) return;
+        String json =  GsonUtils.toJson(message.getData());
+        if (json != null) {
+            ParticipantJoinModel participantJoinModel = GsonUtils.fromJson(json, ParticipantJoinModel.class);
+            if (participantJoinModel != null) {
+                String topic = Constants.TOPIC + viewModel.roomDetail.getId() + "/" + participantJoinModel.getId();
+                Message msg = new Message();
+
+                msg.setCmd(Command.CMD_ROOM_OPTION);
+                if (player == null) return;
+                RoomOptionModel roomOptionModel = new RoomOptionModel();
+                roomOptionModel.setPlay(player.isPlaying());
+                roomOptionModel.setCurrentPositionMovie(player.getCurrentPosition());
+
+                msg.setData(roomOptionModel);
+                sendMqttMessage(msg, topic);
+            }
+        }
+    }
+
+    public void roomOption(Message message) {
+        if (viewModel.isHost) return;
+        String json =  GsonUtils.toJson(message.getData());
+        if (json != null) {
+            RoomOptionModel roomOptionModel = GsonUtils.fromJson(json, RoomOptionModel.class);
+            if (player != null && roomOptionModel != null) {
+
+                player.seekTo(roomOptionModel.getCurrentPositionMovie());
+                if (roomOptionModel.isPlay()) {
+                    player.play();
+                } else {
+                    player.pause();
+                }
+            }
+        }
+    }
 }
 

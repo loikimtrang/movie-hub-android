@@ -48,7 +48,7 @@
 
         <meta-data android:name="com.onesignal.NotificationServiceExtension"
             android:value="com.movie_hub.android.ui.main.service.NotificationServiceExtension" />
-
+        <service android:name="org.eclipse.paho.android.service.MqttService" />
         <activity
             android:name=".ui.main.splash.SplashActivity"
             android:theme="@style/SplashTheme"

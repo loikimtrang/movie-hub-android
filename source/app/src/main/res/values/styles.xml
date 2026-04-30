@@ -15,6 +15,11 @@
         <item name="cornerSize">50%</item>
     </style>
 
+    <style name="imgNotification">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">@dimen/_6sdp</item>
+    </style>
+
     <!-- res/values/styles.xml -->
     <style name="TransparentActivity" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <item name="android:windowBackground">@android:color/transparent</item>

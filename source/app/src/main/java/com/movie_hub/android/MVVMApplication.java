@@ -1,5 +1,7 @@
 package com.movie_hub.android;
 
+import static com.movie_hub.android.constant.Constants.TOPIC;
+
 import android.annotation.SuppressLint;
 import android.app.Application;
 import android.app.NotificationChannel;
@@ -227,27 +229,32 @@ public class MVVMApplication extends Application implements LifecycleObserver {
         return subject;
     }
 
-    private final String TOPIC_REQUEST = "PARTNER_IN_CHANNEL";
-    private final String TOPIC_RESPONSE = "CLIENT_PUSH_";
     private MqttManager mqttManager;
     private final Map<Integer, Message> pendingRequests = new HashMap<>();
     private final Map<Integer, TimerTask> pendingTimeouts = new HashMap<>();
     private Timer timeoutTimer = new Timer("WebSocketTimeoutTimer");
 
     @SuppressLint("CheckResult")
-    public void createMqtt(String url, String deviceId) {
-        String clientId = deviceId;
-        Timber.d("MQTT_LOG: Initializing MQTT | URL: %s | ClientID: %s", url, clientId);
+    public void createMqtt(String userId, String[] topics) {
+        // Log danh sách topic để dễ debug
+        Timber.d("MQTT_LOG: Initializing MQTT | URL: %s | Topics: %s",
+                Constants.MQTT_BROKER, java.util.Arrays.toString(topics));
+
         mqttManager = new MqttManager();
-        mqttManager.init(this, url, clientId, new MqttCallbackExtended() {
+        mqttManager.init(this, Constants.MQTT_BROKER, userId, new MqttCallbackExtended() {
             @Override
             public void connectComplete(boolean reconnect, String serverURI) {
-                Timber.i("MQTT_LOG: CONNECTION SUCCESSFUL! Server: %s | Reconnect: %b", serverURI, reconnect);
+                Timber.i("MQTT_LOG: CONNECTION SUCCESSFUL! Server: %s", serverURI);
 
                 try {
-                    String deviceTopic = TOPIC_RESPONSE + deviceId;
-                    mqttManager.subscribe(deviceTopic, 2);
-                    Timber.d("MQTT_LOG: Subscribed to Topic: %s", deviceTopic);
+                    int[] qos = new int[topics.length];
+                    for (int i = 0; i < topics.length; i++) {
+                        qos[i] = 2;
+                    }
+                    mqttManager.subscribe(topics, qos);
+
+                    Timber.d("MQTT_LOG: Subscribed to all topics successfully");
+
                     KittyRealtimeEvent event = (KittyRealtimeEvent) currentActivity;
                     if (event != null) event.onConnectionOpened();
                 } catch (Exception e) {
@@ -256,18 +263,16 @@ public class MVVMApplication extends Application implements LifecycleObserver {
             }
 
             @Override
-            public void messageArrived(String topic, MqttMessage message) {
+            public void messageArrived(String topicName, MqttMessage message) {
                 String payload = new String(message.getPayload());
-                Timber.w("MQTT_LOG: MESSAGE ARRIVED! Topic: %s | Payload: %s", topic, payload);
+                Timber.w("MQTT_LOG: MESSAGE FROM [%s] | Payload: %s", topicName, payload);
+
                 try {
                     Message msg = GsonUtils.fromJson(payload, Message.class);
                     int requestId = msg.hashCode();
                     synchronized (pendingTimeouts) {
                         TimerTask task = pendingTimeouts.remove(requestId);
-                        if (task != null) {
-                            task.cancel();
-                            Timber.d("MQTT_LOG: Timeout canceled for RequestId: %d", requestId);
-                        }
+                        if (task != null) task.cancel();
                     }
                     synchronized (pendingRequests) { pendingRequests.remove(requestId); }
 
@@ -280,64 +285,36 @@ public class MVVMApplication extends Application implements LifecycleObserver {
             }
 
             @Override
-            public void deliveryComplete(IMqttDeliveryToken token) {
-            }
+            public void deliveryComplete(IMqttDeliveryToken token) {}
 
             @Override
             public void connectionLost(Throwable cause) {
-                Timber.e("MQTT_LOG: CONNECTION LOST! Reason: %s",
-                        (cause != null ? cause.getMessage() : "Unknown reason"));
-
+                Timber.e("MQTT_LOG: CONNECTION LOST!");
                 KittyRealtimeEvent event = (KittyRealtimeEvent) currentActivity;
-                if (event != null) {
-                    event.onConnectionClosed();
-                }
+                if (event != null) event.onConnectionClosed();
             }
         });
 
+        // ... Giữ nguyên phần MqttConnectOptions và mqttManager.connect(options) ...
         MqttConnectOptions options = new MqttConnectOptions();
         options.setAutomaticReconnect(true);
         options.setCleanSession(false);
+        options.setUserName(Constants.MQTT_USERNAME);
+        options.setPassword(Constants.MQTT_PASSWORD.toCharArray());
+        options.setKeepAliveInterval(30);
 
         try {
-            Timber.d("MQTT_LOG: Attempting to connect...");
             mqttManager.connect(options);
         } catch (MqttException e) {
-            Timber.e("MQTT_LOG: Connect call failed: %s", e.getMessage());
+            Timber.e("MQTT_LOG: Connect failed: %s", e.getMessage());
         }
     }
 
-    public void sendMessageMqtt(Message message) {
+    public void sendMessageMqtt(Message message, String topic) {
         if (mqttManager != null) {
-            boolean isPing = Command.COMMAND_CLIENT_PING.equals(message.getCmd());
-
-            if (!isPing) {
-                int requestId = message.hashCode();
-                synchronized (pendingRequests) { pendingRequests.put(requestId, message); }
-
-                TimerTask timeoutTask = new TimerTask() {
-                    @Override
-                    public void run() {
-                        synchronized (pendingRequests) {
-                            Message timedOut = pendingRequests.remove(requestId);
-                            if (timedOut != null) {
-                                KittyRealtimeEvent event = (KittyRealtimeEvent) currentActivity;
-                                if (event != null) event.onMessageTimeout(timedOut);
-                            }
-                        }
-                    }
-                };
-
-                synchronized (pendingTimeouts) { pendingTimeouts.put(requestId, timeoutTask); }
-                timeoutTimer.schedule(timeoutTask, 30000);
-            }
-
             try {
                 String json = GsonUtils.toJson(message);
-                mqttManager.publish(TOPIC_REQUEST, json, 0);
-                if (isPing) {
-                    Timber.v("MQTT Keep-alive ping sent (No timeout tracked)");
-                }
+                mqttManager.publish(topic, json, 2);
             } catch (MqttException e) {
                 Timber.e(e);
             }

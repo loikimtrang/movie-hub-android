@@ -11,13 +11,18 @@ import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.movie_hub.android.R;
+import com.movie_hub.android.constant.Constants;
 import com.movie_hub.android.data.model.api.response.notification.NotificationResponse;
+import com.movie_hub.android.data.model.onesignal.MessageCommentResponse;
 import com.movie_hub.android.databinding.ItemNotificationBinding;
 import com.movie_hub.android.utils.DisplayUtils;
+import com.movie_hub.android.utils.GsonUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapter.NotificationViewHolder> {
 
@@ -54,6 +59,20 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
 
         updateUI(holder, item);
         updateTime(holder, item);
+        holder.binding.imgAvatar.setVisibility(View.GONE);
+        if (Objects.equals(item.getType(), Constants.NOTIFICATION_TYPE_SOCIAL)) {
+            MessageCommentResponse messageCommentResponse = GsonUtils.fromJson(item.getBody(), MessageCommentResponse.class);
+
+            if (messageCommentResponse != null && messageCommentResponse.getAuthor() != null && messageCommentResponse.getAuthor().getAvatarPath() != null) {
+                Glide.with(context)
+                        .load(Constants.MEDIA_URL + messageCommentResponse.getAuthor().getAvatarPath())
+                        .placeholder(R.drawable.logo)
+                        .error(R.drawable.logo)
+                        .into(holder.binding.imgAvatar);
+
+                holder.binding.imgAvatar.setVisibility(View.VISIBLE);
+            }
+        }
 
         holder.binding.getRoot().setOnClickListener(v -> {
             if (listener != null) {

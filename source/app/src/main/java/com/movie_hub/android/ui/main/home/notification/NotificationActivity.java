@@ -18,6 +18,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.movie_hub.android.BR;
 import com.movie_hub.android.R;
+import com.movie_hub.android.constant.Constants;
 import com.movie_hub.android.data.model.api.ResponseListObj;
 import com.movie_hub.android.data.model.api.request.notification.NotificationRequest;
 import com.movie_hub.android.data.model.api.request.notification.UpdateReadRequest;
@@ -30,7 +31,9 @@ import com.movie_hub.android.di.component.ActivityComponent;
 import com.movie_hub.android.ui.base.activity.BaseActivity;
 import com.movie_hub.android.ui.base.activity.SystemBarColorProvider;
 import com.movie_hub.android.ui.main.MainCallback;
+import com.movie_hub.android.ui.main.home.filter.model.FilterTypeModel;
 import com.movie_hub.android.ui.main.home.notification.adapter.NotificationAdapter;
+import com.movie_hub.android.ui.main.home.notification.adapter.NotificationFilterAdapter;
 import com.movie_hub.android.ui.main.home.notification.shimmer.NotificationShimmerAdapter;
 import com.movie_hub.android.utils.GsonUtils;
 
@@ -40,6 +43,7 @@ import java.util.List;
 public class NotificationActivity extends BaseActivity<ActivityNotificationBinding, NotificationModel> implements NotificationAdapter.OnNotificationClickListener, SystemBarColorProvider {
 
     private NotificationAdapter adapter;
+    private NotificationFilterAdapter typeFilterAdapter;
     private int currentPage = 0;
     private final int pageSize = 20;
     private boolean isLoading = false;
@@ -98,6 +102,8 @@ public class NotificationActivity extends BaseActivity<ActivityNotificationBindi
         viewBinding.rvNotification.setLayoutManager(new LinearLayoutManager(this));
         viewBinding.rvNotification.setAdapter(adapter);
 
+        initTypeFilter();
+
         viewBinding.swipeRefreshLayout.setOnRefreshListener(() -> {
             getListNotification(true);
         });
@@ -119,6 +125,32 @@ public class NotificationActivity extends BaseActivity<ActivityNotificationBindi
                 }
             }
         });
+    }
+
+    private List<FilterTypeModel> getTypeFilters() {
+        List<FilterTypeModel> list = new ArrayList<>();
+        list.add(new FilterTypeModel(getString(R.string.all), -1, viewModel.currentFilterType == null));
+        list.add(new FilterTypeModel(getString(R.string.nav_community), Constants.NOTIFICATION_TYPE_SOCIAL,
+                viewModel.currentFilterType != null && viewModel.currentFilterType.equals(Constants.NOTIFICATION_TYPE_SOCIAL)));
+        list.add(new FilterTypeModel(getString(R.string.nav_movies), Constants.NOTIFICATION_TYPE_MOVIE,
+                viewModel.currentFilterType != null && viewModel.currentFilterType.equals(Constants.NOTIFICATION_TYPE_MOVIE)));
+        return list;
+    }
+
+    private void initTypeFilter() {
+        typeFilterAdapter = new NotificationFilterAdapter(filterTypeModel -> {
+            if (filterTypeModel.getType() == -1) {
+                viewModel.currentFilterType = null;
+            } else {
+                viewModel.currentFilterType = filterTypeModel.getType();
+            }
+            typeFilterAdapter.setData(getTypeFilters());
+            getListNotification(true);
+        });
+
+        viewBinding.rvType.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+        viewBinding.rvType.setAdapter(typeFilterAdapter);
+        typeFilterAdapter.setData(getTypeFilters());
     }
 
     public void showShimmerLoading() {
@@ -144,6 +176,7 @@ public class NotificationActivity extends BaseActivity<ActivityNotificationBindi
         request.setPage(currentPage);
         request.setSize(pageSize);
         request.setIsRead(viewModel.currentFilterReadStatus);
+        request.setType(viewModel.currentFilterType);
 
         viewModel.getListMovieHistory(new MainCallback<ResponseListObj<NotificationResponse>>() {
             @Override

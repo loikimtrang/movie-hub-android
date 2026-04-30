@@ -85,7 +85,7 @@ public class SearchTopTrendingViewModel extends BaseFragmentViewModel {
     public void getListMovie(MainCallback<List<MovieResponse>> callback, MovieRequest request) {
         Map<String, Object> query = RequestToMapConverter.convert(request);
 
-        compositeDisposable.add(repository.getApiService().getListMovie(query)
+        compositeDisposable.add(repository.getApiService().getListTopViewsMovie(query)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .retryWhen(throwable ->

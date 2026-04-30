@@ -3,16 +3,22 @@ package com.movie_hub.android.ui.main.live.adapter;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
+import com.movie_hub.android.R;
+import com.movie_hub.android.constant.Constants;
 import com.movie_hub.android.data.model.api.response.room.RoomResponse;
 import com.movie_hub.android.databinding.ItemRoomBinding;
+import com.movie_hub.android.utils.DisplayUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.RoomViewHolder> {
 
@@ -39,7 +45,49 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.RoomViewHolder
 
     @Override
     public void onBindViewHolder(@NonNull RoomAdapter.RoomViewHolder holder, int position) {
-       
+        RoomResponse item = items.get(position);
+
+        holder.binding.tvTitle.setText(item.getName());
+        holder.binding.tvNameAuthor.setText(item.getHost().getFullName());
+        holder.binding.tvTime.setText(DisplayUtils.getTimeAgo(context, item.getCreatedDate()));
+
+        Glide.with(context)
+                .load(Constants.MEDIA_URL + item.getHost().getAvatarPath())
+                .placeholder(R.drawable.logo)
+                .error(R.drawable.logo)
+                .into(holder.binding.imgAvatar);
+
+        Glide.with(context)
+                .load(item.getMovieItem().getMovie().getPosterUrl())
+                .placeholder(R.drawable.place_holder_2_3)
+                .error(R.drawable.place_holder_2_3)
+                .into(holder.binding.image);
+
+        holder.binding.getRoot().setOnClickListener(v -> {
+            if (listener != null) {
+                listener.onRoomClick(item, holder.getBindingAdapterPosition());
+            }
+        });
+
+        if (Objects.equals(item.getState(), Constants.ROOM_STATE_PENDING)) {
+            holder.binding.dayStart.setText(context.getString(R.string.premiered_on) + " " + item.getStartTime());
+            holder.binding.dayStart.setVisibility(View.VISIBLE);
+            holder.binding.layoutIcLive.setVisibility(View.GONE);
+            holder.binding.layoutIcEnd.setVisibility(View.GONE);
+            holder.binding.layoutIcWaiting.setVisibility(View.VISIBLE);
+
+        } else if (Objects.equals(item.getState(), Constants.ROOM_STATE_RUNNING)) {
+            holder.binding.dayStart.setVisibility(View.GONE);
+            holder.binding.layoutIcEnd.setVisibility(View.GONE);
+            holder.binding.layoutIcWaiting.setVisibility(View.GONE);
+            holder.binding.layoutIcLive.setVisibility(View.VISIBLE);
+
+        } else {
+            holder.binding.dayStart.setVisibility(View.GONE);
+            holder.binding.layoutIcWaiting.setVisibility(View.GONE);
+            holder.binding.layoutIcLive.setVisibility(View.GONE);
+            holder.binding.layoutIcEnd.setVisibility(View.VISIBLE);
+        }
     }
 
     @SuppressLint("NotifyDataSetChanged")
@@ -49,6 +97,33 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.RoomViewHolder
             items.addAll(newData);
         }
         notifyDataSetChanged();
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    public void addData(List<RoomResponse> newData) {
+        if (newData == null || newData.isEmpty()) return;
+        int start = items.size();
+        items.addAll(newData);
+        notifyItemRangeInserted(start, newData.size());
+    }
+
+    public RoomResponse getItem(int position) {
+        if (position < 0 || position >= items.size()) return null;
+        return items.get(position);
+    }
+
+    public void removeAt(int position) {
+        if (position < 0 || position >= items.size()) return;
+        items.remove(position);
+        notifyItemRemoved(position);
+    }
+
+    public void restoreAt(int position, RoomResponse item) {
+        if (item == null) return;
+        if (position < 0) position = 0;
+        if (position > items.size()) position = items.size();
+        items.add(position, item);
+        notifyItemInserted(position);
     }
 
     @Override

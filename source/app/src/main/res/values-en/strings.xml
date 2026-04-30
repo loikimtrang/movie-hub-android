@@ -321,4 +321,11 @@
     <string name="status_waiting">Waiting</string>
     <string name="status_ended">Ended</string>
     <string name="status_live">LIVE</string>
+    <string name="my_room">My room</string>
+    <string name="premiered_on">Premiered on:</string>
+    <string name="empty_room">List room empty</string>
+    <string name="nav_community">Community</string>
+    <string name="nav_movies">Movies</string>
+    <string name="nav_schedule_premiere">Schedule premiere</string>
+    <string name="nav_watch_together">Watch Together</string>
 </resources>

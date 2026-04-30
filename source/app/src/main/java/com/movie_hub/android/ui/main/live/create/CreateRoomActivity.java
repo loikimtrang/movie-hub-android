@@ -3,6 +3,7 @@ package com.movie_hub.android.ui.main.live.create;
 import android.annotation.SuppressLint;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
@@ -14,11 +15,13 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.movie_hub.android.BR;
+import com.movie_hub.android.MVVMApplication;
 import com.movie_hub.android.R;
 import com.movie_hub.android.constant.Constants;
 import com.movie_hub.android.data.model.api.request.room.CreateRoomRequest;
 import com.movie_hub.android.data.model.api.response.MovieItem.MovieItemResponse;
 import com.movie_hub.android.data.model.api.response.movie.MovieResponse;
+import com.movie_hub.android.data.model.api.response.room.RoomResponse;
 import com.movie_hub.android.data.model.api.response.season.SeasonResponse;
 import com.movie_hub.android.data.model.other.ToastMessage;
 import com.movie_hub.android.databinding.ActivityCreateRoomBinding;
@@ -28,6 +31,7 @@ import com.movie_hub.android.ui.base.activity.SystemBarColorProvider;
 import com.movie_hub.android.ui.main.MainCallback;
 import com.movie_hub.android.ui.main.live.create.adapter.RoomEpisodeAdapter;
 import com.movie_hub.android.ui.main.movie.detail.dialog.ChooseSeasonBottomSheetDialog;
+import com.movie_hub.android.ui.main.movie.watch.WatchMovieActivity;
 import com.movie_hub.android.utils.GsonUtils;
 
 import java.text.SimpleDateFormat;
@@ -87,6 +91,8 @@ public class CreateRoomActivity extends BaseActivity<ActivityCreateRoomBinding, 
 
             viewBinding.title.setText(viewModel.movieDetails.getTitle());
             viewBinding.subTitle.setText(viewModel.movieDetails.getOriginalTitle());
+
+            viewBinding.tvNameRoom.setText(getString(R.string.nav_watch_together) + " " + viewModel.movieDetails.getTitle());
 
             if (viewModel.movieDetails.getType() == Constants.TYPE_MOVIE_SERIES) {
                 roomEpisodeAdapter = new RoomEpisodeAdapter(this, this);
@@ -262,7 +268,7 @@ public class CreateRoomActivity extends BaseActivity<ActivityCreateRoomBinding, 
         }
 
         viewModel.showLoading();
-        viewModel.createRoom(new MainCallback<Void>() {
+        viewModel.createRoom(new MainCallback<RoomResponse>() {
             @Override
             public void doError(Throwable error) {
                 viewModel.hideLoading();
@@ -270,11 +276,22 @@ public class CreateRoomActivity extends BaseActivity<ActivityCreateRoomBinding, 
             }
 
             @Override
+            public void doSuccess(RoomResponse response) {
+
+                if (!request.isStartNow()) {
+                    new ToastMessage(ToastMessage.TYPE_NORMAL, getString(R.string.create_room_success)).showMessage(CreateRoomActivity.this);
+                    new Handler().postDelayed(() -> {
+                        finish();
+                    }, 1500);
+                } else {
+                    viewModel.roomResponse = response;
+                    getMovie();
+                }
+            }
+
+            @Override
             public void doSuccess() {
-                new ToastMessage(ToastMessage.TYPE_NORMAL, getString(R.string.create_room_success)).showMessage(CreateRoomActivity.this);
-                new Handler().postDelayed(() -> {
-                    finish();
-                }, 1500);
+
             }
 
             @Override
@@ -282,5 +299,102 @@ public class CreateRoomActivity extends BaseActivity<ActivityCreateRoomBinding, 
                 new ToastMessage(ToastMessage.TYPE_ERROR, getString(R.string.an_error_occurred)).showMessage(CreateRoomActivity.this);
             }
         }, request);
+    }
+
+    public void getMovie() {
+        viewModel.getMovie(new MainCallback<MovieResponse>() {
+            @Override
+            public void doError(Throwable error) {
+
+            }
+
+            @Override
+            public void doSuccess() {
+
+            }
+
+            @Override
+            public void doFail() {
+
+            }
+
+            @Override
+            public void doSuccess(MovieResponse object) {
+                viewModel.movieDetails = object;
+                startRoom();
+            }
+        }, viewModel.movieDetails.getId());
+    }
+
+    public void startRoom() {
+        viewModel.startRoom(new MainCallback<RoomResponse>() {
+            @Override
+            public void doError(Throwable error) {
+                viewModel.hideLoading();
+            }
+
+            @Override
+            public void doSuccess() {
+                viewModel.hideLoading();
+            }
+
+            @Override
+            public void doFail() {
+                viewModel.hideLoading();
+            }
+
+            @Override
+            public void doSuccess(RoomResponse object) {
+                joinRoom();
+            }
+        }, viewModel.roomResponse.getId());
+    }
+
+    public void joinRoom() {
+        viewModel.joinRoom(new MainCallback<RoomResponse>() {
+            @Override
+            public void doError(Throwable error) {
+                viewModel.hideLoading();
+            }
+
+            @Override
+            public void doSuccess() {
+                viewModel.hideLoading();
+            }
+
+            @Override
+            public void doFail() {
+                viewModel.hideLoading();
+            }
+
+            @Override
+            public void doSuccess(RoomResponse object) {
+                createMqtt();
+            }
+        }, viewModel.roomResponse.getId());
+    }
+
+    public void createMqtt() {
+        String topicParent = Constants.TOPIC +  viewModel.roomResponse.getId().toString();
+        String[] myTopics = { topicParent };
+        ((MVVMApplication) application).createMqtt(viewModel.getUserId().toString(), myTopics);
+    }
+
+    @Override
+    public void onConnectionOpened() {
+        super.onConnectionOpened();
+
+        Intent it = new Intent(this, WatchMovieActivity.class);
+        it.putExtra("movie_details", GsonUtils.toJson(viewModel.movieDetails));
+        it.putExtra(WatchMovieActivity.ROOM, GsonUtils.toJson(viewModel.roomResponse));
+        if (viewModel.movieDetails.getType() == Constants.TYPE_MOVIE_SERIES) {
+            it.putExtra("episode", GsonUtils.toJson(viewModel.movieDetails.getEpisodeById(viewModel.roomResponse.getMovieItem().getId())));
+        }
+        it.putExtra(WatchMovieActivity.LiveRoom, true);
+        it.putExtra(WatchMovieActivity.Host, true);
+
+        startActivity(it);
+        viewModel.hideLoading();
+        finish();
     }
 }

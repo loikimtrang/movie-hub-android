@@ -27,9 +27,9 @@ public class MqttManager {
         });
     }
 
-    public void subscribe(String topic, int qos) throws MqttException {
-        if (mqttClient.isConnected()) {
-            mqttClient.subscribe(topic, qos);
+    public void subscribe(String[] topicFilters, int[] qos) throws MqttException {
+        if (mqttClient != null && mqttClient.isConnected()) {
+            mqttClient.subscribe(topicFilters, qos);
         }
     }
 

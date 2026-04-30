@@ -192,4 +192,8 @@ public class BaseViewModel extends ViewModel {
                 )
         );
     }
+
+    public Long getUserId() {
+        return repository.getSharedPreferences().getUserId();
+    }
 }

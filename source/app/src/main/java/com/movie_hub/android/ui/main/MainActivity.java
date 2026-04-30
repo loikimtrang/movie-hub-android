@@ -8,13 +8,17 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
 import com.movie_hub.android.BR;
+import com.movie_hub.android.MVVMApplication;
 import com.movie_hub.android.R;
 import com.movie_hub.android.constant.Constants;
+import com.movie_hub.android.data.model.api.request.favourite.CreateFavouriteRequest;
 import com.movie_hub.android.data.model.api.request.movie.MovieRequest;
 import com.movie_hub.android.data.model.api.response.MovieItem.MovieItemResponse;
 import com.movie_hub.android.data.model.api.response.category.CategoryResponse;
@@ -22,6 +26,7 @@ import com.movie_hub.android.data.model.api.response.collection.CollectionRespon
 import com.movie_hub.android.data.model.api.response.history.ListWatchHistoryResponse;
 import com.movie_hub.android.data.model.api.response.history.WatchHistoryResponse;
 import com.movie_hub.android.data.model.api.response.movie.MovieResponse;
+import com.movie_hub.android.data.model.api.response.room.RoomResponse;
 import com.movie_hub.android.data.model.api.response.user.UserResponse;
 import com.movie_hub.android.data.model.onesignal.MessageCommentResponse;
 import com.movie_hub.android.data.model.onesignal.MessageOneSignal;
@@ -37,6 +42,7 @@ import com.movie_hub.android.ui.main.account.contact.ContactActivity;
 import com.movie_hub.android.ui.main.account.favourite.FavouriteActivity;
 import com.movie_hub.android.ui.main.account.history.HistoryActivity;
 import com.movie_hub.android.ui.main.account.language.LanguageActivity;
+import com.movie_hub.android.ui.main.account.login.LoginActivity;
 import com.movie_hub.android.ui.main.account.playlist.PlayListActivity;
 import com.movie_hub.android.ui.main.account.privacy.PrivacyActivity;
 import com.movie_hub.android.ui.main.account.setting.SettingActivity;
@@ -56,6 +62,7 @@ import com.movie_hub.android.ui.main.movie.watch.WatchMovieActivity;
 import com.movie_hub.android.ui.main.schedule.ScheduleFragment;
 import com.movie_hub.android.ui.main.search.SearchFragment;
 import com.movie_hub.android.ui.main.splash.SplashActivity;
+import com.movie_hub.android.utils.DialogUtils;
 import com.movie_hub.android.utils.GsonUtils;
 
 import java.util.List;
@@ -105,6 +112,19 @@ public class MainActivity extends BaseActivity<ActivityMainBinding, MainViewMode
                 }
             }
         }
+
+        loginLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == RESULT_OK) {
+                        Intent data = result.getData();
+                        boolean loginSuccess = data != null && data.getBooleanExtra("login_success", false);
+                        if (loginSuccess) {
+                            new ToastMessage(ToastMessage.TYPE_NORMAL, getString(R.string.login_successful)).showMessage(this);
+                        }
+                    }
+                }
+        );
     }
 
     @SuppressLint("NonConstantResourceId")
@@ -119,8 +139,13 @@ public class MainActivity extends BaseActivity<ActivityMainBinding, MainViewMode
                     handleFragment(Constants.SEARCH);
                     return true;
                 case R.id.live:
-                    handleFragment(Constants.LIVE);
-                    return true;
+                    if (viewModel.isLogin()) {
+                        handleFragment(Constants.LIVE);
+                        return true;
+                    } else {
+                        showLoginRequiredDialog();
+                        return false;
+                    }
                 case R.id.schedule:
                     handleFragment(Constants.SCHEDULE);
                     return true;
@@ -543,5 +568,54 @@ public class MainActivity extends BaseActivity<ActivityMainBinding, MainViewMode
     public void navigateToNotification() {
         Intent it = new Intent(this, NotificationActivity.class);
         startActivity(it);
+    }
+
+    public MovieResponse movieResponse;
+    public RoomResponse roomResponse;
+
+    public void createMqtt(MovieResponse movieResponse, RoomResponse model) {
+        viewModel.showLoading();
+        this.movieResponse = movieResponse;
+        this.roomResponse = model;
+
+        String topicParent = Constants.TOPIC +  model.getId().toString();
+        String topicChild = topicParent + "/" + viewModel.getUserId().toString();
+        String[] myTopics = { topicParent, topicChild };
+        ((MVVMApplication) application).createMqtt(viewModel.getUserId().toString(), myTopics);
+    }
+
+    @Override
+    public void onConnectionOpened() {
+        super.onConnectionOpened();
+        Intent it = new Intent(this, WatchMovieActivity.class);
+        it.putExtra("movie_details", GsonUtils.toJson(this.movieResponse));
+        it.putExtra(WatchMovieActivity.ROOM, GsonUtils.toJson(this.roomResponse));
+        if (this.movieResponse.getType() == Constants.TYPE_MOVIE_SERIES) {
+            it.putExtra("episode", GsonUtils.toJson(this.movieResponse.getEpisodeById(this.roomResponse.getMovieItem().getId())));
+        }
+
+        it.putExtra(WatchMovieActivity.LiveRoom, true);
+        it.putExtra(WatchMovieActivity.Host, false);
+
+        startActivity(it);
+
+        viewModel.hideLoading();
+        this.roomResponse = new RoomResponse();
+        this.movieResponse = new MovieResponse();
+    }
+    private ActivityResultLauncher<Intent> loginLauncher;
+    public void showLoginRequiredDialog() {
+        DialogUtils.dialogConfirm(
+                this,
+                getString(R.string.not_login),
+                getString(R.string.login),
+                (dialog, which) -> {
+                    Intent it = new Intent(this, LoginActivity.class);
+                    it.putExtra("login_from_other", "login_from_other");
+                    loginLauncher.launch(it);
+                },
+                getString(R.string.cancel),
+                null
+        );
     }
 }

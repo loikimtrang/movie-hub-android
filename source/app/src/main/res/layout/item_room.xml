@@ -71,7 +71,18 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:layout_marginTop="@dimen/_6sdp">
+                android:layout_marginTop="@dimen/_6sdp"
+                android:gravity="center">
+
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/img_avatar"
+                    android:layout_width="@dimen/_16sdp"
+                    android:layout_height="@dimen/_16sdp"
+                    android:scaleType="centerCrop"
+                    app:shapeAppearanceOverlay="@style/roundImg"
+                    android:src="@drawable/logo"
+                    android:layout_gravity="center"
+                    android:layout_marginEnd="@dimen/_6sdp"/>
 
                 <TextView
                     android:id="@+id/tv_name_author"
@@ -81,8 +92,7 @@
                     android:textColor="@color/text_cate"
                     android:maxLines="1"
                     android:ellipsize="end"
-                    android:text="@string/name"
-                    android:layout_marginTop="@dimen/_3sdp"/>
+                    android:text="@string/name"/>
 
                 <ImageView
                     android:layout_width="@dimen/_18sdp"
@@ -98,10 +108,21 @@
                     android:textColor="@color/text_cate"
                     android:maxLines="1"
                     android:ellipsize="end"
-                    android:text="@string/name"
-                    android:layout_marginTop="@dimen/_3sdp"/>
+                    android:text="@string/name"/>
 
             </LinearLayout>
+
+            <TextView
+                android:id="@+id/day_start"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/Text_12_Normal"
+                android:textColor="@color/text_cate"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:text="@string/name"
+                android:layout_marginTop="@dimen/_3sdp"
+                android:visibility="gone"/>
 
         </LinearLayout>
 

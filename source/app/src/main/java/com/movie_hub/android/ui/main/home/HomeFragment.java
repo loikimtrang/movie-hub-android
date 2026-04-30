@@ -42,6 +42,7 @@ import com.movie_hub.android.ui.base.activity.SystemBarColorProvider;
 import com.movie_hub.android.ui.base.fragment.BaseFragment;
 import com.movie_hub.android.ui.main.MainActivity;
 import com.movie_hub.android.ui.main.MainCallback;
+import com.movie_hub.android.ui.main.account.login.LoginActivity;
 import com.movie_hub.android.ui.main.home.adapter.CollectionAdapter;
 import com.movie_hub.android.ui.main.home.adapter.CollectionType_Topic_Adapter;
 import com.movie_hub.android.ui.main.home.adapter.MovieBannerAdapter;
@@ -51,6 +52,7 @@ import com.movie_hub.android.ui.main.home.filter.adapter.HomeTopFilterItemAdapte
 import com.movie_hub.android.ui.main.home.filter.fragment.FilterCategoryFragmentDialog;
 import com.movie_hub.android.ui.main.home.filter.fragment.FilterFragmentDialog;
 import com.movie_hub.android.ui.main.home.filter.model.FilterTypeModel;
+import com.movie_hub.android.utils.DialogUtils;
 import com.movie_hub.android.utils.DisplayUtils;
 import com.movie_hub.android.utils.GsonUtils;
 import com.movie_hub.android.utils.HtmlUtils;
@@ -219,7 +221,11 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding, HomeViewMode
         });
 
         binding.btnNotification.setOnClickListener(v -> {
-            ((MainActivity) requireActivity()).navigateToNotification();
+            if (viewModel.isLogin()) {
+                ((MainActivity) requireActivity()).navigateToNotification();
+            } else {
+                ((MainActivity) requireActivity()).showLoginRequiredDialog();
+            }
         });
     }
 

@@ -35,7 +35,7 @@
                 style="@style/Text_12_Bold"
                 android:gravity="center"
                 android:text="@string/new_update_available"
-                android:maxLines="2"
+                android:maxLines="3"
                 android:layout_marginBottom="@dimen/_12sdp"/>
 
             <LinearLayout

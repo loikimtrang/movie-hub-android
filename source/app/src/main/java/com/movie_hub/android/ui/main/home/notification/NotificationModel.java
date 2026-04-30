@@ -21,6 +21,7 @@ import timber.log.Timber;
 public class NotificationModel extends BaseViewModel {
 
     Boolean currentFilterReadStatus = null;
+    Integer currentFilterType = null;
     public NotificationModel(Repository repository, MVVMApplication application) {
         super(repository, application);
     }

@@ -209,7 +209,7 @@
     <string name="weeks_ago">tuần trước</string>
     <string name="just_now">vừa xong</string>
     <string name="no_comment_yet">Chưa có bình luận nào</string>
-    <string name="not_login">Bạn chưa đăng nhập!</string>
+    <string name="not_login">Bạn chưa đăng nhập! \n Vui lòng đăng nhập để tiếp tục</string>
     <string name="replying_to">Đang trả lời</string>
     <string name="add_new">Thêm mới</string>
     <string name="movie_list_empty">Danh sách phim trống</string>
@@ -321,4 +321,11 @@
     <string name="status_waiting">Đang chờ</string>
     <string name="status_ended">Đã kết thúc</string>
     <string name="status_live">LIVE</string>
+    <string name="my_room">Phòng của tôi</string>
+    <string name="premiered_on">Công chiếu:</string>
+    <string name="empty_room">Danh phòng trống</string>
+    <string name="nav_community">Cộng đồng</string>
+    <string name="nav_movies">Phim</string>
+    <string name="nav_schedule_premiere">Lên lịch công chiếu</string>
+    <string name="nav_watch_together">Cùng xem</string>
 </resources>

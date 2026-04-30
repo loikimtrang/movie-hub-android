@@ -209,7 +209,7 @@
                             <TextView
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:text="@string/start_automatically_option"
+                                android:text="@string/nav_schedule_premiere"
                                 style="@style/Text_12_Normal"
                                 android:textColor="@color/text_gray"
                                 android:ellipsize="end"
@@ -279,6 +279,20 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentBottom="true">
 
+                    <com.google.android.material.progressindicator.LinearProgressIndicator
+                        android:id="@+id/bottom_loading_bar"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="top"
+                        android:indeterminate="true"
+                        android:visibility="gone"
+                        app:trackThickness="1dp"
+                        app:indicatorColor="@color/ic_tab_bar_tint"
+                        app:trackColor="@android:color/transparent"
+                        style="@style/Widget.MaterialComponents.LinearProgressIndicator"
+                       />
+
+
                     <FrameLayout
                         android:id="@+id/btn_login"
                         android:layout_width="match_parent"
@@ -311,20 +325,6 @@
 
 
         </LinearLayout>
-
-        <com.google.android.material.progressindicator.LinearProgressIndicator
-            android:id="@+id/bottom_loading_bar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom"
-            android:indeterminate="true"
-            android:visibility="gone"
-            app:trackThickness="1dp"
-            app:indicatorColor="@color/ic_tab_bar_tint"
-            app:trackColor="@android:color/transparent"
-            style="@style/Widget.MaterialComponents.LinearProgressIndicator"
-            android:layout_marginBottom="@dimen/_25sdp"/>
-
 
         <FrameLayout
             android:id="@+id/loading_overlay"
