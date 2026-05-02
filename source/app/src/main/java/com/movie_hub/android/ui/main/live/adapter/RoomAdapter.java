@@ -69,6 +69,9 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.RoomViewHolder
             }
         });
 
+        holder.binding.icHourglass.clearAnimation();
+        holder.binding.icDotLive.clearAnimation();
+
         if (Objects.equals(item.getState(), Constants.ROOM_STATE_PENDING)) {
             holder.binding.dayStart.setText(context.getString(R.string.premiered_on) + " " + item.getStartTime());
             holder.binding.dayStart.setVisibility(View.VISIBLE);
@@ -76,12 +79,17 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.RoomViewHolder
             holder.binding.layoutIcEnd.setVisibility(View.GONE);
             holder.binding.layoutIcWaiting.setVisibility(View.VISIBLE);
 
+            android.view.animation.Animation rotate = android.view.animation.AnimationUtils.loadAnimation(context, R.anim.rotate_center);
+            holder.binding.icHourglass.startAnimation(rotate);
+
         } else if (Objects.equals(item.getState(), Constants.ROOM_STATE_RUNNING)) {
             holder.binding.dayStart.setVisibility(View.GONE);
             holder.binding.layoutIcEnd.setVisibility(View.GONE);
             holder.binding.layoutIcWaiting.setVisibility(View.GONE);
             holder.binding.layoutIcLive.setVisibility(View.VISIBLE);
 
+            android.view.animation.Animation blink = android.view.animation.AnimationUtils.loadAnimation(context, R.anim.fade_blink);
+            holder.binding.icDotLive.startAnimation(blink);
         } else {
             holder.binding.dayStart.setVisibility(View.GONE);
             holder.binding.layoutIcWaiting.setVisibility(View.GONE);

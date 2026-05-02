@@ -17,6 +17,9 @@ import com.movie_hub.android.data.model.api.response.movie.MovieResponse;
 import com.movie_hub.android.data.model.api.response.room.RoomResponse;
 import com.movie_hub.android.data.model.api.response.user.UserResponse;
 import com.movie_hub.android.data.model.api.response.video.VideoResponse;
+import com.movie_hub.android.data.model.mqtt.ClientPingModel;
+import com.movie_hub.android.data.mqtt.Command;
+import com.movie_hub.android.data.mqtt.Message;
 import com.movie_hub.android.ui.base.activity.BaseViewModel;
 import com.movie_hub.android.ui.main.MainCallback;
 import com.movie_hub.android.ui.main.movie.watch.setting.SettingVideoModel;
@@ -52,11 +55,32 @@ public class WatchMovieViewModel extends BaseViewModel {
     public boolean isLiveRoom = false;
     public boolean isHost = false;
     public RoomResponse roomDetail;
-
+    private MutableLiveData<Boolean> isSyncWithHost = new MutableLiveData<>(true);
+    public ClientPingModel clientPingModel = new ClientPingModel();
+    public Message msgPing = new Message();
     SettingVideoModel settingVideoModel = new SettingVideoModel();
     public WatchMovieViewModel(Repository repository, MVVMApplication application) {
         super(repository, application);
         settingVideoModel.initSetting();
+
+        isSyncWithHost.setValue(true);
+
+        clientPingModel.setAccountId(getUserId());
+        msgPing.setCmd(Command.COMMAND_CLIENT_PING);
+        msgPing.setData(clientPingModel);
+    }
+
+    public LiveData<Boolean> getIsSyncWithHost() {
+        return isSyncWithHost;
+    }
+
+    public void setSyncWithHost(boolean enable) {
+        isSyncWithHost.setValue(enable);
+    }
+
+    public boolean isSyncWithHostEnabled() {
+        Boolean v = isSyncWithHost.getValue();
+        return v == null || v;
     }
 
     public LiveData<Boolean> getIsPlaying() {

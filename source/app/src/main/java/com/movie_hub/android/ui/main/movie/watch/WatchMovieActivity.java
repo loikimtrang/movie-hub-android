@@ -28,6 +28,7 @@ import android.widget.SeekBar;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.SwitchCompat;
 import androidx.core.view.WindowCompat;
 import androidx.media3.common.C;
 import androidx.media3.common.Format;
@@ -67,7 +68,7 @@ import com.movie_hub.android.data.model.api.response.season.SeasonResponse;
 import com.movie_hub.android.data.model.api.response.user.UserResponse;
 import com.movie_hub.android.data.model.api.response.video.VideoResponse;
 import com.movie_hub.android.data.model.mqtt.ParticipantJoinModel;
-import com.movie_hub.android.data.model.mqtt.RoomOptionModel;
+import com.movie_hub.android.data.model.mqtt.RoomStateModel;
 import com.movie_hub.android.data.mqtt.Command;
 import com.movie_hub.android.data.mqtt.Message;
 import com.movie_hub.android.databinding.ActivityWatchMovieBinding;
@@ -135,6 +136,32 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
     public static String LiveRoom = "isLiveRoom";
     public static String Host = "isHost";
     public static String ROOM = "room_details";
+    private boolean suppressSpeedBroadcast = false;
+    private boolean suppressModelSpeedObserver = false;
+    private boolean suppressMqttPublishFromModel = false;
+    @Nullable private Float normalSpeedBeforePress = null;
+    private boolean suppressSyncSwitchListener = false;
+
+    private Handler handlerPing = new Handler(Looper.getMainLooper());
+    private Runnable runnablePing;
+
+    private void startSchedule() {
+        runnablePing = new Runnable() {
+            @Override
+            public void run() {
+                Timber.d("MQTT_LOG: ", "Ping to server");
+                sendMqttMessage(viewModel.msgPing, Constants.TOPIC + viewModel.roomDetail.getId());
+                handlerPing.postDelayed(this, 10000);
+            }
+        };
+        handlerPing.post(runnablePing);
+    }
+
+    private void stopSchedule() {
+        if (handlerPing != null && runnablePing != null) {
+            handlerPing.removeCallbacks(runnablePing);
+        }
+    }
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -187,10 +214,58 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
                 viewModel.isHost = getIntent().getBooleanExtra(Host, false);
                 String roomJson = getIntent().getStringExtra(ROOM);
                 viewModel.roomDetail = GsonUtils.fromJson(roomJson, RoomResponse.class);
+                setupSyncWithHostToggle();
 
+                if (viewModel.isHost) {
+                    startSchedule();
+                }
                 initMovie();
             }
         }
+    }
+
+    private void setupSyncWithHostToggle() {
+        if (!viewModel.isHost) {
+            viewModel.setSyncWithHost(true);
+            viewBinding.layoutSync.setVisibility(View.VISIBLE);
+        } else {
+            return;
+        }
+
+        SwitchCompat syncSwitch = viewBinding.switchSyncWithHost;
+
+        viewModel.getIsSyncWithHost().observe(this, enabled -> {
+            boolean v = enabled == null || enabled;
+            if (syncSwitch.isChecked() == v) return;
+            suppressSyncSwitchListener = true;
+            syncSwitch.setChecked(v);
+            suppressSyncSwitchListener = false;
+        });
+
+        syncSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (suppressSyncSwitchListener) return;
+            boolean wasEnabled = viewModel.isSyncWithHostEnabled();
+            viewModel.setSyncWithHost(isChecked);
+
+            if (!wasEnabled && isChecked && viewModel.isLiveRoom && !viewModel.isHost) {
+                requestSyncFromHost();
+            }
+        });
+    }
+
+    private void requestSyncFromHost() {
+        if (!viewModel.isLiveRoom || viewModel.isHost) return;
+        if (viewModel.roomDetail == null) return;
+        String topic = Constants.TOPIC + viewModel.roomDetail.getId();
+
+        Message msg = new Message();
+        msg.setCmd(Command.CMD_ROOM_SYNC);
+        msg.setData(null);
+        sendMqttMessage(msg, topic);
+    }
+
+    private boolean shouldApplyHostPlaybackCommands() {
+        return viewModel.isLiveRoom && !viewModel.isHost && viewModel.isSyncWithHostEnabled();
     }
 
     public void getUserProfile() {
@@ -377,7 +452,7 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
         if (!viewModel.setting.isSetupPlaybackSpeed()) {
             if (viewModel.setting.getPlaybackSpeed() != null) {
                 float speed = viewModel.setting.getPlaybackSpeed().floatValue();
-                viewModel.settingVideoModel.getPlaySpeed().setSpeed(speed);
+                viewModel.settingVideoModel.setPlaybackSpeed(speed);
             }
 
             viewModel.setting.setSetupPlaybackSpeed(true);
@@ -426,10 +501,12 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
         long lastPosition = viewModel.lastPlaybackPosition;
         if (lastPosition > 0) {
             player.seekTo(lastPosition);
+            hostSeekVideo();
         }
         player.setPlayWhenReady(true);
 
         setupPlayerListener();
+        bindPlaybackSpeedModelToPlayer();
         setupSeekBar();
         setupGestureDetector();
         setupSeekBarBrightNess();
@@ -629,6 +706,20 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
             }
 
             @Override
+            public void onPlaybackParametersChanged(@NonNull PlaybackParameters playbackParameters) {
+                Player.Listener.super.onPlaybackParametersChanged(playbackParameters);
+                // Keep SettingVideoModel in sync even if speed was changed outside our model.
+                if (suppressModelSpeedObserver) return;
+                float speed = playbackParameters.speed;
+                Float current = viewModel.settingVideoModel.getPlaySpeed().getSpeed();
+                if (current == null || Math.abs(current - speed) > 0.0001f) {
+                    suppressMqttPublishFromModel = true; // avoid loop: player -> model -> publish
+                    viewModel.settingVideoModel.setPlaybackSpeed(speed);
+                    suppressMqttPublishFromModel = false;
+                }
+            }
+
+            @Override
             public void onTracksChanged(Tracks tracks) {
                 extractAvailableQualities(tracks);
 
@@ -655,6 +746,51 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
                 handlePlaybackError(error);
             }
         });
+    }
+
+    private void bindPlaybackSpeedModelToPlayer() {
+        viewModel.settingVideoModel.getPlaybackSpeedLive().observe(this, speed -> {
+            if (speed == null || player == null) return;
+            if (suppressModelSpeedObserver) return;
+
+            // Model -> player (always), and model -> MQTT (host-only).
+            try {
+                suppressModelSpeedObserver = true;
+                applyPlaybackSpeed(speed, false); // don't let player-listener publish
+            } finally {
+                suppressModelSpeedObserver = false;
+            }
+
+            if (!suppressMqttPublishFromModel && viewModel.isLiveRoom && viewModel.isHost) {
+                publishRoomSpeed(speed);
+            }
+        });
+    }
+
+    private void publishRoomSpeed(float speed) {
+        if (!viewModel.isLiveRoom || !viewModel.isHost) return;
+        if (viewModel.roomDetail == null) return;
+        String topic = Constants.TOPIC + viewModel.roomDetail.getId();
+
+        Message msg = new Message();
+        msg.setCmd(Command.CMD_ROOM_STATE);
+
+        RoomStateModel roomStateModel = new RoomStateModel();
+        roomStateModel.setSubCmd(Command.CMD_ROOM_PLAY_SPEED);
+        roomStateModel.setPlaySpeed(speed);
+
+        msg.setData(roomStateModel);
+        sendMqttMessage(msg, topic);
+    }
+
+    private void applyPlaybackSpeed(float speed, boolean shouldBroadcastIfHost) {
+        if (player == null) return;
+        try {
+            suppressSpeedBroadcast = !shouldBroadcastIfHost;
+            player.setPlaybackParameters(new PlaybackParameters(speed));
+        } finally {
+            suppressSpeedBroadcast = false;
+        }
     }
 
     private void refreshCheckStatus() {
@@ -743,6 +879,20 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
         updatePlayPauseIcons(isPlaying);
         autoHideHandler.removeCallbacks(hideControlsRunnable);
         autoHideHandler.postDelayed(hideControlsRunnable, AUTO_HIDE_DELAY_MILLIS);
+
+        if (viewModel.isLiveRoom && viewModel.isHost) {
+            String topic = Constants.TOPIC + viewModel.roomDetail.getId().toString();
+            Message message = new Message();
+            message.setCmd(Command.CMD_ROOM_STATE);
+
+            RoomStateModel roomStateModel = new RoomStateModel();
+            roomStateModel.setPlay(isPlaying);
+            roomStateModel.setSubCmd(isPlaying ? Command.CMD_ROOM_PLAY : Command.CMD_ROOM_PAUSE);
+
+            message.setData(roomStateModel);
+
+            sendMqttMessage(message, topic);
+        }
     }
 
     private int countdown = 5;
@@ -757,6 +907,10 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
         viewModel.setPlaying(false);
         viewBinding.btnPlayPause.setVisibility(View.GONE);
         viewBinding.btnReplay.setVisibility(View.VISIBLE);
+
+        if (viewModel.isLiveRoom) {
+            return;
+        }
 
         if (!isLastEpisode() && isSeries) {
             toggleControls();
@@ -885,6 +1039,7 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
 
                 long newPosition = (duration * progress) / 1000;
                 player.seekTo(newPosition);
+                hostSeekVideo();
                 viewBinding.tvCurrentTime.setText(formatTime(newPosition));
 
                 if (thumbnailManager != null) {
@@ -1005,7 +1160,11 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
                     viewBinding.playerView.setHapticFeedbackEnabled(true);
                     viewBinding.playerView.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
 
-                    player.setPlaybackParameters(new PlaybackParameters(viewModel.settingVideoModel.getPlaySpeedWhenPress().getSpeed()));
+                    // "Hold for 2x" style: temporarily boost speed while finger is down.
+                    // Update SettingVideoModel so UI reflects the boosted speed.
+                    normalSpeedBeforePress = viewModel.settingVideoModel.getPlaySpeed().getSpeed();
+                    float boosted = viewModel.settingVideoModel.getPlaySpeedWhenPress().getSpeed();
+                    viewModel.settingVideoModel.setPlaybackSpeed(boosted); // observer will update player + MQTT
                     autoHideHandler.removeCallbacks(hideControlsRunnable);
                     autoHideHandler.postDelayed(hideControlsRunnable, 0);
 
@@ -1049,7 +1208,14 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
 
             if (event.getAction() == MotionEvent.ACTION_UP || event.getAction() == MotionEvent.ACTION_CANCEL) {
                 if (player != null && player.isPlaying()) {
-                    player.setPlaybackParameters(new PlaybackParameters(viewModel.settingVideoModel.getPlaySpeed().getSpeed()));
+                    // Restore the speed that was active before long-press.
+                    Float restore = normalSpeedBeforePress != null
+                            ? normalSpeedBeforePress
+                            : viewModel.settingVideoModel.getPlaySpeed().getSpeed();
+                    if (restore != null) {
+                        viewModel.settingVideoModel.setPlaybackSpeed(restore); // observer will update player + MQTT
+                    }
+                    normalSpeedBeforePress = null;
                     runOnUiThread(() -> viewBinding.layoutSpeedPress.setVisibility(View.GONE));
                 }
             }
@@ -1064,6 +1230,7 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
         Log.d("SEE", String.valueOf(seekToPosition));
         seekToPosition = Math.max(0, Math.min(seekToPosition, player.getDuration()));
         player.seekTo(seekToPosition);
+        hostSeekVideo();
         showSeekPreview(seekToPosition, isForward);
 
         showSeekCount(isForward, SEEK_DOUBLE_TAP_MILLIS);
@@ -1511,7 +1678,9 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
         stopVolumeObserver();
         stopTrackingLoop();
         viewModel.stopTokenAutoRefresh();
-
+        if (viewModel.isLiveRoom && viewModel.isHost) {
+            stopSchedule();
+        }
         ((MVVMApplication) application).destroyMqtt();
     }
 
@@ -1545,6 +1714,7 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
                 viewBinding.btnPlayPause.setVisibility(View.VISIBLE);
                 viewBinding.btnReplay.setVisibility(View.GONE);
                 player.seekTo(0);
+                hostSeekVideo();
                 updatePlayPauseState(true);
                 break;
             case R.id.btn_forward:
@@ -1600,6 +1770,7 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
         if (viewModel.nowVideoPlay != null && viewModel.nowVideoPlay.getIntroEnd() != null) {
             long introEndMs = viewModel.nowVideoPlay.getIntroEnd() * 1000L;
             player.seekTo(introEndMs);
+            hostSeekVideo();
             viewBinding.btnSkipIntro.setVisibility(View.GONE);
         }
     }
@@ -1643,11 +1814,7 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
     @Override
     public void updatePlaySpeedVideo(float speed, int typeSpeedOption) {
         if (typeSpeedOption == PlaySpeedBottomSheetDialog.TYPE_SPEED) {
-            viewModel.settingVideoModel.getPlaySpeed().setSpeed(speed);
-            if (player != null) {
-                PlaybackParameters params = new PlaybackParameters(viewModel.settingVideoModel.getPlaySpeed().getSpeed());
-                player.setPlaybackParameters(params);
-            }
+            viewModel.settingVideoModel.setPlaybackSpeed(speed); // observer will update player + MQTT
         } else {
             viewModel.settingVideoModel.getPlaySpeedWhenPress().setSpeed(speed);
         }
@@ -1927,15 +2094,44 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
         Log.d("MQTT_LOG", Objects.requireNonNull(GsonUtils.toJson(message)));
         if (!viewModel.isLiveRoom) return;
         switch (message.getCmd()) {
+            case Command.CMD_ROOM_SYNC:
+                // Participant -> Host: request sync snapshot
+                if (viewModel.isHost) {
+                    hostBroadcastSyncData();
+                }
+                break;
             case Command.CMD_PARTICIPANT_JOIN:
                 participantJoin(message);
                 break;
-            case Command.CMD_ROOM_OPTION:
-                roomOption(message);
+            case Command.CMD_ROOM_STATE:
+                if (shouldApplyHostPlaybackCommands()) {
+                    roomOption(message);
+                }
+                break;
+            case Command.CMD_END_ROOM:
+                endRoom(message);
                 break;
             default:
                 break;
         }
+    }
+
+    private void hostBroadcastSyncData() {
+        if (!viewModel.isLiveRoom || !viewModel.isHost) return;
+        if (player == null || viewModel.roomDetail == null) return;
+        String topic = Constants.TOPIC + viewModel.roomDetail.getId();
+
+        Message msg = new Message();
+        msg.setCmd(Command.CMD_ROOM_STATE);
+
+        RoomStateModel data = new RoomStateModel();
+        data.setSubCmd(Command.CMD_ROOM_ALL_STATE);
+        data.setPlay(player.isPlaying());
+        data.setCurrentPositionMovie(player.getCurrentPosition());
+        data.setPlaySpeed(player.getPlaybackParameters().speed);
+        msg.setData(data);
+
+        sendMqttMessage(msg, topic);
     }
 
     private void sendMqttMessage(Message message, String topic) {
@@ -1951,33 +2147,78 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
                 String topic = Constants.TOPIC + viewModel.roomDetail.getId() + "/" + participantJoinModel.getId();
                 Message msg = new Message();
 
-                msg.setCmd(Command.CMD_ROOM_OPTION);
+                msg.setCmd(Command.CMD_ROOM_STATE);
                 if (player == null) return;
-                RoomOptionModel roomOptionModel = new RoomOptionModel();
-                roomOptionModel.setPlay(player.isPlaying());
-                roomOptionModel.setCurrentPositionMovie(player.getCurrentPosition());
+                RoomStateModel roomStateModel = new RoomStateModel();
+                roomStateModel.setSubCmd(Command.CMD_ROOM_ALL_STATE);
 
-                msg.setData(roomOptionModel);
+                roomStateModel.setPlay(player.isPlaying());
+                roomStateModel.setCurrentPositionMovie(player.getCurrentPosition());
+                roomStateModel.setPlaySpeed(player.getPlaybackParameters().speed);
+
+                msg.setData(roomStateModel);
                 sendMqttMessage(msg, topic);
             }
         }
     }
 
+    public void hostSeekVideo() {
+        if (!viewModel.isLiveRoom || !viewModel.isHost) return;
+        String topic = Constants.TOPIC + viewModel.roomDetail.getId();
+        Message msg = new Message();
+
+        msg.setCmd(Command.CMD_ROOM_STATE);
+        if (player == null) return;
+        RoomStateModel roomStateModel = new RoomStateModel();
+        roomStateModel.setSubCmd(Command.CMD_ROOM_SEEK);
+        roomStateModel.setCurrentPositionMovie(player.getCurrentPosition());
+        msg.setData(roomStateModel);
+        sendMqttMessage(msg, topic);
+    }
+
     public void roomOption(Message message) {
         if (viewModel.isHost) return;
+        if (!viewModel.isSyncWithHostEnabled()) return;
         String json =  GsonUtils.toJson(message.getData());
         if (json != null) {
-            RoomOptionModel roomOptionModel = GsonUtils.fromJson(json, RoomOptionModel.class);
-            if (player != null && roomOptionModel != null) {
+            RoomStateModel roomStateModel = GsonUtils.fromJson(json, RoomStateModel.class);
+            if (player != null && roomStateModel != null) {
 
-                player.seekTo(roomOptionModel.getCurrentPositionMovie());
-                if (roomOptionModel.isPlay()) {
-                    player.play();
-                } else {
-                    player.pause();
+                switch (roomStateModel.getSubCmd()) {
+                    case Command.CMD_ROOM_ALL_STATE:
+                        syncRoomWithHost(roomStateModel);
+                        break;
+                    case Command.CMD_ROOM_PAUSE:
+                    case Command.CMD_ROOM_PLAY:
+                        updatePlayPauseState(roomStateModel.isPlay());
+                        break;
+                    case Command.CMD_ROOM_SEEK:
+                        seekRoom(roomStateModel);
+                        break;
+                    case Command.CMD_ROOM_PLAY_SPEED:
+                        suppressMqttPublishFromModel = true;
+                        viewModel.settingVideoModel.setPlaybackSpeed((float) roomStateModel.getPlaySpeed());
+                        suppressMqttPublishFromModel = false;
+                        break;
+
                 }
+
             }
         }
+    }
+
+    public void syncRoomWithHost(RoomStateModel roomStateModel) {
+        player.seekTo(roomStateModel.getCurrentPositionMovie());
+        updatePlayPauseState(roomStateModel.isPlay());
+        applyPlaybackSpeed((float) roomStateModel.getPlaySpeed(), false);
+    }
+
+    public void seekRoom(RoomStateModel roomStateModel) {
+        player.seekTo(roomStateModel.getCurrentPositionMovie());
+    }
+
+    public void endRoom(Message message) {
+
     }
 }
 

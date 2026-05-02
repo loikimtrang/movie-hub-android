@@ -3,7 +3,6 @@ package com.movie_hub.android.ui.main.live;
 import static com.movie_hub.android.ui.main.home.HomeFragment.NavigateToMovieDetails;
 
 import com.movie_hub.android.BR;
-import com.movie_hub.android.MVVMApplication;
 import com.movie_hub.android.R;
 import com.movie_hub.android.constant.Constants;
 import com.movie_hub.android.data.model.api.ResponseListObj;
@@ -11,7 +10,6 @@ import com.movie_hub.android.data.model.api.request.room.RoomRequest;
 import com.movie_hub.android.data.model.api.response.history.ListWatchHistoryResponse;
 import com.movie_hub.android.data.model.api.response.movie.MovieResponse;
 import com.movie_hub.android.data.model.api.response.room.RoomResponse;
-import com.movie_hub.android.data.model.mqtt.RoomOptionModel;
 import com.movie_hub.android.data.model.other.ToastMessage;
 import com.movie_hub.android.databinding.FragmentLiveBinding;
 import com.movie_hub.android.di.component.FragmentComponent;
@@ -326,10 +324,11 @@ public class LiveFragment extends BaseFragment<FragmentLiveBinding, LiveViewMode
     public void showFilterMenu(View anchor) {
         View popupView = LayoutInflater.from(requireContext())
                 .inflate(R.layout.layout_popup_filter_room, null);
+        int widthInPx = getResources().getDimensionPixelSize(R.dimen._160sdp);
 
         PopupWindow popupWindow = new PopupWindow(
                 popupView,
-                ViewGroup.LayoutParams.WRAP_CONTENT,
+                widthInPx,
                 ViewGroup.LayoutParams.WRAP_CONTENT,
                 true
         );

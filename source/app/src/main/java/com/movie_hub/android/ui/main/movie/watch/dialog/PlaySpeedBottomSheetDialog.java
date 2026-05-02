@@ -136,7 +136,7 @@ public class PlaySpeedBottomSheetDialog extends BaseBottomSheetDialog {
 
     private void updateSpeed(float speed) {
         if (TYPE_SPEED_OPTION == TYPE_SPEED) {
-            settingVideoModel.getPlaySpeed().setSpeed(speed);
+            settingVideoModel.setPlaybackSpeed(speed);
         } else {
             settingVideoModel.getPlaySpeedWhenPress().setSpeed(speed);
         }

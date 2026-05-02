@@ -328,4 +328,6 @@
     <string name="nav_movies">Movies</string>
     <string name="nav_schedule_premiere">Schedule premiere</string>
     <string name="nav_watch_together">Watch Together</string>
+    <string name="sync_with_host">Sync with host</string>
+
 </resources>

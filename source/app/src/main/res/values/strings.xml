@@ -24,6 +24,7 @@
     <string name="menu_privacy_policy">Privacy Policy</string>
     <string name="menu_contact">Contact</string>
     <string name="menu_language">Language</string>
+    <string name="sync">Sync</string>
 
     <string name="confirm">Confirm</string>
     <string name="cancel">Cancel</string>
@@ -332,5 +333,5 @@
     <string name="nav_movies">Movies</string>
     <string name="nav_schedule_premiere">Schedule premiere</string>
     <string name="nav_watch_together">Watch Together</string>
-
+    <string name="sync_with_host">Sync with host</string>
 </resources>

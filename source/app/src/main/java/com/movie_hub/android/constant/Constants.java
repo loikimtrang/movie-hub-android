@@ -2,6 +2,8 @@ package com.movie_hub.android.constant;
 
 import android.os.CpuUsageInfo;
 
+import com.movie_hub.android.BuildConfig;
+
 public class Constants {
     public static final String DB_NAME = "room";
     public static final String PREF_NAME = "mvvm.prefs";
@@ -27,19 +29,14 @@ public class Constants {
     public static final int GENDER_MALE = 1;
     public static final int GENDER_FEMALE = 2;
     public static final int GENDER_UNSPECIFIED = 3;
-
-    public static final String MEDIA_URL = "https://media-api.moviehub.biz/v1/file/download";
-    public static final String MEDIA_URL_VTT = "https://media-api.moviehub.biz/v1/file/public-download"; // vtt,
-    public static final String MEDIA_URL_VIDEO = "/v1/file/download-video-resource";
-
     public static final String ERROR = "ERROR";
     public static final int RC_SIGN_IN = 1001;
     public static final int SRC_TYPE_VIDEO_EXTERNAL = 2; // có link http
     public static final int SRC_TYPE_VIDEO_INTERNAL = 1; // sài link nhà
 
 
-    public static final String CLIENT_ID = "144532728035-rbu66k0hirdckcp1ato2kff2m83uta4g.apps.googleusercontent.com";
-    public static final String ONESIGNAL_APP_ID = "1a61db28-dca2-483d-9475-4d028b71b6d4";
+    public static final String CLIENT_ID = BuildConfig.CLIENT_ID;
+    public static final String ONESIGNAL_APP_ID = BuildConfig.ONESIGNAL_APP_ID;
     public static int PLATFORM_ANDROID = 2;
     public static int TYPE_MOVIE_SINGLE = 1;
     public static int TYPE_MOVIE_SERIES = 2;
@@ -95,9 +92,13 @@ public class Constants {
     public static final Integer PARTICIPANT_STATE_PENDING = 0;
     public static final Integer PARTICIPANT_STATE_JOIN = 1;
     public static final Integer PARTICIPANT_STATE_LEFT = 2;
-    public static final String MQTT_BROKER = "tcp://rabbitmq.moviehub.biz:1883";
-    public static final String MQTT_USERNAME = "admin";
-    public static final String MQTT_PASSWORD = "admin@2o23.hcm";
+    public static final String MEDIA_URL = BuildConfig.MEDIA_URL;
+    public static final String MEDIA_URL_VTT = BuildConfig.MEDIA_URL_VTT;
+    public static final String MEDIA_URL_VIDEO = BuildConfig.MEDIA_URL_VIDEO;
+
+    public static final String MQTT_BROKER = BuildConfig.MQTT_BROKER;
+    public static final String MQTT_USERNAME = BuildConfig.MQTT_USERNAME;
+    public static final String MQTT_PASSWORD = BuildConfig.MQTT_PASSWORD;
     public static final String TOPIC = "room/";
 
     public static final Integer NOTIFICATION_TYPE_MOVIE = 2;

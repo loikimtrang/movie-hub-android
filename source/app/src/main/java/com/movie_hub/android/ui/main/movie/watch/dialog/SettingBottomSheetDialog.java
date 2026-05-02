@@ -49,6 +49,7 @@ public class SettingBottomSheetDialog extends BaseBottomSheetDialog {
         binding.btnMoreOption.setOnClickListener(v -> onMoreOptionClicked());
 
         videoQuality.observeForever(qualityObserver);
+        settingVideoModel.getPlaybackSpeedLive().observeForever(playSpeedObserver);
     }
 
     @SuppressLint({"SetTextI18n", "DefaultLocale"})
@@ -95,9 +96,21 @@ public class SettingBottomSheetDialog extends BaseBottomSheetDialog {
         }
     };
 
+    @SuppressLint({"SetTextI18n", "DefaultLocale"})
+    private final Observer<Float> playSpeedObserver = speed -> {
+        if (speed == null) return;
+        if (speed == 1.0f) {
+            binding.tvPlaySpeed.setText(getContext().getString(R.string.normal) + " ("
+                    + String.format(Locale.US, "%.2fx", speed) + ")");
+        } else {
+            binding.tvPlaySpeed.setText(String.format(Locale.US, "%.2fx", speed));
+        }
+    };
+
     @Override
     public void dismiss() {
         super.dismiss();
         videoQuality.removeObserver(qualityObserver);
+        settingVideoModel.getPlaybackSpeedLive().removeObserver(playSpeedObserver);
     }
 }

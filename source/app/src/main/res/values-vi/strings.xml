@@ -328,4 +328,6 @@
     <string name="nav_movies">Phim</string>
     <string name="nav_schedule_premiere">Lên lịch công chiếu</string>
     <string name="nav_watch_together">Cùng xem</string>
+    <string name="sync_with_host">Đồng bộ với chủ phòng</string>
+
 </resources>

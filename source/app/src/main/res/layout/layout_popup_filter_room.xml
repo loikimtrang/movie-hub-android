@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="@dimen/_120sdp"
+    android:layout_width="@dimen/_160sdp"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:background="@drawable/bg_notification_ft"
+    android:background="@drawable/bg_room_ft"
     android:elevation="@dimen/_4sdp"
     android:padding="@dimen/_6sdp">
 

@@ -14,8 +14,10 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.movie_hub.android.R;
 import com.movie_hub.android.constant.Constants;
+import com.movie_hub.android.data.model.api.response.movie.MovieResponse;
 import com.movie_hub.android.data.model.api.response.notification.NotificationResponse;
 import com.movie_hub.android.data.model.onesignal.MessageCommentResponse;
+import com.movie_hub.android.data.model.onesignal.OneSignalCommand;
 import com.movie_hub.android.databinding.ItemNotificationBinding;
 import com.movie_hub.android.utils.DisplayUtils;
 import com.movie_hub.android.utils.GsonUtils;
@@ -60,7 +62,8 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
         updateUI(holder, item);
         updateTime(holder, item);
         holder.binding.imgAvatar.setVisibility(View.GONE);
-        if (Objects.equals(item.getType(), Constants.NOTIFICATION_TYPE_SOCIAL)) {
+        holder.binding.imgAvatar.setVisibility(View.GONE);
+        if (Objects.equals(item.getType(), Constants.NOTIFICATION_TYPE_SOCIAL) && Objects.equals(item.getCmd(), OneSignalCommand.CMD_REPLY_COMMENT)) {
             MessageCommentResponse messageCommentResponse = GsonUtils.fromJson(item.getBody(), MessageCommentResponse.class);
 
             if (messageCommentResponse != null && messageCommentResponse.getAuthor() != null && messageCommentResponse.getAuthor().getAvatarPath() != null) {
@@ -71,6 +74,20 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
                         .into(holder.binding.imgAvatar);
 
                 holder.binding.imgAvatar.setVisibility(View.VISIBLE);
+            }
+        }
+
+        if (Objects.equals(item.getType(), Constants.NOTIFICATION_TYPE_MOVIE) && Objects.equals(item.getCmd(), OneSignalCommand.CMD_NEW_MOVIE)) {
+            MovieResponse movieResponse = GsonUtils.fromJson(item.getBody(), MovieResponse.class);
+
+            if (movieResponse != null && movieResponse.getThumbnailUrl() != null) {
+                Glide.with(context)
+                        .load(movieResponse.getThumbnailUrl())
+                        .placeholder(R.drawable.logo)
+                        .error(R.drawable.logo)
+                        .into(holder.binding.imgMovie);
+
+                holder.binding.imgMovie.setVisibility(View.VISIBLE);
             }
         }
 

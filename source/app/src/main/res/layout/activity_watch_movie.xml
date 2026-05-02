@@ -99,7 +99,7 @@
                             tools:ignore="RtlHardcoded"
                             android:layout_toEndOf="@+id/btn_lock_screen"
                             android:layout_centerVertical="true"
-                            android:layout_toStartOf="@id/btn_setting">
+                            android:layout_toStartOf="@id/layout_sync">
 
                             <TextView
                                 android:id="@+id/name_movie"
@@ -136,6 +136,40 @@
                                 android:src="@drawable/ic_setting_video"/>
 
                         </FrameLayout>
+
+                        <LinearLayout
+                            android:id="@+id/layout_sync"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="top|end"
+                            android:padding="@dimen/_6sdp"
+                            tools:ignore="UsingOnClickInXml"
+                            android:background="@drawable/bg_bottom_control"
+                            android:layout_centerVertical="true"
+                            android:layout_toStartOf="@+id/btn_setting"
+                            android:orientation="horizontal"
+                            android:layout_marginEnd="@dimen/_6sdp"
+                            android:visibility="gone">
+
+                            <androidx.appcompat.widget.SwitchCompat
+                                android:id="@+id/switch_sync_with_host"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:thumb="@drawable/thumb_custom"
+                                app:track="@drawable/track_custom"
+                                android:switchMinWidth="@dimen/_30sdp"
+                                android:layout_alignParentEnd="true"
+                                android:layout_centerVertical="true"/>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                style="@style/Text_14_Normal"
+                                android:text="@string/sync_with_host"
+                                android:layout_marginStart="@dimen/_6sdp"/>
+
+
+                        </LinearLayout>
                     </RelativeLayout>
 
                 </FrameLayout>

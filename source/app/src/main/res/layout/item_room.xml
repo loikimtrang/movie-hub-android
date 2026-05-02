@@ -34,6 +34,74 @@
                     android:scaleType="centerCrop"
                     app:shapeAppearanceOverlay="@style/movieVerticalImg"/>
 
+                <LinearLayout
+                    android:id="@+id/layout_ic_live"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center"
+                    android:padding="@dimen/_2sdp"
+                    android:background="@drawable/bg_ic_live"
+                    android:layout_alignParentEnd="true"
+                    android:visibility="gone"
+                    android:layout_margin="@dimen/_6sdp">
+
+                    <ImageView
+                        android:id="@+id/ic_dot_live"
+                        android:layout_width="@dimen/_6sdp"
+                        android:layout_height="@dimen/_6sdp"
+                        android:src="@drawable/ic_dot_live" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        style="@style/Text_8_Bold"
+                        android:text="@string/status_live"
+                        android:layout_marginStart="@dimen/_2sdp"/>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/layout_ic_waiting"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center"
+                    android:paddingHorizontal="@dimen/_3sdp"
+                    android:background="@drawable/bg_ic_waiting_live"
+                    android:visibility="gone"
+                    android:layout_gravity="bottom"
+                    android:layout_margin="@dimen/_6sdp">
+
+                    <ImageView
+                        android:id="@+id/ic_hourglass"
+                        android:layout_width="@dimen/_10sdp"
+                        android:layout_height="@dimen/_19sdp"
+                        android:src="@drawable/ic_hourglass" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/layout_ic_end"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center"
+                    android:paddingHorizontal="@dimen/_3sdp"
+                    android:background="@drawable/bg_ic_end_live"
+                    android:visibility="gone"
+                    android:layout_gravity="bottom"
+                    android:layout_margin="@dimen/_6sdp">
+
+                    <ImageView
+                        android:id="@+id/ic_end"
+                        android:layout_width="@dimen/_10sdp"
+                        android:layout_height="@dimen/_19sdp"
+                        android:src="@drawable/ic_end_live" />
+
+                </LinearLayout>
+
+
             </FrameLayout>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
@@ -62,7 +130,7 @@
                 android:layout_height="wrap_content"
                 style="@style/Text_12_Normal"
                 android:textColor="@color/text_cate"
-                android:maxLines="1"
+                android:maxLines="2"
                 android:ellipsize="end"
                 android:text="@string/name"
                 android:layout_marginTop="@dimen/_3sdp"/>
@@ -123,85 +191,6 @@
                 android:text="@string/name"
                 android:layout_marginTop="@dimen/_3sdp"
                 android:visibility="gone"/>
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/layout_ic_live"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center"
-            android:padding="@dimen/_3sdp"
-            android:background="@drawable/bg_ic_live"
-            android:layout_alignParentEnd="true"
-            android:visibility="gone">
-
-            <ImageView
-                android:id="@+id/ic_dot_live"
-                android:layout_width="@dimen/_6sdp"
-                android:layout_height="@dimen/_6sdp"
-                android:src="@drawable/ic_dot_live" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                style="@style/Text_10_Bold"
-                android:text="@string/status_live"
-                android:layout_marginStart="@dimen/_3sdp"/>
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/layout_ic_waiting"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center"
-            android:paddingHorizontal="@dimen/_3sdp"
-            android:background="@drawable/bg_ic_waiting_live"
-            android:layout_alignParentEnd="true"
-            android:visibility="gone">
-
-            <ImageView
-                android:id="@+id/ic_hourglass"
-                android:layout_width="@dimen/_10sdp"
-                android:layout_height="@dimen/_19sdp"
-                android:src="@drawable/ic_hourglass" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                style="@style/Text_10_Bold"
-                android:text="@string/status_waiting"
-                android:layout_marginStart="@dimen/_3sdp"/>
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/layout_ic_end"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center"
-            android:paddingHorizontal="@dimen/_3sdp"
-            android:background="@drawable/bg_ic_end_live"
-            android:layout_alignParentEnd="true"
-            android:visibility="visible">
-
-            <ImageView
-                android:id="@+id/ic_end"
-                android:layout_width="@dimen/_10sdp"
-                android:layout_height="@dimen/_19sdp"
-                android:src="@drawable/ic_end_live" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                style="@style/Text_10_Bold"
-                android:textColor="@color/orange"
-                android:text="@string/status_ended"
-                android:layout_marginStart="@dimen/_3sdp"/>
 
         </LinearLayout>
 
