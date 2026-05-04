@@ -77,7 +77,7 @@ public class DialogUtils {
         });
 
         TextView btnCancel = dialog.findViewById(R.id.btn_cancel);
-        btnCancel.setVisibility(View.GONE); // 👈 Ẩn luôn nút Cancel
+        btnCancel.setVisibility(View.GONE);
 
         dialog.show();
         return dialog;

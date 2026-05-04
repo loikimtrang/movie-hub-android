@@ -3,6 +3,8 @@ package com.movie_hub.android.ui.main.movie.watch.dialog;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.view.LayoutInflater;
+import android.view.View;
+
 import androidx.annotation.NonNull;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Observer;
@@ -19,6 +21,7 @@ public class SettingBottomSheetDialog extends BaseBottomSheetDialog {
     private LayoutBottomSheetSettingsBinding binding;
     private SettingVideoModel settingVideoModel;
     private final SettingBottomSheetCallback callback;
+    private final boolean hidePlaybackSpeedAndMoreOptions;
     public static MutableLiveData<VideoQuality> videoQuality = new MutableLiveData<>();
     public interface SettingBottomSheetCallback {
         void onQualityClicked();
@@ -28,9 +31,15 @@ public class SettingBottomSheetDialog extends BaseBottomSheetDialog {
         void onMoreOptionsClicked();
     }
     public SettingBottomSheetDialog(@NonNull Context context, SettingVideoModel settingVideoModel, SettingBottomSheetCallback callback) {
+        this(context, settingVideoModel, callback, false);
+    }
+
+    public SettingBottomSheetDialog(@NonNull Context context, SettingVideoModel settingVideoModel,
+                                    SettingBottomSheetCallback callback, boolean hidePlaybackSpeedAndMoreOptions) {
         super(context);
         this.settingVideoModel = settingVideoModel;
         this.callback = callback;
+        this.hidePlaybackSpeedAndMoreOptions = hidePlaybackSpeedAndMoreOptions;
         init();
     }
 
@@ -40,6 +49,11 @@ public class SettingBottomSheetDialog extends BaseBottomSheetDialog {
         setContentView(binding.getRoot());
         setUpView();
         setupTransparentWindow();
+
+        if (hidePlaybackSpeedAndMoreOptions) {
+            binding.btnPlaySpeed.setVisibility(View.GONE);
+            binding.btnMoreOption.setVisibility(View.GONE);
+        }
 
         binding.layoutSetting.setOnClickListener(v -> dismiss());
         binding.btnQuality.setOnClickListener(v -> onQualityClicked());

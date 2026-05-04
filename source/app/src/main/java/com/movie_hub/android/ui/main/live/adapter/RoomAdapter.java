@@ -43,6 +43,7 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.RoomViewHolder
         return new RoomAdapter.RoomViewHolder(binding);
     }
 
+    @SuppressLint("SetTextI18n")
     @Override
     public void onBindViewHolder(@NonNull RoomAdapter.RoomViewHolder holder, int position) {
         RoomResponse item = items.get(position);
@@ -50,6 +51,16 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.RoomViewHolder
         holder.binding.tvTitle.setText(item.getName());
         holder.binding.tvNameAuthor.setText(item.getHost().getFullName());
         holder.binding.tvTime.setText(DisplayUtils.getTimeAgo(context, item.getCreatedDate()));
+
+        if (item.getMovieItem().getMovie().getType() == Constants.TYPE_MOVIE_SINGLE) {
+            holder.binding.tvSubTitle.setText(item.getMovieItem().getMovie().getTitle());
+        } else {
+            String title = item.getMovieItem().getMovie().getTitle();
+            String episode = context.getString(R.string.episode_char)
+                    + item.getMovieItem().getLabel();
+
+            holder.binding.tvSubTitle.setText(episode + " - " + title);
+        }
 
         Glide.with(context)
                 .load(Constants.MEDIA_URL + item.getHost().getAvatarPath())
@@ -91,7 +102,8 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.RoomViewHolder
             android.view.animation.Animation blink = android.view.animation.AnimationUtils.loadAnimation(context, R.anim.fade_blink);
             holder.binding.icDotLive.startAnimation(blink);
         } else {
-            holder.binding.dayStart.setVisibility(View.GONE);
+            holder.binding.dayStart.setText(context.getString(R.string.status_ended));
+            holder.binding.dayStart.setVisibility(View.VISIBLE);
             holder.binding.layoutIcWaiting.setVisibility(View.GONE);
             holder.binding.layoutIcLive.setVisibility(View.GONE);
             holder.binding.layoutIcEnd.setVisibility(View.VISIBLE);

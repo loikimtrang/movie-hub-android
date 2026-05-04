@@ -4,5 +4,5 @@ import lombok.Data;
 
 @Data
 public class ClientPingModel {
-    private Long accountId;
+    private String accountId;
 }

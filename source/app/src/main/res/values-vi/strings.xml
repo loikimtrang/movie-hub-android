@@ -329,5 +329,13 @@
     <string name="nav_schedule_premiere">Lên lịch công chiếu</string>
     <string name="nav_watch_together">Cùng xem</string>
     <string name="sync_with_host">Đồng bộ với chủ phòng</string>
+    <string name="msg_room_timeout_countdown">Phòng đã hết thời gian, sẽ đóng trong %s</string>
+    <string name="msg_room_timeout_ask">Phòng đã hết thời gian, bạn có muốn tiếp tục xem với chế độ bình thường?</string>
+    <string name="msg_host_left_ask">Chủ phòng đã rời đi, bạn có muốn tiếp tục xem với chế độ bình thường?</string>
+    <string name="msg_room_ended_ask">Phòng đã kết thúc, bạn có muốn tiếp tục xem với chế độ bình thường?</string>
+
+    <string name="action_continue">Tiếp tục</string>
+    <string name="action_exit">Thoát</string>
+    <string name="chat">Trò chuyện</string>
 
 </resources>

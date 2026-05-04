@@ -329,5 +329,13 @@
     <string name="nav_schedule_premiere">Schedule premiere</string>
     <string name="nav_watch_together">Watch Together</string>
     <string name="sync_with_host">Sync with host</string>
+    <string name="msg_room_timeout_countdown">The room has expired and will close in %s</string>
+    <string name="msg_room_timeout_ask">The room has expired. Would you like to continue watching in normal mode?</string>
+    <string name="msg_host_left_ask">The host has left. Would you like to continue watching in normal mode?</string>
+    <string name="msg_room_ended_ask">The room has ended. Would you like to continue watching in normal mode?</string>
+
+    <string name="action_continue">Continue</string>
+    <string name="action_exit">Exit</string>
+    <string name="chat">Chat</string>
 
 </resources>

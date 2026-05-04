@@ -103,6 +103,9 @@ public class Constants {
 
     public static final Integer NOTIFICATION_TYPE_MOVIE = 2;
     public static final Integer NOTIFICATION_TYPE_SOCIAL = 3;
+    public static final String ROOM_REASON_END = "ROOM_END";
+    public static final String ROOM_REASON_HOST_LEFT = "HOST_LEFT";
+    public static final String ROOM_REASON_TIMEOUT = "ROOM_TIMEOUT";
 
     private Constants(){
 
