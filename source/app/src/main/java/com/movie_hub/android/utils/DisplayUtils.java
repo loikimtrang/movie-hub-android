@@ -271,4 +271,23 @@ public class DisplayUtils {
             return 0;
         }
     }
+    public static final String SERVER_FORMAT = "dd/MM/yyyy HH:mm:ss";
+    public static final String VIEW_FORMAT = "HH:mm dd/MM/yyyy";
+
+    public static String formatDateTime(String dateStr) {
+        if (dateStr == null || dateStr.isEmpty()) return "";
+
+        SimpleDateFormat inputFormat = new SimpleDateFormat(SERVER_FORMAT, Locale.getDefault());
+        SimpleDateFormat outputFormat = new SimpleDateFormat(VIEW_FORMAT, Locale.getDefault());
+
+        try {
+            Date date = inputFormat.parse(dateStr);
+            if (date != null) {
+                return outputFormat.format(date);
+            }
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return dateStr;
+    }
 }

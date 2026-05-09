@@ -65,8 +65,6 @@ public class CollectionAdapter extends RecyclerView.Adapter<CollectionAdapter.Co
                 setupRecycler(holder, new CollectionType_1_Adapter(onMovieClickCallback, context), item.getMovies());
                 break;
 
-
-
             case Constants.TYPE_COLLECTION_3:
                 setupRecycler(holder, new CollectionType_3_Adapter(onMovieClickCallback, context), item.getMovies());
                 break;

@@ -85,7 +85,11 @@ public class HomeSideBarDetailActivity extends BaseActivity<ActivityHomeSideBarD
             viewBinding.tvTitle.setText(collectionResponse.getName());
 
             viewModel.collectionResponse = collectionResponse;
-            getListMovie();
+            if (collectionResponse.isTmpCollection()) {
+                showTmpCollectionMovies(collectionResponse);
+            } else {
+                getListMovie();
+            }
         }
 
         viewBinding.rvMovie.addOnScrollListener(new RecyclerView.OnScrollListener() {
@@ -93,6 +97,7 @@ public class HomeSideBarDetailActivity extends BaseActivity<ActivityHomeSideBarD
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
                 if (dy <= 0) return;
+                if (viewModel.collectionResponse != null && viewModel.collectionResponse.isTmpCollection()) return;
 
                 LinearLayoutManager lm = (LinearLayoutManager) recyclerView.getLayoutManager();
                 if (lm == null || movieVerticalAdapter == null) return;
@@ -105,6 +110,21 @@ public class HomeSideBarDetailActivity extends BaseActivity<ActivityHomeSideBarD
                 }
             }
         });
+    }
+
+    private void showTmpCollectionMovies(@NonNull CollectionResponse collectionResponse) {
+        hideShimmer();
+        isLoading = false;
+        isLastPage = true;
+
+        List<MovieResponse> movies = collectionResponse.getMovies();
+        if (movies != null && !movies.isEmpty()) {
+            viewBinding.layoutEmpty.setVisibility(View.GONE);
+            viewModel.listMovieResponse.setValue(new ArrayList<>(movies));
+            movieVerticalAdapter.setData(movies);
+        } else {
+            viewBinding.layoutEmpty.setVisibility(View.VISIBLE);
+        }
     }
 
     public void showShimmer() {

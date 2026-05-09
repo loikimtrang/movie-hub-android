@@ -7,8 +7,8 @@ android {
         applicationId "com.movie_hub.android"
         minSdkVersion 21
         targetSdkVersion 30
-        versionCode 11
-        versionName "v1.0.10"
+        versionCode 13
+        versionName "v1.0.12"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         Properties properties = new Properties()
@@ -20,6 +20,7 @@ android {
         buildConfigField "String", "MEDIA_URL", properties.getProperty("MEDIA_URL")
         buildConfigField "String", "MEDIA_URL_VTT", properties.getProperty("MEDIA_URL_VTT")
         buildConfigField "String", "MEDIA_URL_VIDEO", properties.getProperty("MEDIA_URL_VIDEO")
+        buildConfigField "String", "MEDIA_URL_UPLOAD", properties.getProperty("MEDIA_URL_UPLOAD")
 
         buildConfigField "String", "MQTT_BROKER", properties.getProperty("MQTT_BROKER")
         buildConfigField "String", "MQTT_USERNAME", properties.getProperty("MQTT_USERNAME")
@@ -183,5 +184,7 @@ dependencies {
     implementation 'org.eclipse.paho:org.eclipse.paho.android.service:1.1.1'
 
     implementation 'com.onesignal:OneSignal:4.8.5'
+
+    implementation 'com.daimajia.swipelayout:library:1.2.0@aar'
 }
 apply plugin: 'com.google.gms.google-services'

@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.movie_hub.android.R;
 import com.movie_hub.android.constant.Constants;
+import com.movie_hub.android.data.model.api.response.MovieItem.MovieItemResponse;
 import com.movie_hub.android.data.model.api.response.movie.MovieResponse;
 import com.movie_hub.android.data.model.api.response.notification.NotificationResponse;
 import com.movie_hub.android.data.model.onesignal.MessageCommentResponse;
@@ -77,18 +78,41 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
             }
         }
 
-        if (Objects.equals(item.getType(), Constants.NOTIFICATION_TYPE_MOVIE) && Objects.equals(item.getCmd(), OneSignalCommand.CMD_NEW_MOVIE)) {
-            MovieResponse movieResponse = GsonUtils.fromJson(item.getBody(), MovieResponse.class);
+        if (Objects.equals(item.getType(), Constants.NOTIFICATION_TYPE_MOVIE)) {
+            switch (item.getCmd()) {
+                case OneSignalCommand.CMD_NEW_MOVIE:
+                    MovieResponse movieResponse = GsonUtils.fromJson(item.getBody(), MovieResponse.class);
 
-            if (movieResponse != null && movieResponse.getThumbnailUrl() != null) {
-                Glide.with(context)
-                        .load(movieResponse.getThumbnailUrl())
-                        .placeholder(R.drawable.logo)
-                        .error(R.drawable.logo)
-                        .into(holder.binding.imgMovie);
+                    if (movieResponse != null && movieResponse.getThumbnailUrl() != null) {
+                        Glide.with(context)
+                                .load(movieResponse.getThumbnailUrl())
+                                .placeholder(R.drawable.logo)
+                                .error(R.drawable.logo)
+                                .into(holder.binding.imgMovie);
 
-                holder.binding.imgMovie.setVisibility(View.VISIBLE);
+                        holder.binding.imgMovie.setVisibility(View.VISIBLE);
+                    }
+
+                    break;
+                case OneSignalCommand.CMD_NEW_MOVIE_ITEM:
+                    MovieItemResponse movieItemResponse = GsonUtils.fromJson(item.getBody(), MovieItemResponse.class);
+
+                    if (movieItemResponse != null && movieItemResponse.getMovie() != null && movieItemResponse.getMovie().getThumbnailUrl() != null) {
+                        Glide.with(context)
+                                .load(movieItemResponse.getMovie().getThumbnailUrl())
+                                .placeholder(R.drawable.logo)
+                                .error(R.drawable.logo)
+                                .into(holder.binding.imgMovie);
+
+                        holder.binding.imgMovie.setVisibility(View.VISIBLE);
+                    }
+
+                    break;
+                default:
+                    break;
             }
+
+
         }
 
         holder.binding.getRoot().setOnClickListener(v -> {

@@ -47,13 +47,15 @@
 
 
                 <FrameLayout
+                    android:id="@+id/layout_date_release"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:background="@drawable/bg_year"
                     android:paddingHorizontal="@dimen/_3sdp"
                     android:paddingVertical="@dimen/_1sdp"
                     android:layout_gravity="center_vertical"
-                    android:layout_marginEnd="@dimen/_6sdp">
+                    android:layout_marginEnd="@dimen/_6sdp"
+                    android:visibility="gone">
 
                     <TextView
                         android:layout_width="wrap_content"

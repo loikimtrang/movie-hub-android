@@ -91,6 +91,8 @@ public class MovieDetailActivity extends BaseActivity<ActivityMovieDetailBinding
     private Runnable updateSeekBarRunnable;
     private boolean isBuffering = false;
     private boolean isMuted = true;
+    private boolean isMovieAvailable = true;
+    private String movieStreamUrl = null;
     public static String DATA_MSG = "DATA_MSG";
     private ActivityResultLauncher<Intent> loginLauncher;
     @SuppressLint("SetTextI18n")
@@ -296,11 +298,17 @@ public class MovieDetailActivity extends BaseActivity<ActivityMovieDetailBinding
     private void setUpView() {
         if (viewModel.movieDetails == null) return;
 
-        for (SeasonResponse s: viewModel.movieDetails.getSeasons()) {
-            s.setSelect(false);
+        List<SeasonResponse> seasons = viewModel.movieDetails.getSeasons();
+        if (seasons != null && !seasons.isEmpty()) {
+            for (SeasonResponse s : seasons) {
+                if (s != null) s.setSelect(false);
+            }
+            SeasonResponse lastSeason = seasons.get(seasons.size() - 1);
+            if (lastSeason != null) lastSeason.setSelect(true);
         }
 
-        viewModel.movieDetails.getSeasons().get(viewModel.movieDetails.getSeasons().size() - 1).setSelect(true);
+        movieStreamUrl = extractMovieStreamUrl(viewModel.movieDetails, viewModel.remainingEpisode);
+        isMovieAvailable = movieStreamUrl != null && !movieStreamUrl.trim().isEmpty();
 
         Glide.with(this)
                 .load(viewModel.movieDetails.getThumbnailUrl())
@@ -322,25 +330,44 @@ public class MovieDetailActivity extends BaseActivity<ActivityMovieDetailBinding
         }
 
         if (viewModel.movieDetails.getType() == Constants.TYPE_MOVIE_SINGLE) {
-            viewBinding.includeMovieHeader.dateRelease.setText(DisplayUtils.getYearFromReleaseDate(viewModel.movieDetails.getReleaseDate()));
-            viewBinding.includeMovieHeader.durationEpisodeSeason.setText(DisplayUtils.displayTimeFromSeconds(this, viewModel.movieDetails.getSeasons().get(0).getVideo().getDuration()));
+            if (viewModel.movieDetails.getReleaseDate() == null) {
+                viewBinding.includeMovieHeader.layoutDateRelease.setVisibility(View.GONE);
+            } else {
+                viewBinding.includeMovieHeader.layoutDateRelease.setVisibility(View.VISIBLE);
+                viewBinding.includeMovieHeader.dateRelease.setText(DisplayUtils.getYearFromReleaseDate(viewModel.movieDetails.getReleaseDate()));
+            }
+            if (seasons != null && !seasons.isEmpty() && seasons.get(0) != null && seasons.get(0).getVideo() != null) {
+                viewBinding.includeMovieHeader.durationEpisodeSeason.setText(
+                        DisplayUtils.displayTimeFromSeconds(this, seasons.get(0).getVideo().getDuration())
+                );
+            } else {
+                viewBinding.includeMovieHeader.durationEpisodeSeason.setText("");
+            }
         } else if (viewModel.movieDetails.getType() == Constants.TYPE_MOVIE_SERIES) {
-            if (viewModel.movieDetails.getSeasons() != null && !viewModel.movieDetails.getSeasons().isEmpty()) {
-                SeasonResponse lastSeason = viewModel.movieDetails.getSeasons().get(viewModel.movieDetails.getSeasons().size() - 1);
-                viewBinding.includeMovieHeader.dateRelease.setText(DisplayUtils.getYearFromReleaseDate(lastSeason.getReleaseDate()));
+            if (seasons != null && !seasons.isEmpty()) {
+                SeasonResponse lastSeason = seasons.get(seasons.size() - 1);
+                if (lastSeason.getReleaseDate() == null || lastSeason.getReleaseDate().isEmpty()) {
+                    viewBinding.includeMovieHeader.layoutDateRelease.setVisibility(View.GONE);
+                } else {
+                    viewBinding.includeMovieHeader.layoutDateRelease.setVisibility(View.VISIBLE);
+                    viewBinding.includeMovieHeader.dateRelease.setText(DisplayUtils.getYearFromReleaseDate(lastSeason.getReleaseDate()));
+                }
 
-                if (viewModel.movieDetails.getSeasons().size() == 1) {
-                    viewBinding.includeMovieHeader.durationEpisodeSeason.setText(viewModel.movieDetails.getSeasons().get(0).getEpisodes().size()
+                if (seasons.size() == 1) {
+                    int episodeCount = (seasons.get(0) != null && seasons.get(0).getEpisodes() != null)
+                            ? seasons.get(0).getEpisodes().size()
+                            : 0;
+                    viewBinding.includeMovieHeader.durationEpisodeSeason.setText(episodeCount
                             + " " + getString(R.string.episode_non_up));
                 } else {
-                    viewBinding.includeMovieHeader.durationEpisodeSeason.setText(viewModel.movieDetails.getSeasons().size()
+                    viewBinding.includeMovieHeader.durationEpisodeSeason.setText(seasons.size()
                             + " " + getString(R.string.season_non_up));
                 }
             }
         }
 
-        if (viewModel.movieDetails.getSeasons() != null && !viewModel.movieDetails.getSeasons().isEmpty()) {
-            SeasonResponse lastSeason = viewModel.movieDetails.getSeasons().get(viewModel.movieDetails.getSeasons().size() - 1);
+        if (seasons != null && !seasons.isEmpty()) {
+            SeasonResponse lastSeason = seasons.get(seasons.size() - 1);
 
             if (lastSeason.getTrailer() != null) {
                 VideoResponse video = lastSeason.getTrailer().getVideo();
@@ -379,7 +406,7 @@ public class MovieDetailActivity extends BaseActivity<ActivityMovieDetailBinding
         List<String> tabTitles = new ArrayList<>();
         fragmentList.clear();
 
-        if (isSeries) {
+        if (isSeries && isMovieAvailable) {
             tabTitles.add(getString(R.string.episode));
             fragmentList.add(new EpisodesFragment());
         }
@@ -459,6 +486,41 @@ public class MovieDetailActivity extends BaseActivity<ActivityMovieDetailBinding
         setupGestureDetector();
     }
 
+    /**
+     * Video Extraction for "Watch Movie".
+     *
+     * Correct fields in current data model:
+     * - Movie single: `movie.seasons[0].video.content`
+     * - Movie series: `episode.video.content` (episode chosen from remainingEpisode or first episode)
+     */
+    @Nullable
+    private String extractMovieStreamUrl(@Nullable MovieResponse movie, @Nullable MovieItemResponse remainingEpisode) {
+        if (movie == null) return null;
+        List<SeasonResponse> seasons = movie.getSeasons();
+        if (seasons == null || seasons.isEmpty()) return null;
+
+        Integer type = movie.getType();
+        if (type != null && type == Constants.TYPE_MOVIE_SERIES) {
+            MovieItemResponse episode = remainingEpisode;
+            if (episode == null) {
+                SeasonResponse firstSeason = seasons.get(0);
+                if (firstSeason == null || firstSeason.getEpisodes() == null || firstSeason.getEpisodes().isEmpty()) {
+                    return null;
+                }
+                episode = firstSeason.getEpisodes().get(0);
+            }
+            if (episode == null || episode.getVideo() == null) return null;
+            return episode.getVideo().getContent();
+        }
+
+        SeasonResponse firstSeason = seasons.get(0);
+        if (firstSeason == null || firstSeason.getVideo() == null) return null;
+        return firstSeason.getVideo().getContent();
+    }
+
+    /**
+     * Feature Gatekeeping: if movie isn't playable, hide/disable interactions.
+     */
     private void toggleMute() {
         isMuted = !isMuted;
         player.setVolume(isMuted ? 0f : 1f);
@@ -684,6 +746,7 @@ public class MovieDetailActivity extends BaseActivity<ActivityMovieDetailBinding
                 }
                 break;
             case R.id.btn_cmt:
+                if (!isMovieAvailable) return;
                 showLoading();
                 ClickUtils.debounceClick(viewBinding.includeMovieHeader.btnCmt);
                 Intent it = new Intent(this, CommentActivity.class);
@@ -692,6 +755,7 @@ public class MovieDetailActivity extends BaseActivity<ActivityMovieDetailBinding
                 break;
 
             case R.id.btn_rating:
+                if (!isMovieAvailable) return;
                 if (viewModel.isLogin()) {
                     checkReview();
                 } else {

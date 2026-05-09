@@ -323,7 +323,7 @@
     <string name="status_live">LIVE</string>
     <string name="my_room">Phòng của tôi</string>
     <string name="premiered_on">Công chiếu:</string>
-    <string name="empty_room">Danh phòng trống</string>
+    <string name="empty_room">Danh sách phòng trống</string>
     <string name="nav_community">Cộng đồng</string>
     <string name="nav_movies">Phim</string>
     <string name="nav_schedule_premiere">Lên lịch công chiếu</string>
@@ -337,5 +337,14 @@
     <string name="action_continue">Tiếp tục</string>
     <string name="action_exit">Thoát</string>
     <string name="chat">Trò chuyện</string>
+    <string name="msg_premier_not_started">Vẫn chưa đến thời gian công chiếu</string>
+    <string name="msg_room_ended">Phòng chiếu phim đã kết thúc</string>
+    <string name="msg_waiting_for_host">Chủ phòng chưa tham gia, vui lòng đợi</string>
+    <string name="msg_premier_ready_ask">Đã đến thời gian công chiếu, bạn có muốn bắt đầu không?</string>
 
+    <string name="title_information">Thông tin</string>
+    <string name="action_start">Bắt đầu</string>
+    <string name="back">Quay lại</string>
+    <string name="because_you_watched_format">Vì bạn đã xem</string>
+    <string name="recommend_for_you">Có thể bạn sẽ thích</string>
 </resources>

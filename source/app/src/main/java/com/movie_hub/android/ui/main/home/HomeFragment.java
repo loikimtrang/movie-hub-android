@@ -59,6 +59,7 @@ import com.movie_hub.android.utils.HtmlUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.Objects;
 
 
@@ -109,10 +110,15 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding, HomeViewMode
     private CollectionAdapter collectionAdapter;
     private CollectionType_Topic_Adapter collectionTypeTopicAdapter;
 
-    int currentPage = 0;
-    int pageSize = 4;
-    boolean isLastPage = false;
+    private int nextPage = 0;
+    private final int pageSize = 4;
+    private boolean isLastPage = false;
     private boolean isLoading = false;
+    private int inFlightPage = -1;
+    private final AtomicBoolean suggestDone = new AtomicBoolean(false);
+    private final AtomicBoolean collectionDone = new AtomicBoolean(false);
+    private CollectionResponse pendingSuggestCollection = null;
+    private ResponseListObj<CollectionResponse> pendingCollectionPage = null;
     @Override
     protected void performDataBinding() {
         binding.setF(this);
@@ -207,7 +213,7 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding, HomeViewMode
                 int distanceToBottom = child.getBottom() - (binding.scrollMain.getHeight() + scrollY);
 
                 if (distanceToBottom < threshold && !isLoading && !isLastPage) {
-                    getListCollection();
+                    loadNextPage();
                 }
 
                 if (scrollY > oldScrollY + 5) {
@@ -266,10 +272,14 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding, HomeViewMode
     private void reloadDataHome() {
         showShimmer();
         // collection
-        currentPage = 0;
-        pageSize = 4;
+        nextPage = 0;
         isLastPage = false;
         isLoading = false;
+        inFlightPage = -1;
+        suggestDone.set(false);
+        collectionDone.set(false);
+        pendingSuggestCollection = null;
+        pendingCollectionPage = null;
         viewModel.collectionList.setValue(new ArrayList<>());
 
         viewModel.currentBannerMovie = new MovieResponse();
@@ -516,8 +526,14 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding, HomeViewMode
             @Override
             public void doSuccess(ResponseListObj<SidebarResponse> data) {
                 viewModel.movieBannerList.postValue(data.getContent());
-                getListCollection();
                 getListTopic();
+                if (viewModel.isLogin()) {
+                    getRecommendMovie(() -> {
+                        loadPage(0);
+                    });
+                } else {
+                    loadPage(0);
+                }
             }
             @Override
             public void doError(Throwable error) {
@@ -537,6 +553,40 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding, HomeViewMode
                 showError(getString(R.string.an_error_occurred));
             }
         }, new SideBarRequest());
+    }
+
+    public void getRecommendMovie(@NonNull Runnable onDone) {
+        viewModel.getRecommendMovie(new MainCallback<CollectionResponse>() {
+
+            @Override
+            public void doSuccess(CollectionResponse object) {
+                if (object != null && object.getMovies() != null && !object.getMovies().isEmpty()) {
+                    List<CollectionResponse> current = viewModel.collectionList.getValue();
+                    List<CollectionResponse> newList = new ArrayList<>();
+                    newList.add(object);
+                    if (current != null && !current.isEmpty()) {
+                        newList.addAll(current);
+                    }
+                    viewModel.collectionList.setValue(newList);
+                }
+                onDone.run();
+            }
+
+            @Override
+            public void doError(Throwable error) {
+                onDone.run();
+            }
+
+            @Override
+            public void doSuccess() {
+
+            }
+
+            @Override
+            public void doFail() {
+                onDone.run();
+            }
+        }, getString(R.string.recommend_for_you));
     }
 
     public void getListMovieHistory() {
@@ -569,62 +619,126 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding, HomeViewMode
         });
     }
 
-    public void getListCollection() {
+    private void loadNextPage() {
+        loadPage(nextPage);
+    }
+
+    private void loadPage(int page) {
+        if (isLoading || isLastPage) return;
+        if (inFlightPage == page) return;
+
         isLoading = true;
+        inFlightPage = page;
+        suggestDone.set(false);
+        collectionDone.set(false);
+        pendingSuggestCollection = null;
+        pendingCollectionPage = null;
+
+        if (viewModel.isLogin()) {
+            viewModel.getListSuggestByWatch(new MainCallback<CollectionResponse>() {
+                @Override
+                public void doError(Throwable error) {
+                    suggestDone.set(true);
+                    maybeCommitPage(page);
+                }
+
+                @Override
+                public void doSuccess() { }
+
+                @Override
+                public void doFail() {
+                    suggestDone.set(true);
+                    maybeCommitPage(page);
+                }
+
+                @Override
+                public void doSuccess(CollectionResponse object) {
+                    if (object != null && object.getMovies() != null && !object.getMovies().isEmpty()) {
+                        pendingSuggestCollection = object;
+                    }
+                    suggestDone.set(true);
+                    maybeCommitPage(page);
+                }
+            }, page, getString(R.string.because_you_watched_format));
+        } else {
+            suggestDone.set(true);
+        }
+
         CollectionRequest request = new CollectionRequest();
         request.setSize(pageSize);
-        request.setPage(currentPage);
+        request.setPage(page);
 
         viewModel.getListCollection(new MainCallback<ResponseListObj<CollectionResponse>>() {
             @Override
             public void doError(Throwable error) {
                 hideLoading();
                 isLoading = false;
+                inFlightPage = -1;
                 showError(getString(R.string.an_error_occurred));
             }
 
             @Override
             public void doSuccess() {
-                isLoading = false;
                 hideLoading();
-
             }
 
             @Override
             public void doSuccess(ResponseListObj<CollectionResponse> data) {
-                if (data.getContent() != null && !data.getContent().isEmpty()) {
-                    List<CollectionResponse> filteredContent = new ArrayList<>();
-                    for (CollectionResponse item : data.getContent()) {
-                        if (item.getMovies() != null && !item.getMovies().isEmpty()) {
-                            filteredContent.add(item);
-                        }
-                    }
-
-                    List<CollectionResponse> newList = new ArrayList<>();
-                    if (currentPage != 0) {
-                        List<CollectionResponse> currentList = viewModel.collectionList.getValue();
-                        if (currentList != null) newList.addAll(currentList);
-                    }
-
-                    newList.addAll(filteredContent);
-                    viewModel.collectionList.setValue(newList);
-
-                    currentPage++;
-                    isLastPage = currentPage >= data.getTotalPages();
-                } else {
-                    isLastPage = true;
-                }
-                isLoading = false;
+                pendingCollectionPage = data;
+                collectionDone.set(true);
+                maybeCommitPage(page);
             }
-
 
             @Override
             public void doFail() {
-                isLoading = false;
                 hideLoading();
+                isLoading = false;
+                inFlightPage = -1;
                 showError(getString(R.string.an_error_occurred));
             }
         }, request);
+    }
+
+    private void maybeCommitPage(int page) {
+        if (page != inFlightPage) return;
+        if (!collectionDone.get()) return;
+        if (!suggestDone.get()) return;
+
+        ResponseListObj<CollectionResponse> data = pendingCollectionPage;
+        List<CollectionResponse> pageItems = new ArrayList<>();
+
+        if (pendingSuggestCollection != null && pendingSuggestCollection.getId() != null) {
+            pageItems.add(pendingSuggestCollection);
+        }
+
+        if (data != null && data.getContent() != null && !data.getContent().isEmpty()) {
+            for (CollectionResponse item : data.getContent()) {
+                if (item.getMovies() != null && !item.getMovies().isEmpty()) {
+                    pageItems.add(item);
+                }
+            }
+        }
+
+        if (!pageItems.isEmpty()) {
+            List<CollectionResponse> currentList = viewModel.collectionList.getValue();
+            List<CollectionResponse> newList = new ArrayList<>();
+            if (currentList != null) newList.addAll(currentList);
+            newList.addAll(pageItems);
+            viewModel.collectionList.setValue(newList);
+        } else {
+            isLastPage = true;
+        }
+
+        if (data != null) {
+            int totalPages = data.getTotalPages();
+            nextPage = page + 1;
+            isLastPage = nextPage >= totalPages;
+        } else {
+            isLastPage = true;
+        }
+
+        isLoading = false;
+        inFlightPage = -1;
     }
 
     public void getListTopic() {

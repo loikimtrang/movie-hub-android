@@ -77,9 +77,9 @@ public class Constants {
     public static final Integer ROOM_KIND_PRIVATE = 0;
     public static final Integer ROOM_KIND_PUBLIC = 1;
 
-    public static final Integer ROOM_STATE_PENDING = 0;
-    public static final Integer ROOM_STATE_RUNNING = 1;
-    public static final Integer ROOM_STATE_ENDING = 2;
+    public static final int ROOM_STATE_PENDING = 0;
+    public static final int ROOM_STATE_RUNNING = 1;
+    public static final int ROOM_STATE_ENDING = 2;
 
     // Aliases used by UI filters (Room state)
     public static final Integer STATE_LOCKED = ROOM_STATE_PENDING;

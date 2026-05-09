@@ -45,6 +45,8 @@ import com.movie_hub.android.data.model.api.response.playlist.PlayListResponse;
 import com.movie_hub.android.data.model.api.response.review.ReviewResponse;
 import com.movie_hub.android.data.model.api.response.room.RoomResponse;
 import com.movie_hub.android.data.model.api.response.side_bar.SidebarResponse;
+import com.movie_hub.android.data.model.api.response.suggesst.CategoryByWatch;
+import com.movie_hub.android.data.model.api.response.suggesst.SuggestByWatchResponse;
 import com.movie_hub.android.data.model.api.response.user.UserResponse;
 import com.movie_hub.android.data.model.api.response.user.UserUploadImageResponse;
 
@@ -97,7 +99,14 @@ public interface ApiService {
 
     @GET("v1/movie/list-survey")
     Observable<ResponseWrapper<List<MovieResponse>>> getListMovieSurvey(@QueryMap Map<String, Object> query);
+    @GET("v1/movie/suggest-by-watched")
+    Observable<ResponseWrapper<SuggestByWatchResponse>> getSuggestByWatched(@QueryMap Map<String, Object> query);
 
+    @GET("v1/movie/recommendation")
+    Observable<ResponseWrapper<List<MovieResponse>>> getRecommendMovie();
+
+    @GET("v1/movie/recommendation/recent-watched-category")
+    Observable<ResponseWrapper<CategoryByWatch>> getCategoryByWatched();
     @POST("v1/movie/make-survey")
     Observable<ResponseWrapper> makeSurvey(@Body MakeSurveyRequest request);
 //    Map<String, Object> query = RequestToMapConverter.convert(movieRequest);

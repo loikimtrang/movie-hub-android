@@ -209,8 +209,6 @@ public class ManageAccountViewModel extends BaseViewModel {
                     @Override
                     public void onResponse(Call<ResponseWrapper<UserUploadImageResponse>> call, Response<ResponseWrapper<UserUploadImageResponse>> response) {
                         if (response.isSuccessful() && response.body() != null && response.body().isResult()) {
-
-
                             callback.doSuccess(response.body().getData());
                         } else {
                             callback.doFail();

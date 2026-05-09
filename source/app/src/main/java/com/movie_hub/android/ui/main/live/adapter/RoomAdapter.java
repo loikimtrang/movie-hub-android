@@ -10,6 +10,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.daimajia.swipe.SwipeLayout;
 import com.movie_hub.android.R;
 import com.movie_hub.android.constant.Constants;
 import com.movie_hub.android.data.model.api.response.room.RoomResponse;
@@ -25,9 +26,16 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.RoomViewHolder
     private final List<RoomResponse> items = new ArrayList<>();
     private OnRoomClickListener listener;
     private final Context context;
+    private boolean myRoomListMode;
 
     public interface OnRoomClickListener {
         void onRoomClick(RoomResponse model, int position);
+
+        void onRoomDelete(RoomResponse model, int position);
+    }
+
+    public void setMyRoomListMode(boolean myRoomListMode) {
+        this.myRoomListMode = myRoomListMode;
     }
 
     public RoomAdapter(Context context, OnRoomClickListener listener) {
@@ -47,6 +55,25 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.RoomViewHolder
     @Override
     public void onBindViewHolder(@NonNull RoomAdapter.RoomViewHolder holder, int position) {
         RoomResponse item = items.get(position);
+
+        SwipeLayout swipeLayout = holder.binding.swipeLayout;
+        swipeLayout.close(false);
+
+        boolean canSwipeDelete = myRoomListMode && (Objects.equals(item.getState(), Constants.STATE_END) || Objects.equals(item.getState(), Constants.STATE_LOCKED));
+        swipeLayout.setSwipeEnabled(canSwipeDelete);
+        holder.binding.layoutDelete.setOnClickListener(null);
+        if (canSwipeDelete) {
+            holder.binding.layoutDelete.setOnClickListener(v -> {
+                int pos = holder.getBindingAdapterPosition();
+                if (pos == RecyclerView.NO_POSITION || listener == null) return;
+                swipeLayout.close(true);
+                swipeLayout.postDelayed(() -> {
+                    int updatedPos = holder.getBindingAdapterPosition();
+                    if (updatedPos == RecyclerView.NO_POSITION || listener == null) return;
+                    listener.onRoomDelete(items.get(updatedPos), updatedPos);
+                }, 180);
+            });
+        }
 
         holder.binding.tvTitle.setText(item.getName());
         holder.binding.tvNameAuthor.setText(item.getHost().getFullName());
@@ -74,17 +101,23 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.RoomViewHolder
                 .error(R.drawable.place_holder_2_3)
                 .into(holder.binding.image);
 
-        holder.binding.getRoot().setOnClickListener(v -> {
-            if (listener != null) {
-                listener.onRoomClick(item, holder.getBindingAdapterPosition());
+        holder.binding.swipeLayout.setOnClickListener(null);
+        holder.binding.layoutRoomSurface.setOnClickListener(v -> {
+            if (listener == null) return;
+            int pos = holder.getBindingAdapterPosition();
+            if (pos == RecyclerView.NO_POSITION) return;
+            if (swipeLayout.getOpenStatus() != SwipeLayout.Status.Close) {
+                swipeLayout.close(true);
+                return;
             }
+            listener.onRoomClick(items.get(pos), pos);
         });
 
         holder.binding.icHourglass.clearAnimation();
         holder.binding.icDotLive.clearAnimation();
 
         if (Objects.equals(item.getState(), Constants.ROOM_STATE_PENDING)) {
-            holder.binding.dayStart.setText(context.getString(R.string.premiered_on) + " " + item.getStartTime());
+            holder.binding.dayStart.setText(context.getString(R.string.premiered_on) + " " + DisplayUtils.formatDateTime(item.getStartTime()));
             holder.binding.dayStart.setVisibility(View.VISIBLE);
             holder.binding.layoutIcLive.setVisibility(View.GONE);
             holder.binding.layoutIcEnd.setVisibility(View.GONE);
@@ -136,6 +169,7 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.RoomViewHolder
         if (position < 0 || position >= items.size()) return;
         items.remove(position);
         notifyItemRemoved(position);
+        notifyItemRangeChanged(position, items.size() - position);
     }
 
     public void restoreAt(int position, RoomResponse item) {
@@ -144,6 +178,7 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.RoomViewHolder
         if (position > items.size()) position = items.size();
         items.add(position, item);
         notifyItemInserted(position);
+        notifyItemRangeChanged(position, items.size() - position);
     }
 
     @Override

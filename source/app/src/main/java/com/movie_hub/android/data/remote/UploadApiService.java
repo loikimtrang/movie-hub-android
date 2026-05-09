@@ -3,6 +3,7 @@ package com.movie_hub.android.data.remote;
 import android.app.Application;
 
 import com.google.gson.GsonBuilder;
+import com.movie_hub.android.BuildConfig;
 import com.movie_hub.android.constant.Constants;
 import com.movie_hub.android.data.local.prefs.AppPreferencesService;
 import com.movie_hub.android.data.local.prefs.PreferencesService;
@@ -15,7 +16,7 @@ import timber.log.Timber;
 
 public class UploadApiService {
 
-    private static final String BASE_URL = "https://media.moviehub.biz";
+    private static final String BASE_URL = BuildConfig.MEDIA_URL_UPLOAD;
     private static UploadApiService instance;
     private final ApiService api;
     PreferencesService preferencesService;

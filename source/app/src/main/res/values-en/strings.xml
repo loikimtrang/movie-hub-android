@@ -337,5 +337,15 @@
     <string name="action_continue">Continue</string>
     <string name="action_exit">Exit</string>
     <string name="chat">Chat</string>
+    <string name="msg_premier_not_started">The premiere has not started yet</string>
+    <string name="msg_room_ended">The movie room has ended</string>
+    <string name="msg_waiting_for_host">The host hasn\'t joined yet, please wait</string>
+    <string name="msg_premier_ready_ask">It\'s time for the premiere, would you like to start now?</string>
+
+    <string name="title_information">Information</string>
+    <string name="action_start">Start</string>
+    <string name="back">Back</string>
+    <string name="because_you_watched_format">Because you watched</string>
+    <string name="recommend_for_you">You might like these movies</string>
 
 </resources>

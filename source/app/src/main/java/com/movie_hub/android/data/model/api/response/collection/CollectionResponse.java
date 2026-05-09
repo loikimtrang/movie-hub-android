@@ -25,6 +25,9 @@ public class CollectionResponse {
     private List<MovieResponse> movies;
     private List<CollectionItemResponse> collectionItems;
 
+
+    //
+    private boolean isTmpCollection = false;
     public List<String> getListColor() {
         if (color != null && !color.isEmpty()) {
             List<String> list = GsonUtils.fromJsonToList(color, String.class);

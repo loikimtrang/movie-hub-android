@@ -20,6 +20,8 @@ import com.movie_hub.android.ui.main.home.filter.model.FilterTypeModel;
 import com.movie_hub.android.ui.main.live.adapter.RoomAdapter;
 import com.movie_hub.android.ui.main.live.adapter.RoomFilterTypeAdapter;
 import com.movie_hub.android.ui.main.live.adapter.RoomShimmerAdapter;
+import com.movie_hub.android.utils.DialogUtils;
+import com.movie_hub.android.utils.DisplayUtils;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -30,7 +32,6 @@ import android.widget.PopupWindow;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -52,8 +53,6 @@ public class LiveFragment extends BaseFragment<FragmentLiveBinding, LiveViewMode
 
     // null means "All states"
     private Integer currentStateFilter = null;
-
-    private ItemTouchHelper itemTouchHelper;
 
     @Override
     protected void performDataBinding() {
@@ -114,9 +113,9 @@ public class LiveFragment extends BaseFragment<FragmentLiveBinding, LiveViewMode
                     m.setSelect(m.getType() == currentFilter);
                 }
                 roomFilterTypeAdapter.setData(list);
+                roomAdapter.setMyRoomListMode(currentFilter == FILTER_MY_ROOM);
                 resetPaging();
                 getRooms(true);
-                updateSwipeToDelete();
             }
 
 
@@ -129,6 +128,7 @@ public class LiveFragment extends BaseFragment<FragmentLiveBinding, LiveViewMode
 
     private void initRoomList() {
         roomAdapter = new RoomAdapter(requireContext(), this);
+        roomAdapter.setMyRoomListMode(currentFilter == FILTER_MY_ROOM);
         binding.rvRoom.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false));
         binding.rvRoom.setAdapter(roomAdapter);
         shimmerAdapter = new RoomShimmerAdapter(3);
@@ -152,63 +152,6 @@ public class LiveFragment extends BaseFragment<FragmentLiveBinding, LiveViewMode
                 }
             }
         });
-
-        itemTouchHelper = new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0,
-                ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
-            @Override
-            public boolean onMove(@NonNull RecyclerView recyclerView,
-                                  @NonNull RecyclerView.ViewHolder viewHolder,
-                                  @NonNull RecyclerView.ViewHolder target) {
-                return false;
-            }
-
-            @Override
-            public int getSwipeDirs(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder) {
-                if (currentFilter != FILTER_MY_ROOM) return 0;
-                int pos = viewHolder.getBindingAdapterPosition();
-                RoomResponse item = roomAdapter.getItem(pos);
-                if (item == null) return 0;
-                if (!Objects.equals(item.getState(), Constants.STATE_END)) return 0;
-                return super.getSwipeDirs(recyclerView, viewHolder);
-            }
-
-            @Override
-            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
-                int pos = viewHolder.getBindingAdapterPosition();
-                RoomResponse item = roomAdapter.getItem(pos);
-                if (item == null || item.getId() == null) {
-                    roomAdapter.notifyItemChanged(pos);
-                    return;
-                }
-
-                viewModel.showLoading();
-                viewModel.deleteRoom(new MainCallback<Void>() {
-                    @Override
-                    public void doSuccess() {
-                        viewModel.hideLoading();
-                        roomAdapter.removeAt(pos);
-                        if (roomAdapter.getItemCount() == 0) {
-                            binding.layoutEmpty.setVisibility(View.VISIBLE);
-                        }
-                    }
-
-                    @Override
-                    public void doError(Throwable error) {
-                        viewModel.hideLoading();
-                        roomAdapter.notifyItemChanged(pos);
-                    }
-
-                    @Override public void doSuccess(Void object) {}
-
-                    @Override
-                    public void doFail() {
-                        viewModel.hideLoading();
-                        roomAdapter.notifyItemChanged(pos);
-                    }
-                }, item.getId());
-            }
-        });
-        updateSwipeToDelete();
     }
 
     private void initSwipeRefresh() {
@@ -264,6 +207,7 @@ public class LiveFragment extends BaseFragment<FragmentLiveBinding, LiveViewMode
         MainCallback<ResponseListObj<RoomResponse>> callback = new MainCallback<ResponseListObj<RoomResponse>>() {
             @Override
             public void doSuccess(ResponseListObj<RoomResponse> response) {
+                roomAdapter.setMyRoomListMode(currentFilter == FILTER_MY_ROOM);
                 List<RoomResponse> data = response != null ? response.getContent() : null;
 
                 if (isRefresh) {
@@ -287,7 +231,6 @@ public class LiveFragment extends BaseFragment<FragmentLiveBinding, LiveViewMode
                 }
 
                 finishLoading(isRefresh);
-                updateSwipeToDelete();
             }
 
             @Override
@@ -309,15 +252,6 @@ public class LiveFragment extends BaseFragment<FragmentLiveBinding, LiveViewMode
             viewModel.getListMyRoom(callback, request);
         } else {
             viewModel.getListRoom(callback, request);
-        }
-    }
-
-    private void updateSwipeToDelete() {
-        if (itemTouchHelper == null) return;
-        if (currentFilter == FILTER_MY_ROOM) {
-            itemTouchHelper.attachToRecyclerView(binding.rvRoom);
-        } else {
-            itemTouchHelper.attachToRecyclerView(null);
         }
     }
 
@@ -385,20 +319,128 @@ public class LiveFragment extends BaseFragment<FragmentLiveBinding, LiveViewMode
     }
 
     @Override
+    public void onRoomDelete(RoomResponse item, int pos) {
+        if (item == null || item.getId() == null || pos == RecyclerView.NO_POSITION) return;
+
+        // Remove immediately with smooth animation.
+        roomAdapter.removeAt(pos);
+        updateEmptyState();
+
+        showLoading();
+        viewModel.deleteRoom(new MainCallback<Void>() {
+            @Override
+            public void doSuccess() {
+                hideLoading();
+                updateEmptyState();
+            }
+
+            @Override
+            public void doError(Throwable error) {
+                hideLoading();
+                // Best-effort restore if API fails.
+                roomAdapter.restoreAt(pos, item);
+                updateEmptyState();
+            }
+
+            @Override
+            public void doFail() {
+                hideLoading();
+                roomAdapter.restoreAt(pos, item);
+                updateEmptyState();
+            }
+        }, item.getId());
+    }
+
+    private void updateEmptyState() {
+        binding.layoutEmpty.setVisibility(roomAdapter.getItemCount() == 0 ? View.VISIBLE : View.GONE);
+    }
+
+    @Override
     public void onRoomClick(RoomResponse model, int position) {
         if (!viewModel.isLogin()) {
             ((MainActivity) requireActivity()).showLoginRequiredDialog();
             return;
         }
-        showLoading();
-        if (Objects.equals(model.getState(), Constants.ROOM_STATE_RUNNING)) {
-            getMovie(model.getMovieItem().getMovie().getId(), model, true);
+
+        if (model.getHost().getId() == viewModel.getUserId()) {
+            handleRoomClickByHost(model);
         } else {
-            getMovie(model.getMovieItem().getMovie().getId(), model, false);
+            handleRoomClickByClient(model);
+        }
+    }
+    public void handleRoomClickByHost(RoomResponse model) {
+        switch (model.getState()) {
+            case Constants.ROOM_STATE_PENDING:
+                DialogUtils.dialogConfirm(
+                        requireContext(),
+                        getString(R.string.msg_premier_ready_ask),
+                        getString(R.string.action_start),
+                        (dialog, which) -> {
+                            startRoom(model);
+                        },
+                        getString(R.string.back),
+                        (dialog, which) -> {
+                            dialog.dismiss();
+                        }
+                );
+                break;
+            case Constants.ROOM_STATE_RUNNING:
+                startRoom(model);
+                break;
+            case Constants.ROOM_STATE_ENDING:
+                DialogUtils.dialogConfirm(
+                        requireContext(),
+                        getString(R.string.msg_room_ended),
+                        getString(R.string.title_information),
+                        (dialog, which) -> {
+                            getMovie(model.getMovieItem().getMovie().getId(), model, false);
+                        },
+                        getString(R.string.back),
+                        (dialog, which) -> dialog.dismiss()
+                );
+                break;
+            default:
+                break;
+        }
+    }
+    public void handleRoomClickByClient(RoomResponse model) {
+        switch (model.getState()) {
+            case Constants.ROOM_STATE_PENDING:
+                DialogUtils.dialogConfirm(
+                        requireContext(),
+                        getString(R.string.msg_premier_not_started),
+                        getString(R.string.title_information),
+                        (dialog, which) -> {
+                            getMovie(model.getMovieItem().getMovie().getId(), model, false);
+                        },
+                        getString(R.string.back),
+                        (dialog, which) -> {
+                            dialog.dismiss();
+                        }
+                );
+                break;
+            case Constants.ROOM_STATE_RUNNING:
+                getMovie(model.getMovieItem().getMovie().getId(), model, true);
+                break;
+            case Constants.ROOM_STATE_ENDING:
+                DialogUtils.dialogConfirm(
+                        requireContext(),
+                        getString(R.string.msg_room_ended),
+                        getString(R.string.title_information),
+                        (dialog, which) -> {
+                            getMovie(model.getMovieItem().getMovie().getId(), model, false);
+                        },
+                        getString(R.string.back),
+                        (dialog, which) -> dialog.dismiss()
+                );
+                break;
+            default:
+                break;
         }
     }
 
     public void getMovie(Long id, RoomResponse model, boolean isRoomRunning) {
+        showLoading();
         viewModel.getMovie(new MainCallback<MovieResponse>() {
             @Override
             public void doError(Throwable error) {
@@ -489,7 +531,29 @@ public class LiveFragment extends BaseFragment<FragmentLiveBinding, LiveViewMode
             }
         }, model.getId());
     }
+    public void startRoom(RoomResponse model) {
+        viewModel.startRoom(new MainCallback<RoomResponse>() {
+            @Override
+            public void doError(Throwable error) {
+                viewModel.hideLoading();
+            }
 
+            @Override
+            public void doSuccess() {
+                viewModel.hideLoading();
+            }
+
+            @Override
+            public void doFail() {
+                viewModel.hideLoading();
+            }
+
+            @Override
+            public void doSuccess(RoomResponse object) {
+                getMovie(model.getMovieItem().getMovie().getId(), model, true);
+            }
+        }, model.getId());
+    }
     public void createMqtt(MovieResponse movieResponse, RoomResponse model) {
         ((MainActivity) requireActivity()).createMqtt(movieResponse, model);
     }

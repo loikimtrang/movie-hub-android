@@ -39,7 +39,7 @@
                 android:id="@+id/control_video"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:visibility="visible"
+                android:visibility="gone"
                 android:background="@drawable/bg_control_video">
                 <FrameLayout
                     android:id="@+id/button_control_video"
@@ -211,7 +211,7 @@
                                 android:layout_centerVertical="true"
                                 android:layout_toStartOf="@+id/btn_open_chat"
                                 android:orientation="horizontal"
-                                android:visibility="visible">
+                                android:visibility="gone">
 
                                 <androidx.appcompat.widget.SwitchCompat
                                     android:id="@+id/switch_sync_with_host"

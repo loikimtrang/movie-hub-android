@@ -1784,8 +1784,8 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
         stopVolumeObserver();
         stopTrackingLoop();
         viewModel.stopTokenAutoRefresh();
-        leaveRoom();
         if (viewModel.isLiveRoom && viewModel.isHost) {
+            leaveRoom();
             stopSchedule();
         }
         ((MVVMApplication) application).destroyMqtt();
@@ -1808,9 +1808,6 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
                 updatePlayPauseState(Boolean.TRUE.equals(viewModel.getIsPlaying().getValue()), true);
                 break;
             case R.id.btn_ok:
-                if (viewModel.isHost) {
-                    viewModel.endRoom(viewModel.roomDetail.getId());
-                }
                 finish();
                 break;
             case R.id.btn_lock_screen:
