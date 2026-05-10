@@ -46,6 +46,36 @@
                 android:layout_marginTop="@dimen/_6sdp">
 
 
+                <LinearLayout
+                    android:id="@+id/layout_imdb"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_imdb"
+                    android:paddingHorizontal="@dimen/_3sdp"
+                    android:paddingVertical="@dimen/_1sdp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginEnd="@dimen/_6sdp"
+                    android:visibility="gone"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        style="@style/Text_10_Normal"
+                        android:textColor="@color/imdb"
+                        android:text="IMDB"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginEnd="@dimen/_3sdp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/imdb"
+                        style="@style/Text_10_Normal"
+                        android:layout_gravity="center_vertical"/>
+
+                </LinearLayout>
+
                 <FrameLayout
                     android:id="@+id/layout_date_release"
                     android:layout_width="wrap_content"

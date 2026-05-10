@@ -292,4 +292,26 @@ public class HomeViewModel extends BaseFragmentViewModel {
                         )
         );
     }
+
+    public void getCategoryByWatch(MainCallback<CollectionResponse> callback, String title) {
+        compositeDisposable.add(
+                repository.getApiService().getCategoryByWatched()
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(
+                                response -> {
+                                    if (response.isResult()) {
+                                        callback.doSuccess(response.getData().getCollection(title));
+                                    } else {
+                                        callback.doFail();
+                                    }
+                                },
+                                throwable -> {
+                                    hideLoading();
+                                    Timber.e(throwable);
+                                    callback.doError(throwable);
+                                }
+                        )
+        );
+    }
 }

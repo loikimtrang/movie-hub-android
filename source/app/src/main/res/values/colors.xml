@@ -106,5 +106,5 @@
     <color name="bg_select_movie">#80000000</color>
     <color name="bg_ic_live">#40000000</color>
     <color name="bg_item_chat">#006494</color>
-
+    <color name="imdb">#deb522</color>
 </resources>

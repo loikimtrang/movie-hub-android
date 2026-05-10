@@ -352,6 +352,7 @@
     <string name="action_start">Start</string>
     <string name="back">Back</string>
     <string name="because_you_watched_format">Because you watched </string>
+    <string name="because_you_like_format">Because you like </string>
     <string name="recommend_for_you">You might like these movies</string>
 
 </resources>

@@ -46,7 +46,7 @@ public class MovieResponse {
     private Long reviewCount;
     private Double averageRating;
     private Long commentCount;
-
+    private Double imdbRating;
     private boolean isSelect;
     public Double getAverageRating() {
         return averageRating == null ? 0.0 : Math.round(averageRating * 10) / 10.0;

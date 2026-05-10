@@ -322,12 +322,21 @@ public class MovieDetailActivity extends BaseActivity<ActivityMovieDetailBinding
         viewBinding.includeMovieHeader.ageRating.setText(DisplayUtils.displayAgeRating(viewModel.movieDetails.getAgeRating()));
         viewBinding.includeMovieHeader.seekBarRemaining.setOnTouchListener((v, event) -> true);
 
+        if (viewModel.movieDetails.getImdbRating() != null) {
+            viewBinding.includeMovieHeader.imdb.setText(viewModel.movieDetails.getImdbRating().toString());
+            viewBinding.includeMovieHeader.layoutImdb.setVisibility(View.VISIBLE);
+        } else {
+            viewBinding.includeMovieHeader.layoutImdb.setVisibility(View.GONE);
+        }
+
         if (viewModel.movieDetails.getReviewCount() != null && viewModel.movieDetails.getReviewCount() > 0L) {
             viewBinding.includeMovieHeader.tvAvgRv.setText(viewModel.movieDetails.getAverageRating().toString());
             viewBinding.includeMovieHeader.layoutReview.setVisibility(View.VISIBLE);
         } else {
             viewBinding.includeMovieHeader.layoutReview.setVisibility(View.GONE);
         }
+
+
 
         if (viewModel.movieDetails.getType() == Constants.TYPE_MOVIE_SINGLE) {
             if (viewModel.movieDetails.getReleaseDate() == null) {

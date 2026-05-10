@@ -117,15 +117,15 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding, HomeViewMode
     private int inFlightPage = -1;
     private final AtomicBoolean suggestDone = new AtomicBoolean(false);
     private final AtomicBoolean collectionDone = new AtomicBoolean(false);
+    private final AtomicBoolean categoryByWatchDone = new AtomicBoolean(false);
     private CollectionResponse pendingSuggestCollection = null;
+    private CollectionResponse pendingCategoryByWatchCollection = null;
     private ResponseListObj<CollectionResponse> pendingCollectionPage = null;
     @Override
     protected void performDataBinding() {
         binding.setF(this);
         binding.setVm(viewModel);
-
         setUpView();
-
         observeMovieBanner();
         observeHistory();
         observeCollection();
@@ -281,6 +281,8 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding, HomeViewMode
         pendingSuggestCollection = null;
         pendingCollectionPage = null;
         viewModel.collectionList.setValue(new ArrayList<>());
+        categoryByWatchDone.set(false);
+        pendingCategoryByWatchCollection = null;
 
         viewModel.currentBannerMovie = new MovieResponse();
         viewModel.movieHistory.setValue(new ArrayList<>());
@@ -589,6 +591,35 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding, HomeViewMode
         }, getString(R.string.recommend_for_you));
     }
 
+    public void getCategoryByWatch(int page) {
+        viewModel.getCategoryByWatch(new MainCallback<CollectionResponse>() {
+
+            @Override
+            public void doSuccess(CollectionResponse object) {
+                if (object != null && object.getMovies() != null && !object.getMovies().isEmpty()) {
+                    pendingCategoryByWatchCollection = object;
+                }
+                categoryByWatchDone.set(true);
+                maybeCommitPage(page);
+            }
+
+            @Override
+            public void doError(Throwable error) {
+                categoryByWatchDone.set(true);
+                maybeCommitPage(page);
+            }
+
+            @Override
+            public void doSuccess() { }
+
+            @Override
+            public void doFail() {
+                categoryByWatchDone.set(true);
+                maybeCommitPage(page);
+            }
+        }, getString(R.string.because_you_like_format));
+    }
+
     public void getListMovieHistory() {
         viewModel.getListMovieHistory(new MainCallback<List<MovieHistoryResponse>>() {
             @Override
@@ -631,8 +662,16 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding, HomeViewMode
         inFlightPage = page;
         suggestDone.set(false);
         collectionDone.set(false);
+        categoryByWatchDone.set(false);
         pendingSuggestCollection = null;
+        pendingCategoryByWatchCollection = null;
         pendingCollectionPage = null;
+
+        if (page == 0 && viewModel.isLogin()) {
+            getCategoryByWatch(page);
+        } else {
+            categoryByWatchDone.set(true);
+        }
 
         if (viewModel.isLogin()) {
             viewModel.getListSuggestByWatch(new MainCallback<CollectionResponse>() {
@@ -703,12 +742,17 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding, HomeViewMode
         if (page != inFlightPage) return;
         if (!collectionDone.get()) return;
         if (!suggestDone.get()) return;
+        if (!categoryByWatchDone.get()) return;
 
         ResponseListObj<CollectionResponse> data = pendingCollectionPage;
         List<CollectionResponse> pageItems = new ArrayList<>();
 
         if (pendingSuggestCollection != null && pendingSuggestCollection.getId() != null) {
             pageItems.add(pendingSuggestCollection);
+        }
+
+        if (pendingCategoryByWatchCollection != null && pendingCategoryByWatchCollection.getId() != null) {
+            pageItems.add(pendingCategoryByWatchCollection);
         }
 
         if (data != null && data.getContent() != null && !data.getContent().isEmpty()) {
