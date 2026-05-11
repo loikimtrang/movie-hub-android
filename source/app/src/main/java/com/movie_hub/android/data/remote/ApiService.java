@@ -45,6 +45,7 @@ import com.movie_hub.android.data.model.api.response.playlist.PlayListResponse;
 import com.movie_hub.android.data.model.api.response.review.ReviewResponse;
 import com.movie_hub.android.data.model.api.response.room.RoomResponse;
 import com.movie_hub.android.data.model.api.response.side_bar.SidebarResponse;
+import com.movie_hub.android.data.model.api.response.subtitle.SubtitleResponse;
 import com.movie_hub.android.data.model.api.response.suggesst.CategoryByWatch;
 import com.movie_hub.android.data.model.api.response.suggesst.SuggestByWatchResponse;
 import com.movie_hub.android.data.model.api.response.user.UserResponse;
@@ -260,4 +261,8 @@ public interface ApiService {
 
     @POST("v1/room/start/{id}")
     Observable<ResponseWrapper<RoomResponse>> startRoom(@Path("id") Long id);
+
+    @Headers("UseGuestToken: 1")
+    @GET("v1/video-library-subtitle/list")
+    Observable<ResponseWrapper<ResponseListObj<SubtitleResponse>>> getListSubtitle(@QueryMap Map<String, Object> query);
 }

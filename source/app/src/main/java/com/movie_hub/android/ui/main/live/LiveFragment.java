@@ -35,9 +35,13 @@ import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
+import java.util.TimeZone;
 
 public class LiveFragment extends BaseFragment<FragmentLiveBinding, LiveViewModel> implements RoomAdapter.OnRoomClickListener {
     private static final int FILTER_ALL = -1;
@@ -371,34 +375,67 @@ public class LiveFragment extends BaseFragment<FragmentLiveBinding, LiveViewMode
     public void handleRoomClickByHost(RoomResponse model) {
         switch (model.getState()) {
             case Constants.ROOM_STATE_PENDING:
-                DialogUtils.dialogConfirm(
-                        requireContext(),
-                        getString(R.string.msg_premier_ready_ask),
-                        getString(R.string.action_start),
-                        (dialog, which) -> {
-                            startRoom(model);
-                        },
-                        getString(R.string.back),
-                        (dialog, which) -> {
-                            dialog.dismiss();
+                long startTimeMillis = 0;
+                String startTimeStr = model.getStartTime();
+
+                if (startTimeStr != null && !startTimeStr.isEmpty()) {
+                    try {
+                        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault());
+                        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+
+                        Date startDate = sdf.parse(startTimeStr);
+                        if (startDate != null) {
+                            startTimeMillis = startDate.getTime();
                         }
-                );
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+                if (System.currentTimeMillis() < startTimeMillis) {
+                    DialogUtils.dialogConfirm(
+                            requireContext(),
+                            getString(R.string.msg_premier_not_started),
+                            getString(R.string.title_information),
+                            (dialog, which) -> {
+                                if (model.getMovieItem() != null && model.getMovieItem().getMovie() != null) {
+                                    getMovie(model.getMovieItem().getMovie().getId(), model, false);
+                                }
+                            },
+                            getString(R.string.back), // Nút bên phải: Quay lại
+                            (dialog, which) -> dialog.dismiss()
+                    );
+                } else {
+                    // TRƯỜNG HỢP: ĐÃ ĐẾN GIỜ HOẶC QUÁ GIỜ
+                    DialogUtils.dialogConfirm(
+                            requireContext(),
+                            getString(R.string.msg_premier_ready_ask),
+                            getString(R.string.action_start),
+                            (dialog, which) -> startRoom(model),
+                            getString(R.string.back),
+                            (dialog, which) -> dialog.dismiss()
+                    );
+                }
                 break;
+
             case Constants.ROOM_STATE_RUNNING:
                 startRoom(model);
                 break;
+
             case Constants.ROOM_STATE_ENDING:
                 DialogUtils.dialogConfirm(
                         requireContext(),
                         getString(R.string.msg_room_ended),
                         getString(R.string.title_information),
                         (dialog, which) -> {
-                            getMovie(model.getMovieItem().getMovie().getId(), model, false);
+                            if (model.getMovieItem() != null && model.getMovieItem().getMovie() != null) {
+                                getMovie(model.getMovieItem().getMovie().getId(), model, false);
+                            }
                         },
                         getString(R.string.back),
                         (dialog, which) -> dialog.dismiss()
                 );
                 break;
+
             default:
                 break;
         }
@@ -440,7 +477,6 @@ public class LiveFragment extends BaseFragment<FragmentLiveBinding, LiveViewMode
     }
 
     public void getMovie(Long id, RoomResponse model, boolean isRoomRunning) {
-        showLoading();
         viewModel.getMovie(new MainCallback<MovieResponse>() {
             @Override
             public void doError(Throwable error) {
@@ -532,6 +568,7 @@ public class LiveFragment extends BaseFragment<FragmentLiveBinding, LiveViewMode
         }, model.getId());
     }
     public void startRoom(RoomResponse model) {
+        showLoading();
         viewModel.startRoom(new MainCallback<RoomResponse>() {
             @Override
             public void doError(Throwable error) {

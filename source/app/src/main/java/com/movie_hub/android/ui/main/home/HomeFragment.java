@@ -667,7 +667,7 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding, HomeViewMode
         pendingCategoryByWatchCollection = null;
         pendingCollectionPage = null;
 
-        if (page == 0 && viewModel.isLogin()) {
+        if (page == 1 && viewModel.isLogin()) {
             getCategoryByWatch(page);
         } else {
             categoryByWatchDone.set(true);

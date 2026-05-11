@@ -39,7 +39,6 @@ public class AuthInterceptor implements Interceptor {
                     String credentials = "abc_client:abc123";
                     String basicAuth = "Basic " + android.util.Base64.encodeToString(credentials.getBytes(), android.util.Base64.NO_WRAP);
                     builder.header("Authorization", basicAuth);
-                    builder.header("X-tenant", "moviehub");
                     return chain.proceed(builder.build());
                 })
                 .build();
@@ -59,48 +58,69 @@ public class AuthInterceptor implements Interceptor {
         Request originalRequest = chain.request();
         Request.Builder requestBuilder = originalRequest.newBuilder();
 
-        // 1. Xử lý Header X-tenant cho tất cả request
-        requestBuilder.header("X-tenant", "moviehub");
+        // 1. Lấy thông tin các header điều hướng
+        String ignoreAuth = originalRequest.header("IgnoreAuth");
+        String useBasicAuth = originalRequest.header("UseBasicAuth");
+        String useGuestToken = originalRequest.header("UseGuestToken");
 
-        // 2. Kiểm tra các Header đặc biệt (IgnoreAuth/UseBasicAuth)
-        if ("1".equals(originalRequest.header("IgnoreAuth"))) {
-            requestBuilder.removeHeader("IgnoreAuth");
+        // Xóa các header đánh dấu để tránh gửi lên server
+        requestBuilder.removeHeader("IgnoreAuth");
+        requestBuilder.removeHeader("UseBasicAuth");
+        requestBuilder.removeHeader("UseGuestToken");
+
+        // Khai báo biến token ở đây để dùng chung cho toàn bộ hàm intercept (Fix lỗi Resolve Symbol)
+        String token = appPreferences.getToken();
+
+        // TRƯỜNG HỢP 1: Bỏ qua định danh hoàn toàn
+        if ("1".equals(ignoreAuth)) {
             return chain.proceed(requestBuilder.build());
         }
 
-        if ("1".equals(originalRequest.header("UseBasicAuth"))) {
-            requestBuilder.removeHeader("UseBasicAuth");
+        // TRƯỜNG HỢP 2: Sử dụng Basic Auth
+        if ("1".equals(useBasicAuth)) {
             String credentials = "abc_client:abc123";
             String basicAuth = "Basic " + android.util.Base64.encodeToString(credentials.getBytes(), android.util.Base64.NO_WRAP);
             requestBuilder.header("Authorization", basicAuth);
-        } else {
-            String token = appPreferences.getToken();
+        }
+        else {
+            // TRƯỜNG HỢP 3: Xử lý Bearer Token (Login hoặc Guest)
             if (token != null && !token.isEmpty() && !"NULL".equalsIgnoreCase(token)) {
+                // Kiểm tra Token sắp hết hạn để Refresh chủ động
                 if (JwtUtils.isTokenExpiringSoon(token, 2 * 60 * 1000)) {
                     synchronized (this) {
                         String freshToken = refreshTokenSync();
-                        if (freshToken != null) token = freshToken;
+                        if (freshToken != null) {
+                            token = freshToken;
+                        }
                     }
                 }
                 requestBuilder.header("Authorization", "Bearer " + token);
             }
+            else if ("1".equals(useGuestToken)) {
+                token = Constants.TOKEN_GUEST;
+                requestBuilder.header("Authorization", "Bearer " + token);
+            }
         }
 
+        // Thực thi Request
         Response response = chain.proceed(requestBuilder.build());
 
+        // 4. Xử lý lỗi 401 (Token hết hạn đột xuất)
         if (response.code() == 401) {
             synchronized (this) {
                 String latestToken = appPreferences.getToken();
                 String newToken;
 
-                if (latestToken != null && !latestToken.equals(appPreferences.getToken())) {
+                // Kiểm tra xem token hiện tại trong Prefs có khác với token vừa dùng không (đã có luồng khác refresh xong chưa)
+                if (latestToken != null && !latestToken.isEmpty() && !latestToken.equals(token)) {
                     newToken = latestToken;
                 } else {
+                    // Tiến hành Refresh Token thủ công nếu đây là luồng đầu tiên phát hiện 401
                     newToken = refreshTokenSync();
                 }
 
                 if (newToken != null) {
-                    response.close();
+                    response.close(); // Quan trọng: Đóng response cũ trước khi thực hiện request mới
                     Request retryRequest = originalRequest.newBuilder()
                             .header("Authorization", "Bearer " + newToken)
                             .header("X-tenant", "moviehub")

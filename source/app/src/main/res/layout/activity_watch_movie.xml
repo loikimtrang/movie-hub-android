@@ -35,6 +35,19 @@
                 app:use_controller="false"
                 android:background="#000000"/>
 
+            <TextView
+                android:id="@+id/tv_sub_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal |bottom"
+                android:layout_marginBottom="@dimen/_30sdp"
+                android:layout_marginHorizontal="@dimen/_20sdp"
+                android:gravity="center"
+                style="@style/Text_14_Bold"
+                android:text="Đây là phụ đề"
+                android:textColor="@color/white"
+                android:visibility="invisible"/>
+
             <FrameLayout
                 android:id="@+id/control_video"
                 android:layout_width="match_parent"
@@ -711,7 +724,6 @@
                 <!-- Thumbnail Preview - CHỒNG LÊN TRÊN SEEK BAR -->
 
             </LinearLayout>
-
 
             <LinearLayout
                 android:id="@+id/layout_count_previous"

@@ -348,4 +348,6 @@
     <string name="because_you_watched_format">Vì bạn đã xem</string>
     <string name="because_you_like_format">Vì bạn thích</string>
     <string name="recommend_for_you">Có thể bạn sẽ thích</string>
+    <string name="movie_not_ready">Phim chưa sẵn sàng vui lòng quay lại sau.</string>
+
 </resources>

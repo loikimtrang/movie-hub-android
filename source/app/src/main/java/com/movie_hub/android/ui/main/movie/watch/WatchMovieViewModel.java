@@ -14,10 +14,12 @@ import com.movie_hub.android.data.model.api.request.favourite.CreateFavouriteReq
 import com.movie_hub.android.data.model.api.request.history.ListWatchHistoryRequest;
 import com.movie_hub.android.data.model.api.request.history.TrackingWatchHistoryRequest;
 import com.movie_hub.android.data.model.api.request.setting.UserSettingsRequest;
+import com.movie_hub.android.data.model.api.request.subtitle.SubtitleRequest;
 import com.movie_hub.android.data.model.api.response.MovieItem.MovieItemResponse;
 import com.movie_hub.android.data.model.api.response.history.ListWatchHistoryResponse;
 import com.movie_hub.android.data.model.api.response.movie.MovieResponse;
 import com.movie_hub.android.data.model.api.response.room.RoomResponse;
+import com.movie_hub.android.data.model.api.response.subtitle.SubtitleResponse;
 import com.movie_hub.android.data.model.api.response.user.UserResponse;
 import com.movie_hub.android.data.model.api.response.video.VideoResponse;
 import com.movie_hub.android.data.model.mqtt.ClientPingModel;
@@ -70,6 +72,7 @@ public class WatchMovieViewModel extends BaseViewModel {
     public boolean isHost = false;
     public RoomResponse roomDetail;
     public UserResponse userResponse;
+    private MutableLiveData<List<SubtitleResponse>> subtitleList = new MutableLiveData<>(new ArrayList<>());
 
     private final List<CreateChatModel> chatModels = new ArrayList<>();
     private final MutableLiveData<List<CreateChatModel>> chatModelsLiveData =
@@ -252,7 +255,6 @@ public class WatchMovieViewModel extends BaseViewModel {
             return;
         }
 
-        // Nếu chưa login → dùng anonymous token và auto refresh mỗi 10 phút
         getAnonymousToken();
 
         if (tokenRefreshDisposable != null && !tokenRefreshDisposable.isDisposed()) return;
@@ -304,6 +306,7 @@ public class WatchMovieViewModel extends BaseViewModel {
                             setTokenVideo(token);
                             Timber.d("✅ Token đã sẵn sàng: %s", token);
                             tokenReady.postValue(true);
+                            Constants.TOKEN_GUEST = token;
                         },
                         throwable -> {
                             Timber.e(throwable, "❌ Lỗi khi gọi anonymous token");
@@ -424,6 +427,41 @@ public class WatchMovieViewModel extends BaseViewModel {
                                 },
                                 throwable -> {
                                     hideLoading();
+                                    Timber.e(throwable);
+                                }
+                        )
+        );
+    }
+
+    public void getListSubtitle(MainCallback<List<SubtitleResponse>> callback, Long idVideo) {
+        SubtitleRequest request = new SubtitleRequest();
+        request.setVideoLibraryId(idVideo);
+
+        Map<String, Object> query = RequestToMapConverter.convert(request);
+        compositeDisposable.add(
+                repository.getApiService().getListSubtitle(query)
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .retryWhen(throwable ->
+                                throwable.flatMap((Function<Throwable, ObservableSource<?>>) throwable1 -> {
+                                    if (NetworkUtils.checkNetworkError(throwable1)) {
+                                        return application.showDialogNoInternetAccess();
+                                    } else {
+                                        return Observable.error(throwable1);
+                                    }
+                                })
+                        )
+                        .subscribe(
+                                (response) -> {
+                                    if (response.isResult()) {
+                                        callback.doSuccess(response.getData().getContent());
+                                    } else {
+                                        callback.doFail();
+                                    }
+                                },
+                                throwable -> {
+                                    hideLoading();
+                                    callback.doError(throwable);
                                     Timber.e(throwable);
                                 }
                         )

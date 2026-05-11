@@ -39,6 +39,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
+import java.util.TimeZone;
 
 public class CreateRoomActivity extends BaseActivity<ActivityCreateRoomBinding, CreateRoomViewModel> implements SystemBarColorProvider,
         ChooseSeasonBottomSheetDialog.ChooseSeasonBottomSheetCallback,
@@ -263,7 +264,8 @@ public class CreateRoomActivity extends BaseActivity<ActivityCreateRoomBinding, 
         request.setKind(Constants.ROOM_KIND_PUBLIC);
 
         if (!viewModel.isStartNow) {
-            SimpleDateFormat apiSdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault());
+            SimpleDateFormat apiSdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.US);
+            apiSdf.setTimeZone(TimeZone.getTimeZone("UTC"));
             request.setStartTime(apiSdf.format(selectedCalendar.getTime()));
         }
 

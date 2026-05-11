@@ -107,6 +107,8 @@ public class Constants {
     public static final String ROOM_REASON_HOST_LEFT = "HOST_LEFT";
     public static final String ROOM_REASON_TIMEOUT = "ROOM_TIMEOUT";
 
+    public static String TOKEN_GUEST;
+
     private Constants(){
 
     }

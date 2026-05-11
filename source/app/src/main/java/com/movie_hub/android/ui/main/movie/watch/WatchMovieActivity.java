@@ -69,6 +69,7 @@ import com.movie_hub.android.data.model.api.response.history.WatchHistoryRespons
 import com.movie_hub.android.data.model.api.response.movie.MovieResponse;
 import com.movie_hub.android.data.model.api.response.room.RoomResponse;
 import com.movie_hub.android.data.model.api.response.season.SeasonResponse;
+import com.movie_hub.android.data.model.api.response.subtitle.SubtitleResponse;
 import com.movie_hub.android.data.model.api.response.user.UserResponse;
 import com.movie_hub.android.data.model.api.response.video.VideoResponse;
 import com.movie_hub.android.data.model.mqtt.CreateChatModel;
@@ -157,7 +158,7 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
     private Runnable runnablePing;
 
     private ChatAdapter chatAdapter;
-
+    private final Handler handlerRetryGetListSubtitle = new Handler(Looper.getMainLooper());
     private void startSchedule() {
         runnablePing = new Runnable() {
             @SuppressLint("TimberArgCount")
@@ -240,9 +241,25 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
                 viewBinding.btnOpenChat.setVisibility(View.VISIBLE);
                 setupChatUi();
             }
+
+
+            if (viewModel.isLogin()) {
+                getListSubtitle();
+            } else {
+                startGetListSubtitle();
+            }
         }
     }
-
+    private void startGetListSubtitle() {
+        handlerRetryGetListSubtitle.removeCallbacksAndMessages(null);
+        if (Constants.TOKEN_GUEST == null || Constants.TOKEN_GUEST.isEmpty()) {
+            Log.d("Subtitle", "Guest Token chưa có, đang thử lại sau 2s...");
+            handlerRetryGetListSubtitle.postDelayed(this::startGetListSubtitle, 2000);
+        } else {
+            Log.d("Subtitle", "Đã có Guest Token, tiến hành lấy Subtitle.");
+            getListSubtitle();
+        }
+    }
     private void setupChatUi() {
         chatAdapter = new ChatAdapter();
         viewBinding.rvChat.setLayoutManager(new LinearLayoutManager(this));
@@ -390,6 +407,31 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
 
             }
         });
+    }
+
+    public void getListSubtitle() {
+        if (viewModel.nowEpisodePlay == null || viewModel.nowEpisodePlay.getVideo().getId() == null) return;
+
+        viewModel.getListSubtitle(new MainCallback<List<SubtitleResponse>>() {
+            @Override
+            public void doSuccess(List<SubtitleResponse> data) {
+
+            }
+            @Override
+            public void doError(Throwable error) {
+
+            }
+
+            @Override
+            public void doSuccess() {
+
+            }
+
+            @Override
+            public void doFail() {
+
+            }
+        }, viewModel.nowEpisodePlay.getVideo().getId());
     }
 
     private UserSettingsRequest createDefaultSettings() {
@@ -1789,6 +1831,8 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
             stopSchedule();
         }
         ((MVVMApplication) application).destroyMqtt();
+        handlerRetryGetListSubtitle.removeCallbacksAndMessages(null);
+        Constants.TOKEN_GUEST = "";
     }
 
     // region === Click ===

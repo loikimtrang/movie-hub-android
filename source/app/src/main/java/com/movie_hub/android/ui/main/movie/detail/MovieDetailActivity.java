@@ -134,6 +134,7 @@ public class MovieDetailActivity extends BaseActivity<ActivityMovieDetailBinding
                 if (watchHistoryResponse == null) {
                     viewBinding.includeMovieHeader.layoutRemaining.setVisibility(View.GONE);
                     viewBinding.includeMovieHeader.tvWatch.setText(getString(R.string.watch_now));
+                    refreshPlayabilityFlags();
                     return;
                 }
 
@@ -152,12 +153,15 @@ public class MovieDetailActivity extends BaseActivity<ActivityMovieDetailBinding
 
                 viewBinding.includeMovieHeader.seekBarRemaining.setProgress(currentTime.intValue());
 
+                refreshPlayabilityFlags();
+
             } else if (viewModel.movieDetails.getType() == Constants.TYPE_MOVIE_SERIES) {
                 WatchHistoryResponse watchHistoryResponse = response.getFirstWatchHistory();
                 if (watchHistoryResponse == null) {
                     viewBinding.includeMovieHeader.layoutRemaining.setVisibility(View.GONE);
                     viewBinding.includeMovieHeader.tvWatch.setText(getString(R.string.watch_now));
                     viewModel.remainingEpisode = null;
+                    refreshPlayabilityFlags();
                     return;
                 }
 
@@ -190,6 +194,7 @@ public class MovieDetailActivity extends BaseActivity<ActivityMovieDetailBinding
                             viewBinding.includeMovieHeader.layoutRemaining.setVisibility(View.GONE);
                             viewBinding.includeMovieHeader.tvWatch.setText(getString(R.string.watch_now));
                             viewModel.remainingEpisode = null;
+                            refreshPlayabilityFlags();
                             return;
                         } else {
                             remainingEpisode = viewModel.movieDetails.getEpisodeById(watchHistoryNoComplete.getMovieItemId());
@@ -225,6 +230,7 @@ public class MovieDetailActivity extends BaseActivity<ActivityMovieDetailBinding
                 viewBinding.includeMovieHeader.layoutRemaining.setVisibility(View.VISIBLE);
 
                 viewModel.remainingEpisode = remainingEpisode;
+                refreshPlayabilityFlags();
             }
 
         });
@@ -307,8 +313,7 @@ public class MovieDetailActivity extends BaseActivity<ActivityMovieDetailBinding
             if (lastSeason != null) lastSeason.setSelect(true);
         }
 
-        movieStreamUrl = extractMovieStreamUrl(viewModel.movieDetails, viewModel.remainingEpisode);
-        isMovieAvailable = movieStreamUrl != null && !movieStreamUrl.trim().isEmpty();
+        refreshPlayabilityFlags();
 
         Glide.with(this)
                 .load(viewModel.movieDetails.getThumbnailUrl())
@@ -527,6 +532,51 @@ public class MovieDetailActivity extends BaseActivity<ActivityMovieDetailBinding
         return firstSeason.getVideo().getContent();
     }
 
+    private void refreshPlayabilityFlags() {
+        if (viewModel.movieDetails == null) {
+            movieStreamUrl = null;
+            isMovieAvailable = false;
+            return;
+        }
+        movieStreamUrl = extractMovieStreamUrl(viewModel.movieDetails, viewModel.remainingEpisode);
+        isMovieAvailable = movieStreamUrl != null && !movieStreamUrl.trim().isEmpty();
+    }
+
+    /**
+     * Whether the stream URL exists in season/episode video data for the given playback target.
+     */
+    private boolean hasPlayableStreamUrl(@Nullable MovieResponse movie, @Nullable MovieItemResponse episode) {
+        String url = extractMovieStreamUrl(movie, episode);
+        return url != null && !url.trim().isEmpty();
+    }
+
+    @Nullable
+    private MovieItemResponse resolveEpisodeForWatchButton() {
+        if (viewModel.movieDetails == null) return null;
+        if (viewModel.movieDetails.getType() == Constants.TYPE_MOVIE_SERIES) {
+            if (viewModel.remainingEpisode == null) {
+                List<SeasonResponse> seasons = viewModel.movieDetails.getSeasons();
+                if (seasons == null || seasons.isEmpty()) return null;
+                SeasonResponse firstSeason = seasons.get(0);
+                if (firstSeason == null || firstSeason.getEpisodes() == null || firstSeason.getEpisodes().isEmpty()) {
+                    return null;
+                }
+                return firstSeason.getEpisodes().get(0);
+            }
+            return viewModel.remainingEpisode;
+        }
+        return null;
+    }
+
+    private void showMovieNotReadyDialog() {
+        DialogUtils.dialogConfirmSingleButton(
+                this,
+                getString(R.string.movie_not_ready),
+                getString(R.string.close),
+                null
+        );
+    }
+
     /**
      * Feature Gatekeeping: if movie isn't playable, hide/disable interactions.
      */
@@ -717,6 +767,10 @@ public class MovieDetailActivity extends BaseActivity<ActivityMovieDetailBinding
                 this.finish();
                 break;
             case R.id.watch_now:
+                if (!hasPlayableStreamUrl(viewModel.movieDetails, resolveEpisodeForWatchButton())) {
+                    showMovieNotReadyDialog();
+                    break;
+                }
                 showLoading();
                 Intent intent = new Intent(this, WatchMovieActivity.class);
                 intent.putExtra("movie_details", GsonUtils.toJson(viewModel.movieDetails));
@@ -890,6 +944,10 @@ public class MovieDetailActivity extends BaseActivity<ActivityMovieDetailBinding
     }
 
     public void navigateToWatchMovieActivity(MovieItemResponse episode) {
+        if (!hasPlayableStreamUrl(viewModel.movieDetails, episode)) {
+            showMovieNotReadyDialog();
+            return;
+        }
         viewModel.showLoading();
         Intent intent = new Intent(this, WatchMovieActivity.class);
         intent.putExtra("movie_details", GsonUtils.toJson(viewModel.movieDetails));
@@ -1076,6 +1134,7 @@ public class MovieDetailActivity extends BaseActivity<ActivityMovieDetailBinding
             @Override
             public void doSuccess(MovieResponse data) {
                 viewModel.movieDetails = data;
+                refreshPlayabilityFlags();
                 if (viewModel.movieDetails.getReviewCount() != null && viewModel.movieDetails.getReviewCount() > 0L) {
                     viewBinding.includeMovieHeader.tvAvgRv.setText(viewModel.movieDetails.getAverageRating().toString());
                     viewBinding.includeMovieHeader.layoutReview.setVisibility(View.VISIBLE);

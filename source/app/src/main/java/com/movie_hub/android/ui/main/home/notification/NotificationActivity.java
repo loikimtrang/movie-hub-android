@@ -22,6 +22,8 @@ import com.movie_hub.android.constant.Constants;
 import com.movie_hub.android.data.model.api.ResponseListObj;
 import com.movie_hub.android.data.model.api.request.notification.NotificationRequest;
 import com.movie_hub.android.data.model.api.request.notification.UpdateReadRequest;
+import com.movie_hub.android.data.model.api.response.MovieItem.MovieItemResponse;
+import com.movie_hub.android.data.model.api.response.movie.MovieResponse;
 import com.movie_hub.android.data.model.api.response.notification.NotificationResponse;
 import com.movie_hub.android.data.model.onesignal.MessageCommentResponse;
 import com.movie_hub.android.data.model.onesignal.MessageOneSignal;
@@ -283,6 +285,19 @@ public class NotificationActivity extends BaseActivity<ActivityNotificationBindi
                 MessageCommentResponse messageCommentResponse = GsonUtils.fromJson(messageOneSignal.getData(), MessageCommentResponse.class);
                 if (messageCommentResponse != null && messageCommentResponse.getMovieId() != null) {
                     getMovieDetailByNotification(Long.valueOf(messageCommentResponse.getMovieId()), messageOneSignal);
+                }
+                break;
+            case OneSignalCommand.CMD_NEW_MOVIE:
+                MovieResponse movieResponse = GsonUtils.fromJson(messageOneSignal.getData(), MovieResponse.class);
+                if (movieResponse != null && movieResponse.getId() != null) {
+                    getMovieDetailByNotification(movieResponse.getId(), messageOneSignal);
+                }
+                break;
+
+            case OneSignalCommand.CMD_NEW_MOVIE_ITEM:
+                MovieItemResponse movieItemResponse = GsonUtils.fromJson(messageOneSignal.getData(), MovieItemResponse.class);
+                if (movieItemResponse != null && movieItemResponse.getId() != null) {
+                    getMovieDetailByNotification(movieItemResponse.getMovie().getId(), messageOneSignal);
                 }
                 break;
             default:
