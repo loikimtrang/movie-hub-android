@@ -572,11 +572,12 @@ public class MainActivity extends BaseActivity<ActivityMainBinding, MainViewMode
 
     public MovieResponse movieResponse;
     public RoomResponse roomResponse;
-
-    public void createMqtt(MovieResponse movieResponse, RoomResponse model) {
+    public boolean isHost;
+    public void createMqtt(MovieResponse movieResponse, RoomResponse model, boolean isHost) {
         viewModel.showLoading();
         this.movieResponse = movieResponse;
         this.roomResponse = model;
+        this.isHost = isHost;
 
         String topicParent = Constants.TOPIC +  model.getId().toString();
         String topicChild = topicParent + "/" + viewModel.getUserId().toString();
@@ -595,13 +596,14 @@ public class MainActivity extends BaseActivity<ActivityMainBinding, MainViewMode
         }
 
         it.putExtra(WatchMovieActivity.LiveRoom, true);
-        it.putExtra(WatchMovieActivity.Host, false);
+        it.putExtra(WatchMovieActivity.Host, this.isHost);
 
         startActivity(it);
 
         viewModel.hideLoading();
         this.roomResponse = new RoomResponse();
         this.movieResponse = new MovieResponse();
+        this.isHost = false;
     }
     private ActivityResultLauncher<Intent> loginLauncher;
     public void showLoginRequiredDialog() {

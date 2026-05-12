@@ -107,4 +107,7 @@
     <color name="bg_ic_live">#40000000</color>
     <color name="bg_item_chat">#006494</color>
     <color name="imdb">#deb522</color>
+    <color name="bg_chat">#1E1E1E</color>
+    <color name="bg_input_chat">#2C2C2C</color>
+
 </resources>

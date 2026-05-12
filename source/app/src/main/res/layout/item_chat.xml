@@ -10,7 +10,7 @@
         android:paddingVertical="@dimen/_2sdp"
         android:clickable="true"
         android:focusable="true"
-        android:background="@color/bg_comment">
+        android:background="@color/bg_chat">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -42,8 +42,9 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        style="@style/Text_10_Normal"
+                        style="@style/Text_10_Bold"
                         tools:text="Name"
+                        android:textColor="#BB86FC"
                         android:id="@+id/tv_name_author"
                         android:maxWidth="@dimen/_100sdp"
                         android:ellipsize="end"
@@ -59,7 +60,8 @@
                             android:layout_width="@dimen/_10sdp"
                             android:layout_height="@dimen/_10sdp"
                             android:src="@drawable/ic_dot_room"
-                            android:layout_gravity="center"/>
+                            android:layout_gravity="center"
+                            android:visibility="gone"/>
 
                         <TextView
                             android:layout_width="wrap_content"
@@ -67,6 +69,7 @@
                             style="@style/Text_10_Normal"
                             tools:text="10:30"
                             android:id="@+id/tv_time"
+                            android:visibility="gone"
                             />
                     </LinearLayout>
 
@@ -74,9 +77,7 @@
 
                 <FrameLayout
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/bg_chat"
-                    android:padding="@dimen/_3sdp">
+                    android:layout_height="wrap_content">
 
                     <TextView
                         android:layout_width="wrap_content"

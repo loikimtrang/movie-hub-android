@@ -278,7 +278,10 @@ public class DisplayUtils {
         if (dateStr == null || dateStr.isEmpty()) return "";
 
         SimpleDateFormat inputFormat = new SimpleDateFormat(SERVER_FORMAT, Locale.getDefault());
+        inputFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+
         SimpleDateFormat outputFormat = new SimpleDateFormat(VIEW_FORMAT, Locale.getDefault());
+        outputFormat.setTimeZone(TimeZone.getDefault());
 
         try {
             Date date = inputFormat.parse(dateStr);

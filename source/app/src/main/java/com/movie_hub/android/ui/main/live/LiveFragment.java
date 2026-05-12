@@ -398,7 +398,7 @@ public class LiveFragment extends BaseFragment<FragmentLiveBinding, LiveViewMode
                             getString(R.string.title_information),
                             (dialog, which) -> {
                                 if (model.getMovieItem() != null && model.getMovieItem().getMovie() != null) {
-                                    getMovie(model.getMovieItem().getMovie().getId(), model, false);
+                                    getMovie(model.getMovieItem().getMovie().getId(), model, false, true);
                                 }
                             },
                             getString(R.string.back), // Nút bên phải: Quay lại
@@ -428,7 +428,7 @@ public class LiveFragment extends BaseFragment<FragmentLiveBinding, LiveViewMode
                         getString(R.string.title_information),
                         (dialog, which) -> {
                             if (model.getMovieItem() != null && model.getMovieItem().getMovie() != null) {
-                                getMovie(model.getMovieItem().getMovie().getId(), model, false);
+                                getMovie(model.getMovieItem().getMovie().getId(), model, false, true);
                             }
                         },
                         getString(R.string.back),
@@ -448,7 +448,7 @@ public class LiveFragment extends BaseFragment<FragmentLiveBinding, LiveViewMode
                         getString(R.string.msg_premier_not_started),
                         getString(R.string.title_information),
                         (dialog, which) -> {
-                            getMovie(model.getMovieItem().getMovie().getId(), model, false);
+                            getMovie(model.getMovieItem().getMovie().getId(), model, false, false);
                         },
                         getString(R.string.back),
                         (dialog, which) -> {
@@ -457,7 +457,7 @@ public class LiveFragment extends BaseFragment<FragmentLiveBinding, LiveViewMode
                 );
                 break;
             case Constants.ROOM_STATE_RUNNING:
-                getMovie(model.getMovieItem().getMovie().getId(), model, true);
+                getMovie(model.getMovieItem().getMovie().getId(), model, true, true);
                 break;
             case Constants.ROOM_STATE_ENDING:
                 DialogUtils.dialogConfirm(
@@ -465,7 +465,7 @@ public class LiveFragment extends BaseFragment<FragmentLiveBinding, LiveViewMode
                         getString(R.string.msg_room_ended),
                         getString(R.string.title_information),
                         (dialog, which) -> {
-                            getMovie(model.getMovieItem().getMovie().getId(), model, false);
+                            getMovie(model.getMovieItem().getMovie().getId(), model, false, false);
                         },
                         getString(R.string.back),
                         (dialog, which) -> dialog.dismiss()
@@ -476,7 +476,7 @@ public class LiveFragment extends BaseFragment<FragmentLiveBinding, LiveViewMode
         }
     }
 
-    public void getMovie(Long id, RoomResponse model, boolean isRoomRunning) {
+    public void getMovie(Long id, RoomResponse model, boolean isRoomRunning, boolean isHost) {
         viewModel.getMovie(new MainCallback<MovieResponse>() {
             @Override
             public void doError(Throwable error) {
@@ -498,7 +498,7 @@ public class LiveFragment extends BaseFragment<FragmentLiveBinding, LiveViewMode
             @Override
             public void doSuccess(MovieResponse object) {
                 if (isRoomRunning) {
-                    joinRoom(object, model);
+                    joinRoom(object, model, isHost);
                 } else {
                     if (viewModel.isLogin()) {
                         getListMovieTracking(object, NavigateToMovieDetails);
@@ -542,7 +542,7 @@ public class LiveFragment extends BaseFragment<FragmentLiveBinding, LiveViewMode
         ((MainActivity) requireActivity()).navigateToMovieDetail(movieResponse, listWatchHistoryResponse);
     }
 
-    public void joinRoom(MovieResponse movieResponse, RoomResponse model) {
+    public void joinRoom(MovieResponse movieResponse, RoomResponse model, boolean isHost) {
         viewModel.joinRoom(new MainCallback<RoomResponse>() {
             @Override
             public void doError(Throwable error) {
@@ -563,7 +563,7 @@ public class LiveFragment extends BaseFragment<FragmentLiveBinding, LiveViewMode
 
             @Override
             public void doSuccess(RoomResponse object) {
-                createMqtt(movieResponse, object);
+                createMqtt(movieResponse, object, isHost);
             }
         }, model.getId());
     }
@@ -587,12 +587,12 @@ public class LiveFragment extends BaseFragment<FragmentLiveBinding, LiveViewMode
 
             @Override
             public void doSuccess(RoomResponse object) {
-                getMovie(model.getMovieItem().getMovie().getId(), model, true);
+                getMovie(model.getMovieItem().getMovie().getId(), model, true, true);
             }
         }, model.getId());
     }
-    public void createMqtt(MovieResponse movieResponse, RoomResponse model) {
-        ((MainActivity) requireActivity()).createMqtt(movieResponse, model);
+    public void createMqtt(MovieResponse movieResponse, RoomResponse model, boolean isHost) {
+        ((MainActivity) requireActivity()).createMqtt(movieResponse, model, isHost);
     }
 
     public void showLoading() {

@@ -71,37 +71,61 @@ public class ChatAdapter extends ListAdapter<CreateChatModel, ChatAdapter.ChatVi
             if (item == null) return;
             boolean groupWithPrevious = shouldGroupWithPrevious(item, previous);
             binding.tvContent.setText(item.getContent() != null ? item.getContent() : "");
-
-            if (groupWithPrevious) {
-                binding.imgAvatar.setVisibility(View.INVISIBLE);
-                binding.layoutInfChat.setVisibility(View.GONE);
-            } else {
-                binding.imgAvatar.setVisibility(View.VISIBLE);
-                binding.layoutInfChat.setVisibility(View.VISIBLE);
-                UserResponse author = item.getAuthor();
-                String name = "";
-                String avatar = "";
-                if (author != null) {
-                    if (!TextUtils.isEmpty(author.getFullName())) {
-                        name = author.getFullName();
-                    } else if (!TextUtils.isEmpty(author.getUsername())) {
-                        name = author.getUsername();
-                    }
-                    if (author.getAvatarPath() != null) {
-                        avatar = author.getAvatarPath();
-                    }
+            binding.imgAvatar.setVisibility(View.VISIBLE);
+            binding.layoutInfChat.setVisibility(View.VISIBLE);
+            UserResponse author = item.getAuthor();
+            String name = "";
+            String avatar = "";
+            if (author != null) {
+                if (!TextUtils.isEmpty(author.getFullName())) {
+                    name = author.getFullName();
+                } else if (!TextUtils.isEmpty(author.getUsername())) {
+                    name = author.getUsername();
                 }
-                binding.tvNameAuthor.setText(name);
-                binding.tvTime.setText(formatDisplayTime(item.getCreateDate()));
-                if (!TextUtils.isEmpty(avatar) && !avatar.contains("http")) {
-                    avatar = Constants.MEDIA_URL + avatar;
+                if (author.getAvatarPath() != null) {
+                    avatar = author.getAvatarPath();
                 }
-                Glide.with(binding.imgAvatar.getContext())
-                        .load(TextUtils.isEmpty(avatar) ? R.drawable.logo : avatar)
-                        .placeholder(R.drawable.logo)
-                        .error(R.drawable.logo)
-                        .into(binding.imgAvatar);
             }
+            binding.tvNameAuthor.setText(name);
+            binding.tvTime.setText(formatDisplayTime(item.getCreateDate()));
+            if (!TextUtils.isEmpty(avatar) && !avatar.contains("http")) {
+                avatar = Constants.MEDIA_URL + avatar;
+            }
+            Glide.with(binding.imgAvatar.getContext())
+                    .load(TextUtils.isEmpty(avatar) ? R.drawable.logo : avatar)
+                    .placeholder(R.drawable.logo)
+                    .error(R.drawable.logo)
+                    .into(binding.imgAvatar);
+//            if (groupWithPrevious) {
+//                binding.imgAvatar.setVisibility(View.INVISIBLE);
+//                binding.layoutInfChat.setVisibility(View.GONE);
+//            } else {
+//                binding.imgAvatar.setVisibility(View.VISIBLE);
+//                binding.layoutInfChat.setVisibility(View.VISIBLE);
+//                UserResponse author = item.getAuthor();
+//                String name = "";
+//                String avatar = "";
+//                if (author != null) {
+//                    if (!TextUtils.isEmpty(author.getFullName())) {
+//                        name = author.getFullName();
+//                    } else if (!TextUtils.isEmpty(author.getUsername())) {
+//                        name = author.getUsername();
+//                    }
+//                    if (author.getAvatarPath() != null) {
+//                        avatar = author.getAvatarPath();
+//                    }
+//                }
+//                binding.tvNameAuthor.setText(name);
+//                binding.tvTime.setText(formatDisplayTime(item.getCreateDate()));
+//                if (!TextUtils.isEmpty(avatar) && !avatar.contains("http")) {
+//                    avatar = Constants.MEDIA_URL + avatar;
+//                }
+//                Glide.with(binding.imgAvatar.getContext())
+//                        .load(TextUtils.isEmpty(avatar) ? R.drawable.logo : avatar)
+//                        .placeholder(R.drawable.logo)
+//                        .error(R.drawable.logo)
+//                        .into(binding.imgAvatar);
+//            }
         }
 
         private static boolean shouldGroupWithPrevious(
