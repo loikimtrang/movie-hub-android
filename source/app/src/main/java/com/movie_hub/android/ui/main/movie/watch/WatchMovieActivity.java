@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.ContentObserver;
 import android.graphics.Color;
+import android.graphics.Rect;
 import android.media.AudioManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -15,11 +16,15 @@ import android.os.Handler;
 import android.os.Looper;
 import android.provider.Settings;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.GestureDetector;
 import android.view.HapticFeedbackConstants;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
+import android.view.ViewConfiguration;
+import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.view.Window;
 import android.view.WindowInsets;
 import android.view.WindowInsetsController;
@@ -55,6 +60,13 @@ import androidx.media3.exoplayer.source.DefaultMediaSourceFactory;
 import androidx.media3.exoplayer.trackselection.DefaultTrackSelector;
 import androidx.media3.ui.AspectRatioFrameLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.transition.AutoTransition;
+import androidx.transition.ChangeBounds;
+import androidx.transition.Fade;
+import androidx.transition.Slide;
+import androidx.transition.Transition;
+import androidx.transition.TransitionManager;
+import androidx.transition.TransitionSet;
 
 import com.bumptech.glide.Glide;
 import com.google.common.collect.ImmutableList;
@@ -116,6 +128,9 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
         MoreOptionBottomSheetDialog.MoreOptionBottomSheetCallback,
         SeasonItemAdapter.OnSeasonClickListener,
         EpisodeItemListHoriAdapter.OnEpisodeClickListener {
+    private static final long CHAT_ANIM_DURATION_MS = 260L;
+    private static final float CHAT_SWIPE_CLOSE_THRESHOLD = 0.32f; // fraction of chat width
+    private boolean chatTransitionRunning = false;
     private ExoPlayer player;
     private static final int AUTO_HIDE_DELAY_MILLIS = 3000;
     private static final int SEEK_DOUBLE_TAP_MILLIS = 10000;
@@ -159,6 +174,8 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
 
     private ChatAdapter chatAdapter;
     private final Handler handlerRetryGetListSubtitle = new Handler(Looper.getMainLooper());
+    private boolean lastImeVisible = false;
+    @Nullable private ViewTreeObserver.OnGlobalLayoutListener imeLayoutListener;
     private void startSchedule() {
         runnablePing = new Runnable() {
             @SuppressLint("TimberArgCount")
@@ -240,6 +257,7 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
                 getUserProfileForLive();
                 viewBinding.btnOpenChat.setVisibility(View.VISIBLE);
                 setupChatUi();
+                setupImeAwareChatInput();
             }
 
 
@@ -249,6 +267,221 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
                 startGetListSubtitle();
             }
         }
+
+        setupChatSwipeToClose();
+    }
+
+    private void setupImeAwareChatInput() {
+        if (imeLayoutListener != null) return;
+
+        final View root = viewBinding.getRoot();
+        imeLayoutListener = () -> {
+            Rect r = new Rect();
+            root.getWindowVisibleDisplayFrame(r);
+
+            int screenHeight = root.getRootView().getHeight();
+            int visibleHeight = r.height();
+            int heightDiff = Math.max(0, screenHeight - visibleHeight);
+
+            // Heuristic threshold to decide IME visibility (landscape + immersive can vary)
+            boolean imeVisible = heightDiff > dpToPx(140);
+            if (imeVisible == lastImeVisible) return;
+            lastImeVisible = imeVisible;
+
+            applyChatImeState(imeVisible);
+        };
+        root.getViewTreeObserver().addOnGlobalLayoutListener(imeLayoutListener);
+    }
+
+    private void applyChatImeState(boolean imeVisible) {
+        // Only animate when chat is actually open/visible (prevents background layout churn).
+        if (viewBinding.layoutChat.getVisibility() != View.VISIBLE) return;
+
+        TransitionManager.beginDelayedTransition(viewBinding.layoutChat, new ChangeBounds());
+        ViewGroup.LayoutParams lp = viewBinding.bottomComment.getLayoutParams();
+        ViewGroup.LayoutParams inputLp = viewBinding.lInput.getLayoutParams();
+        ViewGroup.LayoutParams editLp = viewBinding.edtComment.getLayoutParams();
+
+        if (imeVisible) {
+            // Expand the input panel so the EditText can grow into remaining space.
+            lp.height = ViewGroup.LayoutParams.MATCH_PARENT;
+            viewBinding.bottomComment.setLayoutParams(lp);
+            viewBinding.rvChat.setVisibility(View.GONE);
+            inputLp.height = ViewGroup.LayoutParams.MATCH_PARENT;
+            viewBinding.lInput.setLayoutParams(inputLp);
+            editLp.height = ViewGroup.LayoutParams.MATCH_PARENT;
+            viewBinding.edtComment.setLayoutParams(editLp);
+            viewBinding.edtComment.setMinLines(4);
+            viewBinding.edtComment.setMaxLines(12);
+            viewBinding.edtComment.setGravity(Gravity.START | Gravity.TOP);
+        } else {
+            // Restore normal chat list + compact input.
+            lp.height = ViewGroup.LayoutParams.WRAP_CONTENT;
+            viewBinding.bottomComment.setLayoutParams(lp);
+            viewBinding.rvChat.setVisibility(View.VISIBLE);
+            inputLp.height = ViewGroup.LayoutParams.WRAP_CONTENT;
+            viewBinding.lInput.setLayoutParams(inputLp);
+            editLp.height = ViewGroup.LayoutParams.WRAP_CONTENT;
+            viewBinding.edtComment.setLayoutParams(editLp);
+            viewBinding.edtComment.setMinLines(1);
+            viewBinding.edtComment.setMaxLines(4);
+            viewBinding.edtComment.setGravity(Gravity.START | Gravity.CENTER_VERTICAL);
+        }
+    }
+
+    private int dpToPx(int dp) {
+        return Math.round(dp * getResources().getDisplayMetrics().density);
+    }
+
+    private Transition buildChatTransition(boolean opening) {
+        Transition slide = new Slide(Gravity.END);
+        slide.setDuration(CHAT_ANIM_DURATION_MS);
+
+        Transition fade = new Fade(opening ? Fade.IN : Fade.OUT);
+        fade.setDuration(CHAT_ANIM_DURATION_MS);
+
+        Transition bounds = new ChangeBounds();
+        bounds.setDuration(CHAT_ANIM_DURATION_MS);
+
+        TransitionSet set = new TransitionSet()
+                .setOrdering(TransitionSet.ORDERING_TOGETHER)
+                .addTransition(bounds)
+                .addTransition(slide)
+                .addTransition(fade);
+        set.setInterpolator(new DecelerateInterpolator());
+        set.addListener(new Transition.TransitionListener() {
+            @Override public void onTransitionStart(@NonNull Transition transition) { chatTransitionRunning = true; }
+            @Override public void onTransitionEnd(@NonNull Transition transition) { chatTransitionRunning = false; transition.removeListener(this); }
+            @Override public void onTransitionCancel(@NonNull Transition transition) { chatTransitionRunning = false; transition.removeListener(this); }
+            @Override public void onTransitionPause(@NonNull Transition transition) {}
+            @Override public void onTransitionResume(@NonNull Transition transition) {}
+        });
+        return set;
+    }
+
+    private void openChatAnimated() {
+        if (chatTransitionRunning) return;
+        if (viewBinding.layoutChat.getVisibility() == View.VISIBLE) return;
+
+        viewModel.setChatOpen(true);
+        viewBinding.layoutChat.animate().cancel();
+        viewBinding.layoutChat.setTranslationX(0f);
+        viewBinding.layoutChat.setAlpha(1f);
+
+        ViewGroup root = (ViewGroup) viewBinding.getRoot();
+        TransitionManager.beginDelayedTransition(root, buildChatTransition(true));
+        viewBinding.layoutChat.setVisibility(View.VISIBLE);
+    }
+
+    private void closeChatAnimated() {
+        if (chatTransitionRunning) return;
+        if (viewBinding.layoutChat.getVisibility() != View.VISIBLE) {
+            viewModel.setChatOpen(false);
+            return;
+        }
+
+        viewModel.setChatOpen(false);
+        // IMPORTANT: Do a single TransitionManager transition so bounds + slide/fade stay in sync.
+        // Manual property animations here will cause a second pass (stutter) and delay the video resize.
+        viewBinding.layoutChat.animate().cancel();
+        viewBinding.layoutChat.setTranslationX(0f);
+        viewBinding.layoutChat.setAlpha(1f);
+
+        ViewGroup root = (ViewGroup) viewBinding.getRoot();
+        TransitionManager.beginDelayedTransition(root, buildChatTransition(false));
+        viewBinding.layoutChat.setVisibility(View.GONE);
+    }
+
+    private void toggleChatAnimated() {
+        if (viewBinding.layoutChat.getVisibility() == View.VISIBLE) {
+            closeChatAnimated();
+        } else {
+            openChatAnimated();
+        }
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    private void setupChatSwipeToClose() {
+        // Allow swiping the chat panel (from right side) to close it.
+        final int touchSlop = ViewConfiguration.get(this).getScaledTouchSlop();
+
+        viewBinding.layoutChat.setClickable(true);
+        viewBinding.layoutChat.setFocusable(true);
+
+        viewBinding.layoutChat.setOnTouchListener(new View.OnTouchListener() {
+            float downX;
+            float downY;
+            float startTx;
+            boolean dragging;
+
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if (viewBinding.layoutChat.getVisibility() != View.VISIBLE) return false;
+
+                switch (event.getActionMasked()) {
+                    case MotionEvent.ACTION_DOWN:
+                        downX = event.getRawX();
+                        downY = event.getRawY();
+                        startTx = v.getTranslationX();
+                        dragging = false;
+                        v.animate().cancel();
+                        return false; // let children (RecyclerView/EditText) receive events unless we start dragging
+
+                    case MotionEvent.ACTION_MOVE: {
+                        float dx = event.getRawX() - downX;
+                        float dy = event.getRawY() - downY;
+
+                        if (!dragging) {
+                            if (Math.abs(dx) > touchSlop && Math.abs(dx) > Math.abs(dy)) {
+                                // Start horizontal drag (swipe right to close).
+                                dragging = dx > 0;
+                                if (dragging) {
+                                    v.getParent().requestDisallowInterceptTouchEvent(true);
+                                    v.animate().cancel();
+                                }
+                            } else {
+                                return false;
+                            }
+                        }
+
+                        if (dragging) {
+                            float tx = Math.max(0f, startTx + dx);
+                            v.setTranslationX(tx);
+                            float w = Math.max(1f, v.getWidth());
+                            v.setAlpha(Math.max(0.3f, 1f - (tx / w)));
+                            return true;
+                        }
+                        return false;
+                    }
+
+                    case MotionEvent.ACTION_UP:
+                    case MotionEvent.ACTION_CANCEL: {
+                        if (!dragging) return false;
+
+                        float w = Math.max(1f, v.getWidth());
+                        float tx = v.getTranslationX();
+                        boolean shouldClose = (tx / w) >= CHAT_SWIPE_CLOSE_THRESHOLD;
+
+                        if (shouldClose) {
+                            // Reset transient drag state; closing uses TransitionManager for a single, synced animation.
+                            v.setTranslationX(0f);
+                            v.setAlpha(1f);
+                            closeChatAnimated();
+                        } else {
+                            v.animate()
+                                    .translationX(0f)
+                                    .alpha(1f)
+                                    .setDuration(180L)
+                                    .setInterpolator(new DecelerateInterpolator())
+                                    .start();
+                        }
+                        dragging = false;
+                        return true;
+                    }
+                }
+                return false;
+            }
+        });
     }
     private void startGetListSubtitle() {
         handlerRetryGetListSubtitle.removeCallbacksAndMessages(null);
@@ -1799,6 +2032,16 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
     }
     @Override
     protected void onDestroy() {
+        if (imeLayoutListener != null) {
+            View root = viewBinding != null ? viewBinding.getRoot() : null;
+            if (root != null) {
+                ViewTreeObserver vto = root.getViewTreeObserver();
+                if (vto.isAlive()) {
+                    vto.removeOnGlobalLayoutListener(imeLayoutListener);
+                }
+            }
+            imeLayoutListener = null;
+        }
         super.onDestroy();
 
         if (player != null) {
@@ -1914,19 +2157,10 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
                 onNextEpisodeClick();
                 break;
             case R.id.btn_open_chat:
-                if (viewModel.isChatOpen) {
-                    viewModel.setChatOpen(false);
-                    viewBinding.layoutChat.setVisibility(View.GONE);
-                } else {
-                    viewModel.setChatOpen(true);
-                    viewBinding.layoutChat.setVisibility(View.VISIBLE);
-                }
+                toggleChatAnimated();
                 break;
             case R.id.btn_close_chat:
-                if (viewModel.isChatOpen) {
-                    viewModel.setChatOpen(false);
-                    viewBinding.layoutChat.setVisibility(View.GONE);
-                }
+                closeChatAnimated();
                 break;
             case R.id.btn_create_comment:
                 sendRoomChatMessage();

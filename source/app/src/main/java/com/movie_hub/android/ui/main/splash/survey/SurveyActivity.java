@@ -26,6 +26,7 @@ import com.movie_hub.android.data.model.api.request.movie.MovieRequest;
 import com.movie_hub.android.data.model.api.request.side_bar.SideBarRequest;
 import com.movie_hub.android.data.model.api.response.movie.MovieResponse;
 import com.movie_hub.android.data.model.api.response.side_bar.SidebarResponse;
+import com.movie_hub.android.data.model.other.ToastMessage;
 import com.movie_hub.android.databinding.ActivitySurveyBinding;
 import com.movie_hub.android.di.component.ActivityComponent;
 import com.movie_hub.android.ui.base.activity.BaseActivity;
@@ -39,6 +40,7 @@ import com.movie_hub.android.ui.main.search.topTrending.FlexSpacingItemDecoratio
 import com.movie_hub.android.ui.main.search.topTrending.adapter.MovieVerticalAdapter;
 import com.movie_hub.android.ui.main.search.topTrending.adapter.SearchHistoryAdapter;
 import com.movie_hub.android.ui.main.search.topTrending.shimmer.MovieVerticalShimmerAdapter;
+import com.movie_hub.android.ui.main.splash.SplashActivity;
 import com.movie_hub.android.ui.main.splash.survey.adapter.MovieSurveyAdapter;
 import com.movie_hub.android.utils.DisplayUtils;
 import com.movie_hub.android.utils.GridUtil;
@@ -96,6 +98,37 @@ public class SurveyActivity extends BaseActivity<ActivitySurveyBinding, SurveyVi
 
         viewBinding.btnDone.setOnClickListener(v -> {
             handleFinishSurvey();
+        });
+
+        viewBinding.btnLogOut.setOnClickListener(v -> {
+            userSignOut();
+        });
+    }
+    public void userSignOut() {
+        viewModel.showLoading();
+        viewModel.userSignOut(new MainCallback<Void>() {
+            @Override
+            public void doSuccess(Void unused) {
+                startActivity(new Intent(getApplicationContext(), SplashActivity.class));
+                new ToastMessage(ToastMessage.TYPE_NORMAL, getString(R.string.sign_out_success)).showMessage(getApplicationContext());
+                finish();
+            }
+
+            @Override
+            public void doError(Throwable throwable) {
+                new ToastMessage(ToastMessage.TYPE_WARNING, getString(R.string.an_error_occurred)).showMessage(getApplicationContext());
+            }
+
+            @Override
+            public void doFail() {
+                new ToastMessage(ToastMessage.TYPE_WARNING, getString(R.string.an_error_occurred)).showMessage(getApplicationContext());
+            }
+
+            @Override
+            public void doSuccess() {
+                startActivity(new Intent(getApplicationContext(), SplashActivity.class));
+                finish();
+            }
         });
     }
     public void showShimmerLoading() {

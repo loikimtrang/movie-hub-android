@@ -160,6 +160,26 @@
 
                 </FrameLayout>
 
+                <FrameLayout
+                    android:id="@+id/btn_log_out"
+                    android:layout_width="@dimen/_100sdp"
+                    android:layout_height="@dimen/_36sdp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:onClick="onClick"
+                    android:background="@drawable/bg_btn_skip"
+                    android:layout_marginTop="@dimen/_12sdp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/log_out"
+                        style="@style/Text_12_Bold"
+                        android:layout_gravity="center"/>
+
+                </FrameLayout>
+
+
             </LinearLayout>
 
 

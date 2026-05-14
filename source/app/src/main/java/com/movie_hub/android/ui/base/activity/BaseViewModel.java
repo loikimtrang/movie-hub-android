@@ -196,4 +196,49 @@ public class BaseViewModel extends ViewModel {
     public Long getUserId() {
         return repository.getSharedPreferences().getUserId();
     }
+
+    public void userSignOut(MainCallback<Void> callback) {
+        application.removeOneSignalExternalId();
+        repository.getSharedPreferences().clearAuthData();
+        compositeDisposable.add(repository.getMasterApiService().logout()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .retryWhen(throwable ->
+                        throwable.flatMap((Function<Throwable, ObservableSource<?>>) throwable1 -> {
+                            if (NetworkUtils.checkNetworkError(throwable1)) {
+                                hideLoading();
+                                return application.showDialogNoInternetAccess();
+                            }else{
+                                return Observable.error(throwable1);
+                            }
+                        })
+                )
+                .subscribe(
+                        response -> {
+                            if (response.isResult()) {
+                                compositeDisposable.add(
+                                        repository.getRoomService().userDao().clear()
+                                                .subscribeOn(Schedulers.io())
+                                                .observeOn(AndroidSchedulers.mainThread())
+                                                .subscribe(
+                                                        () -> {
+                                                            callback.doSuccess();
+                                                        },
+                                                        throwable -> {
+                                                            Timber.e(throwable, "Sign out: Failed to clear user data from DB");
+                                                            callback.doError(throwable);
+                                                        }
+                                                )
+                                );
+                            } else {
+                                callback.doFail();
+                            }
+                        }, throwable -> {
+                            Timber.e(throwable);
+                            callback.doError(throwable);
+                        }
+                )
+        );
+    }
+
 }

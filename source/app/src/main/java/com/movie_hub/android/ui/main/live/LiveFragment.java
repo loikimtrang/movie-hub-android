@@ -457,7 +457,7 @@ public class LiveFragment extends BaseFragment<FragmentLiveBinding, LiveViewMode
                 );
                 break;
             case Constants.ROOM_STATE_RUNNING:
-                getMovie(model.getMovieItem().getMovie().getId(), model, true, true);
+                getMovie(model.getMovieItem().getMovie().getId(), model, true, false);
                 break;
             case Constants.ROOM_STATE_ENDING:
                 DialogUtils.dialogConfirm(

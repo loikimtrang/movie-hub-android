@@ -16,7 +16,8 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:background="@color/black">
 
         <FrameLayout
             android:layout_width="0dp"
@@ -985,30 +986,37 @@
 
         </FrameLayout>
 
-        <RelativeLayout
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/layout_chat"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="3"
             android:background="@color/bg_chat"
+            android:clickable="true"
+            android:focusable="true"
             android:visibility="gone">
 
-            <RelativeLayout
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/layout_chat_header"
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/_40sdp">
+                android:layout_width="0dp"
+                android:layout_height="@dimen/_40sdp"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent">
 
                 <FrameLayout
                     android:id="@+id/btn_close_chat"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:padding="@dimen/_6sdp"
-                    android:layout_centerVertical="true"
                     android:background="@drawable/bg_btn_press_tran"
                     android:layout_marginStart="@dimen/_3sdp"
                     android:clickable="true"
                     android:focusable="true"
-                    android:onClick="onClick">
+                    android:onClick="onClick"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent">
 
                     <ImageView
                         android:layout_width="@dimen/_12sdp"
@@ -1023,76 +1031,86 @@
                     android:layout_height="wrap_content"
                     android:text="@string/chat"
                     style="@style/Text_12_Normal"
-                    android:layout_centerInParent="true"/>
-
-
-            </RelativeLayout>
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"/>
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rv_chat"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_above="@+id/bottom_comment"
-                android:layout_below="@+id/layout_chat_header"/>
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                app:layout_constraintTop_toBottomOf="@id/layout_chat_header"
+                app:layout_constraintBottom_toTopOf="@id/bottom_comment"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"/>
 
-            <RelativeLayout
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/bottom_comment"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:background="@color/bg_chat"
-                android:layout_alignParentBottom="true">
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent">
 
                 <com.google.android.material.progressindicator.LinearProgressIndicator
                     android:id="@+id/bottom_loading_bar"
-                    android:layout_width="match_parent"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="bottom"
                     android:indeterminate="true"
                     android:visibility="gone"
                     app:trackThickness="1dp"
                     app:indicatorColor="@color/ic_tab_bar_tint"
                     app:trackColor="@android:color/transparent"
-                    style="@style/Widget.MaterialComponents.LinearProgressIndicator"/>
+                    style="@style/Widget.MaterialComponents.LinearProgressIndicator"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"/>
 
                 <LinearLayout
                     android:id="@+id/l_input"
-                    android:layout_width="match_parent"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:layout_marginHorizontal="@dimen/_6sdp"
                     android:layout_marginBottom="@dimen/_6sdp"
                     android:layout_marginTop="@dimen/_6sdp"
-                    android:layout_below="@+id/l_reply_to">
+                    app:layout_constraintTop_toBottomOf="@id/bottom_loading_bar"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent">
 
                     <EditText
                         android:id="@+id/edt_comment"
                         android:layout_width="0dp"
-                        android:layout_height="@dimen/_36sdp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
                         android:background="@drawable/bg_input_chat"
                         android:paddingVertical="@dimen/_6sdp"
                         android:paddingHorizontal="@dimen/_6sdp"
                         android:hint="@string/comment_here"
                         android:textColorHint="@color/text_comment"
                         android:maxLength="300"
-                        android:layout_weight="1"
-                        android:gravity="start|center_vertical"
+                        android:minHeight="@dimen/_36sdp"
+                        android:gravity="start|top"
                         android:inputType="textMultiLine"
                         android:imeOptions="actionDone"
                         android:scrollbars="vertical"
-                        style="@style/Text_10_Normal"
-                        />
+                        style="@style/Text_10_Normal" />
 
                     <FrameLayout
+                        android:id="@+id/btn_create_comment"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
+                        android:layout_gravity="bottom"
                         android:layout_marginStart="@dimen/_3sdp"
                         android:padding="@dimen/_6sdp"
                         android:background="@drawable/bg_btn_press_tran"
                         android:clickable="true"
                         android:focusable="true"
                         android:onClick="onClick"
-                        android:id="@+id/btn_create_comment"
                         android:visibility="visible">
 
                         <ImageView
@@ -1103,9 +1121,9 @@
 
                     </FrameLayout>
                 </LinearLayout>
-            </RelativeLayout>
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
-        </RelativeLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
     </LinearLayout>
 

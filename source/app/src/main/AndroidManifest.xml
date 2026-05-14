@@ -168,6 +168,7 @@
 
             android:exported="true"/>
         <activity android:name=".ui.main.movie.watch.WatchMovieActivity"
+            android:windowSoftInputMode="adjustResize|stateHidden"
             android:screenOrientation="landscape"
             android:exported="true"/>
 
