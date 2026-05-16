@@ -14,12 +14,14 @@ public class SettingVideoModel {
     private PlaySpeed playSpeed = new PlaySpeed();
     private PlaySpeed playSpeedWhenPress = new PlaySpeed();
     private List<VideoQuality> availableQualities = new ArrayList<>();
+    private SubtitleStyle subtitleStyle = new SubtitleStyle();
 
     /**
      * Observable current playback speed (single source of truth).
      * Dialogs/Activity can observe this to keep UI + player in sync.
      */
     private transient MutableLiveData<Float> playbackSpeedLive = new MutableLiveData<>();
+    private transient MutableLiveData<SubtitleStyle> subtitleStyleLive = new MutableLiveData<>();
 
     @Data
     public static class Quality {
@@ -36,6 +38,7 @@ public class SettingVideoModel {
         quality.setAuto(true);
         setPlaybackSpeed(1.0f);
         playSpeedWhenPress.setSpeed(2.0f);
+        getSubtitleStyleLive().postValue(subtitleStyle);
     }
 
     public MutableLiveData<Float> getPlaybackSpeedLive() {
@@ -46,5 +49,16 @@ public class SettingVideoModel {
     public void setPlaybackSpeed(float speed) {
         playSpeed.setSpeed(speed);
         getPlaybackSpeedLive().postValue(speed);
+    }
+
+    public MutableLiveData<SubtitleStyle> getSubtitleStyleLive() {
+        if (subtitleStyleLive == null) subtitleStyleLive = new MutableLiveData<>();
+        return subtitleStyleLive;
+    }
+
+    public void updateSubtitleStyle(SubtitleStyle style) {
+        if (style == null) return;
+        this.subtitleStyle = style;
+        getSubtitleStyleLive().postValue(style);
     }
 }

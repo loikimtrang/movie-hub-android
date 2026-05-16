@@ -40,7 +40,8 @@
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:scaleType="centerCrop"
-                            app:shapeAppearanceOverlay="@style/movieVerticalImg"
+                            android:src="@drawable/place_holder_16_9"
+                            app:shapeAppearanceOverlay="@style/movieEpisodeImg"
                             />
 
                         <SeekBar
@@ -49,14 +50,14 @@
                             android:layout_height="wrap_content"
                             android:max="100"
                             android:progress="100"
-                            android:minHeight="@dimen/_3sdp"
-                            android:maxHeight="@dimen/_3sdp"
+                            android:minHeight="@dimen/_5sdp"
+                            android:maxHeight="@dimen/_5sdp"
                             android:progressDrawable="@drawable/seekbar_video_progress_history_radius_half"
                             android:paddingStart="0dp"
                             android:paddingEnd="0dp"
                             android:thumb="@null"
                             android:layout_gravity="bottom"
-                            android:visibility="gone"/>
+                            android:visibility="visible"/>
 
                     </FrameLayout>
 

@@ -350,5 +350,17 @@
     <string name="recommend_for_you">You might like these movies</string>
     <string name="movie_not_ready">"The movie isn't ready yet, please come back later"</string>
     <string name="current_subtitle">Current subtitle:</string>
+    <string name="customize_subtitle">Customize subtitle</string>
+    <string name="subtitle_preview_sample">Subtitle preview</string>
+    <string name="subtitle_font_size">Font size: </string>
+    <string name="subtitle_font_size_small">Small</string>
+    <string name="subtitle_font_size_medium">Medium</string>
+    <string name="subtitle_font_size_large">Large</string>
+    <string name="subtitle_background">Text background: </string>
+    <string name="subtitle_background_color">Background color: </string>
+    <string name="subtitle_text_color">Text color: </string>
+    <string name="subtitle_enabled">Show subtitles</string>
+    <string name="subtitle_not_available">Not available</string>
+    <string name="subtitle_not_available_for_video">This video has no subtitles</string>
 
 </resources>

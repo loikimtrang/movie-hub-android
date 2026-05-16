@@ -44,6 +44,12 @@
         <item name="cornerFamily">rounded</item>
         <item name="cornerSize">@dimen/_12sdp</item>
     </style>
+
+    <style name="movieEpisodeImg">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">@dimen/_5sdp</item>
+    </style>
+
     <style name="movieCollectionImg_type1">
         <item name="cornerFamily">rounded</item>
         <item name="cornerSize">@dimen/_12sdp</item>

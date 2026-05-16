@@ -350,5 +350,17 @@
     <string name="recommend_for_you">Có thể bạn sẽ thích</string>
     <string name="movie_not_ready">Phim chưa sẵn sàng vui lòng quay lại sau.</string>
     <string name="current_subtitle">Ngôn ngữ hiện tại: </string>
+    <string name="customize_subtitle">Tùy chỉnh phụ đề</string>
+    <string name="subtitle_preview_sample">Xem trước phụ đề</string>
+    <string name="subtitle_font_size">Cỡ chữ: </string>
+    <string name="subtitle_font_size_small">Nhỏ</string>
+    <string name="subtitle_font_size_medium">Vừa</string>
+    <string name="subtitle_font_size_large">To</string>
+    <string name="subtitle_background">Nền chữ: </string>
+    <string name="subtitle_background_color">Màu nền: </string>
+    <string name="subtitle_text_color">Màu chữ: </string>
+    <string name="subtitle_enabled">Hiển thị phụ đề</string>
+    <string name="subtitle_not_available">Không có phụ đề</string>
+    <string name="subtitle_not_available_for_video">Video này không có phụ đề</string>
 
 </resources>

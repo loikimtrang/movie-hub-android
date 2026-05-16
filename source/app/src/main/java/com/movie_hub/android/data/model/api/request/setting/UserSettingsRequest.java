@@ -12,6 +12,11 @@ public class UserSettingsRequest {
     private Double playbackSpeed;
     private Integer resolution;
 
+    private Boolean subtitleEnabled;
+    private Integer subtitleFontSize;
+    private Integer subtitleBackgroundColor;
+    private Integer subtitleTextColor;
+
     private boolean isSetupBrightness;
     private boolean isSetupPlaybackSpeed;
     private boolean isSetupAudio;

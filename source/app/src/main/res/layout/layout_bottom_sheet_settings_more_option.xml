@@ -83,6 +83,41 @@
             </RelativeLayout>
 
             <RelativeLayout
+                android:id="@+id/btn_subtitle_customize"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingVertical="@dimen/_6sdp"
+                android:paddingHorizontal="@dimen/_12sdp"
+                android:clickable="true"
+                android:focusable="true"
+                android:background="@drawable/bg_setting_list">
+
+                <ImageView
+                    android:id="@+id/ic_subtitle_customize"
+                    android:layout_width="@dimen/_14sdp"
+                    android:layout_height="@dimen/_14sdp"
+                    android:src="@drawable/ic_subtitle_off"
+                    android:layout_alignParentStart="true"
+                    android:layout_centerVertical="true"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    style="@style/Text_14_Normal"
+                    android:text="@string/customize_subtitle"
+                    android:layout_marginStart="@dimen/_12sdp"
+                    android:layout_toEndOf="@+id/ic_subtitle_customize"
+                    android:layout_centerVertical="true"/>
+
+                <ImageView
+                    android:layout_width="@dimen/_12sdp"
+                    android:layout_height="@dimen/_12sdp"
+                    android:src="@drawable/ic_more"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"/>
+            </RelativeLayout>
+
+            <RelativeLayout
                 android:id="@+id/btn_subtitle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

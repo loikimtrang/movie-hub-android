@@ -55,6 +55,7 @@
     <color name="bg_setting">#272A3B</color>
     <color name="bg_tag_speed">#2A2A36</color>
     <color name="bg_setting_speed_item">#51566C</color>  // 373737
+
     <color name="bg_setting_button">#40000000</color>
     <color name="bg_list_episode">#C0000000</color>
     <color name="bg_age_rating">#51566C</color>
@@ -109,5 +110,12 @@
     <color name="imdb">#deb522</color>
     <color name="bg_chat">#1E1E1E</color>
     <color name="bg_input_chat">#2C2C2C</color>
+
+    <color name="subtitle_text_yellow">#FFF09B</color>
+    <color name="subtitle_bg_black_80">#CC000000</color>
+    <color name="subtitle_bg_black_50">#80000000</color>
+    <color name="subtitle_bg_dark_gray">#CC333333</color>
+    <color name="subtitle_select">#FFBB86FC</color>
+    <color name="subtitle_none">#3C404C</color>
 
 </resources>

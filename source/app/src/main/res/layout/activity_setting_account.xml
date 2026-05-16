@@ -289,6 +289,36 @@
                         android:maxHeight="@dimen/_8sdp"
                         android:minHeight="@dimen/_8sdp"/>
 
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/_50sdp"
+                        android:paddingHorizontal="@dimen/_12sdp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            style="@style/Text_12_Normal"
+                            android:text="@string/subtitle_enabled"
+                            android:layout_centerVertical="true" />
+
+                        <androidx.appcompat.widget.SwitchCompat
+                            android:id="@+id/switch_subtitle_enabled"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:thumb="@drawable/thumb_custom"
+                            app:track="@drawable/track_custom"
+                            android:switchMinWidth="@dimen/_40sdp"
+                            android:checked="true"
+                            android:layout_alignParentEnd="true"
+                            android:layout_centerVertical="true" />
+                    </RelativeLayout>
+
+                    <include
+                        android:id="@+id/subtitle_setting_panel"
+                        layout="@layout/layout_include_setting_subtitle"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+
                 </LinearLayout>
             </androidx.core.widget.NestedScrollView>
 

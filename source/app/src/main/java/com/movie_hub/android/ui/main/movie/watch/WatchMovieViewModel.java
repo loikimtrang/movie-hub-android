@@ -65,7 +65,7 @@ public class WatchMovieViewModel extends BaseViewModel {
     public UserSettingsRequest setting = new UserSettingsRequest();
     public List<LanguageRequest> languageRequestList = new ArrayList<>();
 
-    private MutableLiveData<Boolean> isPlaying = new MutableLiveData<>(true);
+    private MutableLiveData<Boolean> isPlaying = new MutableLiveData<>(false);
     public MutableLiveData<ListWatchHistoryResponse> movieDetailsTracking = new MutableLiveData<>();
     public long lastPlaybackPosition = 0L;
     /** True while the chat panel is visible ({@link #setChatOpen(boolean)}). */
@@ -79,6 +79,10 @@ public class WatchMovieViewModel extends BaseViewModel {
     public UserResponse userResponse;
     private MutableLiveData<List<SubtitleResponse>> subtitleList = new MutableLiveData<>(new ArrayList<>());
     public SubtitleResponse currentSubtitle = null;
+    /** True after subtitle API finished for the current video (success or fail). */
+    public boolean subtitleApiSettledForCurrentVideo = false;
+    /** True when the latest subtitle API returned at least one track for the current video. */
+    public boolean hasSubtitleTracksForCurrentVideo = false;
 
     private final List<CreateChatModel> chatModels = new ArrayList<>();
     private final MutableLiveData<List<CreateChatModel>> chatModelsLiveData =
@@ -247,6 +251,8 @@ public class WatchMovieViewModel extends BaseViewModel {
         settingVideoModel.getQuality().setResolution(new VideoQuality());
         settingVideoModel.getAvailableQualities().clear();
         currentSubtitle = null;
+        subtitleApiSettledForCurrentVideo = false;
+        hasSubtitleTracksForCurrentVideo = false;
         subtitleList.setValue(new ArrayList<>());
     }
     @Getter

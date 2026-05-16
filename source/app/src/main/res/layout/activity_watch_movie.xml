@@ -45,9 +45,8 @@
                 android:layout_marginHorizontal="@dimen/_20sdp"
                 android:gravity="center"
                 style="@style/Text_14_Bold"
-                android:text="Đây là phụ đề"
                 android:textColor="@color/white"
-                android:visibility="invisible"/>
+                android:visibility="gone"/>
 
             <FrameLayout
                 android:id="@+id/control_video"

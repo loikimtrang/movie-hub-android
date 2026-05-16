@@ -24,6 +24,7 @@ public class MoreOptionBottomSheetDialog extends BaseBottomSheetDialog {
     public static MutableLiveData<VideoQuality> videoQuality = new MutableLiveData<>();
     public interface MoreOptionBottomSheetCallback {
         void onPlaybackSpeedPressClicked();
+        void onSubtitleCustomizeClicked();
     }
     public MoreOptionBottomSheetDialog(@NonNull Context context, SettingVideoModel settingVideoModel, MoreOptionBottomSheetCallback callback) {
         super(context);
@@ -39,6 +40,7 @@ public class MoreOptionBottomSheetDialog extends BaseBottomSheetDialog {
         setUpView();
         binding.layoutSetting.setOnClickListener(v -> dismiss());
         binding.btnPlaySpeed.setOnClickListener(v -> onPlaySpeedClicked());
+        binding.btnSubtitleCustomize.setOnClickListener(v -> onSubtitleCustomizeClicked());
         binding.btnSubtitle.setOnClickListener(v -> onSubtitleClicked());
 
     }
@@ -51,5 +53,10 @@ public class MoreOptionBottomSheetDialog extends BaseBottomSheetDialog {
         callback.onPlaybackSpeedPressClicked();
         dismiss();
     }
+    private void onSubtitleCustomizeClicked() {
+        callback.onSubtitleCustomizeClicked();
+        dismiss();
+    }
+
     private void onSubtitleClicked() { }
 }

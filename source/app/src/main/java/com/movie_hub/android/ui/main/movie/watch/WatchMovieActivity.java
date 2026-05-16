@@ -16,6 +16,7 @@ import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.Settings;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.GestureDetector;
@@ -35,6 +36,7 @@ import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -52,6 +54,8 @@ import androidx.media3.common.TrackSelectionOverride;
 import androidx.media3.common.TrackSelectionParameters;
 import androidx.media3.common.Tracks;
 import androidx.media3.common.VideoSize;
+import androidx.media3.common.text.Cue;
+import androidx.media3.common.text.CueGroup;
 import androidx.media3.exoplayer.DefaultRenderersFactory;
 import androidx.media3.exoplayer.ExoPlayer;
 import androidx.media3.exoplayer.mediacodec.MediaCodecInfo;
@@ -106,6 +110,8 @@ import com.movie_hub.android.ui.main.movie.watch.dialog.PlaySpeedBottomSheetDial
 import com.movie_hub.android.ui.main.movie.watch.dialog.QualityBottomSheetDialog;
 import com.movie_hub.android.ui.main.movie.watch.dialog.SettingBottomSheetDialog;
 import com.movie_hub.android.ui.main.movie.watch.dialog.SubtitleBottomSheetDialog;
+import com.movie_hub.android.ui.main.movie.watch.dialog.SubtitleCustomizeBottomSheetDialog;
+import com.movie_hub.android.ui.main.movie.watch.setting.SubtitleStyle;
 import com.movie_hub.android.ui.main.movie.watch.setting.SettingVideoModel;
 import com.movie_hub.android.ui.main.movie.watch.setting.VideoQuality;
 import com.movie_hub.android.utils.DeviceUtils;
@@ -218,6 +224,7 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
             viewModel.movieDetails = movie;
             viewModel.isLiveRoom = getIntent().getBooleanExtra(LiveRoom, false);
             viewModel.setting = createDefaultSettings();
+            applyUserSubtitleSettings();
             thumbnailManager = new SpriteThumbnailManager(this, viewBinding.ivThumbnailPreview, viewBinding.thumbnailPreviewContainer);
 
             isSeries = viewModel.movieDetails != null &&
@@ -263,11 +270,7 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
             }
 
 
-            if (viewModel.isLogin()) {
-                getListSubtitle();
-            } else {
-                startGetListSubtitle();
-            }
+            loadSubtitlesForCurrentVideo();
         }
 
         setupChatSwipeToClose();
@@ -612,6 +615,7 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
                     viewModel.setting = createDefaultSettings();
                 }
 
+                applyUserSubtitleSettings();
                 initMovie();
             }
 
@@ -647,15 +651,27 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
         });
     }
 
+    private void loadSubtitlesForCurrentVideo() {
+        handlerRetryGetListSubtitle.removeCallbacksAndMessages(null);
+        if (viewModel.nowVideoPlay == null || viewModel.nowVideoPlay.getId() == null) return;
+        if (!isSubtitleEnabledInSettings()) return;
+        if (viewModel.isLogin()) {
+            getListSubtitle();
+        } else {
+            startGetListSubtitle();
+        }
+    }
+
     public void getListSubtitle() {
+        if (viewModel.nowVideoPlay == null || viewModel.nowVideoPlay.getId() == null) return;
         viewModel.getListSubtitle(new MainCallback<List<SubtitleResponse>>() {
             @Override
             public void doSuccess(List<SubtitleResponse> data) {
-
+                onSubtitleListLoaded(data);
             }
             @Override
             public void doError(Throwable error) {
-
+                onSubtitleListLoaded(null);
             }
 
             @Override
@@ -665,9 +681,69 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
 
             @Override
             public void doFail() {
-
+                onSubtitleListLoaded(null);
             }
         }, viewModel.nowVideoPlay.getId());
+    }
+
+    /**
+     * Settings may have subtitles enabled, but a given video can have zero tracks from the API.
+     */
+    private void onSubtitleListLoaded(@Nullable List<SubtitleResponse> data) {
+        viewModel.subtitleApiSettledForCurrentVideo = true;
+        boolean hasTracks = data != null && !data.isEmpty();
+        viewModel.hasSubtitleTracksForCurrentVideo = hasTracks;
+        if (!hasTracks) {
+            viewModel.currentSubtitle = null;
+            clearSubtitleOverlay();
+            return;
+        }
+        applyDefaultSubtitleIfAvailable(data);
+    }
+
+    private void applyDefaultSubtitleIfAvailable(List<SubtitleResponse> data) {
+        if (!isSubtitleEnabledInSettings()) return;
+        if (data == null || data.isEmpty()) return;
+        if (player == null) return;
+
+        Runnable applyTrack = () -> {
+            for (SubtitleResponse sub : data) {
+                if (Boolean.TRUE.equals(sub.getIsDefault())) {
+                    viewModel.currentSubtitle = sub;
+                    applySubtitle(sub);
+                    return;
+                }
+            }
+            viewModel.currentSubtitle = data.get(0);
+            applySubtitle(data.get(0));
+        };
+
+        if (player.getPlaybackState() == Player.STATE_READY) {
+            applyTrack.run();
+        } else {
+            player.addListener(new Player.Listener() {
+                @Override
+                public void onPlaybackStateChanged(int state) {
+                    if (state == Player.STATE_READY) {
+                        player.removeListener(this);
+                        applyTrack.run();
+                    }
+                }
+            });
+        }
+    }
+
+    private String getSubtitleLabelForSettingsUi() {
+        if (!isSubtitleEnabledInSettings()) {
+            return getString(R.string.off);
+        }
+        if (viewModel.subtitleApiSettledForCurrentVideo && !viewModel.hasSubtitleTracksForCurrentVideo) {
+            return getString(R.string.subtitle_not_available);
+        }
+        if (viewModel.currentSubtitle != null && viewModel.currentSubtitle.getLabel() != null) {
+            return viewModel.currentSubtitle.getLabel();
+        }
+        return getString(R.string.off);
     }
 
     private UserSettingsRequest createDefaultSettings() {
@@ -691,7 +767,29 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
             defaultSetting.setBrightness(50);
         }
 
+        defaultSetting.setSubtitleEnabled(true);
+        new SubtitleStyle().applyToUserSettings(defaultSetting);
         return defaultSetting;
+    }
+
+    private boolean isSubtitleEnabledInSettings() {
+        return viewModel.setting == null
+                || viewModel.setting.getSubtitleEnabled() == null
+                || Boolean.TRUE.equals(viewModel.setting.getSubtitleEnabled());
+    }
+
+    private void applyUserSubtitleSettings() {
+        if (viewModel.setting == null) {
+            viewModel.setting = createDefaultSettings();
+        }
+        if (viewModel.setting.getSubtitleEnabled() == null) {
+            viewModel.setting.setSubtitleEnabled(true);
+        }
+        viewModel.settingVideoModel.updateSubtitleStyle(SubtitleStyle.fromUserSettings(viewModel.setting));
+        if (!isSubtitleEnabledInSettings()) {
+            viewModel.currentSubtitle = null;
+            clearSubtitleOverlay();
+        }
     }
 
     //region === Init Movie ===
@@ -862,6 +960,9 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
         // TẠO PLAYER
         player = playerBuilder.build();
         viewBinding.playerView.setPlayer(player);
+        if (viewBinding.playerView.getSubtitleView() != null) {
+            viewBinding.playerView.getSubtitleView().setVisibility(View.GONE);
+        }
         showLoadingVideo();
 
         MediaItem mediaItem = MediaItem.fromUri(uri);
@@ -876,6 +977,7 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
 
         setupPlayerListener();
         bindPlaybackSpeedModelToPlayer();
+        bindSubtitleStyleToOverlay();
         setupSeekBar();
         setupGestureDetector();
         setupSeekBarBrightNess();
@@ -1114,7 +1216,69 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
             public void onPlayerError(PlaybackException error) {
                 handlePlaybackError(error);
             }
+
+            @Override
+            public void onCues(@NonNull CueGroup cueGroup) {
+                runOnUiThread(() -> updateSubtitleOverlay(cueGroup));
+            }
         });
+    }
+
+    private void clearSubtitleOverlay() {
+        viewBinding.tvSubTitle.setText("");
+        viewBinding.tvSubTitle.setVisibility(View.GONE);
+    }
+
+    private void updateSubtitleOverlay(CueGroup cueGroup) {
+        renderSubtitleCues(cueGroup);
+    }
+
+    /** Media3 1.1.1: cue timing is on {@link CueGroup}, not per {@link Cue}. Poll current cues while playing. */
+    private void syncSubtitleOverlayToPlaybackPosition() {
+        if (viewModel.currentSubtitle == null || player == null) return;
+        renderSubtitleCues(player.getCurrentCues());
+    }
+
+    private void renderSubtitleCues(CueGroup cueGroup) {
+        if (viewModel.currentSubtitle == null) {
+            clearSubtitleOverlay();
+            return;
+        }
+        if (cueGroup.cues == null || cueGroup.cues.isEmpty()) {
+            clearSubtitleOverlay();
+            return;
+        }
+
+        StringBuilder text = new StringBuilder();
+        for (Cue cue : cueGroup.cues) {
+            CharSequence cueText = cue.text;
+            if (cueText == null) continue;
+            String line = cueText.toString().trim();
+            if (line.isEmpty()) continue;
+            if (text.length() > 0) text.append('\n');
+            text.append(line);
+        }
+
+        if (text.length() > 0) {
+            viewBinding.tvSubTitle.setText(text);
+            viewBinding.tvSubTitle.setVisibility(View.VISIBLE);
+            applySubtitleStyleToOverlay();
+        } else {
+            clearSubtitleOverlay();
+        }
+    }
+
+    private void bindSubtitleStyleToOverlay() {
+        viewModel.settingVideoModel.getSubtitleStyleLive().observe(this, style -> {
+            if (style != null) applySubtitleStyleToOverlay();
+        });
+    }
+
+    private void applySubtitleStyleToOverlay() {
+        SubtitleStyle style = viewModel.settingVideoModel.getSubtitleStyle();
+        if (style != null) {
+            style.applyTo(viewBinding.tvSubTitle);
+        }
     }
 
     private void bindPlaybackSpeedModelToPlayer() {
@@ -1397,6 +1561,10 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
                                 }
                             }
                         }
+                    }
+
+                    if (viewModel.currentSubtitle != null) {
+                        syncSubtitleOverlayToPlaybackPosition();
                     }
                 }
 
@@ -1934,11 +2102,8 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
     // region === Show Setting Video ===
     private void showSettingsBottomSheet() {
         toggleControls();
-        String subtitleLabel = viewModel.currentSubtitle != null && viewModel.currentSubtitle.getLabel() != null
-                ? viewModel.currentSubtitle.getLabel()
-                : getString(R.string.off);
         SettingBottomSheetDialog sheet = new SettingBottomSheetDialog(
-                this, viewModel.settingVideoModel, subtitleLabel, this,
+                this, viewModel.settingVideoModel, getSubtitleLabelForSettingsUi(), this,
                 viewModel.isParticipantPlaybackRestricted());
         sheet.show();
         Objects.requireNonNull(sheet.getWindow()).getDecorView().post(sheet::setupTransparentWindow);
@@ -1973,7 +2138,19 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
         });
     }
 
+    private void showSettingsSubtitleCustomizeBottomSheet() {
+        SubtitleCustomizeBottomSheetDialog sheet =
+                new SubtitleCustomizeBottomSheetDialog(this, viewModel.settingVideoModel);
+        sheet.show();
+        Objects.requireNonNull(sheet.getWindow()).getDecorView().post(sheet::setupTransparentWindow);
+        sheet.setOnDismissListener(v -> hideSystemUI());
+    }
+
     private void showSettingsSubtitleBottomSheet() {
+        if (viewModel.subtitleApiSettledForCurrentVideo && !viewModel.hasSubtitleTracksForCurrentVideo) {
+            Toast.makeText(this, R.string.subtitle_not_available_for_video, Toast.LENGTH_SHORT).show();
+            return;
+        }
         List<SubtitleResponse> subtitles = viewModel.getSubtitleList().getValue();
         if (subtitles == null) subtitles = new ArrayList<>();
         SubtitleBottomSheetDialog sheet = new SubtitleBottomSheetDialog(
@@ -1990,7 +2167,8 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
     private void applySubtitle(SubtitleResponse subtitle) {
         if (player == null || viewModel.nowUriPlay == null) return;
         long currentPosition = player.getCurrentPosition();
-        boolean wasPlaying = player.isPlaying();
+        // isPlaying() is false while buffering; playWhenReady reflects user/autoplay intent.
+        boolean shouldPlay = player.getPlayWhenReady();
 
         MediaItem.Builder builder = new MediaItem.Builder().setUri(viewModel.nowUriPlay);
         if (subtitle != null) {
@@ -2007,7 +2185,11 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
         // avoiding the A/V drift that occurs when seekTo is called after prepare().
         player.setMediaItem(builder.build(), currentPosition);
         player.prepare();
-        player.setPlayWhenReady(wasPlaying);
+        player.setPlayWhenReady(shouldPlay);
+
+        if (subtitle == null) {
+            clearSubtitleOverlay();
+        }
     }
 
     // region === Show Runnable ===
@@ -2244,6 +2426,11 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
     public void onPlaybackSpeedPressClicked() {
         showSettingsPlaySpeedBottomSheet(PlaySpeedBottomSheetDialog.TYPE_SPEED_PRESS);
     }
+
+    @Override
+    public void onSubtitleCustomizeClicked() {
+        showSettingsSubtitleCustomizeBottomSheet();
+    }
     @Override
     public void onPlaybackSpeedClicked() {
         showSettingsPlaySpeedBottomSheet(PlaySpeedBottomSheetDialog.TYPE_SPEED);
@@ -2318,6 +2505,8 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
         viewModel.updateSettingWhenChangeEpisode();
         showLoadingVideo();
         reset();
+        clearSubtitleOverlay();
+        loadSubtitlesForCurrentVideo();
 
         TrackSelectionParameters.Builder builder = player.getTrackSelectionParameters().buildUpon();
         builder.clearOverridesOfType(C.TRACK_TYPE_VIDEO);
