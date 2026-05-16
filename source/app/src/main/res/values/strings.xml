@@ -128,6 +128,7 @@
     <string name="auto">Auto</string>
     <string name="normal">Normal</string>
     <string name="current_quality">Current quality: </string>
+    <string name="current_subtitle">Current subtitle:</string>
     <string name="hold_playback_speed">Playback speed while holding</string>
 
     <string name="fit_screen">Fit to screen</string>

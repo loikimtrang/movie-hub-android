@@ -10,6 +10,7 @@ public class SubtitleResponse {
     private String language;
     private String fileUrl;
     private Boolean isDefault;
+    private String label;
 
     public String getSubtitleUrl() {
         if (fileUrl != null && fileUrl.startsWith("http")) {

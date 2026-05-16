@@ -22,6 +22,7 @@ public class SettingBottomSheetDialog extends BaseBottomSheetDialog {
     private SettingVideoModel settingVideoModel;
     private final SettingBottomSheetCallback callback;
     private final boolean hidePlaybackSpeedAndMoreOptions;
+    private final String currentSubtitleLabel;
     public static MutableLiveData<VideoQuality> videoQuality = new MutableLiveData<>();
     public interface SettingBottomSheetCallback {
         void onQualityClicked();
@@ -30,14 +31,22 @@ public class SettingBottomSheetDialog extends BaseBottomSheetDialog {
         void onLockScreenClicked();
         void onMoreOptionsClicked();
     }
-    public SettingBottomSheetDialog(@NonNull Context context, SettingVideoModel settingVideoModel, SettingBottomSheetCallback callback) {
-        this(context, settingVideoModel, callback, false);
+    public SettingBottomSheetDialog(@NonNull Context context, SettingVideoModel settingVideoModel,
+                                    SettingBottomSheetCallback callback) {
+        this(context, settingVideoModel, null, callback, false);
     }
 
     public SettingBottomSheetDialog(@NonNull Context context, SettingVideoModel settingVideoModel,
                                     SettingBottomSheetCallback callback, boolean hidePlaybackSpeedAndMoreOptions) {
+        this(context, settingVideoModel, null, callback, hidePlaybackSpeedAndMoreOptions);
+    }
+
+    public SettingBottomSheetDialog(@NonNull Context context, SettingVideoModel settingVideoModel,
+                                    String currentSubtitleLabel,
+                                    SettingBottomSheetCallback callback, boolean hidePlaybackSpeedAndMoreOptions) {
         super(context);
         this.settingVideoModel = settingVideoModel;
+        this.currentSubtitleLabel = currentSubtitleLabel;
         this.callback = callback;
         this.hidePlaybackSpeedAndMoreOptions = hidePlaybackSpeedAndMoreOptions;
         init();
@@ -80,6 +89,9 @@ public class SettingBottomSheetDialog extends BaseBottomSheetDialog {
         } else {
             binding.tvPlaySpeed.setText(String.format(Locale.US, "%.2fx",settingVideoModel.getPlaySpeed().getSpeed()));
         }
+
+        binding.tvSubtitle.setText(
+                currentSubtitleLabel != null ? currentSubtitleLabel : getContext().getString(R.string.off));
     }
 
     private void onQualityClicked() {
@@ -90,7 +102,10 @@ public class SettingBottomSheetDialog extends BaseBottomSheetDialog {
         callback.onPlaybackSpeedClicked();
         dismiss();
     }
-    private void onSubtitleClicked() { }
+    private void onSubtitleClicked() {
+        callback.onSubtitleClicked();
+        dismiss();
+    }
     private void onLockScreenClicked() {
         callback.onLockScreenClicked();
         dismiss();

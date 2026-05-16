@@ -120,7 +120,7 @@
                                 tools:ignore="RtlHardcoded"
                                 android:layout_toEndOf="@+id/btn_lock_screen"
                                 android:layout_centerVertical="true"
-                                android:layout_toStartOf="@id/btn_open_chat">
+                                android:layout_toStartOf="@id/layout_count_participant">
 
                                 <TextView
                                     android:id="@+id/name_movie"
@@ -192,6 +192,36 @@
                                     android:visibility="invisible"/>
 
                             </FrameLayout>
+
+                            <LinearLayout
+                                android:id="@+id/layout_count_participant"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="top|end"
+                                android:background="@drawable/bg_bottom_control"
+                                android:layout_toStartOf="@+id/btn_open_chat"
+                                android:layout_centerVertical="true"
+                                android:layout_marginEnd="@dimen/_6sdp"
+                                android:visibility="gone"
+                                android:orientation="horizontal"
+                                android:paddingVertical="@dimen/_10sdp"
+                                android:paddingHorizontal="@dimen/_6sdp"
+                                android:gravity="center">
+
+                                <ImageView
+                                    android:layout_width="@dimen/_16sdp"
+                                    android:layout_height="@dimen/_16sdp"
+                                    android:src="@drawable/ic_paticipant"
+                                    android:layout_marginEnd="@dimen/_3sdp" />
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="100"
+                                    style="@style/Text_14_Normal"/>
+
+                            </LinearLayout>
+
 
                         </RelativeLayout>
 

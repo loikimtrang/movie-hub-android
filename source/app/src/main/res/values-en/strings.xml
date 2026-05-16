@@ -349,5 +349,6 @@
     <string name="because_you_like_format">Because you like</string>
     <string name="recommend_for_you">You might like these movies</string>
     <string name="movie_not_ready">"The movie isn't ready yet, please come back later"</string>
+    <string name="current_subtitle">Current subtitle:</string>
 
 </resources>

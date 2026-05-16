@@ -6,6 +6,7 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.movie_hub.android.MVVMApplication;
+import com.movie_hub.android.R;
 import com.movie_hub.android.constant.Constants;
 import com.movie_hub.android.data.Repository;
 import com.movie_hub.android.data.model.api.RequestToMapConverter;
@@ -13,6 +14,7 @@ import com.movie_hub.android.data.model.api.ResponseWrapper;
 import com.movie_hub.android.data.model.api.request.favourite.CreateFavouriteRequest;
 import com.movie_hub.android.data.model.api.request.history.ListWatchHistoryRequest;
 import com.movie_hub.android.data.model.api.request.history.TrackingWatchHistoryRequest;
+import com.movie_hub.android.data.model.api.request.movie.filter.LanguageRequest;
 import com.movie_hub.android.data.model.api.request.setting.UserSettingsRequest;
 import com.movie_hub.android.data.model.api.request.subtitle.SubtitleRequest;
 import com.movie_hub.android.data.model.api.response.MovieItem.MovieItemResponse;
@@ -30,6 +32,8 @@ import com.movie_hub.android.ui.base.activity.BaseViewModel;
 import com.movie_hub.android.ui.main.MainCallback;
 import com.movie_hub.android.ui.main.movie.watch.setting.SettingVideoModel;
 import com.movie_hub.android.ui.main.movie.watch.setting.VideoQuality;
+import com.movie_hub.android.utils.FileUtils;
+import com.movie_hub.android.utils.GsonUtils;
 import com.movie_hub.android.utils.NetworkUtils;
 
 import java.text.SimpleDateFormat;
@@ -59,6 +63,7 @@ public class WatchMovieViewModel extends BaseViewModel {
     public VideoResponse nowVideoPlay; // Single movie
 
     public UserSettingsRequest setting = new UserSettingsRequest();
+    public List<LanguageRequest> languageRequestList = new ArrayList<>();
 
     private MutableLiveData<Boolean> isPlaying = new MutableLiveData<>(true);
     public MutableLiveData<ListWatchHistoryResponse> movieDetailsTracking = new MutableLiveData<>();
@@ -73,6 +78,7 @@ public class WatchMovieViewModel extends BaseViewModel {
     public RoomResponse roomDetail;
     public UserResponse userResponse;
     private MutableLiveData<List<SubtitleResponse>> subtitleList = new MutableLiveData<>(new ArrayList<>());
+    public SubtitleResponse currentSubtitle = null;
 
     private final List<CreateChatModel> chatModels = new ArrayList<>();
     private final MutableLiveData<List<CreateChatModel>> chatModelsLiveData =
@@ -97,6 +103,9 @@ public class WatchMovieViewModel extends BaseViewModel {
         clientPingModel.setAccountId(getUserId().toString());
         msgPing.setCmd(Command.COMMAND_CLIENT_PING);
         msgPing.setData(clientPingModel);
+
+        languageRequestList = GsonUtils.fromJsonToList(
+                FileUtils.readRawResource(application, R.raw.language_options), LanguageRequest.class);
     }
 
     public LiveData<Boolean> getIsSyncWithHost() {
@@ -237,6 +246,8 @@ public class WatchMovieViewModel extends BaseViewModel {
         settingVideoModel.getQuality().setAuto(true);
         settingVideoModel.getQuality().setResolution(new VideoQuality());
         settingVideoModel.getAvailableQualities().clear();
+        currentSubtitle = null;
+        subtitleList.setValue(new ArrayList<>());
     }
     @Getter
     private String tokenVideo;
@@ -433,6 +444,10 @@ public class WatchMovieViewModel extends BaseViewModel {
         );
     }
 
+    public LiveData<List<SubtitleResponse>> getSubtitleList() {
+        return subtitleList;
+    }
+
     public void getListSubtitle(MainCallback<List<SubtitleResponse>> callback, Long idVideo) {
         SubtitleRequest request = new SubtitleRequest();
         request.setVideoLibraryId(idVideo);
@@ -454,7 +469,10 @@ public class WatchMovieViewModel extends BaseViewModel {
                         .subscribe(
                                 (response) -> {
                                     if (response.isResult()) {
-                                        callback.doSuccess(response.getData().getContent());
+                                        List<SubtitleResponse> list = response.getData().getContent();
+                                        enrichSubtitleLabels(list);
+                                        subtitleList.setValue(list);
+                                        callback.doSuccess(list);
                                     } else {
                                         callback.doFail();
                                     }
@@ -466,5 +484,18 @@ public class WatchMovieViewModel extends BaseViewModel {
                                 }
                         )
         );
+    }
+
+    private void enrichSubtitleLabels(List<SubtitleResponse> list) {
+        if (list == null || languageRequestList == null) return;
+        for (SubtitleResponse sub : list) {
+            if (sub.getLanguage() == null) continue;
+            for (LanguageRequest lang : languageRequestList) {
+                if (sub.getLanguage().equals(lang.getValue())) {
+                    sub.setLabel(lang.getLabel());
+                    break;
+                }
+            }
+        }
     }
 }
