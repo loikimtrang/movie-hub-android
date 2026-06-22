@@ -324,4 +324,100 @@ public class CommentViewModel extends BaseViewModel {
                 )
         );
     }
+
+    public void deleteComment(MainCallback<ResponseWrapper> callback, long commentId) {
+        showLoading();
+        compositeDisposable.add(repository.getApiService().deleteComment(commentId)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .retryWhen(throwable ->
+                        throwable.flatMap((Function<Throwable, ObservableSource<?>>) throwable1 -> {
+                            if (NetworkUtils.checkNetworkError(throwable1)) {
+                                hideLoading();
+                                return application.showDialogNoInternetAccess();
+                            } else {
+                                return Observable.error(throwable1);
+                            }
+                        })
+                )
+                .subscribe(
+                        response -> {
+                            hideLoading();
+                            if (response.isResult()) {
+                                callback.doSuccess(response);
+                            } else {
+                                callback.doFail();
+                            }
+                        },
+                        throwable -> {
+                            hideLoading();
+                            Timber.e(throwable);
+                            callback.doError(throwable);
+                        }
+                )
+        );
+    }
+
+    public void removeCommentFromList(long commentId) {
+        List<CommentResponse> list = commentList.getValue();
+        if (list == null) {
+            return;
+        }
+
+        List<CommentResponse> newList = new ArrayList<>(list);
+        for (int i = 0; i < newList.size(); i++) {
+            if (newList.get(i).getId() != null && newList.get(i).getId() == commentId) {
+                newList.remove(i);
+                Long total = totalComment.getValue();
+                if (total != null && total > 0) {
+                    totalComment.postValue(total - 1);
+                }
+                break;
+            }
+        }
+        commentList.setValue(newList);
+    }
+
+    public Long findParentIdForChild(long childId) {
+        List<CommentResponse> list = commentList.getValue();
+        if (list == null) {
+            return null;
+        }
+
+        for (CommentResponse parent : list) {
+            if (parent.getChildComments() == null) {
+                continue;
+            }
+            for (CommentResponse child : parent.getChildComments()) {
+                if (child.getId() != null && child.getId() == childId) {
+                    return parent.getId();
+                }
+            }
+        }
+        return null;
+    }
+
+    public void removeChildCommentFromList(long parentId, long childId) {
+        List<CommentResponse> list = commentList.getValue();
+        if (list == null) {
+            return;
+        }
+
+        for (CommentResponse parent : list) {
+            if (parent.getId() != null && parent.getId() == parentId) {
+                if (parent.getChildComments() != null) {
+                    parent.getChildComments().removeIf(child ->
+                            child.getId() != null && child.getId() == childId
+                    );
+                }
+                parent.setTotalChildren(Math.max(0, parent.getTotalChildren() - 1));
+                Long total = totalComment.getValue();
+                if (total != null && total > 0) {
+                    totalComment.postValue(total - 1);
+                }
+                commentList.setValue(new ArrayList<>(list));
+                break;
+            }
+        }
+    }
 }

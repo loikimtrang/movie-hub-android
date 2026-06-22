@@ -23,7 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import eu.davidea.flexibleadapter.databinding.BR;
+import com.movie_hub.android.BR;
 
 public class SearchResultFragment extends BaseFragment<FragmentSearchResultBinding, SearchResultViewModel> {
 

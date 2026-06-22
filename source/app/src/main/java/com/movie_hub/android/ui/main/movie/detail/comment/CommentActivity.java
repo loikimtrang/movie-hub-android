@@ -37,7 +37,9 @@ import com.movie_hub.android.data.model.api.request.comment.CreateCommentRequest
 import com.movie_hub.android.data.model.api.response.comment.CommentResponse;
 import com.movie_hub.android.data.model.api.response.comment.VoteListResponse;
 import com.movie_hub.android.data.model.api.response.movie.MovieResponse;
+import com.movie_hub.android.data.model.api.response.report.CreateReportRequest;
 import com.movie_hub.android.data.model.onesignal.MessageCommentResponse;
+import com.movie_hub.android.data.model.onesignal.OneSignalCommand;
 import com.movie_hub.android.data.model.other.ToastMessage;
 import com.movie_hub.android.databinding.ActivityCommentBinding;
 import com.movie_hub.android.di.component.ActivityComponent;
@@ -53,6 +55,7 @@ import com.movie_hub.android.ui.main.movie.detail.comment.shimmer.CommentShimmer
 import com.movie_hub.android.ui.main.movie.detail.comment.shimmer.EpisodeCommentShimmerAdapter;
 import com.movie_hub.android.utils.ClickUtils;
 import com.movie_hub.android.utils.DialogUtils;
+import com.movie_hub.android.utils.ReportDialogUtils;
 import com.movie_hub.android.utils.GsonUtils;
 
 import java.util.ArrayList;
@@ -75,6 +78,7 @@ public class CommentActivity extends BaseActivity<ActivityCommentBinding, Commen
     private boolean isStateReply = false;
     private boolean isShowShimmer = false;
     public static final String MSG_CMT = "MSG_CMT";
+    public static final String MSG_CMD = "MSG_CMD";
     private boolean isShowShimmerComment = false;
     @SuppressLint("SetTextI18n")
     @Override
@@ -196,7 +200,10 @@ public class CommentActivity extends BaseActivity<ActivityCommentBinding, Commen
     public void observeCommentList() {
         viewBinding.rvComment.setItemAnimator(null);
         viewModel.commentList.observe(this, commentList -> {
-            if (commentList.isEmpty()) return;
+            if (commentList == null || commentList.isEmpty()) {
+                commentParentAdapter.clearData();
+                return;
+            }
             List<VoteListResponse> voteList = viewModel.voteList.getValue();
             commentParentAdapter.setData(commentList, viewModel.voteList.getValue(), viewModel.tagCommentSelect);
 
@@ -212,7 +219,7 @@ public class CommentActivity extends BaseActivity<ActivityCommentBinding, Commen
 
     }
     public void setUpAdapter() {
-        commentParentAdapter = new CommentParentAdapter(this, this);
+        commentParentAdapter = new CommentParentAdapter(this, this, viewModel.getUserId());
         commentShimmerAdapter = new CommentShimmerAdapter(6);
         viewBinding.rvComment.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
 
@@ -274,38 +281,19 @@ public class CommentActivity extends BaseActivity<ActivityCommentBinding, Commen
 
                     viewModel.mergeOrUpdateComments(data.getContent());
                     String json = getIntent().getStringExtra(MSG_CMT);
+                    String cmd = getIntent().getStringExtra(MSG_CMD);
 
                     if (json != null && !json.isEmpty() && viewModel.isLogin()) {
                         getIntent().removeExtra(MSG_CMT);
+                        getIntent().removeExtra(MSG_CMD);
                         MessageCommentResponse mCmtResponse = GsonUtils.fromJson(json, MessageCommentResponse.class);
-                        long targetId = Long.parseLong(mCmtResponse.getParentId());
-                        int targetPosition = -1;
-                        List<CommentResponse> currentList = viewModel.commentList.getValue();
-
-                        if (currentList != null) {
-                            for (int i = 0; i < currentList.size(); i++) {
-                                if (currentList.get(i).getId() != null && currentList.get(i).getId() == targetId) {
-                                    targetPosition = i;
-                                    currentList.get(i).setIsOpenChildComment(true);
-                                    CommentRequest commentRequest = new CommentRequest();
-                                    commentRequest.setParentId(targetId);
-                                    commentRequest.setIsOpenChildComment(true);
-                                    viewModel.getListChildComment(commentRequest);
-                                    break;
-                                }
-                            }
-                        }
+                        int targetPosition = resolveNotificationCommentPosition(mCmtResponse, cmd);
 
                         if (targetPosition != -1) {
                             int finalTargetPosition = targetPosition;
-                            viewBinding.rvComment.post(() -> {
-                                lm.scrollToPositionWithOffset(finalTargetPosition, 0);
-
-                            });
+                            viewBinding.rvComment.post(() -> lm.scrollToPositionWithOffset(finalTargetPosition, 0));
                         } else {
-                            viewBinding.rvComment.post(() -> {
-                                lm.scrollToPositionWithOffset(firstVisible, offset);
-                            });
+                            viewBinding.rvComment.post(() -> lm.scrollToPositionWithOffset(firstVisible, offset));
                         }
                     } else {
                         viewBinding.rvComment.post(() -> {
@@ -719,5 +707,178 @@ public class CommentActivity extends BaseActivity<ActivityCommentBinding, Commen
         viewBinding.edtComment.requestFocus();
         InputMethodManager imm = (InputMethodManager) this.getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.showSoftInput(viewBinding.edtComment, InputMethodManager.SHOW_IMPLICIT);
+    }
+
+    @Override
+    public void onReportClick(CommentResponse commentResponse) {
+        showReportDialog(commentResponse);
+    }
+
+    @Override
+    public void onReportChildClick(CommentResponse commentResponse) {
+        showReportDialog(commentResponse);
+    }
+
+    @Override
+    public void onDeleteClick(CommentResponse commentResponse) {
+        showDeleteCommentConfirmDialog(commentResponse, false);
+    }
+
+    @Override
+    public void onDeleteChildClick(CommentResponse commentResponse) {
+        showDeleteCommentConfirmDialog(commentResponse, true);
+    }
+
+    private void showDeleteCommentConfirmDialog(CommentResponse commentResponse, boolean isChildComment) {
+        if (!viewModel.isLogin()) {
+            showLoginRequiredDialog();
+            return;
+        }
+        if (commentResponse == null || commentResponse.getId() == null) {
+            return;
+        }
+
+        DialogUtils.dialogConfirm(
+                this,
+                getString(R.string.delete_comment_confirm),
+                getString(R.string.delete),
+                (dialog, which) -> deleteComment(commentResponse, isChildComment),
+                getString(R.string.cancel),
+                null
+        );
+    }
+
+    private void deleteComment(CommentResponse commentResponse, boolean isChildComment) {
+        viewModel.deleteComment(new MainCallback<ResponseWrapper>() {
+            @Override
+            public void doError(Throwable error) {
+                new ToastMessage(ToastMessage.TYPE_WARNING, getString(R.string.an_error_occurred))
+                        .showMessage(CommentActivity.this);
+            }
+
+            @Override
+            public void doSuccess() {
+            }
+
+            @Override
+            public void doSuccess(ResponseWrapper response) {
+                if (isChildComment) {
+                    Long parentId = commentResponse.getParent() != null
+                            ? commentResponse.getParent().getId()
+                            : null;
+                    if (parentId == null) {
+                        parentId = viewModel.findParentIdForChild(commentResponse.getId());
+                    }
+                    if (parentId != null) {
+                        viewModel.removeChildCommentFromList(parentId, commentResponse.getId());
+                    }
+                } else {
+                    viewModel.removeCommentFromList(commentResponse.getId());
+                }
+                new ToastMessage(ToastMessage.TYPE_NORMAL, getString(R.string.delete_comment_success))
+                        .showMessage(CommentActivity.this);
+            }
+
+            @Override
+            public void doFail() {
+                new ToastMessage(ToastMessage.TYPE_WARNING, getString(R.string.an_error_occurred))
+                        .showMessage(CommentActivity.this);
+            }
+        }, commentResponse.getId());
+    }
+
+    private void showReportDialog(CommentResponse commentResponse) {
+        if (!viewModel.isLogin()) {
+            showLoginRequiredDialog();
+            return;
+        }
+        if (commentResponse == null || commentResponse.getId() == null) {
+            return;
+        }
+
+        ReportDialogUtils.show(
+                this,
+                getString(R.string.report_comment_title),
+                content -> submitReport(commentResponse.getId(), Constants.USER_REPORT_TYPE_COMMENT, content)
+        );
+    }
+
+    private void submitReport(long objectId, int reportType, String content) {
+        CreateReportRequest request = new CreateReportRequest();
+        request.setObjectId(objectId);
+        request.setType(reportType);
+        request.setContent(content);
+
+        viewModel.createReport(new MainCallback<ResponseWrapper>() {
+            @Override
+            public void doError(Throwable error) {
+                new ToastMessage(ToastMessage.TYPE_WARNING, getString(R.string.an_error_occurred))
+                        .showMessage(CommentActivity.this);
+            }
+
+            @Override
+            public void doSuccess() {
+            }
+
+            @Override
+            public void doSuccess(ResponseWrapper response) {
+                new ToastMessage(ToastMessage.TYPE_NORMAL, getString(R.string.report_success))
+                        .showMessage(CommentActivity.this);
+            }
+
+            @Override
+            public void doFail() {
+                new ToastMessage(ToastMessage.TYPE_WARNING, getString(R.string.an_error_occurred))
+                        .showMessage(CommentActivity.this);
+            }
+        }, request);
+    }
+
+    private int resolveNotificationCommentPosition(MessageCommentResponse mCmtResponse, String cmd) {
+        if (mCmtResponse == null) return -1;
+
+        List<CommentResponse> currentList = viewModel.commentList.getValue();
+        if (currentList == null) return -1;
+
+        if (OneSignalCommand.CMD_TOXIC_COMMENT_LOCKED.equals(cmd)) {
+            if (mCmtResponse.getId() == null) return -1;
+            long commentId = Long.parseLong(mCmtResponse.getId());
+
+            if (mCmtResponse.getParentId() != null && !mCmtResponse.getParentId().isEmpty()) {
+                long parentId = Long.parseLong(mCmtResponse.getParentId());
+                for (int i = 0; i < currentList.size(); i++) {
+                    if (currentList.get(i).getId() != null && currentList.get(i).getId() == parentId) {
+                        currentList.get(i).setIsOpenChildComment(true);
+                        CommentRequest commentRequest = new CommentRequest();
+                        commentRequest.setParentId(parentId);
+                        commentRequest.setIsOpenChildComment(true);
+                        viewModel.getListChildComment(commentRequest);
+                        return i;
+                    }
+                }
+            }
+
+            for (int i = 0; i < currentList.size(); i++) {
+                if (currentList.get(i).getId() != null && currentList.get(i).getId() == commentId) {
+                    return i;
+                }
+            }
+            return -1;
+        }
+
+        if (mCmtResponse.getParentId() == null || mCmtResponse.getParentId().isEmpty()) return -1;
+
+        long targetId = Long.parseLong(mCmtResponse.getParentId());
+        for (int i = 0; i < currentList.size(); i++) {
+            if (currentList.get(i).getId() != null && currentList.get(i).getId() == targetId) {
+                currentList.get(i).setIsOpenChildComment(true);
+                CommentRequest commentRequest = new CommentRequest();
+                commentRequest.setParentId(targetId);
+                commentRequest.setIsOpenChildComment(true);
+                viewModel.getListChildComment(commentRequest);
+                return i;
+            }
+        }
+        return -1;
     }
 }

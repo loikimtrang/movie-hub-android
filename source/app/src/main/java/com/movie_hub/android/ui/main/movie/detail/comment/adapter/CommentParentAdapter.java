@@ -2,8 +2,6 @@ package com.movie_hub.android.ui.main.movie.detail.comment.adapter;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.graphics.BlurMaskFilter;
-import android.graphics.Paint;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.LayoutInflater;
@@ -26,6 +24,8 @@ import com.movie_hub.android.databinding.ItemCommentParentBinding;
 import com.movie_hub.android.databinding.ItemReviewBinding;
 import com.movie_hub.android.ui.main.movie.detail.comment.model.TagComment;
 import com.movie_hub.android.utils.DisplayUtils;
+import com.movie_hub.android.utils.ReportPopupUtils;
+import com.movie_hub.android.utils.ToxicTextUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -38,18 +38,22 @@ public class CommentParentAdapter extends RecyclerView.Adapter<CommentParentAdap
     private OnCommentParentClickListener listener;
     private Context context;
     private TagComment tagComment;
+    private Long currentUserId;
 
     public interface OnCommentParentClickListener {
         void onOpenChildClick(CommentResponse commentResponse, List<CommentResponse> items);
         void onDisLikeClick(CommentResponse commentResponse);
         void onLikeClick(CommentResponse commentResponse);
         void onReplyClick(CommentResponse commentResponse);
+        void onReportClick(CommentResponse commentResponse);
+        void onDeleteClick(CommentResponse commentResponse);
     }
 
-    public CommentParentAdapter(OnCommentParentClickListener listener, Context context) {
+    public CommentParentAdapter(OnCommentParentClickListener listener, Context context, Long currentUserId) {
         super();
         this.listener = listener;
         this.context = context;
+        this.currentUserId = currentUserId;
 
         timeUpdateHandler.postDelayed(timeUpdateRunnable, 60 * 1000);
     }
@@ -62,7 +66,7 @@ public class CommentParentAdapter extends RecyclerView.Adapter<CommentParentAdap
     public CommentParentViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
         ItemCommentParentBinding binding = ItemCommentParentBinding.inflate(inflater, parent, false);
-        return new CommentParentViewHolder(binding);
+        return new CommentParentViewHolder(binding, currentUserId);
     }
 
     private final Handler timeUpdateHandler = new Handler(Looper.getMainLooper());
@@ -107,13 +111,29 @@ public class CommentParentAdapter extends RecyclerView.Adapter<CommentParentAdap
         } else {
             holder.binding.icGender.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_gender_un));
         }
-        holder.binding.tvNameAuthor.setText(item.getAuthor().getFullName());
-        holder.binding.tvContent.setText(item.getContent());
+        holder.binding.tvNameAuthor.setText(DisplayUtils.getAuthorDisplayName(
+                context,
+                item.getAuthor().getFullName(),
+                item.getAuthor().getId(),
+                currentUserId
+        ));
+
+        boolean needDisplayButton = ToxicTextUtils.bindToxicContent(
+                holder.binding.tvContent,
+                item.getContent(),
+                item.getToxicSpans(),
+                item.getStatus(),
+                item.isDisplay(),
+                0
+        );
 
         holder.binding.tvCountLike.setText(String.valueOf(item.getTotalLike()));
         holder.binding.tvCountDisLike.setText(String.valueOf(item.getTotalDislike()));
 
         holder.binding.tvTime.setText(DisplayUtils.getTimeAgo(context, item.getCreatedDate()));
+
+        boolean ownContent = isOwnContent(item);
+        holder.binding.btnMore.setVisibility(View.VISIBLE);
 
         if (item.isPinned()) {
             holder.binding.icPin.setVisibility(View.VISIBLE);
@@ -231,6 +251,24 @@ public class CommentParentAdapter extends RecyclerView.Adapter<CommentParentAdap
             listener.onReplyClick(item);
         });
 
+        holder.binding.btnMore.setOnClickListener(v ->
+                ReportPopupUtils.showCommentMorePopup(
+                        context,
+                        v,
+                        ownContent,
+                        () -> {
+                            if (listener != null) {
+                                listener.onReportClick(item);
+                            }
+                        },
+                        () -> {
+                            if (listener != null) {
+                                listener.onDeleteClick(item);
+                            }
+                        }
+                )
+        );
+
         holder.binding.btnOpenComment.setOnClickListener(v -> {
             if (listener == null) return;
             item.setIsOpenChildComment(!Boolean.TRUE.equals(item.getIsOpenChildComment()));
@@ -238,33 +276,25 @@ public class CommentParentAdapter extends RecyclerView.Adapter<CommentParentAdap
             notifyItemChanged(position);
         });
 
-        boolean needDisplayButton = item.getStatus() != null && item.getStatus() == -1;
-        applyBlurText(holder.binding, needDisplayButton && !item.isDisplay());
-
         holder.binding.icDisplay.setVisibility(needDisplayButton ? View.VISIBLE : View.GONE);
+        ToxicTextUtils.updateRevealIcon(item.isDisplay(), holder.binding.icDisplay, R.drawable.ic_eye_hidden, R.drawable.ic_eye);
 
         holder.binding.btnDisplay.setOnClickListener(v -> {
-            if (item.getStatus() == -1) {
+            if (needDisplayButton) {
                 item.setDisplay(!item.isDisplay());
-                applyBlurText(holder.binding, !item.isDisplay());
+                ToxicTextUtils.bindToxicContent(
+                        holder.binding.tvContent,
+                        item.getContent(),
+                        item.getToxicSpans(),
+                        item.getStatus(),
+                        item.isDisplay(),
+                        0
+                );
+                ToxicTextUtils.updateRevealIcon(item.isDisplay(), holder.binding.icDisplay, R.drawable.ic_eye_hidden, R.drawable.ic_eye);
             }
         });
     }
 
-    private void applyBlurText(ItemCommentParentBinding binding, boolean blur) {
-        Paint paint = binding.tvContent.getPaint();
-
-        if (blur) {
-            binding.tvContent.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
-            paint.setMaskFilter(new BlurMaskFilter(8f, BlurMaskFilter.Blur.NORMAL));
-            binding.icDisplay.setImageResource(R.drawable.ic_eye_hidden);
-        } else {
-            paint.setMaskFilter(null);
-            binding.icDisplay.setImageResource(R.drawable.ic_eye);
-        }
-
-        binding.tvContent.invalidate();
-    }
     public void notifyParentCommentChanged(long commentId, List<CommentResponse> childComment) {
         for (int i = 0; i < items.size(); i++) {
             if (items.get(i).getId() == commentId) {
@@ -363,6 +393,13 @@ public class CommentParentAdapter extends RecyclerView.Adapter<CommentParentAdap
         notifyItemRangeInserted(startPos, moreItems.size());
     }
 
+    private boolean isOwnContent(CommentResponse item) {
+        return item.getAuthor() != null
+                && currentUserId != null
+                && currentUserId > 0
+                && item.getAuthor().getId() == currentUserId;
+    }
+
     @Override
     public void onViewRecycled(@NonNull CommentParentViewHolder holder) {
         RecyclerView childRecycler = holder.binding.childComment;
@@ -381,12 +418,16 @@ public class CommentParentAdapter extends RecyclerView.Adapter<CommentParentAdap
         final ItemCommentParentBinding binding;
         CommentChildAdapter childAdapter; // giữ lại adapter
 
-        public CommentParentViewHolder(@NonNull ItemCommentParentBinding binding) {
+        public CommentParentViewHolder(@NonNull ItemCommentParentBinding binding, Long currentUserId) {
             super(binding.getRoot());
             this.binding = binding;
 
             // Init 1 lần duy nhất tại đây
-            childAdapter = new CommentChildAdapter((CommentChildAdapter.OnCommentChildClickListener) binding.getRoot().getContext(), binding.getRoot().getContext());
+            childAdapter = new CommentChildAdapter(
+                    (CommentChildAdapter.OnCommentChildClickListener) binding.getRoot().getContext(),
+                    binding.getRoot().getContext(),
+                    currentUserId
+            );
             binding.childComment.setAdapter(childAdapter);
             binding.childComment.setLayoutManager(new LinearLayoutManager(binding.getRoot().getContext()));
         }

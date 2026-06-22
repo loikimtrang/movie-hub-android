@@ -34,7 +34,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
-import eu.davidea.flexibleadapter.databinding.BR;
+import com.movie_hub.android.BR;
 import timber.log.Timber;
 
 public class ManageAccountActivity extends BaseActivity<ActivityManageAccountBinding, ManageAccountViewModel> implements ManageAccountMenuAdapter.OnItemClickListener, SystemBarColorProvider {

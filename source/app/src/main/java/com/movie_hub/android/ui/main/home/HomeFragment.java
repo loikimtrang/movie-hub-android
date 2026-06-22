@@ -530,9 +530,7 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding, HomeViewMode
                 viewModel.movieBannerList.postValue(data.getContent());
                 getListTopic();
                 if (viewModel.isLogin()) {
-                    getRecommendMovie(() -> {
-                        loadPage(0);
-                    });
+                    getRecommendMovie(() -> getRecommendMovieKnn(() -> loadPage(0)));
                 } else {
                     loadPage(0);
                 }
@@ -589,6 +587,37 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding, HomeViewMode
                 onDone.run();
             }
         }, getString(R.string.recommend_for_you));
+    }
+
+    public void getRecommendMovieKnn(@NonNull Runnable onDone) {
+        viewModel.getRecommendMovieKnn(new MainCallback<CollectionResponse>() {
+            @Override
+            public void doSuccess(CollectionResponse object) {
+                if (object != null && object.getMovies() != null && !object.getMovies().isEmpty()) {
+                    List<CollectionResponse> current = viewModel.collectionList.getValue();
+                    List<CollectionResponse> newList = new ArrayList<>();
+                    if (current != null && !current.isEmpty()) {
+                        newList.addAll(current);
+                    }
+                    newList.add(object);
+                    viewModel.collectionList.setValue(newList);
+                }
+                onDone.run();
+            }
+
+            @Override
+            public void doError(Throwable error) {
+                onDone.run();
+            }
+
+            @Override
+            public void doSuccess() { }
+
+            @Override
+            public void doFail() {
+                onDone.run();
+            }
+        }, 0, getString(R.string.recommend_knn_similar_taste));
     }
 
     public void getCategoryByWatch(int page) {

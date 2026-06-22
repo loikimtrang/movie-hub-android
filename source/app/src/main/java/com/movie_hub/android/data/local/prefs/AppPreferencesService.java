@@ -178,4 +178,14 @@ public class AppPreferencesService implements PreferencesService {
         return mPrefs.getString(KEY_LANGUAGE_CODE, "vi");
     }
 
+    @Override
+    public boolean isBlockScreenCaptureEnabled() {
+        return mPrefs.getBoolean(KEY_BLOCK_SCREEN_CAPTURE, true);
+    }
+
+    @Override
+    public void setBlockScreenCaptureEnabled(boolean enabled) {
+        mPrefs.edit().putBoolean(KEY_BLOCK_SCREEN_CAPTURE, enabled).apply();
+    }
+
 }

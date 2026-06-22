@@ -21,7 +21,7 @@ import com.movie_hub.android.ui.main.schedule.adapter.movie.MovieScheduleAdapter
 import com.movie_hub.android.ui.main.schedule.adapter.movie.MovieScheduleShimmerAdapter;
 import com.movie_hub.android.utils.DateUtils;
 import java.util.List;
-import eu.davidea.flexibleadapter.databinding.BR;
+import com.movie_hub.android.BR;
 
 public class ScheduleFragment extends BaseFragment<FragmentScheduleBinding, ScheduleViewModel>
         implements ScheduleTimeAdapter.OnScheduleClickListener, MovieScheduleAdapter.OnMovieClickListener {

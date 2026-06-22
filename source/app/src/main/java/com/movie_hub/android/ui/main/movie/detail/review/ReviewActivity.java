@@ -24,7 +24,10 @@ import com.movie_hub.android.data.model.api.request.review.CreateReviewRequest;
 import com.movie_hub.android.data.model.api.request.review.ReviewRequest;
 import com.movie_hub.android.data.model.api.response.comment.VoteListResponse;
 import com.movie_hub.android.data.model.api.response.movie.MovieResponse;
+import com.movie_hub.android.data.model.api.response.report.CreateReportRequest;
 import com.movie_hub.android.data.model.api.response.review.ReviewResponse;
+import com.movie_hub.android.data.model.onesignal.MessageReviewResponse;
+import com.movie_hub.android.data.model.onesignal.OneSignalCommand;
 import com.movie_hub.android.data.model.other.ToastMessage;
 import com.movie_hub.android.databinding.ActivityReviewBinding;
 import com.movie_hub.android.di.component.ActivityComponent;
@@ -37,6 +40,7 @@ import com.movie_hub.android.ui.main.movie.detail.review.adapter.ReviewItemAdapt
 import com.movie_hub.android.ui.main.movie.detail.review.dialog.ReviewDialogFragment;
 import com.movie_hub.android.utils.DialogUtils;
 import com.movie_hub.android.utils.GsonUtils;
+import com.movie_hub.android.utils.ReportDialogUtils;
 
 import java.util.List;
 
@@ -117,6 +121,8 @@ public class ReviewActivity extends BaseActivity<ActivityReviewBinding, ReviewVi
     }
 
     private static final float SHEET_TRANSLATE_Y_DP = 200f;
+    public static final String MSG_REVIEW = "MSG_REVIEW";
+    public static final String MSG_CMD = "MSG_CMD";
 
     private ReviewItemAdapter reviewItemAdapter;
     private CommentShimmerAdapter commentShimmerAdapter;
@@ -205,7 +211,7 @@ public class ReviewActivity extends BaseActivity<ActivityReviewBinding, ReviewVi
     }
 
     public void setUpAdapter() {
-        reviewItemAdapter = new ReviewItemAdapter(this, this);
+        reviewItemAdapter = new ReviewItemAdapter(this, this, viewModel.getUserId());
         commentShimmerAdapter = new CommentShimmerAdapter(6);
         viewBinding.rvReview.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
     }
@@ -295,6 +301,7 @@ public class ReviewActivity extends BaseActivity<ActivityReviewBinding, ReviewVi
                         viewBinding.layoutEmpty.setVisibility(View.GONE);
                         hideShimmer();
                         reviewItemAdapter.setData(viewModel.setupVoteList(data.getContent()));
+                        scrollToNotificationReviewIfNeeded();
                     } else {
                         reviewItemAdapter.addData(viewModel.setupVoteList(data.getContent()));
                     }
@@ -487,8 +494,86 @@ public class ReviewActivity extends BaseActivity<ActivityReviewBinding, ReviewVi
     }
 
     @Override
+    public void onReport(ReviewResponse reviewResponse, int position) {
+        if (!viewModel.isLogin()) {
+            showLoginRequiredDialog();
+            return;
+        }
+        if (reviewResponse == null || reviewResponse.getId() == null) {
+            return;
+        }
+
+        ReportDialogUtils.show(
+                this,
+                getString(R.string.report_review_title),
+                content -> submitReport(reviewResponse.getId(), Constants.USER_REPORT_TYPE_REVIEW, content)
+        );
+    }
+
+    private void submitReport(long objectId, int reportType, String content) {
+        CreateReportRequest request = new CreateReportRequest();
+        request.setObjectId(objectId);
+        request.setType(reportType);
+        request.setContent(content);
+
+        viewModel.createReport(new MainCallback<ResponseWrapper>() {
+            @Override
+            public void doError(Throwable error) {
+                new ToastMessage(ToastMessage.TYPE_WARNING, getString(R.string.an_error_occurred))
+                        .showMessage(ReviewActivity.this);
+            }
+
+            @Override
+            public void doSuccess() {
+            }
+
+            @Override
+            public void doSuccess(ResponseWrapper response) {
+                new ToastMessage(ToastMessage.TYPE_NORMAL, getString(R.string.report_success))
+                        .showMessage(ReviewActivity.this);
+            }
+
+            @Override
+            public void doFail() {
+                new ToastMessage(ToastMessage.TYPE_WARNING, getString(R.string.an_error_occurred))
+                        .showMessage(ReviewActivity.this);
+            }
+        }, request);
+    }
+
+    @Override
     protected void onDestroy() {
         super.onDestroy();
         reviewItemAdapter.stopTimeUpdater();
+    }
+
+    private void scrollToNotificationReviewIfNeeded() {
+        String json = getIntent().getStringExtra(MSG_REVIEW);
+        String cmd = getIntent().getStringExtra(MSG_CMD);
+        if (json == null || json.isEmpty() || !OneSignalCommand.CMD_TOXIC_REVIEW_LOCKED.equals(cmd)) {
+            return;
+        }
+
+        getIntent().removeExtra(MSG_REVIEW);
+        getIntent().removeExtra(MSG_CMD);
+
+        MessageReviewResponse messageReviewResponse = GsonUtils.fromJson(json, MessageReviewResponse.class);
+        if (messageReviewResponse == null || messageReviewResponse.getId() == null) {
+            return;
+        }
+
+        long reviewId = Long.parseLong(messageReviewResponse.getId());
+        int targetPosition = reviewItemAdapter.findPositionById(reviewId);
+        if (targetPosition == -1) {
+            return;
+        }
+
+        int finalTargetPosition = targetPosition;
+        viewBinding.rvReview.post(() -> {
+            LinearLayoutManager lm = (LinearLayoutManager) viewBinding.rvReview.getLayoutManager();
+            if (lm != null) {
+                lm.scrollToPositionWithOffset(finalTargetPosition, 0);
+            }
+        });
     }
 }

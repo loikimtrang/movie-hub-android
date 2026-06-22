@@ -70,7 +70,7 @@
                     android:layout_height="wrap_content"
                     style="@style/Text_10_Normal"
                     android:textColor="@color/progress_history"
-                    android:text="M35:T12"/>
+                    android:text="P35:T12"/>
 
                 <ImageView
                     android:id="@+id/ic_season_dot_episode"

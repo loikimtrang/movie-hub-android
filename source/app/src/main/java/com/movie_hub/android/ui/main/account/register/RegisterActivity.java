@@ -24,7 +24,7 @@ import com.movie_hub.android.utils.GsonUtils;
 import java.net.ConnectException;
 import java.util.Objects;
 
-import eu.davidea.flexibleadapter.databinding.BR;
+import com.movie_hub.android.BR;
 
 public class RegisterActivity extends BaseActivity<ActivityRegisterBinding, RegisterViewModel> implements SystemBarColorProvider, View.OnClickListener {
     final boolean[] isPasswordVisible = {false};

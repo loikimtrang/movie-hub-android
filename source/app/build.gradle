@@ -7,8 +7,8 @@ android {
         applicationId "com.movie_hub.android"
         minSdkVersion 21
         targetSdkVersion 30
-        versionCode 13
-        versionName "v1.0.12"
+        versionCode 15
+        versionName "v1.0.14"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         Properties properties = new Properties()
@@ -58,6 +58,13 @@ android {
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    applicationVariants.all { variant ->
+        variant.outputs.all { output ->
+            def versionName = variant.versionName
+            outputFileName = "moviehub_${versionName}.apk"
+        }
     }
 }
 
@@ -160,12 +167,6 @@ dependencies {
 
     //hash id
     implementation "org.hashids:hashids:1.0.3"
-
-    //Flexible Adapter
-    final flexible_adapter_version = 'c8013533';
-    implementation "com.github.arkon.FlexibleAdapter:flexible-adapter:$flexible_adapter_version"
-    implementation "com.github.arkon.FlexibleAdapter:flexible-adapter-databinding:$flexible_adapter_version"
-    implementation "com.github.arkon.FlexibleAdapter:flexible-adapter-ui:$flexible_adapter_version"
 
     implementation 'com.github.mmin18:RealtimeBlurView:82df3520b4'
     implementation 'com.github.yalantis:ucrop:2.2.8'

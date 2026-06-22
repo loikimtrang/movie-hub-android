@@ -24,7 +24,7 @@ import com.movie_hub.android.utils.GsonUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-import eu.davidea.flexibleadapter.databinding.BR;
+import com.movie_hub.android.BR;
 
 public class EpisodesFragment extends BaseFragment<FragmentEpisodeBinding, EpisodesFragmentViewModel>
         implements ChooseSeasonBottomSheetDialog.ChooseSeasonBottomSheetCallback,

@@ -25,7 +25,7 @@ import com.movie_hub.android.ui.main.search.result.SearchResultFragment;
 import com.movie_hub.android.ui.main.search.suggestion.SearchSuggestionFragment;
 import com.movie_hub.android.ui.main.search.topTrending.SearchTopTrendingFragment;
 
-import eu.davidea.flexibleadapter.databinding.BR;
+import com.movie_hub.android.BR;
 
 public class SearchFragment extends BaseFragment<FragmentSearchBinding, SearchViewModel> implements SystemBarColorProvider {
 

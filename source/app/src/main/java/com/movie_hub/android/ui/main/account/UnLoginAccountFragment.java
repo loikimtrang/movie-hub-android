@@ -21,7 +21,7 @@ import com.movie_hub.android.utils.DialogUtils;
 import java.util.Arrays;
 import java.util.List;
 
-import eu.davidea.flexibleadapter.databinding.BR;
+import com.movie_hub.android.BR;
 
 public class UnLoginAccountFragment extends BaseFragment<FragmentUnLoginAccountBinding, UnLoginAccountViewModel> implements SystemBarColorProvider,
         AccountMenuAdapter.OnItemClickListener,

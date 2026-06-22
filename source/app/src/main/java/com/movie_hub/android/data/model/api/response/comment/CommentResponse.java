@@ -20,6 +20,7 @@ public class CommentResponse {
     private int totalChildren;
     private int totalLike;
     private int totalDislike;
+    private String toxicSpans;
     private String authorInfo;
     private MovieItemResponse movieItem;
     private CommentResponse parent;

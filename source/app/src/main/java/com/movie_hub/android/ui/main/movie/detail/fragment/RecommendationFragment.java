@@ -31,7 +31,7 @@ import com.movie_hub.android.utils.GsonUtils;
 import java.util.List;
 import java.util.Objects;
 
-import eu.davidea.flexibleadapter.databinding.BR;
+import com.movie_hub.android.BR;
 
 public class RecommendationFragment extends BaseFragment<FragmentRecommendationBinding, RecommendationFragmentViewModel> implements MovieVerticalAdapter.OnMovieClickListener{
     private MovieVerticalAdapter movieAdapter;

@@ -126,7 +126,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
-import eu.davidea.flexibleadapter.databinding.BR;
+import com.movie_hub.android.BR;
 import timber.log.Timber;
 
 public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, WatchMovieViewModel> implements View.OnClickListener,
@@ -210,8 +210,7 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
         viewModel.getParticipantPlaybackRestricted().observe(this,
                 restricted -> applyParticipantSyncRestrictedUi(Boolean.TRUE.equals(restricted)));
 
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE,
-                WindowManager.LayoutParams.FLAG_SECURE);
+        applyScreenCaptureProtection();
         viewBinding.setA(this);
         viewBinding.setVm(viewModel);
         hideSystemUI();
@@ -517,6 +516,15 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
                 viewBinding.icUnread.setVisibility(Boolean.TRUE.equals(visible)
                         ? View.VISIBLE
                         : View.INVISIBLE));
+    }
+
+    private void applyScreenCaptureProtection() {
+        if (viewModel.isBlockScreenCaptureEnabled()) {
+            getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE,
+                    WindowManager.LayoutParams.FLAG_SECURE);
+        } else {
+            getWindow().clearFlags(WindowManager.LayoutParams.FLAG_SECURE);
+        }
     }
 
     private void applyParticipantSyncRestrictedUi(boolean restricted) {
@@ -2236,6 +2244,7 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
     @Override
     protected void onResume() {
         super.onResume();
+        applyScreenCaptureProtection();
         hideSystemUI();
         startSeekBarUpdate();
         startVolumeObserver();

@@ -9,6 +9,8 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.util.Log;
 
@@ -107,8 +109,18 @@ public class MVVMApplication extends Application implements LifecycleObserver {
             JSONObject additionalData = notification.getAdditionalData();
             notificationReceivedEvent.complete(null);
 
+            MessageOneSignal messageOneSignal = GsonUtils.fromJson(GsonUtils.toJson(additionalData), MessageOneSignal.class);
+            if (messageOneSignal == null) {
+                messageOneSignal = new MessageOneSignal();
+            }
+            if (messageOneSignal.getTitle() == null || messageOneSignal.getTitle().isEmpty()) {
+                messageOneSignal.setTitle(title);
+            }
+            if (messageOneSignal.getContent() == null || messageOneSignal.getContent().isEmpty()) {
+                messageOneSignal.setContent(body);
+            }
 
-            showCustomNotification(GsonUtils.fromJson(GsonUtils.toJson(additionalData), MessageOneSignal.class));
+            showCustomNotification(messageOneSignal);
         });
     }
 
@@ -152,13 +164,18 @@ public class MVVMApplication extends Application implements LifecycleObserver {
         );
 
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, channelId)
-                .setSmallIcon(R.mipmap.ic_launcher)
+                .setSmallIcon(R.drawable.ic_notification_logo)
                 .setContentTitle(messageOneSignal.getTitle())
                 .setContentText(messageOneSignal.getContent())
                 .setAutoCancel(true)
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setDefaults(NotificationCompat.DEFAULT_ALL)
                 .setContentIntent(pendingIntent);
+
+        Bitmap largeIcon = BitmapFactory.decodeResource(getResources(), R.drawable.logo_no_bg);
+        if (largeIcon != null) {
+            notificationBuilder.setLargeIcon(largeIcon);
+        }
 
         notificationManager.notify(requestCode, notificationBuilder.build());
     }

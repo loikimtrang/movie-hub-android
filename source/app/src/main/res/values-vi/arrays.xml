@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="report_reasons">
+        <item>Spam hoặc quảng cáo</item>
+        <item>Quấy rối hoặc công kích</item>
+        <item>Nội dung tiết lộ phim</item>
+        <item>Ngôn từ thù ghét hoặc phản cảm</item>
+        <item>Thông tin sai lệch</item>
+        <item>Nội dung khiêu dâm hoặc không phù hợp</item>
+        <item>Bạo lực hoặc kích động bạo lực</item>
+        <item>Mạo danh người khác</item>
+        <item>Tiết lộ thông tin cá nhân</item>
+        <item>Nội dung lừa đảo hoặc gian lận</item>
+        <item>Không liên quan đến nội dung phim</item>
+        <item>Vi phạm bản quyền</item>
+        <item>Khác</item>
+    </string-array>
+</resources>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="report_reasons">
+        <item>Spam or advertising</item>
+        <item>Harassment or attack</item>
+        <item>Movie spoiler content</item>
+        <item>Hate speech or offensive language</item>
+        <item>Misinformation</item>
+        <item>Pornographic or inappropriate content</item>
+        <item>Violence or incitement to violence</item>
+        <item>Impersonation</item>
+        <item>Personal information disclosure</item>
+        <item>Scam or fraudulent content</item>
+        <item>Unrelated to movie content</item>
+        <item>Copyright violation</item>
+        <item>Other</item>
+    </string-array>
+</resources>

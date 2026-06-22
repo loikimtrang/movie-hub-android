@@ -17,6 +17,7 @@ public class ReviewResponse {
     private Integer totalLike;
     private Integer totalDislike;
     private Long movieId;
+    private String toxicSpans;
     private UserResponse author;
 
     private boolean isLike;

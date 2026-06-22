@@ -27,6 +27,7 @@ import com.movie_hub.android.data.model.api.response.movie.MovieResponse;
 import com.movie_hub.android.data.model.api.response.notification.NotificationResponse;
 import com.movie_hub.android.data.model.onesignal.MessageCommentResponse;
 import com.movie_hub.android.data.model.onesignal.MessageOneSignal;
+import com.movie_hub.android.data.model.onesignal.MessageReviewResponse;
 import com.movie_hub.android.data.model.onesignal.OneSignalCommand;
 import com.movie_hub.android.databinding.ActivityNotificationBinding;
 import com.movie_hub.android.di.component.ActivityComponent;
@@ -282,9 +283,16 @@ public class NotificationActivity extends BaseActivity<ActivityNotificationBindi
 
         switch (item.getCmd()) {
             case OneSignalCommand.CMD_REPLY_COMMENT:
+            case OneSignalCommand.CMD_TOXIC_COMMENT_LOCKED:
                 MessageCommentResponse messageCommentResponse = GsonUtils.fromJson(messageOneSignal.getData(), MessageCommentResponse.class);
                 if (messageCommentResponse != null && messageCommentResponse.getMovieId() != null) {
                     getMovieDetailByNotification(Long.valueOf(messageCommentResponse.getMovieId()), messageOneSignal);
+                }
+                break;
+            case OneSignalCommand.CMD_TOXIC_REVIEW_LOCKED:
+                MessageReviewResponse messageReviewResponse = GsonUtils.fromJson(messageOneSignal.getData(), MessageReviewResponse.class);
+                if (messageReviewResponse != null && messageReviewResponse.getMovieId() != null) {
+                    getMovieDetailByNotification(Long.valueOf(messageReviewResponse.getMovieId()), messageOneSignal);
                 }
                 break;
             case OneSignalCommand.CMD_NEW_MOVIE:

@@ -30,6 +30,7 @@ import com.movie_hub.android.data.model.api.response.room.RoomResponse;
 import com.movie_hub.android.data.model.api.response.user.UserResponse;
 import com.movie_hub.android.data.model.onesignal.MessageCommentResponse;
 import com.movie_hub.android.data.model.onesignal.MessageOneSignal;
+import com.movie_hub.android.data.model.onesignal.MessageReviewResponse;
 import com.movie_hub.android.data.model.onesignal.OneSignalCommand;
 import com.movie_hub.android.data.model.other.ToastMessage;
 import com.movie_hub.android.databinding.ActivityMainBinding;
@@ -94,21 +95,45 @@ public class MainActivity extends BaseActivity<ActivityMainBinding, MainViewMode
         if (json != null && !json.isEmpty() && viewModel.isLogin()) {
             viewModel.messageOneSignal = GsonUtils.fromJson(json, MessageOneSignal.class);
 
-            if (viewModel.messageOneSignal != null &&
-                    Objects.equals(viewModel.messageOneSignal.getCmd(), OneSignalCommand.CMD_REPLY_COMMENT)) {
+            if (viewModel.messageOneSignal != null && viewModel.messageOneSignal.getCmd() != null) {
                 String dataJson = viewModel.messageOneSignal.getData();
+                String movieId = null;
 
-                if (dataJson != null && !dataJson.isEmpty()) {
-                    MessageCommentResponse messageCommentResponse = GsonUtils.fromJson(dataJson, MessageCommentResponse.class);
-                    if (messageCommentResponse != null && messageCommentResponse.getMovieId() != null) {
-                        MovieResponse movieResponse = new MovieResponse();
-                        movieResponse.setId(Long.valueOf(messageCommentResponse.getMovieId()));
+                switch (viewModel.messageOneSignal.getCmd()) {
+                    case OneSignalCommand.CMD_REPLY_COMMENT:
+                    case OneSignalCommand.CMD_TOXIC_COMMENT_LOCKED:
+                        if (dataJson != null && !dataJson.isEmpty()) {
+                            MessageCommentResponse messageCommentResponse = GsonUtils.fromJson(dataJson, MessageCommentResponse.class);
+                            if (messageCommentResponse != null) {
+                                movieId = messageCommentResponse.getMovieId();
+                            }
+                        }
+                        if (movieId != null && (Objects.equals(viewModel.messageOneSignal.getCmd(), OneSignalCommand.CMD_REPLY_COMMENT)
+                                || Objects.equals(viewModel.messageOneSignal.getCmd(), OneSignalCommand.CMD_TOXIC_COMMENT_LOCKED))) {
+                            viewModel.msgCommentData = GsonUtils.toJson(viewModel.messageOneSignal);
+                        }
+                        break;
+                    case OneSignalCommand.CMD_TOXIC_REVIEW_LOCKED:
+                        if (dataJson != null && !dataJson.isEmpty()) {
+                            MessageReviewResponse messageReviewResponse = GsonUtils.fromJson(dataJson, MessageReviewResponse.class);
+                            if (messageReviewResponse != null) {
+                                movieId = messageReviewResponse.getMovieId();
+                            }
+                        }
+                        if (movieId != null) {
+                            viewModel.msgCommentData = GsonUtils.toJson(viewModel.messageOneSignal);
+                        }
+                        break;
+                    default:
+                        break;
+                }
 
-                        viewModel.msgCommentData = GsonUtils.toJson(viewModel.messageOneSignal);
-                        getMovieDetail(movieResponse, NavigateToMovieDetails);
-                    } else {
-                        Timber.e("ONESIGNAL_LOG: messageCommentResponse hoặc MovieId bị null sau khi parse");
-                    }
+                if (movieId != null) {
+                    MovieResponse movieResponse = new MovieResponse();
+                    movieResponse.setId(Long.valueOf(movieId));
+                    getMovieDetail(movieResponse, NavigateToMovieDetails);
+                } else if (Objects.equals(viewModel.messageOneSignal.getCmd(), OneSignalCommand.CMD_REPLY_COMMENT)) {
+                    Timber.e("ONESIGNAL_LOG: messageCommentResponse hoặc MovieId bị null sau khi parse");
                 }
             }
         }

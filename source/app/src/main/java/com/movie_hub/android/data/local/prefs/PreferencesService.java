@@ -14,6 +14,7 @@ public interface PreferencesService {
     String KEY_USER_RESPONSE = "KEY_USER_RESPONSE";
     String KEY_USER_ID = "KEY_USER_ID";
     String KEY_USER_SETTING= "KEY_USER_SETTING";
+    String KEY_BLOCK_SCREEN_CAPTURE = "KEY_BLOCK_SCREEN_CAPTURE";
 
     void saveAccessTokenObject(UserLoginResponse userLoginResponse);
     UserLoginResponse getUserAccessTokenObject();
@@ -50,4 +51,7 @@ public interface PreferencesService {
     <T> T getObjectVal(String key, Class<T> mModelClass);
     public void setAppLanguage(String langCode);
     public String getAppLanguage();
+
+    boolean isBlockScreenCaptureEnabled();
+    void setBlockScreenCaptureEnabled(boolean enabled);
 }

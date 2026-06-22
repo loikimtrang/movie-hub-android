@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@drawable/bg_dialog"
+    android:padding="@dimen/_12sdp"
+    android:layout_marginHorizontal="@dimen/_20sdp">
+
+    <TextView
+        android:id="@+id/tv_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        style="@style/Text_12_Bold"
+        android:textColor="@color/white"
+        android:layout_marginBottom="@dimen/_12sdp" />
+
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/scroll_reasons"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:scrollbars="vertical"
+        android:overScrollMode="ifContentScrolls"
+        android:fillViewport="false">
+
+        <RadioGroup
+            android:id="@+id/rg_reasons"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" />
+
+    </androidx.core.widget.NestedScrollView>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="@dimen/_12sdp">
+
+        <FrameLayout
+            android:id="@+id/btn_close"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/_36sdp"
+            android:layout_weight="1"
+            android:background="@drawable/bg_btn_white_radius_3sdp"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground"
+            android:layout_marginEnd="@dimen/_6sdp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="@string/report_close"
+                style="@style/Text_12_Normal"
+                android:textColor="@color/black" />
+
+        </FrameLayout>
+
+        <FrameLayout
+            android:id="@+id/btn_send"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/_36sdp"
+            android:layout_weight="1"
+            android:background="@drawable/bg_btn_yellow_radius_3sdp"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground"
+            android:layout_marginStart="@dimen/_6sdp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="@string/report_submit"
+                style="@style/Text_12_Normal"
+                android:textColor="@color/black" />
+
+        </FrameLayout>
+
+    </LinearLayout>
+
+</LinearLayout>

@@ -11,6 +11,7 @@ import com.google.android.flexbox.FlexDirection;
 import com.google.android.flexbox.FlexWrap;
 import com.google.android.flexbox.FlexboxLayoutManager;
 import com.google.android.flexbox.JustifyContent;
+import com.movie_hub.android.BR;
 import com.movie_hub.android.R;
 import com.movie_hub.android.data.model.api.request.movie.MovieRequest;
 import com.movie_hub.android.data.model.api.response.favourite.FavouriteResponse;
@@ -38,8 +39,6 @@ import java.net.ConnectException;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.util.List;
-
-import eu.davidea.flexibleadapter.databinding.BR;
 
 public class SearchTopTrendingFragment extends BaseFragment<FragmentSearchTopTrendingBinding, SearchTopTrendingViewModel> implements MovieVerticalAdapter.OnMovieClickListener, SearchHistoryAdapter.OnItemClickListener{
 

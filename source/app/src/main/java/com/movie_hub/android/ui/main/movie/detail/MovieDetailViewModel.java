@@ -16,6 +16,7 @@ import com.movie_hub.android.data.model.api.response.MovieItem.MovieItemResponse
 import com.movie_hub.android.data.model.api.response.favourite.FavouriteResponse;
 import com.movie_hub.android.data.model.api.response.history.ListWatchHistoryResponse;
 import com.movie_hub.android.data.model.api.response.movie.MovieResponse;
+import com.movie_hub.android.data.model.api.response.playlist.PlayListByMovieResponse;
 import com.movie_hub.android.data.model.api.response.playlist.PlayListResponse;
 import com.movie_hub.android.data.model.api.response.review.ReviewResponse;
 import com.movie_hub.android.ui.base.activity.BaseViewModel;
@@ -295,7 +296,12 @@ public class MovieDetailViewModel extends BaseViewModel {
                 .subscribe(
                         response -> {
                             if (response.isResult()) {
-                                callback.doSuccess(response.getData());
+                                PlayListByMovieResponse data = response.getData();
+                                List<Long> playlistIds = new ArrayList<>();
+                                if (data != null && data.getIds() != null) {
+                                    playlistIds.addAll(data.getIds());
+                                }
+                                callback.doSuccess(playlistIds);
                             } else {
                                 callback.doFail();
                             }

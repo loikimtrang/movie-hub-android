@@ -41,7 +41,9 @@ import com.movie_hub.android.data.model.api.response.notification.NotificationRe
 import com.movie_hub.android.data.model.api.response.person.PersonResponse;
 import com.movie_hub.android.data.model.api.response.login.UserLoginResponse;
 import com.movie_hub.android.data.model.api.response.movie.MovieResponse;
+import com.movie_hub.android.data.model.api.response.playlist.PlayListByMovieResponse;
 import com.movie_hub.android.data.model.api.response.playlist.PlayListResponse;
+import com.movie_hub.android.data.model.api.response.report.CreateReportRequest;
 import com.movie_hub.android.data.model.api.response.review.ReviewResponse;
 import com.movie_hub.android.data.model.api.response.room.RoomResponse;
 import com.movie_hub.android.data.model.api.response.side_bar.SidebarResponse;
@@ -105,6 +107,9 @@ public interface ApiService {
 
     @GET("v1/movie/recommendation")
     Observable<ResponseWrapper<List<MovieResponse>>> getRecommendMovie();
+
+    @GET("v1/movie/recommendation/knn")
+    Observable<ResponseWrapper<ResponseListObj<MovieResponse>>> getRecommendMovieKnn();
 
     @GET("v1/movie/recommendation/recent-watched-category")
     Observable<ResponseWrapper<CategoryByWatch>> getCategoryByWatched();
@@ -171,6 +176,9 @@ public interface ApiService {
     @GET("v1/comment/vote-list/{movieId}")
     Observable<ResponseWrapper<List<VoteListResponse>>> getVoteList(@Path("movieId") Long movieId);
 
+    @DELETE("v1/comment/delete/{id}")
+    Observable<ResponseWrapper> deleteComment(@Path("id") Long id);
+
     // Review
     @GET("v1/review/list")
     Observable<ResponseWrapper<ResponseListObj<ReviewResponse>>> getReviewList(@QueryMap Map<String, Object> query);
@@ -211,7 +219,7 @@ public interface ApiService {
     @DELETE("v1/playlist/remove-item")
     Observable<ResponseWrapper> removeMovieFromPlaylist(@QueryMap Map<String, Object> queryParams);
     @GET("v1/playlist/list-by-movie/{movieId}")
-    Observable<ResponseWrapper<List<Long>>> getPlaylistsByMovie(@Path("movieId") Long movieId);
+    Observable<ResponseWrapper<PlayListByMovieResponse>> getPlaylistsByMovie(@Path("movieId") Long movieId);
 
     @POST("v1/playlist/update-item")
     Observable<ResponseWrapper> updateItemPlayList(@Body UpdatePlayListItemRequest request);
@@ -265,4 +273,7 @@ public interface ApiService {
     @Headers("UseGuestToken: 1")
     @GET("v1/video-library-subtitle/list")
     Observable<ResponseWrapper<ResponseListObj<SubtitleResponse>>> getListSubtitle(@QueryMap Map<String, Object> query);
+
+    @POST("v1/user-report/create")
+    Observable<ResponseWrapper<Void>> createReport(@Body CreateReportRequest request);
 }

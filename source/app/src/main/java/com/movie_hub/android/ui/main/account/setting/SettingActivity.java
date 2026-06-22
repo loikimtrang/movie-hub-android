@@ -124,11 +124,18 @@ public class SettingActivity extends BaseActivity<ActivitySettingAccountBinding,
         setupBrightnessSeekBar();
         setupVolumeSeekBar();
         setupSubtitleSettings();
+        setupBlockScreenCaptureSwitch();
 
         viewBinding.switchAutoSkipIntro.setOnCheckedChangeListener((v, isChecked) ->
                 viewModel.setting.setAutoSkipIntro(isChecked));
         viewBinding.switchAutoNextEpisode.setOnCheckedChangeListener((v, isChecked) ->
                 viewModel.setting.setAutoNextEpisode(isChecked));
+    }
+
+    private void setupBlockScreenCaptureSwitch() {
+        viewBinding.switchBlockScreenCapture.setChecked(viewModel.isBlockScreenCaptureEnabled());
+        viewBinding.switchBlockScreenCapture.setOnCheckedChangeListener((buttonView, isChecked) ->
+                viewModel.setBlockScreenCaptureEnabled(isChecked));
     }
 
     private void applyDefaultSubtitleSettings() {

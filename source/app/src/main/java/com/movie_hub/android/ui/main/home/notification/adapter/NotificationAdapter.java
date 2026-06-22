@@ -18,6 +18,7 @@ import com.movie_hub.android.data.model.api.response.MovieItem.MovieItemResponse
 import com.movie_hub.android.data.model.api.response.movie.MovieResponse;
 import com.movie_hub.android.data.model.api.response.notification.NotificationResponse;
 import com.movie_hub.android.data.model.onesignal.MessageCommentResponse;
+import com.movie_hub.android.data.model.onesignal.MessageReviewResponse;
 import com.movie_hub.android.data.model.onesignal.OneSignalCommand;
 import com.movie_hub.android.databinding.ItemNotificationBinding;
 import com.movie_hub.android.utils.DisplayUtils;
@@ -64,12 +65,25 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
         updateTime(holder, item);
         holder.binding.imgAvatar.setVisibility(View.GONE);
         holder.binding.imgAvatar.setVisibility(View.GONE);
-        if (Objects.equals(item.getType(), Constants.NOTIFICATION_TYPE_SOCIAL) && Objects.equals(item.getCmd(), OneSignalCommand.CMD_REPLY_COMMENT)) {
-            MessageCommentResponse messageCommentResponse = GsonUtils.fromJson(item.getBody(), MessageCommentResponse.class);
+        if (Objects.equals(item.getType(), Constants.NOTIFICATION_TYPE_SOCIAL)) {
+            MessageCommentResponse messageCommentResponse = null;
+            MessageReviewResponse messageReviewResponse = null;
 
-            if (messageCommentResponse != null && messageCommentResponse.getAuthor() != null && messageCommentResponse.getAuthor().getAvatarPath() != null) {
+            if (Objects.equals(item.getCmd(), OneSignalCommand.CMD_REPLY_COMMENT)
+                    || Objects.equals(item.getCmd(), OneSignalCommand.CMD_TOXIC_COMMENT_LOCKED)) {
+                messageCommentResponse = GsonUtils.fromJson(item.getBody(), MessageCommentResponse.class);
+            } else if (Objects.equals(item.getCmd(), OneSignalCommand.CMD_TOXIC_REVIEW_LOCKED)) {
+                messageReviewResponse = GsonUtils.fromJson(item.getBody(), MessageReviewResponse.class);
+            }
+
+            MessageCommentResponse.Author commentAuthor = messageCommentResponse != null ? messageCommentResponse.getAuthor() : null;
+            MessageReviewResponse.Author reviewAuthor = messageReviewResponse != null ? messageReviewResponse.getAuthor() : null;
+            String avatarPath = commentAuthor != null ? commentAuthor.getAvatarPath()
+                    : reviewAuthor != null ? reviewAuthor.getAvatarPath() : null;
+
+            if (avatarPath != null) {
                 Glide.with(context)
-                        .load(Constants.MEDIA_URL + messageCommentResponse.getAuthor().getAvatarPath())
+                        .load(Constants.MEDIA_URL + avatarPath)
                         .placeholder(R.drawable.logo)
                         .error(R.drawable.logo)
                         .into(holder.binding.imgAvatar);

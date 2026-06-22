@@ -2,8 +2,6 @@ package com.movie_hub.android.ui.main.movie.detail.review.adapter;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.graphics.BlurMaskFilter;
-import android.graphics.Paint;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.LayoutInflater;
@@ -21,6 +19,8 @@ import com.movie_hub.android.data.model.api.response.comment.VoteListResponse;
 import com.movie_hub.android.data.model.api.response.review.ReviewResponse;
 import com.movie_hub.android.databinding.ItemReviewBinding;
 import com.movie_hub.android.utils.DisplayUtils;
+import com.movie_hub.android.utils.ReportPopupUtils;
+import com.movie_hub.android.utils.ToxicTextUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,14 +30,17 @@ public class ReviewItemAdapter extends RecyclerView.Adapter<ReviewItemAdapter.Re
     private final List<ReviewResponse> items = new ArrayList<>();
     private ReviewCallback listener;
     private Context context;
+    private Long currentUserId;
     public interface ReviewCallback {
         void onDislike(ReviewResponse ReviewResponse, int position);
         void onLike(ReviewResponse ReviewResponse, int position);
+        void onReport(ReviewResponse reviewResponse, int position);
     }
-    public ReviewItemAdapter(ReviewCallback listener, Context context) {
+    public ReviewItemAdapter(ReviewCallback listener, Context context, Long currentUserId) {
         super();
         this.listener = listener;
         this.context = context;
+        this.currentUserId = currentUserId;
 
         timeUpdateHandler.postDelayed(timeUpdateRunnable, 60 * 1000);
     }
@@ -65,14 +68,28 @@ public class ReviewItemAdapter extends RecyclerView.Adapter<ReviewItemAdapter.Re
     @Override
     public void onBindViewHolder(@NonNull ReviewItemViewHolder holder, int position) {
         ReviewResponse item = items.get(position);
-        holder.binding.tvContent.setText(item.getContent());
+        boolean needDisplayButton = ToxicTextUtils.bindToxicContent(
+                holder.binding.tvContent,
+                item.getContent(),
+                item.getToxicSpans(),
+                item.getStatus(),
+                item.isDisplay(),
+                0
+        );
         holder.binding.tvCountLike.setText(item.getTotalLike().toString());
         holder.binding.tvCountDisLike.setText(item.getTotalDislike().toString());
-        holder.binding.tvNameAuthor.setText(item.getAuthor().getFullName());
+        holder.binding.tvNameAuthor.setText(DisplayUtils.getAuthorDisplayName(
+                context,
+                item.getAuthor().getFullName(),
+                item.getAuthor().getId(),
+                currentUserId
+        ));
         holder.binding.icLike.setImageDrawable(item.isLike() ?
                 ContextCompat.getDrawable(context, R.drawable.ic_like_select) :
                 ContextCompat.getDrawable(context, R.drawable.ic_like));
         holder.binding.tvTime.setText(DisplayUtils.getTimeAgo(context, item.getCreatedDate()));
+
+        holder.binding.btnMore.setVisibility(isOwnContent(item) ? View.GONE : View.VISIBLE);
 
         holder.binding.icDisLike.setImageDrawable(item.isDislike() ?
                 ContextCompat.getDrawable(context, R.drawable.ic_dislike_select) :
@@ -128,38 +145,47 @@ public class ReviewItemAdapter extends RecyclerView.Adapter<ReviewItemAdapter.Re
             listener.onLike(item, position);
         });
 
-        boolean needDisplayButton = item.getStatus() != null && item.getStatus() == -1;
-        applyBlurText(holder.binding, needDisplayButton && !item.isDisplay());
+        holder.binding.btnMore.setOnClickListener(v ->
+                ReportPopupUtils.showReportPopup(context, v, () -> {
+                    if (listener != null) {
+                        listener.onReport(item, position);
+                    }
+                })
+        );
 
         holder.binding.icDisplay.setVisibility(needDisplayButton ? View.VISIBLE : View.GONE);
+        ToxicTextUtils.updateRevealIcon(item.isDisplay(), holder.binding.icDisplay, R.drawable.ic_eye_hidden, R.drawable.ic_eye);
 
         holder.binding.btnDisplay.setOnClickListener(v -> {
-            if (item.getStatus() == -1) {
+            if (needDisplayButton) {
                 item.setDisplay(!item.isDisplay());
-                applyBlurText(holder.binding, !item.isDisplay());
+                ToxicTextUtils.bindToxicContent(
+                        holder.binding.tvContent,
+                        item.getContent(),
+                        item.getToxicSpans(),
+                        item.getStatus(),
+                        item.isDisplay(),
+                        0
+                );
+                ToxicTextUtils.updateRevealIcon(item.isDisplay(), holder.binding.icDisplay, R.drawable.ic_eye_hidden, R.drawable.ic_eye);
             }
         });
-    }
-
-    private void applyBlurText(ItemReviewBinding binding, boolean blur) {
-        Paint paint = binding.tvContent.getPaint();
-
-        if (blur) {
-            binding.tvContent.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
-            paint.setMaskFilter(new BlurMaskFilter(8f, BlurMaskFilter.Blur.NORMAL));
-            binding.icDisplay.setImageResource(R.drawable.ic_eye_hidden);
-        } else {
-            paint.setMaskFilter(null);
-            binding.icDisplay.setImageResource(R.drawable.ic_eye);
-        }
-
-        binding.tvContent.invalidate();
     }
 
     @Override
     public int getItemCount() {
         return items.size();
     }
+
+    public int findPositionById(long reviewId) {
+        for (int i = 0; i < items.size(); i++) {
+            if (items.get(i).getId() != null && items.get(i).getId() == reviewId) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
     public void setData(List<ReviewResponse> newData) {
         items.clear();
         if (newData != null) {
@@ -236,6 +262,13 @@ public class ReviewItemAdapter extends RecyclerView.Adapter<ReviewItemAdapter.Re
     public void clear() {
         items.clear();
         notifyDataSetChanged();
+    }
+
+    private boolean isOwnContent(ReviewResponse item) {
+        return item.getAuthor() != null
+                && currentUserId != null
+                && currentUserId > 0
+                && item.getAuthor().getId() == currentUserId;
     }
 
     static class ReviewItemViewHolder extends RecyclerView.ViewHolder {

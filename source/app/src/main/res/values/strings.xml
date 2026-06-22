@@ -150,15 +150,15 @@
     <string name="dubbed_audio">Dubbed</string>
     <string name="next_episode">Next episode</string>
     <string name="episodes">Episodes</string>
-    <string name="season">Season</string>
+    <string name="season">Part</string>
     <string name="hour">h</string>
     <string name="minute">m</string>
     <string name="episode_non_up">episode</string>
-    <string name="season_non_up">season</string>
+    <string name="season_non_up">part</string>
     <string name="replay">Replay</string>
     <string name="an_error_occurred">An error occurred</string>
     <string name="skip">Skip</string>
-    <string name="season_list">Season list</string>
+    <string name="season_list">Part list</string>
     <string name="close">Close</string>
     <string name="mgs_otp">We have sent the verification code to your email</string>
     <string name="send">Send</string>
@@ -188,7 +188,7 @@
     <string name="release_year">Release Year:</string>
     <string name="age_rating">Age Rating:</string>
     <string name="episode_if">Episode:</string>
-    <string name="season_if">Season:</string>
+    <string name="season_if">Part:</string>
     <string name="age_rating_p">All ages</string>
     <string name="age_rating_k">Under 13</string>
     <string name="age_rating_t13">13 and above</string>
@@ -209,13 +209,23 @@
     <string name="menu_my_play_list">Play list</string>
     <string name="not_favorite">Not favorite</string>
     <string name="episode_char">E</string>
-    <string name="season_char">S</string>
+    <string name="season_char">P</string>
     <string name="continue_watching">Continue watching</string>
     <string name="watch_next">Watch next</string>
     <string name="remaining">remaining</string>
 
     <string name="comment_here">Comment here ...</string>
     <string name="reply">Reply</string>
+    <string name="report">Report</string>
+    <string name="report_comment_title">Report comment</string>
+    <string name="report_review_title">Report review</string>
+    <string name="report_close">Close</string>
+    <string name="report_submit">Submit report</string>
+    <string name="report_select_reason">Please select a report reason</string>
+    <string name="report_success">Report submitted successfully</string>
+    <string name="delete_comment_confirm">Are you sure you want to delete this comment?</string>
+    <string name="delete_comment_success">Comment deleted successfully</string>
+    <string name="author_you_suffix">(you)</string>
     <string name="comment_non_up">comments</string>
     <string name="comment_non_up_one">comment</string>
     <string name="minutes_ago">minutes ago</string>
@@ -297,6 +307,7 @@
     <string name="setting">Setting</string>
     <string name="auto_skip_intro">Auto skip intro:</string>
     <string name="auto_play_next">Auto play next episode:</string>
+    <string name="block_screen_capture">Block screen recording and screenshots:</string>
     <string name="resolution">Resolution:</string>
     <string name="brightness">Brightness:</string>
     <string name="volume">Volume:</string>
@@ -367,6 +378,7 @@
     <string name="because_you_watched_format">Because you watched </string>
     <string name="because_you_like_format">Because you like </string>
     <string name="recommend_for_you">You might like these movies</string>
+    <string name="recommend_knn_similar_taste">People with similar taste also watch</string>
     <string name="movie_not_ready">"The movie isn't ready yet, please come back later"</string>
 
 </resources>

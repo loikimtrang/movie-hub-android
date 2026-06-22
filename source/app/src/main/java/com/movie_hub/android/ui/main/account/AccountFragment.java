@@ -21,7 +21,7 @@ import com.movie_hub.android.utils.DialogUtils;
 import java.util.Arrays;
 import java.util.List;
 
-import eu.davidea.flexibleadapter.databinding.BR;
+import com.movie_hub.android.BR;
 import timber.log.Timber;
 
 public class AccountFragment extends BaseFragment<FragmentAccountBinding, AccountViewModel> implements AccountMenuAdapter.OnItemClickListener, SystemBarColorProvider {

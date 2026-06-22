@@ -319,6 +319,32 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content" />
 
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/_50sdp"
+                        android:paddingHorizontal="@dimen/_12sdp">
+
+                        <TextView
+                            android:id="@+id/tv_block_screen_capture"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            style="@style/Text_12_Normal"
+                            android:text="@string/block_screen_capture"
+                            android:layout_centerVertical="true" />
+
+                        <androidx.appcompat.widget.SwitchCompat
+                            android:id="@+id/switch_block_screen_capture"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:thumb="@drawable/thumb_custom"
+                            app:track="@drawable/track_custom"
+                            android:switchMinWidth="@dimen/_40sdp"
+                            android:checked="true"
+                            android:layout_alignParentEnd="true"
+                            android:layout_centerVertical="true" />
+
+                    </RelativeLayout>
+
                 </LinearLayout>
             </androidx.core.widget.NestedScrollView>
 

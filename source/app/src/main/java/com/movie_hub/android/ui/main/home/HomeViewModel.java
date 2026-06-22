@@ -293,6 +293,36 @@ public class HomeViewModel extends BaseFragmentViewModel {
         );
     }
 
+    public void getRecommendMovieKnn(MainCallback<CollectionResponse> callback, int page, String title) {
+        compositeDisposable.add(
+                repository.getApiService().getRecommendMovieKnn()
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(
+                                response -> {
+                                    hideLoading();
+                                    if (response.isResult()) {
+                                        RecommendResponse recommendResponse = new RecommendResponse();
+                                        ResponseListObj<MovieResponse> data = response.getData();
+                                        if (data != null && data.getContent() != null && !data.getContent().isEmpty()) {
+                                            recommendResponse.setMovies(data.getContent());
+                                        } else {
+                                            recommendResponse.setMovies(new ArrayList<>());
+                                        }
+                                        callback.doSuccess(recommendResponse.getCollection(title));
+                                    } else {
+                                        callback.doFail();
+                                    }
+                                },
+                                throwable -> {
+                                    hideLoading();
+                                    Timber.e(throwable);
+                                    callback.doError(throwable);
+                                }
+                        )
+        );
+    }
+
     public void getCategoryByWatch(MainCallback<CollectionResponse> callback, String title) {
         compositeDisposable.add(
                 repository.getApiService().getCategoryByWatched()

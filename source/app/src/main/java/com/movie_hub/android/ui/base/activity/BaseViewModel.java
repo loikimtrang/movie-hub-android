@@ -9,12 +9,14 @@ import androidx.lifecycle.ViewModel;
 import com.movie_hub.android.MVVMApplication;
 import com.movie_hub.android.data.Repository;
 import com.movie_hub.android.data.model.api.RequestToMapConverter;
+import com.movie_hub.android.data.model.api.ResponseWrapper;
 import com.movie_hub.android.data.model.api.request.history.ListWatchHistoryRequest;
 import com.movie_hub.android.data.model.api.request.notification.UpdateReadRequest;
 import com.movie_hub.android.data.model.api.request.user.RefreshTokenRequest;
 import com.movie_hub.android.data.model.api.response.history.ListWatchHistoryResponse;
 import com.movie_hub.android.data.model.api.response.movie.MovieResponse;
 import com.movie_hub.android.data.model.api.response.notification.CountUnReadResponse;
+import com.movie_hub.android.data.model.api.response.report.CreateReportRequest;
 import com.movie_hub.android.data.model.other.ToastMessage;
 import com.movie_hub.android.ui.main.MainCallback;
 import com.movie_hub.android.ui.main.movie.detail.MovieDetailActivity;
@@ -97,6 +99,14 @@ public class BaseViewModel extends ViewModel {
     }
     public String getLanguage() {
         return repository.getSharedPreferences().getAppLanguage();
+    }
+
+    public boolean isBlockScreenCaptureEnabled() {
+        return repository.getSharedPreferences().isBlockScreenCaptureEnabled();
+    }
+
+    public void setBlockScreenCaptureEnabled(boolean enabled) {
+        repository.getSharedPreferences().setBlockScreenCaptureEnabled(enabled);
     }
 
     public void refreshToken() {
@@ -195,6 +205,39 @@ public class BaseViewModel extends ViewModel {
 
     public Long getUserId() {
         return repository.getSharedPreferences().getUserId();
+    }
+
+    public void createReport(MainCallback<ResponseWrapper> callback, CreateReportRequest request) {
+        showLoading();
+        compositeDisposable.add(repository.getApiService().createReport(request)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .retryWhen(throwable ->
+                        throwable.flatMap((Function<Throwable, ObservableSource<?>>) throwable1 -> {
+                            if (NetworkUtils.checkNetworkError(throwable1)) {
+                                hideLoading();
+                                return application.showDialogNoInternetAccess();
+                            } else {
+                                return Observable.error(throwable1);
+                            }
+                        })
+                )
+                .subscribe(
+                        response -> {
+                            hideLoading();
+                            if (response.isResult()) {
+                                callback.doSuccess(response);
+                            } else {
+                                callback.doFail();
+                            }
+                        },
+                        throwable -> {
+                            hideLoading();
+                            Timber.e(throwable);
+                            callback.doError(throwable);
+                        }
+                )
+        );
     }
 
     public void userSignOut(MainCallback<Void> callback) {

@@ -293,4 +293,14 @@ public class DisplayUtils {
         }
         return dateStr;
     }
+
+    public static String getAuthorDisplayName(Context context, String fullName, long authorId, Long currentUserId) {
+        if (fullName == null) {
+            return "";
+        }
+        if (currentUserId != null && currentUserId > 0 && authorId == currentUserId) {
+            return fullName + " " + context.getString(R.string.author_you_suffix);
+        }
+        return fullName;
+    }
 }

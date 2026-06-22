@@ -42,6 +42,7 @@ import com.movie_hub.android.data.model.api.response.movie.MovieResponse;
 import com.movie_hub.android.data.model.api.response.notification.CountUnReadResponse;
 import com.movie_hub.android.data.model.onesignal.MessageCommentResponse;
 import com.movie_hub.android.data.model.onesignal.MessageOneSignal;
+import com.movie_hub.android.data.model.onesignal.MessageReviewResponse;
 import com.movie_hub.android.data.model.onesignal.OneSignalCommand;
 import com.movie_hub.android.data.model.other.ToastMessage;
 import com.movie_hub.android.data.mqtt.KittyRealtimeEvent;
@@ -323,9 +324,16 @@ public abstract class BaseActivity<B extends ViewDataBinding, V extends BaseView
     protected void handleNotificationData(MessageOneSignal message) {
         switch (message.getCmd()) {
             case OneSignalCommand.CMD_REPLY_COMMENT:
+            case OneSignalCommand.CMD_TOXIC_COMMENT_LOCKED:
                 MessageCommentResponse messageCommentResponse = GsonUtils.fromJson(message.getData(), MessageCommentResponse.class);
-                if (messageCommentResponse != null) {
+                if (messageCommentResponse != null && messageCommentResponse.getMovieId() != null) {
                     getMovieDetailByNotification(Long.valueOf(messageCommentResponse.getMovieId()), message);
+                }
+                break;
+            case OneSignalCommand.CMD_TOXIC_REVIEW_LOCKED:
+                MessageReviewResponse messageReviewResponse = GsonUtils.fromJson(message.getData(), MessageReviewResponse.class);
+                if (messageReviewResponse != null && messageReviewResponse.getMovieId() != null) {
+                    getMovieDetailByNotification(Long.valueOf(messageReviewResponse.getMovieId()), message);
                 }
                 break;
             default:
