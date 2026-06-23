@@ -2,6 +2,8 @@ package com.movie_hub.android.ui.main.movie.watch;
 
 import android.text.TextUtils;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
@@ -94,6 +96,8 @@ public class WatchMovieViewModel extends BaseViewModel {
      * Public for layout Data Binding ({@code vm.participantPlaybackRestricted}).
      */
     public final MutableLiveData<Boolean> participantPlaybackRestricted = new MutableLiveData<>(false);
+    /** Null when not in a live room; updated by server {@code CMD_UPDATE_PARTICIPANT_COUNT}. */
+    private final MutableLiveData<Integer> liveRoomViewerCount = new MutableLiveData<>();
     public ClientPingModel clientPingModel = new ClientPingModel();
     public Message msgPing = new Message();
     SettingVideoModel settingVideoModel = new SettingVideoModel();
@@ -216,6 +220,25 @@ public class WatchMovieViewModel extends BaseViewModel {
         return participantPlaybackRestricted;
     }
 
+    public LiveData<Integer> getLiveRoomViewerCount() {
+        return liveRoomViewerCount;
+    }
+
+    public void initLiveRoomViewerCount(@Nullable Integer count) {
+        liveRoomViewerCount.setValue(count != null && count > 0 ? count : 1);
+    }
+
+    public void applyServerViewerCount(@NonNull String roomId, int currentViewers) {
+        if (roomDetail == null || roomDetail.getId() == null) return;
+        if (!roomId.equals(String.valueOf(roomDetail.getId()))) return;
+        roomDetail.setParticipantCount(currentViewers);
+        liveRoomViewerCount.setValue(currentViewers);
+    }
+
+    public void clearLiveRoomViewerCount() {
+        liveRoomViewerCount.setValue(null);
+    }
+
     public boolean isParticipantPlaybackRestricted() {
         return Boolean.TRUE.equals(participantPlaybackRestricted.getValue());
     }
@@ -233,6 +256,7 @@ public class WatchMovieViewModel extends BaseViewModel {
         isLiveRoom = false;
         isHost = false;
         roomDetail = null;
+        clearLiveRoomViewerCount();
         setSyncWithHost(false);
         clearChatMessages();
         refreshLiveRoomUiState();

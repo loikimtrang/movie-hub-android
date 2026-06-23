@@ -32,6 +32,23 @@
 
     </androidx.core.widget.NestedScrollView>
 
+    <EditText
+        android:id="@+id/edt_other_reason"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_60sdp"
+        android:layout_marginTop="@dimen/_8sdp"
+        android:background="@drawable/bg_input_review"
+        android:padding="@dimen/_8sdp"
+        android:hint="@string/report_other_reason_hint"
+        android:textColorHint="@color/text_comment"
+        android:textColor="@color/white"
+        android:gravity="top|start"
+        android:inputType="textMultiLine|textCapSentences"
+        android:maxLength="300"
+        android:maxLines="4"
+        android:visibility="gone"
+        style="@style/Text_12_Normal" />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

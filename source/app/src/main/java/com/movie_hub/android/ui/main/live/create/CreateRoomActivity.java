@@ -5,7 +5,6 @@ import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
 import android.view.View;
 import android.widget.Toast;
 
@@ -33,6 +32,7 @@ import com.movie_hub.android.ui.main.live.create.adapter.RoomEpisodeAdapter;
 import com.movie_hub.android.ui.main.movie.detail.dialog.ChooseSeasonBottomSheetDialog;
 import com.movie_hub.android.ui.main.movie.watch.WatchMovieActivity;
 import com.movie_hub.android.utils.GsonUtils;
+import com.movie_hub.android.utils.RoomDialogUtils;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -279,12 +279,12 @@ public class CreateRoomActivity extends BaseActivity<ActivityCreateRoomBinding, 
 
             @Override
             public void doSuccess(RoomResponse response) {
-
+                viewModel.hideLoading();
                 if (!request.isStartNow()) {
-                    new ToastMessage(ToastMessage.TYPE_NORMAL, getString(R.string.create_room_success)).showMessage(CreateRoomActivity.this);
-                    new Handler().postDelayed(() -> {
-                        finish();
-                    }, 1500);
+                    RoomDialogUtils.showRoomCodeDialog(
+                            CreateRoomActivity.this,
+                            response != null ? response.getCode() : null,
+                            CreateRoomActivity.this::finish);
                 } else {
                     viewModel.roomResponse = response;
                     getMovie();

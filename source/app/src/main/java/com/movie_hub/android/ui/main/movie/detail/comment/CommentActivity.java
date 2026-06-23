@@ -56,6 +56,7 @@ import com.movie_hub.android.ui.main.movie.detail.comment.shimmer.EpisodeComment
 import com.movie_hub.android.utils.ClickUtils;
 import com.movie_hub.android.utils.DialogUtils;
 import com.movie_hub.android.utils.ReportDialogUtils;
+import com.movie_hub.android.utils.ReportUtils;
 import com.movie_hub.android.utils.GsonUtils;
 
 import java.util.ArrayList;
@@ -827,9 +828,16 @@ public class CommentActivity extends BaseActivity<ActivityCommentBinding, Commen
             }
 
             @Override
+            public void doErrorForm(ResponseWrapper response) {
+                ReportUtils.showReportFailMessage(
+                        CommentActivity.this,
+                        response,
+                        Constants.USER_REPORT_TYPE_COMMENT
+                );
+            }
+
+            @Override
             public void doFail() {
-                new ToastMessage(ToastMessage.TYPE_WARNING, getString(R.string.an_error_occurred))
-                        .showMessage(CommentActivity.this);
             }
         }, request);
     }

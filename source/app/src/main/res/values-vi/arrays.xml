@@ -13,6 +13,6 @@
         <item>Nội dung lừa đảo hoặc gian lận</item>
         <item>Không liên quan đến nội dung phim</item>
         <item>Vi phạm bản quyền</item>
-        <item>Khác</item>
+        <item>@string/report_reason_other</item>
     </string-array>
 </resources>

@@ -19,5 +19,6 @@ public class Command {
 
     // Be gui
     public static final String CMD_END_ROOM = "CMD_END_ROOM";
+    public static final String CMD_UPDATE_PARTICIPANT_COUNT = "CMD_UPDATE_PARTICIPANT_COUNT";
 
 }

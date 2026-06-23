@@ -13,6 +13,6 @@
         <item>Scam or fraudulent content</item>
         <item>Unrelated to movie content</item>
         <item>Copyright violation</item>
-        <item>Other</item>
+        <item>@string/report_reason_other</item>
     </string-array>
 </resources>

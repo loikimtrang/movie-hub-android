@@ -227,6 +227,8 @@ public class BaseViewModel extends ViewModel {
                             hideLoading();
                             if (response.isResult()) {
                                 callback.doSuccess(response);
+                            } else if (callback instanceof MainCallback) {
+                                ((MainCallback<?>) callback).doErrorForm(response);
                             } else {
                                 callback.doFail();
                             }

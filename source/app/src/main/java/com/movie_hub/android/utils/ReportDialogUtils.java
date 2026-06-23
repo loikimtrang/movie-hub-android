@@ -6,6 +6,7 @@ import android.view.View;
 import android.content.res.ColorStateList;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
@@ -44,15 +45,17 @@ public class ReportDialogUtils {
         TextView tvTitle = dialog.findViewById(R.id.tv_title);
         NestedScrollView scrollReasons = dialog.findViewById(R.id.scroll_reasons);
         RadioGroup radioGroup = dialog.findViewById(R.id.rg_reasons);
+        EditText edtOtherReason = dialog.findViewById(R.id.edt_other_reason);
         tvTitle.setText(title);
 
+        String otherReasonLabel = context.getString(R.string.report_reason_other);
         String[] reasons = context.getResources().getStringArray(R.array.report_reasons);
         int padding = context.getResources().getDimensionPixelSize(R.dimen._8sdp);
-        for (int i = 0; i < reasons.length; i++) {
+        for (String reason : reasons) {
             RadioButton radioButton = new RadioButton(context);
             radioButton.setId(View.generateViewId());
-            radioButton.setText(reasons[i]);
-            radioButton.setTag(reasons[i]);
+            radioButton.setText(reason);
+            radioButton.setTag(reason);
             radioButton.setTextColor(ContextCompat.getColor(context, R.color.text_comment));
             radioButton.setButtonTintList(ColorStateList.valueOf(ContextCompat.getColor(context, R.color.white)));
             radioButton.setPadding(padding, padding, padding, padding);
@@ -63,6 +66,17 @@ public class ReportDialogUtils {
             radioButton.setLayoutParams(params);
             radioGroup.addView(radioButton);
         }
+
+        radioGroup.setOnCheckedChangeListener((group, checkedId) -> {
+            RadioButton selected = dialog.findViewById(checkedId);
+            boolean isOther = selected != null && otherReasonLabel.equals(String.valueOf(selected.getTag()));
+            edtOtherReason.setVisibility(isOther ? View.VISIBLE : View.GONE);
+            if (!isOther) {
+                edtOtherReason.setText("");
+            } else {
+                edtOtherReason.requestFocus();
+            }
+        });
 
         radioGroup.post(() -> limitReasonListHeight(scrollReasons, radioGroup, VISIBLE_REASON_COUNT));
 
@@ -82,6 +96,17 @@ public class ReportDialogUtils {
             String content = selected.getTag() != null
                     ? selected.getTag().toString()
                     : selected.getText().toString();
+
+            if (otherReasonLabel.equals(content)) {
+                content = edtOtherReason.getText().toString().trim();
+                if (content.isEmpty()) {
+                    new ToastMessage(
+                            ToastMessage.TYPE_WARNING,
+                            context.getString(R.string.report_enter_other_reason)
+                    ).showMessage(context);
+                    return;
+                }
+            }
 
             dialog.dismiss();
             if (listener != null) {

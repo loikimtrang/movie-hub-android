@@ -41,6 +41,7 @@ import com.movie_hub.android.ui.main.movie.detail.review.dialog.ReviewDialogFrag
 import com.movie_hub.android.utils.DialogUtils;
 import com.movie_hub.android.utils.GsonUtils;
 import com.movie_hub.android.utils.ReportDialogUtils;
+import com.movie_hub.android.utils.ReportUtils;
 
 import java.util.List;
 
@@ -534,9 +535,16 @@ public class ReviewActivity extends BaseActivity<ActivityReviewBinding, ReviewVi
             }
 
             @Override
+            public void doErrorForm(ResponseWrapper response) {
+                ReportUtils.showReportFailMessage(
+                        ReviewActivity.this,
+                        response,
+                        Constants.USER_REPORT_TYPE_REVIEW
+                );
+            }
+
+            @Override
             public void doFail() {
-                new ToastMessage(ToastMessage.TYPE_WARNING, getString(R.string.an_error_occurred))
-                        .showMessage(ReviewActivity.this);
             }
         }, request);
     }

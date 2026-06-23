@@ -75,6 +75,7 @@ public class Constants {
     public static final int TYPE_RATING_4 = 4;
     public static final int TYPE_RATING_5 = 5;
     public static String CODE_ACCOUNT_LOCK = "ERROR-ACCOUNT-ERROR-0007";
+    public static String CODE_USER_REPORT_ALREADY_EXISTED = "ERROR-USER-REPORT-0001";
 
     public static final Integer ROOM_KIND_PRIVATE = 0;
     public static final Integer ROOM_KIND_PUBLIC = 1;

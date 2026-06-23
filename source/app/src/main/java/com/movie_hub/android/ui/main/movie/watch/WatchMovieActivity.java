@@ -94,6 +94,7 @@ import com.movie_hub.android.data.model.mqtt.ClientPingModel;
 import com.movie_hub.android.data.model.mqtt.EndRoomModel;
 import com.movie_hub.android.data.model.mqtt.ParticipantJoinModel;
 import com.movie_hub.android.data.model.mqtt.RoomStateModel;
+import com.movie_hub.android.data.model.mqtt.UpdateParticipantCountModel;
 import com.movie_hub.android.data.mqtt.Command;
 import com.movie_hub.android.data.mqtt.Message;
 import com.movie_hub.android.databinding.ActivityWatchMovieBinding;
@@ -116,6 +117,7 @@ import com.movie_hub.android.ui.main.movie.watch.setting.SettingVideoModel;
 import com.movie_hub.android.ui.main.movie.watch.setting.VideoQuality;
 import com.movie_hub.android.utils.DeviceUtils;
 import com.movie_hub.android.utils.DialogUtils;
+import com.movie_hub.android.utils.RoomDialogUtils;
 import com.movie_hub.android.utils.GsonUtils;
 import com.movie_hub.android.utils.LiveDataUtils;
 import com.movie_hub.android.utils.NetworkUtils;
@@ -257,6 +259,8 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
                 String roomJson = getIntent().getStringExtra(ROOM);
                 viewModel.roomDetail = GsonUtils.fromJson(roomJson, RoomResponse.class);
                 viewModel.refreshLiveRoomUiState();
+                viewModel.initLiveRoomViewerCount(
+                        viewModel.roomDetail != null ? viewModel.roomDetail.getParticipantCount() : null);
                 setupSyncWithHostToggle();
 
                 if (viewModel.isHost) {
@@ -264,6 +268,7 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
                 }
                 getUserProfileForLive();
                 viewBinding.btnOpenChat.setVisibility(View.VISIBLE);
+                viewBinding.btnRoomInfo.setVisibility(View.VISIBLE);
                 setupChatUi();
                 setupImeAwareChatInput();
             }
@@ -2403,6 +2408,9 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
             case R.id.btn_create_comment:
                 sendRoomChatMessage();
                 break;
+            case R.id.btn_room_info:
+                showRoomInfoDialog();
+                break;
             default:
                 break;
         }
@@ -2761,6 +2769,9 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
             case Command.CMD_END_ROOM:
                 endRoom(message);
                 break;
+            case Command.CMD_UPDATE_PARTICIPANT_COUNT:
+                handleParticipantCountUpdate(message);
+                break;
             case Command.CMD_CREATE_CHAT:
                 handleIncomingRoomChatMessage(message);
                 break;
@@ -2782,6 +2793,23 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
         }
     }
 
+    private void handleParticipantCountUpdate(Message message) {
+        if (!viewModel.isLiveRoom || message.getData() == null) return;
+        try {
+            UpdateParticipantCountModel payload = GsonUtils.fromJson(
+                    GsonUtils.toJson(message.getData()),
+                    UpdateParticipantCountModel.class);
+            if (payload == null || payload.getRoomId() == null || payload.getCurrentViewers() == null) {
+                return;
+            }
+            runOnUiThread(() -> viewModel.applyServerViewerCount(
+                    payload.getRoomId(),
+                    payload.getCurrentViewers()));
+        } catch (Exception e) {
+            Timber.e(e, "MQTT participant count parse");
+        }
+    }
+
     private void sendRoomChatMessage() {
         if (!viewModel.isLiveRoom || viewModel.roomDetail == null) return;
         String text = viewBinding.edtComment.getText() != null
@@ -2793,6 +2821,13 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
         if (topic == null) return;
         sendMqttMessage(viewModel.buildRoomChatMqttMessage(payload), topic);
         viewBinding.edtComment.setText("");
+    }
+
+    private void showRoomInfoDialog() {
+        if (!viewModel.isLiveRoom || viewModel.roomDetail == null) return;
+        String roomName = viewModel.roomDetail.getName();
+        String roomCode = viewModel.roomDetail.getCode();
+        RoomDialogUtils.showRoomInfoDialog(this, roomName, roomCode);
     }
 
     private void hostBroadcastSyncData(Message message) {
@@ -2978,6 +3013,7 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
         viewModel.setChatOpen(false);
         viewBinding.layoutChat.setVisibility(View.GONE);
         viewBinding.btnOpenChat.setVisibility(View.GONE);
+        viewBinding.btnRoomInfo.setVisibility(View.GONE);
         applyParticipantSyncRestrictedUi(false);
         viewBinding.executePendingBindings();
         restorePlaybackChromeAfterLeavingLiveRoom();

@@ -207,7 +207,12 @@
     <string name="report_close">Đóng</string>
     <string name="report_submit">Gửi báo cáo</string>
     <string name="report_select_reason">Vui lòng chọn lý do báo cáo</string>
+    <string name="report_other_reason_hint">Nhập lý do báo cáo</string>
+    <string name="report_enter_other_reason">Vui lòng nhập lý do báo cáo</string>
+    <string name="report_reason_other">Khác</string>
     <string name="report_success">Gửi báo cáo thành công</string>
+    <string name="report_comment_already">Bạn đã báo cáo bình luận này trước đây</string>
+    <string name="report_review_already">Bạn đã báo cáo đánh giá này trước đây</string>
     <string name="delete_comment_confirm">Bạn có chắc chắn muốn xóa bình luận này?</string>
     <string name="delete_comment_success">Xóa bình luận thành công</string>
     <string name="author_you_suffix">(bạn)</string>
@@ -352,6 +357,14 @@
     <string name="msg_room_ended">Phòng chiếu phim đã kết thúc</string>
     <string name="msg_waiting_for_host">Chủ phòng chưa tham gia, vui lòng đợi</string>
     <string name="msg_premier_ready_ask">Đã đến thời gian công chiếu, bạn có muốn bắt đầu không?</string>
+
+    <string name="room_code_title">Mã phòng</string>
+    <string name="room_info_title">Thông tin phòng</string>
+    <string name="room_info">Thông tin phòng</string>
+    <string name="room_name_label">Tên phòng:</string>
+    <string name="room_code_label">Mã phòng:</string>
+    <string name="copy_room_code">Sao chép mã phòng</string>
+    <string name="room_code_copied">Đã sao chép mã phòng</string>
 
     <string name="title_information">Thông tin</string>
     <string name="action_start">Bắt đầu</string>
