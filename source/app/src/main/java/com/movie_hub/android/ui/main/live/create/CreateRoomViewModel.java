@@ -27,6 +27,35 @@ public class CreateRoomViewModel extends BaseViewModel {
     public CreateRoomViewModel(Repository repository, MVVMApplication application) {
         super(repository, application);
     }
+    public void checkRoom(MainCallback<RoomResponse> callback) {
+        compositeDisposable.add(repository.getApiService().checkRoom()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .retryWhen(throwable ->
+                        throwable.flatMap((Function<Throwable, ObservableSource<?>>) throwable1 -> {
+                            if (NetworkUtils.checkNetworkError(throwable1)) {
+                                hideLoading();
+                                return application.showDialogNoInternetAccess();
+                            } else {
+                                return Observable.error(throwable1);
+                            }
+                        })
+                )
+                .subscribe(
+                        response -> {
+                            if (response.isResult()) {
+                                callback.doSuccess(response.getData());
+                            } else {
+                                callback.doFail();
+                            }
+                        }, throwable -> {
+                            Timber.e(throwable);
+                            callback.doError(throwable);
+                        }
+                )
+        );
+    }
+
     public void createRoom(MainCallback<RoomResponse> callback, CreateRoomRequest request) {
         compositeDisposable.add(repository.getApiService().createRoom(request)
                 .subscribeOn(Schedulers.io())

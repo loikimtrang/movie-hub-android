@@ -331,6 +331,7 @@
     <string name="watch_together">Room</string>
     <string name="episode_room">3. The episode premiered: </string>
     <string name="error_input_room_name">Please enter a room name</string>
+    <string name="error_room_already_running">You already have a room in progress. Please end it before creating a new one.</string>
     <string name="error_select_episode">Please select an episode to premiere</string>
     <string name="create_room_success">Room created successfully</string>
     <string name="error_time_past">Please select a time later than the current time.</string>
@@ -340,6 +341,9 @@
     <string name="my_room">My room</string>
     <string name="premiered_on">Premiered on:</string>
     <string name="empty_room">List room empty</string>
+    <string name="hint_enter_room_code">Enter room code</string>
+    <string name="empty_room_search">Room not found</string>
+    <string name="error_input_room_code">Please enter a room code</string>
     <string name="nav_community">Community</string>
     <string name="nav_movies">Movies</string>
     <string name="nav_schedule_premiere">Schedule premiere</string>

@@ -269,6 +269,41 @@ public class CreateRoomActivity extends BaseActivity<ActivityCreateRoomBinding, 
             request.setStartTime(apiSdf.format(selectedCalendar.getTime()));
         }
 
+        if (viewModel.isStartNow) {
+            viewModel.showLoading();
+            viewModel.checkRoom(new MainCallback<RoomResponse>() {
+                @Override
+                public void doError(Throwable error) {
+                    viewModel.hideLoading();
+                    new ToastMessage(ToastMessage.TYPE_ERROR, getString(R.string.an_error_occurred)).showMessage(CreateRoomActivity.this);
+                }
+
+                @Override
+                public void doSuccess(RoomResponse response) {
+                    viewModel.hideLoading();
+                    if (response != null) {
+                        new ToastMessage(ToastMessage.TYPE_WARNING, getString(R.string.error_room_already_running)).showMessage(CreateRoomActivity.this);
+                        return;
+                    }
+                    submitCreateRoom(request);
+                }
+
+                @Override
+                public void doSuccess() {
+                }
+
+                @Override
+                public void doFail() {
+                    viewModel.hideLoading();
+                    new ToastMessage(ToastMessage.TYPE_ERROR, getString(R.string.an_error_occurred)).showMessage(CreateRoomActivity.this);
+                }
+            });
+        } else {
+            submitCreateRoom(request);
+        }
+    }
+
+    private void submitCreateRoom(CreateRoomRequest request) {
         viewModel.showLoading();
         viewModel.createRoom(new MainCallback<RoomResponse>() {
             @Override
@@ -298,6 +333,7 @@ public class CreateRoomActivity extends BaseActivity<ActivityCreateRoomBinding, 
 
             @Override
             public void doFail() {
+                viewModel.hideLoading();
                 new ToastMessage(ToastMessage.TYPE_ERROR, getString(R.string.an_error_occurred)).showMessage(CreateRoomActivity.this);
             }
         }, request);

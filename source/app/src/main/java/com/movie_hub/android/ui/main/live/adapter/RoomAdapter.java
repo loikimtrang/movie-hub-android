@@ -17,6 +17,8 @@ import com.movie_hub.android.data.model.api.response.room.RoomResponse;
 import com.movie_hub.android.databinding.ItemRoomBinding;
 import com.movie_hub.android.utils.DisplayUtils;
 
+import android.text.TextUtils;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -32,6 +34,8 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.RoomViewHolder
         void onRoomClick(RoomResponse model, int position);
 
         void onRoomDelete(RoomResponse model, int position);
+
+        void onRoomCopyCode(RoomResponse model);
     }
 
     public void setMyRoomListMode(boolean myRoomListMode) {
@@ -59,8 +63,22 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.RoomViewHolder
         SwipeLayout swipeLayout = holder.binding.swipeLayout;
         swipeLayout.close(false);
 
+        boolean canSwipeCopy = !TextUtils.isEmpty(item.getCode());
         boolean canSwipeDelete = myRoomListMode && (Objects.equals(item.getState(), Constants.STATE_END) || Objects.equals(item.getState(), Constants.STATE_LOCKED));
-        swipeLayout.setSwipeEnabled(canSwipeDelete);
+        swipeLayout.setSwipeEnabled(canSwipeCopy || canSwipeDelete);
+
+        holder.binding.layoutCopy.setVisibility(canSwipeCopy ? View.VISIBLE : View.GONE);
+        holder.binding.layoutCopy.setOnClickListener(null);
+        if (canSwipeCopy) {
+            holder.binding.layoutCopy.setOnClickListener(v -> {
+                int pos = holder.getBindingAdapterPosition();
+                if (pos == RecyclerView.NO_POSITION || listener == null) return;
+                swipeLayout.close(true);
+                listener.onRoomCopyCode(items.get(pos));
+            });
+        }
+
+        holder.binding.layoutDelete.setVisibility(canSwipeDelete ? View.VISIBLE : View.GONE);
         holder.binding.layoutDelete.setOnClickListener(null);
         if (canSwipeDelete) {
             holder.binding.layoutDelete.setOnClickListener(v -> {

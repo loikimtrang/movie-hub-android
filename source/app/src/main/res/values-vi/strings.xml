@@ -331,6 +331,7 @@
     <string name="watch_together">Xem chung</string>
     <string name="episode_room">3. Tập phim khởi chiếu:</string>
     <string name="error_input_room_name">Vui lòng nhập tên phòng</string>
+    <string name="error_room_already_running">Bạn đang có một phòng đang diễn ra, không thể tạo phòng mới.</string>
     <string name="error_select_episode">Vui lòng chọn tập phim công chiếu</string>
     <string name="create_room_success">Tạo phòng thành công</string>
     <string name="error_time_past">Vui lòng chọn thời gian lớn hơn thời gian hiện tại</string>
@@ -340,6 +341,9 @@
     <string name="my_room">Phòng của tôi</string>
     <string name="premiered_on">Công chiếu:</string>
     <string name="empty_room">Danh sách phòng trống</string>
+    <string name="hint_enter_room_code">Nhập mã phòng</string>
+    <string name="empty_room_search">Không tìm thấy phòng</string>
+    <string name="error_input_room_code">Vui lòng nhập mã phòng</string>
     <string name="nav_community">Cộng đồng</string>
     <string name="nav_movies">Phim</string>
     <string name="nav_schedule_premiere">Lên lịch công chiếu</string>

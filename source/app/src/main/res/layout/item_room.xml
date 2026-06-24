@@ -14,6 +14,19 @@
         android:orientation="horizontal">
 
         <FrameLayout
+            android:id="@+id/layout_copy"
+            android:layout_width="@dimen/_80sdp"
+            android:layout_height="match_parent"
+            android:background="#3B82F6">
+            <ImageView
+                android:layout_width="@dimen/_24sdp"
+                android:layout_height="@dimen/_24sdp"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_coppy"
+                app:tint="@android:color/white" />
+        </FrameLayout>
+
+        <FrameLayout
             android:id="@+id/layout_delete"
             android:layout_width="@dimen/_80sdp"
             android:layout_height="match_parent"

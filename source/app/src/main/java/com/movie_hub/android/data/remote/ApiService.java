@@ -276,4 +276,7 @@ public interface ApiService {
 
     @POST("v1/user-report/create")
     Observable<ResponseWrapper<Void>> createReport(@Body CreateReportRequest request);
+
+    @GET("v1/room/get-by-code/{code}")
+    Observable<ResponseWrapper<RoomResponse>> getRoomByCode(@Path("code") String code);
 }

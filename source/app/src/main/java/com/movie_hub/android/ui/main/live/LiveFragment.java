@@ -22,16 +22,27 @@ import com.movie_hub.android.ui.main.live.adapter.RoomFilterTypeAdapter;
 import com.movie_hub.android.ui.main.live.adapter.RoomShimmerAdapter;
 import com.movie_hub.android.utils.DialogUtils;
 import com.movie_hub.android.utils.DisplayUtils;
+import com.movie_hub.android.utils.RoomDialogUtils;
 
+import android.annotation.SuppressLint;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
+import android.content.Context;
 import android.widget.ImageView;
 import android.widget.PopupWindow;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -57,6 +68,11 @@ public class LiveFragment extends BaseFragment<FragmentLiveBinding, LiveViewMode
 
     // null means "All states"
     private Integer currentStateFilter = null;
+    private boolean isSearchMode = false;
+    private boolean isSearchLoading = false;
+    private boolean isClearIconVisible = false;
+    private Drawable searchIcon;
+    private Drawable clearIcon;
 
     @Override
     protected void performDataBinding() {
@@ -66,6 +82,7 @@ public class LiveFragment extends BaseFragment<FragmentLiveBinding, LiveViewMode
         initFilter();
         initRoomList();
         initSwipeRefresh();
+        initSearch();
         binding.option.setOnClickListener(this::showFilterMenu);
 
         getRooms(true);
@@ -141,7 +158,7 @@ public class LiveFragment extends BaseFragment<FragmentLiveBinding, LiveViewMode
             @Override
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
-                if (dy <= 0) return;
+                if (dy <= 0 || isSearchMode) return;
 
                 LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
                 if (layoutManager == null || isLoading || isLastPage) return;
@@ -159,7 +176,174 @@ public class LiveFragment extends BaseFragment<FragmentLiveBinding, LiveViewMode
     }
 
     private void initSwipeRefresh() {
-        binding.swipeRefreshLayout.setOnRefreshListener(() -> getRooms(true));
+        binding.swipeRefreshLayout.setOnRefreshListener(() -> {
+            if (isSearchMode) {
+                searchRoomByCode();
+            } else {
+                getRooms(true);
+            }
+        });
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    private void initSearch() {
+        prepareSearchIcons();
+        binding.edtSearchRoom.setCompoundDrawables(searchIcon, null, null, null);
+
+        binding.btnSearch.setOnClickListener(v -> enterSearchMode());
+
+        binding.edtSearchRoom.setOnEditorActionListener((v, actionId, event) -> {
+            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                searchRoomByCode();
+                return true;
+            }
+            return false;
+        });
+
+        binding.edtSearchRoom.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if (!isSearchMode) return;
+                if (!isClearIconVisible) {
+                    binding.edtSearchRoom.setCompoundDrawables(searchIcon, null, clearIcon, null);
+                    isClearIconVisible = true;
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+            }
+        });
+
+        binding.edtSearchRoom.setOnTouchListener((v, event) -> {
+            if (event.getAction() == MotionEvent.ACTION_UP && isClearIconVisible) {
+                Drawable endDrawable = binding.edtSearchRoom.getCompoundDrawables()[2];
+                if (endDrawable != null) {
+                    int drawableWidth = endDrawable.getBounds().width();
+                    int touchAreaStart = binding.edtSearchRoom.getWidth()
+                            - binding.edtSearchRoom.getPaddingEnd() - drawableWidth;
+                    if (event.getX() >= touchAreaStart) {
+                        if (!binding.edtSearchRoom.getText().toString().trim().isEmpty()) {
+                            binding.edtSearchRoom.setText("");
+                        } else {
+                            exitSearchMode();
+                        }
+                        return true;
+                    }
+                }
+            }
+            return false;
+        });
+    }
+
+    private void prepareSearchIcons() {
+        searchIcon = ContextCompat.getDrawable(requireContext(), R.drawable.ic_search_bar);
+        clearIcon = ContextCompat.getDrawable(requireContext(), R.drawable.ic_clear);
+
+        int sizeInPx = (int) TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP, 20, requireContext().getResources().getDisplayMetrics());
+
+        if (searchIcon != null) searchIcon.setBounds(0, 0, sizeInPx, sizeInPx);
+        if (clearIcon != null) clearIcon.setBounds(0, 0, sizeInPx, sizeInPx);
+    }
+
+    private void enterSearchMode() {
+        if (isSearchMode) return;
+
+        isSearchMode = true;
+        binding.layoutHeader.setVisibility(View.GONE);
+        binding.layoutSearch.setVisibility(View.VISIBLE);
+        binding.rvType.setVisibility(View.GONE);
+        binding.edtSearchRoom.setText("");
+        binding.edtSearchRoom.setCompoundDrawables(searchIcon, null, clearIcon, null);
+        isClearIconVisible = true;
+        roomAdapter.setData(new ArrayList<>());
+        binding.layoutEmpty.setVisibility(View.GONE);
+        isLastPage = true;
+        binding.edtSearchRoom.requestFocus();
+        InputMethodManager imm = (InputMethodManager) requireContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+        if (imm != null) {
+            imm.showSoftInput(binding.edtSearchRoom, InputMethodManager.SHOW_IMPLICIT);
+        }
+    }
+
+    private void exitSearchMode() {
+        if (!isSearchMode) return;
+
+        isSearchMode = false;
+        isSearchLoading = false;
+        isClearIconVisible = false;
+        binding.layoutSearch.setVisibility(View.GONE);
+        binding.layoutHeader.setVisibility(View.VISIBLE);
+        binding.rvType.setVisibility(View.VISIBLE);
+        binding.edtSearchRoom.setText("");
+        binding.edtSearchRoom.setCompoundDrawables(searchIcon, null, null, null);
+        binding.tvEmpty.setText(getString(R.string.empty_room));
+        ((MainActivity) requireActivity()).hideKeyboard();
+        resetPaging();
+        getRooms(true);
+    }
+
+    private void searchRoomByCode() {
+        String code = binding.edtSearchRoom.getText().toString().trim();
+        if (code.isEmpty()) {
+            new ToastMessage(ToastMessage.TYPE_WARNING, getString(R.string.error_input_room_code)).showMessage(requireContext());
+            binding.swipeRefreshLayout.setRefreshing(false);
+            return;
+        }
+        if (isSearchLoading) return;
+
+        isSearchLoading = true;
+        ((MainActivity) requireActivity()).hideKeyboard();
+        if (!binding.swipeRefreshLayout.isRefreshing()) {
+            showShimmerLoading();
+        }
+
+        viewModel.getRoomByCode(new MainCallback<RoomResponse>() {
+            @Override
+            public void doSuccess(RoomResponse response) {
+                isSearchLoading = false;
+                finishLoading(true);
+                roomAdapter.setMyRoomListMode(false);
+                if (response != null) {
+                    List<RoomResponse> data = new ArrayList<>();
+                    data.add(response);
+                    roomAdapter.setData(data);
+                    binding.layoutEmpty.setVisibility(View.GONE);
+                } else {
+                    roomAdapter.setData(new ArrayList<>());
+                    binding.tvEmpty.setText(getString(R.string.empty_room_search));
+                    binding.layoutEmpty.setVisibility(View.VISIBLE);
+                }
+            }
+
+            @Override
+            public void doError(Throwable error) {
+                isSearchLoading = false;
+                finishLoading(true);
+                roomAdapter.setData(new ArrayList<>());
+                binding.tvEmpty.setText(getString(R.string.empty_room_search));
+                binding.layoutEmpty.setVisibility(View.VISIBLE);
+                new ToastMessage(ToastMessage.TYPE_ERROR, getString(R.string.an_error_occurred)).showMessage(requireContext());
+            }
+
+            @Override
+            public void doSuccess() {
+            }
+
+            @Override
+            public void doFail() {
+                isSearchLoading = false;
+                finishLoading(true);
+                roomAdapter.setData(new ArrayList<>());
+                binding.tvEmpty.setText(getString(R.string.empty_room_search));
+                binding.layoutEmpty.setVisibility(View.VISIBLE);
+            }
+        }, code);
     }
 
     private void resetPaging() {
@@ -186,6 +370,7 @@ public class LiveFragment extends BaseFragment<FragmentLiveBinding, LiveViewMode
     }
 
     public void getRooms(boolean isRefresh) {
+        if (isSearchMode) return;
         if (!viewModel.isLogin() && currentFilter == FILTER_MY_ROOM) {
             ((MainActivity) requireActivity()).showLoginRequiredDialog();
             return;
@@ -216,6 +401,7 @@ public class LiveFragment extends BaseFragment<FragmentLiveBinding, LiveViewMode
 
                 if (isRefresh) {
                     if (data == null || data.isEmpty()) {
+                        binding.tvEmpty.setText(getString(R.string.empty_room));
                         binding.layoutEmpty.setVisibility(View.VISIBLE);
                         roomAdapter.setData(new ArrayList<>());
                     } else {
@@ -355,7 +541,15 @@ public class LiveFragment extends BaseFragment<FragmentLiveBinding, LiveViewMode
         }, item.getId());
     }
 
+    @Override
+    public void onRoomCopyCode(RoomResponse model) {
+        if (model == null) return;
+        RoomDialogUtils.showRoomCodeDialog(requireContext(), model.getCode(), null);
+    }
+
     private void updateEmptyState() {
+        if (isSearchMode) return;
+        binding.tvEmpty.setText(getString(R.string.empty_room));
         binding.layoutEmpty.setVisibility(roomAdapter.getItemCount() == 0 ? View.VISIBLE : View.GONE);
     }
 
