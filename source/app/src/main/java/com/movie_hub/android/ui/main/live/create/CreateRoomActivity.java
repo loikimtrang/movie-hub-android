@@ -5,11 +5,17 @@ import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.text.Editable;
+import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.view.View;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
@@ -17,17 +23,21 @@ import com.movie_hub.android.BR;
 import com.movie_hub.android.MVVMApplication;
 import com.movie_hub.android.R;
 import com.movie_hub.android.constant.Constants;
+import com.movie_hub.android.data.model.api.ResponseListObj;
 import com.movie_hub.android.data.model.api.request.room.CreateRoomRequest;
 import com.movie_hub.android.data.model.api.response.MovieItem.MovieItemResponse;
 import com.movie_hub.android.data.model.api.response.movie.MovieResponse;
 import com.movie_hub.android.data.model.api.response.room.RoomResponse;
 import com.movie_hub.android.data.model.api.response.season.SeasonResponse;
+import com.movie_hub.android.data.model.api.response.user.UserResponse;
 import com.movie_hub.android.data.model.other.ToastMessage;
 import com.movie_hub.android.databinding.ActivityCreateRoomBinding;
+import com.movie_hub.android.databinding.ItemRoomMemberChipBinding;
 import com.movie_hub.android.di.component.ActivityComponent;
 import com.movie_hub.android.ui.base.activity.BaseActivity;
 import com.movie_hub.android.ui.base.activity.SystemBarColorProvider;
 import com.movie_hub.android.ui.main.MainCallback;
+import com.movie_hub.android.ui.main.live.create.adapter.AccountAutoCompleteAdapter;
 import com.movie_hub.android.ui.main.live.create.adapter.RoomEpisodeAdapter;
 import com.movie_hub.android.ui.main.movie.detail.dialog.ChooseSeasonBottomSheetDialog;
 import com.movie_hub.android.ui.main.movie.watch.WatchMovieActivity;
@@ -71,8 +81,15 @@ public class CreateRoomActivity extends BaseActivity<ActivityCreateRoomBinding, 
     boolean[] isAutoStart = {false};
     private int currentSeasonIndex = 0;
     Calendar selectedCalendar = Calendar.getInstance();
+    private static final long MEMBER_SEARCH_DELAY = 500L;
 
     RoomEpisodeAdapter roomEpisodeAdapter;
+    private AccountAutoCompleteAdapter accountAutoCompleteAdapter;
+    private final List<UserResponse> selectedMembers = new ArrayList<>();
+    private final Handler memberSearchHandler = new Handler(Looper.getMainLooper());
+    private Runnable memberSearchRunnable;
+    private int memberSearchRequestId = 0;
+    private boolean isCreatingRoom = false;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -146,9 +163,166 @@ public class CreateRoomActivity extends BaseActivity<ActivityCreateRoomBinding, 
         viewBinding.edtCalender.setFocusable(false);
         viewBinding.edtCalender.setOnClickListener(v -> showDateTimePicker());
 
+        initPrivateRoom();
+
         viewBinding.btnCreate.setOnClickListener(v -> {
             onClickCreateRoom();
         });
+    }
+
+    private void initPrivateRoom() {
+        accountAutoCompleteAdapter = new AccountAutoCompleteAdapter(this, this::addSelectedMember);
+        viewBinding.rvAccountSuggestions.setLayoutManager(new LinearLayoutManager(this));
+        viewBinding.rvAccountSuggestions.setAdapter(accountAutoCompleteAdapter);
+
+        viewBinding.switchPrivateRoom.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            viewModel.isPrivateRoom = isChecked;
+            viewBinding.layoutPrivateMembers.setVisibility(isChecked ? View.VISIBLE : View.GONE);
+            if (!isChecked) {
+                clearPrivateRoomState();
+            }
+        });
+
+        viewBinding.edtMemberSearch.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                memberSearchHandler.removeCallbacks(memberSearchRunnable);
+                String keyword = s.toString().trim();
+                if (keyword.isEmpty()) {
+                    hideMemberSuggestions();
+                    return;
+                }
+                memberSearchRunnable = () -> searchMembers(keyword);
+                memberSearchHandler.postDelayed(memberSearchRunnable, MEMBER_SEARCH_DELAY);
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+            }
+        });
+    }
+
+    private void searchMembers(String keyword) {
+        final int requestId = ++memberSearchRequestId;
+        viewModel.searchAccounts(new MainCallback<ResponseListObj<UserResponse>>() {
+            @Override
+            public void doSuccess(ResponseListObj<UserResponse> response) {
+                if (requestId != memberSearchRequestId) return;
+                List<UserResponse> results = filterSearchResults(response != null ? response.getContent() : null);
+                accountAutoCompleteAdapter.setData(results);
+                viewBinding.cardSuggestions.setVisibility(results.isEmpty() ? View.GONE : View.VISIBLE);
+            }
+
+            @Override
+            public void doError(Throwable error) {
+                if (requestId != memberSearchRequestId) return;
+                hideMemberSuggestions();
+            }
+
+            @Override
+            public void doSuccess() {
+            }
+
+            @Override
+            public void doFail() {
+                if (requestId != memberSearchRequestId) return;
+                hideMemberSuggestions();
+            }
+        }, keyword);
+    }
+
+    private List<UserResponse> filterSearchResults(List<UserResponse> source) {
+        List<UserResponse> results = new ArrayList<>();
+        if (source == null) return results;
+
+        for (UserResponse user : source) {
+            if (user == null) continue;
+            if (isMemberSelected(user.getId())) continue;
+            results.add(user);
+        }
+        return results;
+    }
+
+    private boolean isMemberSelected(long userId) {
+        for (UserResponse member : selectedMembers) {
+            if (member.getId() == userId) return true;
+        }
+        return false;
+    }
+
+    private void addSelectedMember(UserResponse user) {
+        if (user == null || isMemberSelected(user.getId())) return;
+
+        Long currentUserId = viewModel.getUserId();
+        if (currentUserId != null && user.getId() == currentUserId) return;
+
+        selectedMembers.add(user);
+        renderSelectedMemberChips();
+        viewBinding.edtMemberSearch.setText("");
+        hideMemberSuggestions();
+        hideKeyboard();
+    }
+
+    private void removeSelectedMember(UserResponse user) {
+        if (user == null) return;
+        for (int i = 0; i < selectedMembers.size(); i++) {
+            if (selectedMembers.get(i).getId() == user.getId()) {
+                selectedMembers.remove(i);
+                break;
+            }
+        }
+        renderSelectedMemberChips();
+    }
+
+    private void renderSelectedMemberChips() {
+        viewBinding.flexSelectedMembers.removeAllViews();
+        for (UserResponse member : selectedMembers) {
+            ItemRoomMemberChipBinding chipBinding = ItemRoomMemberChipBinding.inflate(
+                    getLayoutInflater(), viewBinding.flexSelectedMembers, false);
+            chipBinding.tvName.setText(RoomMemberUiUtils.getPrimaryName(member));
+
+            Glide.with(this)
+                    .load(member.getAvatarPath() != null && !member.getAvatarPath().isEmpty()
+                            ? Constants.MEDIA_URL + member.getAvatarPath()
+                            : null)
+                    .placeholder(R.drawable.logo)
+                    .error(R.drawable.logo)
+                    .into(chipBinding.imgAvatar);
+
+            chipBinding.btnRemove.setOnClickListener(v -> removeSelectedMember(member));
+            viewBinding.flexSelectedMembers.addView(chipBinding.getRoot());
+        }
+        updateSelectedMembersVisibility();
+    }
+
+    private void updateSelectedMembersVisibility() {
+        boolean hasMembers = !selectedMembers.isEmpty();
+        viewBinding.tvSelectedMembersLabel.setVisibility(hasMembers ? View.VISIBLE : View.GONE);
+    }
+
+    private void hideMemberSuggestions() {
+        accountAutoCompleteAdapter.setData(new ArrayList<>());
+        viewBinding.cardSuggestions.setVisibility(View.GONE);
+    }
+
+    private void clearPrivateRoomState() {
+        memberSearchHandler.removeCallbacks(memberSearchRunnable);
+        memberSearchRequestId++;
+        selectedMembers.clear();
+        renderSelectedMemberChips();
+        viewBinding.edtMemberSearch.setText("");
+        hideMemberSuggestions();
+        updateSelectedMembersVisibility();
+    }
+
+    @Override
+    protected void onDestroy() {
+        memberSearchHandler.removeCallbacks(memberSearchRunnable);
+        super.onDestroy();
     }
     private void showDateTimePicker() {
         final Calendar now = Calendar.getInstance();
@@ -235,6 +409,8 @@ public class CreateRoomActivity extends BaseActivity<ActivityCreateRoomBinding, 
     }
 
     private void onClickCreateRoom() {
+        if (isCreatingRoom) return;
+
         String roomName = viewBinding.tvNameRoom.getText().toString().trim();
         if (roomName.isEmpty()) {
             new ToastMessage(ToastMessage.TYPE_WARNING, getString(R.string.error_input_room_name)).showMessage(this);
@@ -254,6 +430,11 @@ public class CreateRoomActivity extends BaseActivity<ActivityCreateRoomBinding, 
             return;
         }
 
+        if (viewModel.isPrivateRoom && selectedMembers.isEmpty()) {
+            new ToastMessage(ToastMessage.TYPE_WARNING, getString(R.string.error_select_private_members)).showMessage(this);
+            return;
+        }
+
         CreateRoomRequest request = new CreateRoomRequest();
         request.setName(roomName);
         request.setMovieItemId(viewModel.currentEpisodeSelect != null ?
@@ -261,7 +442,16 @@ public class CreateRoomActivity extends BaseActivity<ActivityCreateRoomBinding, 
                 viewModel.movieDetails.getSeasons().get(0).getId());
 
         request.setStartNow(viewModel.isStartNow);
-        request.setKind(Constants.ROOM_KIND_PUBLIC);
+        if (viewModel.isPrivateRoom) {
+            request.setKind(Constants.ROOM_KIND_PRIVATE);
+            List<Long> accountIds = new ArrayList<>();
+            for (UserResponse member : selectedMembers) {
+                accountIds.add(member.getId());
+            }
+            request.setAccountIds(accountIds);
+        } else {
+            request.setKind(Constants.ROOM_KIND_PUBLIC);
+        }
 
         if (!viewModel.isStartNow) {
             SimpleDateFormat apiSdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.US);
@@ -270,18 +460,18 @@ public class CreateRoomActivity extends BaseActivity<ActivityCreateRoomBinding, 
         }
 
         if (viewModel.isStartNow) {
-            viewModel.showLoading();
+            setCreatingState(true);
             viewModel.checkRoom(new MainCallback<RoomResponse>() {
                 @Override
                 public void doError(Throwable error) {
-                    viewModel.hideLoading();
+                    setCreatingState(false);
                     new ToastMessage(ToastMessage.TYPE_ERROR, getString(R.string.an_error_occurred)).showMessage(CreateRoomActivity.this);
                 }
 
                 @Override
                 public void doSuccess(RoomResponse response) {
-                    viewModel.hideLoading();
                     if (response != null) {
+                        setCreatingState(false);
                         new ToastMessage(ToastMessage.TYPE_WARNING, getString(R.string.error_room_already_running)).showMessage(CreateRoomActivity.this);
                         return;
                     }
@@ -294,28 +484,40 @@ public class CreateRoomActivity extends BaseActivity<ActivityCreateRoomBinding, 
 
                 @Override
                 public void doFail() {
-                    viewModel.hideLoading();
+                    setCreatingState(false);
                     new ToastMessage(ToastMessage.TYPE_ERROR, getString(R.string.an_error_occurred)).showMessage(CreateRoomActivity.this);
                 }
             });
         } else {
+            setCreatingState(true);
             submitCreateRoom(request);
         }
     }
 
+    private void setCreatingState(boolean creating) {
+        isCreatingRoom = creating;
+        viewBinding.btnCreate.setEnabled(!creating);
+        viewBinding.btnLogin.setClickable(!creating);
+        viewBinding.btnLogin.setFocusable(!creating);
+        if (creating) {
+            viewModel.showLoading();
+        } else {
+            viewModel.hideLoading();
+        }
+    }
+
     private void submitCreateRoom(CreateRoomRequest request) {
-        viewModel.showLoading();
         viewModel.createRoom(new MainCallback<RoomResponse>() {
             @Override
             public void doError(Throwable error) {
-                viewModel.hideLoading();
+                setCreatingState(false);
                 new ToastMessage(ToastMessage.TYPE_ERROR, getString(R.string.an_error_occurred)).showMessage(CreateRoomActivity.this);
             }
 
             @Override
             public void doSuccess(RoomResponse response) {
-                viewModel.hideLoading();
                 if (!request.isStartNow()) {
+                    setCreatingState(false);
                     RoomDialogUtils.showRoomCodeDialog(
                             CreateRoomActivity.this,
                             response != null ? response.getCode() : null,
@@ -333,7 +535,7 @@ public class CreateRoomActivity extends BaseActivity<ActivityCreateRoomBinding, 
 
             @Override
             public void doFail() {
-                viewModel.hideLoading();
+                setCreatingState(false);
                 new ToastMessage(ToastMessage.TYPE_ERROR, getString(R.string.an_error_occurred)).showMessage(CreateRoomActivity.this);
             }
         }, request);
@@ -343,17 +545,18 @@ public class CreateRoomActivity extends BaseActivity<ActivityCreateRoomBinding, 
         viewModel.getMovie(new MainCallback<MovieResponse>() {
             @Override
             public void doError(Throwable error) {
-
+                setCreatingState(false);
+                new ToastMessage(ToastMessage.TYPE_ERROR, getString(R.string.an_error_occurred)).showMessage(CreateRoomActivity.this);
             }
 
             @Override
             public void doSuccess() {
-
             }
 
             @Override
             public void doFail() {
-
+                setCreatingState(false);
+                new ToastMessage(ToastMessage.TYPE_ERROR, getString(R.string.an_error_occurred)).showMessage(CreateRoomActivity.this);
             }
 
             @Override
@@ -368,17 +571,18 @@ public class CreateRoomActivity extends BaseActivity<ActivityCreateRoomBinding, 
         viewModel.startRoom(new MainCallback<RoomResponse>() {
             @Override
             public void doError(Throwable error) {
-                viewModel.hideLoading();
+                setCreatingState(false);
+                new ToastMessage(ToastMessage.TYPE_ERROR, getString(R.string.an_error_occurred)).showMessage(CreateRoomActivity.this);
             }
 
             @Override
             public void doSuccess() {
-                viewModel.hideLoading();
             }
 
             @Override
             public void doFail() {
-                viewModel.hideLoading();
+                setCreatingState(false);
+                new ToastMessage(ToastMessage.TYPE_ERROR, getString(R.string.an_error_occurred)).showMessage(CreateRoomActivity.this);
             }
 
             @Override
@@ -392,17 +596,18 @@ public class CreateRoomActivity extends BaseActivity<ActivityCreateRoomBinding, 
         viewModel.joinRoom(new MainCallback<RoomResponse>() {
             @Override
             public void doError(Throwable error) {
-                viewModel.hideLoading();
+                setCreatingState(false);
+                new ToastMessage(ToastMessage.TYPE_ERROR, getString(R.string.an_error_occurred)).showMessage(CreateRoomActivity.this);
             }
 
             @Override
             public void doSuccess() {
-                viewModel.hideLoading();
             }
 
             @Override
             public void doFail() {
-                viewModel.hideLoading();
+                setCreatingState(false);
+                new ToastMessage(ToastMessage.TYPE_ERROR, getString(R.string.an_error_occurred)).showMessage(CreateRoomActivity.this);
             }
 
             @Override
@@ -432,7 +637,7 @@ public class CreateRoomActivity extends BaseActivity<ActivityCreateRoomBinding, 
         it.putExtra(WatchMovieActivity.Host, true);
 
         startActivity(it);
-        viewModel.hideLoading();
+        setCreatingState(false);
         finish();
     }
 }

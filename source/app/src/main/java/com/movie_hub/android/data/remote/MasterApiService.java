@@ -1,5 +1,6 @@
 package com.movie_hub.android.data.remote;
 
+import com.movie_hub.android.data.model.api.ResponseListObj;
 import com.movie_hub.android.data.model.api.ResponseWrapper;
 import com.movie_hub.android.data.model.api.request.forgot.ForgotChangePasswordRequest;
 import com.movie_hub.android.data.model.api.request.forgot.ForgotPasswordRequest;
@@ -22,6 +23,9 @@ import retrofit2.http.GET;
 import retrofit2.http.Headers;
 import retrofit2.http.POST;
 import retrofit2.http.PUT;
+import retrofit2.http.QueryMap;
+
+import java.util.Map;
 
 public interface MasterApiService {
     @POST("/v1/auth/get-anonymous-token")
@@ -68,4 +72,7 @@ public interface MasterApiService {
 
     @PUT("v1/user/update-settings")
     Observable<ResponseWrapper> updateUserSetting(@Body UserSettingsRequest request);
+
+    @GET("v1/user/auto-complete")
+    Observable<ResponseWrapper<ResponseListObj<UserResponse>>> getUserAutoComplete(@QueryMap Map<String, Object> query);
 }

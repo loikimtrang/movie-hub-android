@@ -2311,7 +2311,6 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
         viewModel.stopTokenAutoRefresh();
         if (viewModel.isLiveRoom && viewModel.isHost) {
             leaveRoom();
-
             if (viewModel.isHost) {
                 stopSchedule();
             }
@@ -2950,6 +2949,7 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
 
                 break;
             case Constants.ROOM_REASON_HOST_LEFT:
+                if (viewModel.isHost) break;
                 handleEndRoomClient(getString(R.string.msg_host_left_ask));
                 break;
             default:

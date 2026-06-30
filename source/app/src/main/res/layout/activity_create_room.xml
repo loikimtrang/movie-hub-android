@@ -145,6 +145,112 @@
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/_12sdp"
+                            android:ellipsize="end"
+                            android:text="@string/room_type"
+                            style="@style/Text_12_Normal" />
+
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/_3sdp">
+
+                            <TextView
+                                android:id="@+id/tv_private_room"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_alignParentStart="true"
+                                android:layout_centerVertical="true"
+                                android:layout_toStartOf="@+id/switch_private_room"
+                                android:text="@string/private_room"
+                                style="@style/Text_12_Normal"
+                                android:textColor="@color/text_gray" />
+
+                            <androidx.appcompat.widget.SwitchCompat
+                                android:id="@+id/switch_private_room"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_alignParentEnd="true"
+                                android:layout_centerVertical="true"
+                                android:checked="false"
+                                android:switchMinWidth="@dimen/_40sdp"
+                                android:thumb="@drawable/thumb_custom"
+                                app:track="@drawable/track_custom" />
+                        </RelativeLayout>
+
+                        <LinearLayout
+                            android:id="@+id/layout_private_members"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/_6sdp"
+                            android:orientation="vertical"
+                            android:visibility="gone">
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text="@string/private_room_member_hint"
+                                style="@style/Text_10_Normal"
+                                android:textColor="@color/text_gray" />
+
+                            <com.google.android.material.textfield.TextInputLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                style="@style/CustomOutlinedBox"
+                                android:layout_marginTop="@dimen/_3sdp">
+
+                                <com.google.android.material.textfield.TextInputEditText
+                                    android:id="@+id/edt_member_search"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    style="@style/Text_12_Normal"
+                                    android:hint="@string/hint_search_member"
+                                    android:imeOptions="actionDone"
+                                    android:inputType="text"
+                                    android:paddingHorizontal="@dimen/_6sdp"
+                                    android:singleLine="true" />
+                            </com.google.android.material.textfield.TextInputLayout>
+
+                            <androidx.cardview.widget.CardView
+                                android:id="@+id/card_suggestions"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="@dimen/_3sdp"
+                                android:visibility="gone"
+                                app:cardBackgroundColor="@color/bg_comment"
+                                app:cardCornerRadius="@dimen/_6sdp"
+                                app:cardElevation="@dimen/_2sdp">
+
+                                <androidx.recyclerview.widget.RecyclerView
+                                    android:id="@+id/rv_account_suggestions"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:nestedScrollingEnabled="true"
+                                    android:overScrollMode="never" />
+                            </androidx.cardview.widget.CardView>
+
+                            <TextView
+                                android:id="@+id/tv_selected_members_label"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="@dimen/_8sdp"
+                                android:text="@string/selected_members"
+                                style="@style/Text_12_Normal"
+                                android:visibility="gone" />
+
+                            <com.google.android.flexbox.FlexboxLayout
+                                android:id="@+id/flex_selected_members"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="@dimen/_4sdp"
+                                app:alignItems="flex_start"
+                                app:flexWrap="wrap"
+                                app:justifyContent="flex_start" />
+                        </LinearLayout>
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
                             android:text="@string/time_setting"
                             style="@style/Text_12_Normal"
                             android:ellipsize="end"

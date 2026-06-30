@@ -325,13 +325,20 @@
 
     <string name="create_room">Tạo phòng</string>
     <string name="name_room">1. Tên phòng:</string>
-    <string name="time_setting">2. Cài đặt thời gian:</string>
+    <string name="room_type">2. Loại phòng:</string>
+    <string name="private_room">Phòng riêng tư</string>
+    <string name="time_setting">3. Cài đặt thời gian:</string>
     <string name="start_mode_description">Có thể bắt đầu thủ công hoặc tự động theo thời gian cài đặt.</string>
     <string name="start_automatically_option">Tôi muốn bắt đầu tự động</string>
     <string name="watch_together">Xem chung</string>
-    <string name="episode_room">3. Tập phim khởi chiếu:</string>
+    <string name="episode_room">4. Tập phim khởi chiếu:</string>
     <string name="error_input_room_name">Vui lòng nhập tên phòng</string>
     <string name="error_room_already_running">Bạn đang có một phòng đang diễn ra, không thể tạo phòng mới.</string>
+    <string name="private_room_member_hint">Tìm kiếm và chọn thành viên được phép tham gia phòng.</string>
+    <string name="hint_search_member">Tìm theo tên, username hoặc email</string>
+    <string name="selected_members">Thành viên đã chọn</string>
+    <string name="remove_member">Xóa thành viên</string>
+    <string name="error_select_private_members">Vui lòng chọn ít nhất một thành viên cho phòng riêng tư.</string>
     <string name="error_select_episode">Vui lòng chọn tập phim công chiếu</string>
     <string name="create_room_success">Tạo phòng thành công</string>
     <string name="error_time_past">Vui lòng chọn thời gian lớn hơn thời gian hiện tại</string>
