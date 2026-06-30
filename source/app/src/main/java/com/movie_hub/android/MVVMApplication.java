@@ -15,6 +15,7 @@ import android.os.Build;
 import android.util.Log;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleObserver;
@@ -48,7 +49,9 @@ import com.movie_hub.android.utils.GsonUtils;
 import com.onesignal.OSNotification;
 import com.onesignal.OneSignal;
 
+import org.eclipse.paho.client.mqttv3.IMqttActionListener;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
+import org.eclipse.paho.client.mqttv3.IMqttToken;
 import org.eclipse.paho.client.mqttv3.MqttCallbackExtended;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
@@ -247,12 +250,14 @@ public class MVVMApplication extends Application implements LifecycleObserver {
     }
 
     private MqttManager mqttManager;
+    private String[] activeMqttTopics;
     private final Map<Integer, Message> pendingRequests = new HashMap<>();
     private final Map<Integer, TimerTask> pendingTimeouts = new HashMap<>();
     private Timer timeoutTimer = new Timer("WebSocketTimeoutTimer");
 
     @SuppressLint("CheckResult")
     public void createMqtt(String userId, String[] topics) {
+        activeMqttTopics = topics;
         // Log danh sách topic để dễ debug
         Timber.d("MQTT_LOG: Initializing MQTT | URL: %s | Topics: %s",
                 Constants.MQTT_BROKER, java.util.Arrays.toString(topics));
@@ -281,6 +286,10 @@ public class MVVMApplication extends Application implements LifecycleObserver {
 
             @Override
             public void messageArrived(String topicName, MqttMessage message) {
+                if (!isActiveMqttTopic(topicName)) {
+                    Timber.w("MQTT_LOG: Ignored message from unsubscribed topic [%s]", topicName);
+                    return;
+                }
                 String payload = new String(message.getPayload());
                 Timber.w("MQTT_LOG: MESSAGE FROM [%s] | Payload: %s", topicName, payload);
 
@@ -328,13 +337,37 @@ public class MVVMApplication extends Application implements LifecycleObserver {
     }
 
     public void sendMessageMqtt(Message message, String topic) {
+        sendMessageMqtt(message, topic, null);
+    }
+
+    public void sendMessageMqtt(Message message, String topic, @Nullable Runnable onDelivered) {
         if (mqttManager != null) {
             try {
                 String json = GsonUtils.toJson(message);
-                mqttManager.publish(topic, json, 2);
+                mqttManager.publish(topic, json, 2, new IMqttActionListener() {
+                    @Override
+                    public void onSuccess(IMqttToken asyncActionToken) {
+                        if (onDelivered != null) {
+                            onDelivered.run();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
+                        Timber.e(exception, "MQTT_LOG: Publish failed");
+                        if (onDelivered != null) {
+                            onDelivered.run();
+                        }
+                    }
+                });
             } catch (MqttException e) {
                 Timber.e(e);
+                if (onDelivered != null) {
+                    onDelivered.run();
+                }
             }
+        } else if (onDelivered != null) {
+            onDelivered.run();
         }
     }
 
@@ -362,7 +395,22 @@ public class MVVMApplication extends Application implements LifecycleObserver {
                 Timber.e("MQTT_LOG: Disconnect failed: %s", e.getMessage());
             } finally {
                 mqttManager = null;
+                activeMqttTopics = null;
+            }
+        } else {
+            activeMqttTopics = null;
+        }
+    }
+
+    private boolean isActiveMqttTopic(String topicName) {
+        if (topicName == null || activeMqttTopics == null) {
+            return false;
+        }
+        for (String subscribed : activeMqttTopics) {
+            if (topicName.equals(subscribed)) {
+                return true;
             }
         }
+        return false;
     }
 }

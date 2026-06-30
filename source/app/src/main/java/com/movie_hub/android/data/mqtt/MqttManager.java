@@ -1,6 +1,9 @@
 package com.movie_hub.android.data.mqtt;
 
 import android.content.Context;
+
+import androidx.annotation.Nullable;
+
 import org.eclipse.paho.android.service.MqttAndroidClient;
 import org.eclipse.paho.client.mqttv3.*;
 import timber.log.Timber;
@@ -34,10 +37,21 @@ public class MqttManager {
     }
 
     public void publish(String topic, String payload, int qos) throws MqttException {
-        if (mqttClient.isConnected()) {
+        publish(topic, payload, qos, null);
+    }
+
+    public void publish(String topic, String payload, int qos, @Nullable IMqttActionListener listener)
+            throws MqttException {
+        if (mqttClient != null && mqttClient.isConnected()) {
             MqttMessage message = new MqttMessage(payload.getBytes());
             message.setQos(qos);
-            mqttClient.publish(topic, message);
+            if (listener != null) {
+                mqttClient.publish(topic, message, null, listener);
+            } else {
+                mqttClient.publish(topic, message);
+            }
+        } else if (listener != null) {
+            listener.onFailure(null, new MqttException(MqttException.REASON_CODE_CLIENT_NOT_CONNECTED));
         }
     }
 

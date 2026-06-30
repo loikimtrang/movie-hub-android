@@ -243,6 +243,12 @@ public interface ApiService {
     @PUT("v1/notification/update-read")
     Observable<ResponseWrapper> updateRead(@Body UpdateReadRequest request);
 
+    @PUT("v1/notification/read-all")
+    Observable<ResponseWrapper> readAllNotifications();
+
+    @DELETE("v1/notification/delete/{id}")
+    Observable<ResponseWrapper> deleteNotification(@Path("id") Long id);
+
     @GET("v1/notification/count-unread")
     Observable<ResponseWrapper<CountUnReadResponse>> countUnRead();
 
@@ -270,6 +276,8 @@ public interface ApiService {
     @POST("v1/room/start/{id}")
     Observable<ResponseWrapper<RoomResponse>> startRoom(@Path("id") Long id);
 
+    @GET("v1/room/get/{id}")
+    Observable<ResponseWrapper<RoomResponse>> getRoom(@Path("id") Long id);
     @Headers("UseGuestToken: 1")
     @GET("v1/video-library-subtitle/list")
     Observable<ResponseWrapper<ResponseListObj<SubtitleResponse>>> getListSubtitle(@QueryMap Map<String, Object> query);

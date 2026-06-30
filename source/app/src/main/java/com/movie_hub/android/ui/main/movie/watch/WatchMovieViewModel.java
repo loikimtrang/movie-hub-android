@@ -224,8 +224,9 @@ public class WatchMovieViewModel extends BaseViewModel {
         return liveRoomViewerCount;
     }
 
-    public void initLiveRoomViewerCount(@Nullable Integer count) {
-        liveRoomViewerCount.setValue(count != null && count > 0 ? count : 1);
+    public void initLiveRoomViewerCount() {
+        // Chỉ cập nhật qua CMD_UPDATE_PARTICIPANT_COUNT từ server, không dùng participantCount từ API.
+        liveRoomViewerCount.setValue(null);
     }
 
     public void applyServerViewerCount(@NonNull String roomId, int currentViewers) {

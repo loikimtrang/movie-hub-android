@@ -270,7 +270,8 @@ public class MovieDetailActivity extends BaseActivity<ActivityMovieDetailBinding
             MessageOneSignal messageOneSignal = GsonUtils.fromJson(jsonMsg, MessageOneSignal.class);
             if (messageOneSignal != null && messageOneSignal.getCmd() != null) {
                 if (Objects.equals(messageOneSignal.getCmd(), OneSignalCommand.CMD_REPLY_COMMENT)
-                        || Objects.equals(messageOneSignal.getCmd(), OneSignalCommand.CMD_TOXIC_COMMENT_LOCKED)) {
+                        || Objects.equals(messageOneSignal.getCmd(), OneSignalCommand.CMD_TOXIC_COMMENT_LOCKED)
+                        || Objects.equals(messageOneSignal.getCmd(), OneSignalCommand.CMD_VOTE_COMMENT)) {
                     showLoading();
                     ClickUtils.debounceClick(viewBinding.includeMovieHeader.btnCmt);
                     Intent it = new Intent(this, CommentActivity.class);
@@ -278,7 +279,8 @@ public class MovieDetailActivity extends BaseActivity<ActivityMovieDetailBinding
                     it.putExtra(CommentActivity.MSG_CMT, messageOneSignal.getData());
                     it.putExtra(CommentActivity.MSG_CMD, messageOneSignal.getCmd());
                     startActivity(it);
-                } else if (Objects.equals(messageOneSignal.getCmd(), OneSignalCommand.CMD_TOXIC_REVIEW_LOCKED)) {
+                } else if (Objects.equals(messageOneSignal.getCmd(), OneSignalCommand.CMD_TOXIC_REVIEW_LOCKED)
+                        || Objects.equals(messageOneSignal.getCmd(), OneSignalCommand.CMD_VOTE_REVIEW)) {
                     showLoading();
                     ClickUtils.debounceClick(viewBinding.includeMovieHeader.btnRating);
                     Intent it = new Intent(this, ReviewActivity.class);

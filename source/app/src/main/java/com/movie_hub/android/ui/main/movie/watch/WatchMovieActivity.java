@@ -259,8 +259,7 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
                 String roomJson = getIntent().getStringExtra(ROOM);
                 viewModel.roomDetail = GsonUtils.fromJson(roomJson, RoomResponse.class);
                 viewModel.refreshLiveRoomUiState();
-                viewModel.initLiveRoomViewerCount(
-                        viewModel.roomDetail != null ? viewModel.roomDetail.getParticipantCount() : null);
+                viewModel.initLiveRoomViewerCount();
                 setupSyncWithHostToggle();
 
                 if (viewModel.isHost) {
@@ -2309,13 +2308,14 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
         stopVolumeObserver();
         stopTrackingLoop();
         viewModel.stopTokenAutoRefresh();
-        if (viewModel.isLiveRoom && viewModel.isHost) {
-            leaveRoom();
+        if (viewModel.isLiveRoom) {
             if (viewModel.isHost) {
                 stopSchedule();
             }
+            leaveRoomAndDestroyMqtt();
+        } else {
+            ((MVVMApplication) application).destroyMqtt();
         }
-        ((MVVMApplication) application).destroyMqtt();
         handlerRetryGetListSubtitle.removeCallbacksAndMessages(null);
         Constants.TOKEN_GUEST = "";
     }
@@ -2801,12 +2801,25 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
             if (payload == null || payload.getRoomId() == null || payload.getCurrentViewers() == null) {
                 return;
             }
+            if (!isMqttMessageForCurrentRoom(payload.getRoomId())) {
+                return;
+            }
             runOnUiThread(() -> viewModel.applyServerViewerCount(
                     payload.getRoomId(),
                     payload.getCurrentViewers()));
         } catch (Exception e) {
             Timber.e(e, "MQTT participant count parse");
         }
+    }
+
+    private boolean isMqttMessageForCurrentRoom(@Nullable String roomId) {
+        if (!viewModel.isLiveRoom || viewModel.roomDetail == null || viewModel.roomDetail.getId() == null) {
+            return false;
+        }
+        if (roomId == null || roomId.isEmpty()) {
+            return false;
+        }
+        return roomId.equals(String.valueOf(viewModel.roomDetail.getId()));
     }
 
     private void sendRoomChatMessage() {
@@ -2932,9 +2945,12 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
     }
 
     public void endRoom(Message message) {
+        if (!viewModel.isLiveRoom || message.getData() == null) return;
+
         EndRoomModel endRoomModel = GsonUtils.fromJson(GsonUtils.toJson(message.getData()), EndRoomModel.class);
 
         if (endRoomModel == null || endRoomModel.getReason() == null) return;
+        if (!isMqttMessageForCurrentRoom(endRoomModel.getRoomId())) return;
 
         switch (endRoomModel.getReason()) {
             case Constants.ROOM_REASON_TIMEOUT:
@@ -3006,17 +3022,17 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
      * room messages are ignored, clear session flags, hide sync UI, restore full controls.
      */
     private void transitionToSoloPlaybackAfterRoomEnded() {
-        leaveRoom();
-        ((MVVMApplication) application).destroyMqtt();
-        viewModel.clearLiveRoomSessionForSoloPlayback();
-        viewBinding.layoutSync.setVisibility(View.GONE);
-        viewModel.setChatOpen(false);
-        viewBinding.layoutChat.setVisibility(View.GONE);
-        viewBinding.btnOpenChat.setVisibility(View.GONE);
-        viewBinding.btnRoomInfo.setVisibility(View.GONE);
-        applyParticipantSyncRestrictedUi(false);
-        viewBinding.executePendingBindings();
-        restorePlaybackChromeAfterLeavingLiveRoom();
+        leaveRoomAndDestroyMqtt(() -> {
+            viewModel.clearLiveRoomSessionForSoloPlayback();
+            viewBinding.layoutSync.setVisibility(View.GONE);
+            viewModel.setChatOpen(false);
+            viewBinding.layoutChat.setVisibility(View.GONE);
+            viewBinding.btnOpenChat.setVisibility(View.GONE);
+            viewBinding.btnRoomInfo.setVisibility(View.GONE);
+            applyParticipantSyncRestrictedUi(false);
+            viewBinding.executePendingBindings();
+            restorePlaybackChromeAfterLeavingLiveRoom();
+        });
     }
 
     /** Play/Pause vs Replay visibility after exiting watch-party restrictions (normal rules). */
@@ -3034,8 +3050,46 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
         }
     }
 
+    private static final long MQTT_LEAVE_DELIVERY_TIMEOUT_MS = 3000L;
+
+    private void leaveRoomAndDestroyMqtt() {
+        leaveRoomAndDestroyMqtt(null);
+    }
+
+    private void leaveRoomAndDestroyMqtt(@Nullable Runnable afterDestroy) {
+        final boolean[] destroyed = {false};
+        Runnable timeoutFallback = () -> {
+            Timber.w("MQTT_LOG: Leave room delivery timeout, disconnecting anyway");
+            destroyMqttAfterLeave(destroyed, afterDestroy);
+        };
+        Runnable destroyMqtt = () -> {
+            handlerPing.removeCallbacks(timeoutFallback);
+            destroyMqttAfterLeave(destroyed, afterDestroy);
+        };
+        handlerPing.postDelayed(timeoutFallback, MQTT_LEAVE_DELIVERY_TIMEOUT_MS);
+        leaveRoom(destroyMqtt);
+    }
+
+    private void destroyMqttAfterLeave(boolean[] destroyed, @Nullable Runnable afterDestroy) {
+        if (destroyed[0]) return;
+        destroyed[0] = true;
+        ((MVVMApplication) application).destroyMqtt();
+        if (afterDestroy != null) {
+            afterDestroy.run();
+        }
+    }
+
     public void leaveRoom() {
-        if (!viewModel.isLiveRoom || viewModel.roomDetail == null) return;
+        leaveRoom(null);
+    }
+
+    public void leaveRoom(@Nullable Runnable onDelivered) {
+        if (!viewModel.isLiveRoom || viewModel.roomDetail == null) {
+            if (onDelivered != null) {
+                onDelivered.run();
+            }
+            return;
+        }
         Message message = new Message();
         message.setCmd(Command.CMD_PARTICIPANT_LEFT);
         ClientPingModel clientPingModel = new ClientPingModel();
@@ -3043,7 +3097,8 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
 
         message.setData(clientPingModel);
         String topic = Constants.TOPIC + viewModel.roomDetail.getId();
-        sendMqttMessage(message, topic);
+        Timber.w("MQTT_LOG: MESSAGE SEND! Topic: %s | Payload: %s", topic, GsonUtils.toJson(message));
+        ((MVVMApplication) application).sendMessageMqtt(message, topic, onDelivered);
     }
 }
 

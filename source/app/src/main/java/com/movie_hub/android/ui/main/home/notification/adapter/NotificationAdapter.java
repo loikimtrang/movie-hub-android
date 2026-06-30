@@ -2,7 +2,7 @@ package com.movie_hub.android.ui.main.home.notification.adapter;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.os.Build;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,21 +12,17 @@ import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.daimajia.swipe.SwipeLayout;
 import com.movie_hub.android.R;
-import com.movie_hub.android.constant.Constants;
-import com.movie_hub.android.data.model.api.response.MovieItem.MovieItemResponse;
-import com.movie_hub.android.data.model.api.response.movie.MovieResponse;
 import com.movie_hub.android.data.model.api.response.notification.NotificationResponse;
-import com.movie_hub.android.data.model.onesignal.MessageCommentResponse;
-import com.movie_hub.android.data.model.onesignal.MessageReviewResponse;
-import com.movie_hub.android.data.model.onesignal.OneSignalCommand;
 import com.movie_hub.android.databinding.ItemNotificationBinding;
+import com.movie_hub.android.ui.main.home.notification.model.NotificationDisplayModel;
 import com.movie_hub.android.utils.DisplayUtils;
-import com.movie_hub.android.utils.GsonUtils;
+import com.movie_hub.android.utils.NotificationUiUtils;
+import com.movie_hub.android.utils.ToxicTextUtils;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapter.NotificationViewHolder> {
 
@@ -41,6 +37,8 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
 
     public interface OnNotificationClickListener {
         void onItemClick(NotificationResponse item, int position);
+
+        void onNotificationDelete(NotificationResponse item, int position);
     }
 
     public NotificationAdapter(OnNotificationClickListener listener, Context context) {
@@ -51,91 +49,49 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
     @NonNull
     @Override
     public NotificationViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-        ItemNotificationBinding binding = ItemNotificationBinding.inflate(inflater, parent, false);
+        ItemNotificationBinding binding = ItemNotificationBinding.inflate(
+                LayoutInflater.from(parent.getContext()), parent, false);
         return new NotificationViewHolder(binding);
     }
 
     @Override
     public void onBindViewHolder(@NonNull NotificationViewHolder holder, int position) {
         NotificationResponse item = items.get(position);
-        holder.binding.setItem(item);
+        NotificationDisplayModel display = NotificationUiUtils.build(context, item);
 
-        updateUI(holder, item);
-        updateTime(holder, item);
-        holder.binding.imgAvatar.setVisibility(View.GONE);
-        holder.binding.imgAvatar.setVisibility(View.GONE);
-        if (Objects.equals(item.getType(), Constants.NOTIFICATION_TYPE_SOCIAL)) {
-            MessageCommentResponse messageCommentResponse = null;
-            MessageReviewResponse messageReviewResponse = null;
+        SwipeLayout swipeLayout = holder.binding.swipeLayout;
+        swipeLayout.close(false);
+        swipeLayout.setSwipeEnabled(true);
 
-            if (Objects.equals(item.getCmd(), OneSignalCommand.CMD_REPLY_COMMENT)
-                    || Objects.equals(item.getCmd(), OneSignalCommand.CMD_TOXIC_COMMENT_LOCKED)) {
-                messageCommentResponse = GsonUtils.fromJson(item.getBody(), MessageCommentResponse.class);
-            } else if (Objects.equals(item.getCmd(), OneSignalCommand.CMD_TOXIC_REVIEW_LOCKED)) {
-                messageReviewResponse = GsonUtils.fromJson(item.getBody(), MessageReviewResponse.class);
-            }
-
-            MessageCommentResponse.Author commentAuthor = messageCommentResponse != null ? messageCommentResponse.getAuthor() : null;
-            MessageReviewResponse.Author reviewAuthor = messageReviewResponse != null ? messageReviewResponse.getAuthor() : null;
-            String avatarPath = commentAuthor != null ? commentAuthor.getAvatarPath()
-                    : reviewAuthor != null ? reviewAuthor.getAvatarPath() : null;
-
-            if (avatarPath != null) {
-                Glide.with(context)
-                        .load(Constants.MEDIA_URL + avatarPath)
-                        .placeholder(R.drawable.logo)
-                        .error(R.drawable.logo)
-                        .into(holder.binding.imgAvatar);
-
-                holder.binding.imgAvatar.setVisibility(View.VISIBLE);
-            }
-        }
-
-        if (Objects.equals(item.getType(), Constants.NOTIFICATION_TYPE_MOVIE)) {
-            switch (item.getCmd()) {
-                case OneSignalCommand.CMD_NEW_MOVIE:
-                    MovieResponse movieResponse = GsonUtils.fromJson(item.getBody(), MovieResponse.class);
-
-                    if (movieResponse != null && movieResponse.getThumbnailUrl() != null) {
-                        Glide.with(context)
-                                .load(movieResponse.getThumbnailUrl())
-                                .placeholder(R.drawable.logo)
-                                .error(R.drawable.logo)
-                                .into(holder.binding.imgMovie);
-
-                        holder.binding.imgMovie.setVisibility(View.VISIBLE);
-                    }
-
-                    break;
-                case OneSignalCommand.CMD_NEW_MOVIE_ITEM:
-                    MovieItemResponse movieItemResponse = GsonUtils.fromJson(item.getBody(), MovieItemResponse.class);
-
-                    if (movieItemResponse != null && movieItemResponse.getMovie() != null && movieItemResponse.getMovie().getThumbnailUrl() != null) {
-                        Glide.with(context)
-                                .load(movieItemResponse.getMovie().getThumbnailUrl())
-                                .placeholder(R.drawable.logo)
-                                .error(R.drawable.logo)
-                                .into(holder.binding.imgMovie);
-
-                        holder.binding.imgMovie.setVisibility(View.VISIBLE);
-                    }
-
-                    break;
-                default:
-                    break;
-            }
-
-
-        }
-
-        holder.binding.getRoot().setOnClickListener(v -> {
-            if (listener != null) {
-                listener.onItemClick(item, position);
-            }
+        holder.binding.layoutDelete.setOnClickListener(v -> {
+            int pos = holder.getBindingAdapterPosition();
+            if (pos == RecyclerView.NO_POSITION || listener == null) return;
+            swipeLayout.close(true);
+            swipeLayout.postDelayed(() -> {
+                int updatedPos = holder.getBindingAdapterPosition();
+                if (updatedPos == RecyclerView.NO_POSITION || listener == null) return;
+                listener.onNotificationDelete(items.get(updatedPos), updatedPos);
+            }, 180);
         });
 
-        holder.binding.executePendingBindings();
+        holder.binding.tvTitle.setText(display.getTitle());
+        bindOptionalText(holder.binding.tvSubtitle, display.getSubtitle());
+        bindPreview(holder, display);
+        updateTime(holder, item);
+        updateReadState(holder, item);
+        bindAvatar(holder, display);
+
+        holder.binding.layoutRoot.setOnClickListener(v -> {
+            if (swipeLayout.getOpenStatus() != SwipeLayout.Status.Close) {
+                swipeLayout.close(true);
+                return;
+            }
+            if (listener != null) {
+                int pos = holder.getBindingAdapterPosition();
+                if (pos == RecyclerView.NO_POSITION) return;
+                listener.onItemClick(items.get(pos), pos);
+            }
+        });
     }
 
     @Override
@@ -151,18 +107,70 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
         }
     }
 
-    private void updateUI(NotificationViewHolder holder, NotificationResponse item) {
+    private void bindOptionalText(android.widget.TextView textView, String value) {
+        if (TextUtils.isEmpty(value)) {
+            textView.setVisibility(View.GONE);
+            textView.setText(null);
+        } else {
+            textView.setVisibility(View.VISIBLE);
+            textView.setText(value);
+        }
+    }
+
+    private void bindPreview(NotificationViewHolder holder, NotificationDisplayModel display) {
+        if (TextUtils.isEmpty(display.getPreview())) {
+            holder.binding.tvPreview.setVisibility(View.GONE);
+            ToxicTextUtils.clearBlur(holder.binding.tvPreview);
+            holder.binding.tvPreview.setText(null);
+            return;
+        }
+
+        holder.binding.tvPreview.setVisibility(View.VISIBLE);
+        if (display.isPreviewMasked()) {
+            ToxicTextUtils.bindToxicContent(
+                    holder.binding.tvPreview,
+                    display.getPreview(),
+                    display.getToxicSpans(),
+                    display.getToxicStatus(),
+                    false,
+                    0
+            );
+        } else {
+            ToxicTextUtils.clearBlur(holder.binding.tvPreview);
+            holder.binding.tvPreview.setText(display.getPreview());
+        }
+    }
+
+    private void bindAvatar(NotificationViewHolder holder, NotificationDisplayModel display) {
+        holder.binding.imgAvatar.setVisibility(View.VISIBLE);
+        if (display.isShowAvatar() && !TextUtils.isEmpty(display.getAvatarUrl())) {
+            Glide.with(context)
+                    .load(display.getAvatarUrl())
+                    .placeholder(R.drawable.logo)
+                    .error(R.drawable.logo)
+                    .into(holder.binding.imgAvatar);
+        } else {
+            Glide.with(context)
+                    .load(R.drawable.ic_notification_logo)
+                    .placeholder(R.drawable.logo)
+                    .error(R.drawable.logo)
+                    .into(holder.binding.imgAvatar);
+        }
+    }
+
+    private void updateReadState(NotificationViewHolder holder, NotificationResponse item) {
         if (!item.isRead()) {
             holder.binding.tvTitle.setTypeface(null, android.graphics.Typeface.BOLD);
             holder.binding.tvTitle.setTextColor(ContextCompat.getColor(context, R.color.text));
             holder.binding.tvTime.setTextColor(ContextCompat.getColor(context, R.color.text_gray));
             holder.binding.icUnRead.setVisibility(View.VISIBLE);
+            holder.binding.layoutRoot.setAlpha(1f);
         } else {
             holder.binding.tvTitle.setTypeface(null, android.graphics.Typeface.NORMAL);
             holder.binding.tvTitle.setTextColor(ContextCompat.getColor(context, R.color.text_gray));
-
             holder.binding.tvTime.setTextColor(ContextCompat.getColor(context, R.color.text_gray));
             holder.binding.icUnRead.setVisibility(View.INVISIBLE);
+            holder.binding.layoutRoot.setAlpha(0.88f);
         }
     }
 
@@ -204,6 +212,30 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
         notifyItemRangeInserted(startPos, filteredList.size());
     }
 
+    public void removeAt(int position) {
+        if (position < 0 || position >= items.size()) return;
+        items.remove(position);
+        notifyItemRemoved(position);
+        notifyItemRangeChanged(position, items.size() - position);
+    }
+
+    public void restoreAt(int position, NotificationResponse item) {
+        if (item == null) return;
+        if (position < 0) position = 0;
+        if (position > items.size()) position = items.size();
+        items.add(position, item);
+        notifyItemInserted(position);
+        notifyItemRangeChanged(position, items.size() - position);
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    public void markAllAsRead() {
+        for (NotificationResponse item : items) {
+            item.setRead(true);
+        }
+        notifyDataSetChanged();
+    }
+
     @Override
     public int getItemCount() {
         return items.size();
@@ -212,7 +244,7 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
     static class NotificationViewHolder extends RecyclerView.ViewHolder {
         private final ItemNotificationBinding binding;
 
-        public NotificationViewHolder(@NonNull ItemNotificationBinding binding) {
+        NotificationViewHolder(@NonNull ItemNotificationBinding binding) {
             super(binding.getRoot());
             this.binding = binding;
         }

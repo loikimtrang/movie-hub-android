@@ -558,7 +558,11 @@ public class ReviewActivity extends BaseActivity<ActivityReviewBinding, ReviewVi
     private void scrollToNotificationReviewIfNeeded() {
         String json = getIntent().getStringExtra(MSG_REVIEW);
         String cmd = getIntent().getStringExtra(MSG_CMD);
-        if (json == null || json.isEmpty() || !OneSignalCommand.CMD_TOXIC_REVIEW_LOCKED.equals(cmd)) {
+        if (json == null || json.isEmpty()) {
+            return;
+        }
+        if (!OneSignalCommand.CMD_TOXIC_REVIEW_LOCKED.equals(cmd)
+                && !OneSignalCommand.CMD_VOTE_REVIEW.equals(cmd)) {
             return;
         }
 

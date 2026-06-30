@@ -8,13 +8,19 @@ import com.movie_hub.android.data.model.api.request.notification.NotificationReq
 import com.movie_hub.android.data.model.api.request.notification.UpdateReadRequest;
 import com.movie_hub.android.data.model.api.response.history.MovieHistoryResponse;
 import com.movie_hub.android.data.model.api.response.notification.NotificationResponse;
+import com.movie_hub.android.data.model.api.response.room.RoomResponse;
+import com.movie_hub.android.data.model.api.response.room.RoomResponse;
 import com.movie_hub.android.ui.base.activity.BaseViewModel;
 import com.movie_hub.android.ui.main.MainCallback;
+import com.movie_hub.android.utils.NetworkUtils;
 
 import java.util.List;
 import java.util.Map;
 
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.core.ObservableSource;
+import io.reactivex.rxjava3.functions.Function;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import timber.log.Timber;
 
@@ -71,5 +77,161 @@ public class NotificationModel extends BaseViewModel {
                                 }
                         )
         );
+    }
+
+    public void readAll(MainCallback<Void> callback) {
+        compositeDisposable.add(
+                repository.getApiService().readAllNotifications()
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(
+                                response -> {
+                                    hideLoading();
+                                    if (response.isResult()) {
+                                        callback.doSuccess();
+                                    } else {
+                                        callback.doFail();
+                                    }
+                                },
+                                throwable -> {
+                                    hideLoading();
+                                    Timber.e(throwable);
+                                    callback.doError(throwable);
+                                }
+                        )
+        );
+    }
+
+    public void deleteNotification(MainCallback<Void> callback, Long id) {
+        compositeDisposable.add(
+                repository.getApiService().deleteNotification(id)
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(
+                                response -> {
+                                    hideLoading();
+                                    if (response.isResult()) {
+                                        callback.doSuccess();
+                                    } else {
+                                        callback.doFail();
+                                    }
+                                },
+                                throwable -> {
+                                    hideLoading();
+                                    Timber.e(throwable);
+                                    callback.doError(throwable);
+                                }
+                        )
+        );
+    }
+
+    public void getRoom(MainCallback<RoomResponse> callback, Long roomId) {
+        compositeDisposable.add(repository.getApiService().getRoom(roomId)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .retryWhen(throwable ->
+                        throwable.flatMap((Function<Throwable, ObservableSource<?>>) throwable1 -> {
+                            if (NetworkUtils.checkNetworkError(throwable1)) {
+                                hideLoading();
+                                return application.showDialogNoInternetAccess();
+                            }
+                            return Observable.error(throwable1);
+                        }))
+                .subscribe(
+                        response -> {
+                            if (response.isResult()) {
+                                callback.doSuccess(response.getData());
+                            } else {
+                                callback.doFail();
+                            }
+                        },
+                        throwable -> {
+                            Timber.e(throwable);
+                            callback.doError(throwable);
+                        }
+                ));
+    }
+
+    public void getRoomByCode(MainCallback<RoomResponse> callback, String code) {
+        compositeDisposable.add(repository.getApiService().getRoomByCode(code)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .retryWhen(throwable ->
+                        throwable.flatMap((Function<Throwable, ObservableSource<?>>) throwable1 -> {
+                            if (NetworkUtils.checkNetworkError(throwable1)) {
+                                hideLoading();
+                                return application.showDialogNoInternetAccess();
+                            }
+                            return Observable.error(throwable1);
+                        }))
+                .subscribe(
+                        response -> {
+                            if (response.isResult()) {
+                                callback.doSuccess(response.getData());
+                            } else {
+                                callback.doFail();
+                            }
+                        },
+                        throwable -> {
+                            Timber.e(throwable);
+                            callback.doError(throwable);
+                        }
+                ));
+    }
+
+    public void joinRoom(MainCallback<RoomResponse> callback, Long roomId) {
+        compositeDisposable.add(repository.getApiService().joinRoom(roomId)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .retryWhen(throwable ->
+                        throwable.flatMap((Function<Throwable, ObservableSource<?>>) throwable1 -> {
+                            if (NetworkUtils.checkNetworkError(throwable1)) {
+                                hideLoading();
+                                return application.showDialogNoInternetAccess();
+                            }
+                            return Observable.error(throwable1);
+                        }))
+                .subscribe(
+                        response -> {
+                            hideLoading();
+                            if (response.isResult()) {
+                                callback.doSuccess(response.getData());
+                            } else {
+                                callback.doFail();
+                            }
+                        },
+                        throwable -> {
+                            hideLoading();
+                            Timber.e(throwable);
+                            callback.doError(throwable);
+                        }
+                ));
+    }
+
+    public void startRoom(MainCallback<RoomResponse> callback, Long id) {
+        compositeDisposable.add(repository.getApiService().startRoom(id)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .retryWhen(throwable ->
+                        throwable.flatMap((Function<Throwable, ObservableSource<?>>) throwable1 -> {
+                            if (NetworkUtils.checkNetworkError(throwable1)) {
+                                hideLoading();
+                                return application.showDialogNoInternetAccess();
+                            }
+                            return Observable.error(throwable1);
+                        }))
+                .subscribe(
+                        response -> {
+                            if (response.isResult()) {
+                                callback.doSuccess(response.getData());
+                            } else {
+                                callback.doFail();
+                            }
+                        },
+                        throwable -> {
+                            Timber.e(throwable);
+                            callback.doError(throwable);
+                        }
+                ));
     }
 }

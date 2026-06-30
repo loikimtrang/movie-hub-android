@@ -30,6 +30,7 @@ import com.movie_hub.android.data.model.api.response.room.RoomResponse;
 import com.movie_hub.android.data.model.api.response.user.UserResponse;
 import com.movie_hub.android.data.model.onesignal.MessageCommentResponse;
 import com.movie_hub.android.data.model.onesignal.MessageOneSignal;
+import com.movie_hub.android.data.model.onesignal.MessageRoomNotificationResponse;
 import com.movie_hub.android.data.model.onesignal.MessageReviewResponse;
 import com.movie_hub.android.data.model.onesignal.OneSignalCommand;
 import com.movie_hub.android.data.model.other.ToastMessage;
@@ -58,6 +59,8 @@ import com.movie_hub.android.ui.main.home.notification.NotificationActivity;
 import com.movie_hub.android.ui.main.home.topic.HomeMoreTopicActivity;
 import com.movie_hub.android.ui.main.home.topic.topic_detail.HomeTopicDetailActivity;
 import com.movie_hub.android.ui.main.live.LiveFragment;
+import com.movie_hub.android.ui.main.live.RoomClickCoordinator;
+import com.movie_hub.android.ui.main.live.RoomClickHost;
 import com.movie_hub.android.ui.main.movie.detail.MovieDetailActivity;
 import com.movie_hub.android.ui.main.movie.watch.WatchMovieActivity;
 import com.movie_hub.android.ui.main.schedule.ScheduleFragment;
@@ -72,7 +75,7 @@ import java.util.Objects;
 import timber.log.Timber;
 
 
-public class MainActivity extends BaseActivity<ActivityMainBinding, MainViewModel> implements SystemBarColorProvider, View.OnClickListener, OnMovieClickCallback {
+public class MainActivity extends BaseActivity<ActivityMainBinding, MainViewModel> implements SystemBarColorProvider, View.OnClickListener, OnMovieClickCallback, RoomClickHost {
     private Fragment active;
     private FragmentManager fm;
     private HomeFragment homeFragment;
@@ -81,6 +84,74 @@ public class MainActivity extends BaseActivity<ActivityMainBinding, MainViewMode
     private ScheduleFragment scheduleFragment;
     private AccountFragment accountFragment;
     private UnLoginAccountFragment unLoginAccountFragment;
+    private RoomClickCoordinator roomClickCoordinator;
+
+    public MainViewModel getViewModel() {
+        return viewModel;
+    }
+
+    public void handleRoomClick(RoomResponse room) {
+        if (roomClickCoordinator == null) {
+            roomClickCoordinator = new RoomClickCoordinator(this);
+        }
+        roomClickCoordinator.handleRoomClick(room);
+    }
+
+    @Override
+    public android.app.Activity getHostActivity() {
+        return this;
+    }
+
+    @Override
+    public boolean isUserLoggedIn() {
+        return viewModel.isLogin();
+    }
+
+    @Override
+    public long getUserId() {
+        return viewModel.getUserId();
+    }
+
+    @Override
+    public void showHostLoading() {
+        showLoading();
+    }
+
+    @Override
+    public void hideHostLoading() {
+        hideLoading();
+    }
+
+    @Override
+    public void showHostError(String message) {
+        showError(message);
+    }
+
+    @Override
+    public void fetchMovie(Long id, MainCallback<MovieResponse> callback) {
+        viewModel.getMovie(callback, id);
+    }
+
+    @Override
+    public void fetchListMovieTracking(Long movieId, MainCallback<ListWatchHistoryResponse> callback) {
+        viewModel.getListMovieTracking(callback, movieId);
+    }
+
+    @Override
+    public void fetchJoinRoom(Long roomId, MainCallback<RoomResponse> callback) {
+        viewModel.joinRoom(callback, roomId);
+    }
+
+    @Override
+    public void fetchStartRoom(Long roomId, MainCallback<RoomResponse> callback) {
+        viewModel.startRoom(callback, roomId);
+    }
+
+    @Override
+    public void createMqttAndWatch(MovieResponse movie, RoomResponse room, boolean isHost) {
+        createMqtt(movie, room, isHost);
+    }
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -92,28 +163,35 @@ public class MainActivity extends BaseActivity<ActivityMainBinding, MainViewMode
 //            getUserProfile();
 //        }
         String json = getIntent().getStringExtra("msg_onesignal_data");
-        if (json != null && !json.isEmpty() && viewModel.isLogin()) {
+        if (json != null && !json.isEmpty()) {
             viewModel.messageOneSignal = GsonUtils.fromJson(json, MessageOneSignal.class);
 
-            if (viewModel.messageOneSignal != null && viewModel.messageOneSignal.getCmd() != null) {
+            if (viewModel.messageOneSignal != null
+                    && OneSignalCommand.CMD_ROOM_INVITE.equals(viewModel.messageOneSignal.getCmd())) {
+                handleRoomInviteNotification(viewModel.messageOneSignal);
+            } else if (viewModel.isLogin()
+                    && viewModel.messageOneSignal != null
+                    && viewModel.messageOneSignal.getCmd() != null) {
                 String dataJson = viewModel.messageOneSignal.getData();
+                String cmd = viewModel.messageOneSignal.getCmd();
                 String movieId = null;
 
-                switch (viewModel.messageOneSignal.getCmd()) {
+                switch (cmd) {
                     case OneSignalCommand.CMD_REPLY_COMMENT:
                     case OneSignalCommand.CMD_TOXIC_COMMENT_LOCKED:
+                    case OneSignalCommand.CMD_VOTE_COMMENT:
                         if (dataJson != null && !dataJson.isEmpty()) {
                             MessageCommentResponse messageCommentResponse = GsonUtils.fromJson(dataJson, MessageCommentResponse.class);
                             if (messageCommentResponse != null) {
                                 movieId = messageCommentResponse.getMovieId();
                             }
                         }
-                        if (movieId != null && (Objects.equals(viewModel.messageOneSignal.getCmd(), OneSignalCommand.CMD_REPLY_COMMENT)
-                                || Objects.equals(viewModel.messageOneSignal.getCmd(), OneSignalCommand.CMD_TOXIC_COMMENT_LOCKED))) {
+                        if (movieId != null) {
                             viewModel.msgCommentData = GsonUtils.toJson(viewModel.messageOneSignal);
                         }
                         break;
                     case OneSignalCommand.CMD_TOXIC_REVIEW_LOCKED:
+                    case OneSignalCommand.CMD_VOTE_REVIEW:
                         if (dataJson != null && !dataJson.isEmpty()) {
                             MessageReviewResponse messageReviewResponse = GsonUtils.fromJson(dataJson, MessageReviewResponse.class);
                             if (messageReviewResponse != null) {
@@ -132,7 +210,7 @@ public class MainActivity extends BaseActivity<ActivityMainBinding, MainViewMode
                     MovieResponse movieResponse = new MovieResponse();
                     movieResponse.setId(Long.valueOf(movieId));
                     getMovieDetail(movieResponse, NavigateToMovieDetails);
-                } else if (Objects.equals(viewModel.messageOneSignal.getCmd(), OneSignalCommand.CMD_REPLY_COMMENT)) {
+                } else if (Objects.equals(cmd, OneSignalCommand.CMD_REPLY_COMMENT)) {
                     Timber.e("ONESIGNAL_LOG: messageCommentResponse hoặc MovieId bị null sau khi parse");
                 }
             }
@@ -631,6 +709,88 @@ public class MainActivity extends BaseActivity<ActivityMainBinding, MainViewMode
         this.isHost = false;
     }
     private ActivityResultLauncher<Intent> loginLauncher;
+
+    @Override
+    protected void handleNotificationData(MessageOneSignal message) {
+        if (message != null && OneSignalCommand.CMD_ROOM_INVITE.equals(message.getCmd())) {
+            handleRoomInviteNotification(message);
+            return;
+        }
+        super.handleNotificationData(message);
+    }
+
+    public void handleRoomInviteNotification(MessageOneSignal messageOneSignal) {
+        if (!viewModel.isLogin()) {
+            showLoginRequiredDialog();
+            return;
+        }
+        if (messageOneSignal == null || messageOneSignal.getData() == null || messageOneSignal.getData().isEmpty()) {
+            return;
+        }
+
+        MessageRoomNotificationResponse roomNotification = GsonUtils.fromJson(
+                messageOneSignal.getData(), MessageRoomNotificationResponse.class);
+        if (roomNotification == null) {
+            showError(getString(R.string.an_error_occurred));
+            return;
+        }
+
+        Long roomId = parseRoomId(roomNotification.getId());
+        String roomCode = roomNotification.getCode();
+        if (roomId == null && (roomCode == null || roomCode.isEmpty())) {
+            showError(getString(R.string.an_error_occurred));
+            return;
+        }
+
+        showLoading();
+        MainCallback<RoomResponse> roomCallback = new MainCallback<RoomResponse>() {
+            @Override
+            public void doSuccess(RoomResponse room) {
+                hideLoading();
+                if (room == null) {
+                    showError(getString(R.string.an_error_occurred));
+                    return;
+                }
+                handleRoomClick(room);
+            }
+
+            @Override
+            public void doError(Throwable error) {
+                hideLoading();
+                showError(getString(R.string.an_error_occurred));
+            }
+
+            @Override
+            public void doSuccess() {
+                hideLoading();
+            }
+
+            @Override
+            public void doFail() {
+                hideLoading();
+                showError(getString(R.string.an_error_occurred));
+            }
+        };
+
+        if (roomId != null) {
+            viewModel.getRoom(roomCallback, roomId);
+        } else {
+            viewModel.getRoomByCode(roomCallback, roomCode);
+        }
+    }
+
+    @Nullable
+    private Long parseRoomId(@Nullable String roomId) {
+        if (roomId == null || roomId.isEmpty()) {
+            return null;
+        }
+        try {
+            return Long.parseLong(roomId);
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
     public void showLoginRequiredDialog() {
         DialogUtils.dialogConfirm(
                 this,

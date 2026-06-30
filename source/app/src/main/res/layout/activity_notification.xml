@@ -55,6 +55,18 @@
                     />
 
                 <FrameLayout
+                    android:id="@+id/read_all"
+                    android:layout_width="@dimen/_36sdp"
+                    android:layout_height="@dimen/_40sdp"
+                    android:layout_toStartOf="@+id/option">
+                    <ImageView
+                        android:layout_width="@dimen/_18sdp"
+                        android:layout_height="@dimen/_18sdp"
+                        android:src="@drawable/ic_read_all"
+                        android:layout_gravity="center"/>
+                </FrameLayout>
+
+                <FrameLayout
                     android:id="@+id/option"
                     android:layout_width="@dimen/_36sdp"
                     android:layout_height="@dimen/_40sdp"

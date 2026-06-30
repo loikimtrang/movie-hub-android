@@ -316,6 +316,10 @@
     <string name="error_select_at_least_3">Please select at least 3 titles</string>
     <string name="notification">Notification</string>
     <string name="empty_notification">You have no notifications</string>
+    <string name="notification_from">From %1$s</string>
+    <string name="notification_room_by_host">%1$s invited you to watch together</string>
+    <string name="notification_premiere_at">Premiere: %1$s</string>
+    <string name="notification_content_hidden">Content is hidden</string>
     <string name="time_just_now">just now</string>
     <string name="time_minutes_ago">%d mins ago</string>
     <string name="time_hours_ago">%d hours ago</string>
@@ -368,6 +372,7 @@
     <string name="msg_room_ended">The movie room has ended</string>
     <string name="msg_waiting_for_host">The host hasn\'t joined yet, please wait</string>
     <string name="msg_premier_ready_ask">It\'s time for the premiere, would you like to start now?</string>
+    <string name="msg_premier_expired">This room has passed its premiere window</string>
 
     <string name="room_code_title">Room code</string>
     <string name="room_info_title">Room info</string>

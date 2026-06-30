@@ -46,13 +46,9 @@ import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 import java.util.Objects;
-import java.util.TimeZone;
 
 public class LiveFragment extends BaseFragment<FragmentLiveBinding, LiveViewModel> implements RoomAdapter.OnRoomClickListener {
     private static final int FILTER_ALL = -1;
@@ -555,245 +551,18 @@ public class LiveFragment extends BaseFragment<FragmentLiveBinding, LiveViewMode
 
     @Override
     public void onRoomClick(RoomResponse model, int position) {
-        if (!viewModel.isLogin()) {
-            ((MainActivity) requireActivity()).showLoginRequiredDialog();
-            return;
-        }
-
-        if (model.getHost().getId() == viewModel.getUserId()) {
-            handleRoomClickByHost(model);
-        } else {
-            handleRoomClickByClient(model);
-        }
-    }
-    public void handleRoomClickByHost(RoomResponse model) {
-        switch (model.getState()) {
-            case Constants.ROOM_STATE_PENDING:
-                long startTimeMillis = 0;
-                String startTimeStr = model.getStartTime();
-
-                if (startTimeStr != null && !startTimeStr.isEmpty()) {
-                    try {
-                        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault());
-                        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
-
-                        Date startDate = sdf.parse(startTimeStr);
-                        if (startDate != null) {
-                            startTimeMillis = startDate.getTime();
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-                if (System.currentTimeMillis() < startTimeMillis) {
-                    DialogUtils.dialogConfirm(
-                            requireContext(),
-                            getString(R.string.msg_premier_not_started),
-                            getString(R.string.title_information),
-                            (dialog, which) -> {
-                                if (model.getMovieItem() != null && model.getMovieItem().getMovie() != null) {
-                                    getMovie(model.getMovieItem().getMovie().getId(), model, false, true);
-                                }
-                            },
-                            getString(R.string.back), // Nút bên phải: Quay lại
-                            (dialog, which) -> dialog.dismiss()
-                    );
-                } else {
-                    // TRƯỜNG HỢP: ĐÃ ĐẾN GIỜ HOẶC QUÁ GIỜ
-                    DialogUtils.dialogConfirm(
-                            requireContext(),
-                            getString(R.string.msg_premier_ready_ask),
-                            getString(R.string.action_start),
-                            (dialog, which) -> startRoom(model),
-                            getString(R.string.back),
-                            (dialog, which) -> dialog.dismiss()
-                    );
-                }
-                break;
-
-            case Constants.ROOM_STATE_RUNNING:
-                startRoom(model);
-                break;
-
-            case Constants.ROOM_STATE_ENDING:
-                DialogUtils.dialogConfirm(
-                        requireContext(),
-                        getString(R.string.msg_room_ended),
-                        getString(R.string.title_information),
-                        (dialog, which) -> {
-                            if (model.getMovieItem() != null && model.getMovieItem().getMovie() != null) {
-                                getMovie(model.getMovieItem().getMovie().getId(), model, false, true);
-                            }
-                        },
-                        getString(R.string.back),
-                        (dialog, which) -> dialog.dismiss()
-                );
-                break;
-
-            default:
-                break;
-        }
-    }
-    public void handleRoomClickByClient(RoomResponse model) {
-        switch (model.getState()) {
-            case Constants.ROOM_STATE_PENDING:
-                DialogUtils.dialogConfirm(
-                        requireContext(),
-                        getString(R.string.msg_premier_not_started),
-                        getString(R.string.title_information),
-                        (dialog, which) -> {
-                            getMovie(model.getMovieItem().getMovie().getId(), model, false, false);
-                        },
-                        getString(R.string.back),
-                        (dialog, which) -> {
-                            dialog.dismiss();
-                        }
-                );
-                break;
-            case Constants.ROOM_STATE_RUNNING:
-                getMovie(model.getMovieItem().getMovie().getId(), model, true, false);
-                break;
-            case Constants.ROOM_STATE_ENDING:
-                DialogUtils.dialogConfirm(
-                        requireContext(),
-                        getString(R.string.msg_room_ended),
-                        getString(R.string.title_information),
-                        (dialog, which) -> {
-                            getMovie(model.getMovieItem().getMovie().getId(), model, false, false);
-                        },
-                        getString(R.string.back),
-                        (dialog, which) -> dialog.dismiss()
-                );
-                break;
-            default:
-                break;
-        }
+        handleRoomClickFromExternal(model);
     }
 
-    public void getMovie(Long id, RoomResponse model, boolean isRoomRunning, boolean isHost) {
-        viewModel.getMovie(new MainCallback<MovieResponse>() {
-            @Override
-            public void doError(Throwable error) {
-                hideLoading();
-                new ToastMessage(ToastMessage.TYPE_WARNING, getString(R.string.an_error_occurred)).showMessage(getContext());
-            }
-
-            @Override
-            public void doSuccess() {
-                hideLoading();
-            }
-
-            @Override
-            public void doFail() {
-                new ToastMessage(ToastMessage.TYPE_WARNING, getString(R.string.an_error_occurred)).showMessage(getContext());
-                hideLoading();
-            }
-
-            @Override
-            public void doSuccess(MovieResponse object) {
-                if (isRoomRunning) {
-                    joinRoom(object, model, isHost);
-                } else {
-                    if (viewModel.isLogin()) {
-                        getListMovieTracking(object, NavigateToMovieDetails);
-                    }
-                }
-            }
-        }, id);
+    public void handleRoomClickFromExternal(RoomResponse model) {
+        ((MainActivity) requireActivity()).handleRoomClick(model);
     }
 
-    public void getListMovieTracking(MovieResponse movieResponse, int typeNavigate) {
-        showLoading();
-        viewModel.getListMovieTracking(new MainCallback<ListWatchHistoryResponse>() {
-
-            @Override
-            public void doSuccess(ListWatchHistoryResponse data) {
-                if (typeNavigate == NavigateToMovieDetails) {
-                    navigateToMovieDetails(movieResponse, data);
-                }
-            }
-
-            @Override
-            public void doError(Throwable error) {
-                hideLoading();
-                showError(getString(R.string.an_error_occurred));
-            }
-
-            @Override
-            public void doSuccess() {
-                hideLoading();
-            }
-
-            @Override
-            public void doFail() {
-                hideLoading();
-                showError(getString(R.string.an_error_occurred));
-            }
-        }, movieResponse.getId());
-    }
-
-    public void navigateToMovieDetails(MovieResponse movieResponse, ListWatchHistoryResponse listWatchHistoryResponse) {
-        ((MainActivity) requireActivity()).navigateToMovieDetail(movieResponse, listWatchHistoryResponse);
-    }
-
-    public void joinRoom(MovieResponse movieResponse, RoomResponse model, boolean isHost) {
-        viewModel.joinRoom(new MainCallback<RoomResponse>() {
-            @Override
-            public void doError(Throwable error) {
-                new ToastMessage(ToastMessage.TYPE_WARNING, getString(R.string.an_error_occurred)).showMessage(getContext());
-                hideLoading();
-            }
-
-            @Override
-            public void doSuccess() {
-
-            }
-
-            @Override
-            public void doFail() {
-                new ToastMessage(ToastMessage.TYPE_WARNING, getString(R.string.an_error_occurred)).showMessage(getContext());
-                hideLoading();
-            }
-
-            @Override
-            public void doSuccess(RoomResponse object) {
-                createMqtt(movieResponse, object, isHost);
-            }
-        }, model.getId());
-    }
-    public void startRoom(RoomResponse model) {
-        showLoading();
-        viewModel.startRoom(new MainCallback<RoomResponse>() {
-            @Override
-            public void doError(Throwable error) {
-                viewModel.hideLoading();
-            }
-
-            @Override
-            public void doSuccess() {
-                viewModel.hideLoading();
-            }
-
-            @Override
-            public void doFail() {
-                viewModel.hideLoading();
-            }
-
-            @Override
-            public void doSuccess(RoomResponse object) {
-                getMovie(model.getMovieItem().getMovie().getId(), model, true, true);
-            }
-        }, model.getId());
-    }
-    public void createMqtt(MovieResponse movieResponse, RoomResponse model, boolean isHost) {
-        ((MainActivity) requireActivity()).createMqtt(movieResponse, model, isHost);
-    }
-
-    public void showLoading() {
+    private void showLoading() {
         ((MainActivity) requireActivity()).showLoading();
     }
 
-    public void hideLoading() {
+    private void hideLoading() {
         ((MainActivity) requireActivity()).hideLoading();
     }
 }

@@ -1,86 +1,106 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
-    <data>
-        <variable
-            name="item"
-            type="com.movie_hub.android.data.model.api.response.notification.NotificationResponse" />
-    </data>
+<com.daimajia.swipe.SwipeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/swipe_layout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    app:leftEdgeSwipeOffset="0dp"
+    app:rightEdgeSwipeOffset="0dp">
 
-    <RelativeLayout
+    <LinearLayout
+        android:id="@+id/bottom_wrapper"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:orientation="horizontal">
+
+        <FrameLayout
+            android:id="@+id/layout_delete"
+            android:layout_width="@dimen/_80sdp"
+            android:layout_height="match_parent"
+            android:background="#FF1744">
+
+            <ImageView
+                android:layout_width="@dimen/_24sdp"
+                android:layout_height="@dimen/_24sdp"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_delete"
+                app:tint="@android:color/white" />
+        </FrameLayout>
+    </LinearLayout>
+
+    <LinearLayout
         android:id="@+id/layout_root"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@drawable/bg_btn_press_tran"
         android:clickable="true"
         android:focusable="true"
-        android:background="@drawable/bg_btn_press_tran">
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingHorizontal="@dimen/_12sdp"
+        android:paddingVertical="@dimen/_12sdp">
+
+        <ImageView
+            android:id="@+id/ic_un_read"
+            android:layout_width="@dimen/_8sdp"
+            android:layout_height="@dimen/_8sdp"
+            android:layout_marginEnd="@dimen/_8sdp"
+            android:src="@drawable/ic_un_read"
+            android:visibility="invisible" />
 
         <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/img_avatar"
-            android:layout_width="@dimen/_36sdp"
-            android:layout_height="@dimen/_36sdp"
+            android:layout_width="@dimen/_40sdp"
+            android:layout_height="@dimen/_40sdp"
             android:scaleType="centerCrop"
-            app:shapeAppearanceOverlay="@style/roundImg"
             android:src="@drawable/logo"
-            android:layout_gravity="center"
-            android:layout_marginStart="@dimen/_6sdp"
-            android:layout_centerVertical="true"
-            android:visibility="gone"/>
+            app:shapeAppearanceOverlay="@style/roundImg" />
 
         <LinearLayout
-            android:layout_width="match_parent"
+            android:id="@+id/layout_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_centerVertical="true"
-            android:layout_marginStart="@dimen/_12sdp"
-            android:layout_marginVertical="@dimen/_12sdp"
-            android:layout_marginEnd="@dimen/_6sdp"
-            android:layout_toEndOf="@+id/img_avatar"
-            android:layout_toStartOf="@+id/img_movie">
+            android:layout_marginStart="@dimen/_10sdp"
+            android:layout_weight="1"
+            android:orientation="vertical">
 
             <TextView
                 android:id="@+id/tv_title"
-                android:layout_width="wrap_content"
+                style="@style/Text_14_Bold"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:ellipsize="end"
-                android:text="@{item.title}"
-                android:maxLines="3"
-                style="@style/Text_14_Normal"/>
+                android:maxLines="2" />
+
+            <TextView
+                android:id="@+id/tv_subtitle"
+                style="@style/Text_12_Normal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/_2sdp"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:textColor="@color/text_gray"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/tv_preview"
+                style="@style/Text_12_Normal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/_4sdp"
+                android:ellipsize="end"
+                android:maxLines="2"
+                android:textColor="@color/text"
+                android:visibility="gone" />
 
             <TextView
                 android:id="@+id/tv_time"
+                style="@style/Text_10_Normal"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:singleLine="true"
-                android:ellipsize="end"
-                android:layout_marginTop="@dimen/_3sdp"
-                android:textColor="@color/text_gray"
-                style="@style/Text_10_Normal"/>
-
+                android:layout_marginTop="@dimen/_6sdp"
+                android:textColor="@color/text_gray" />
         </LinearLayout>
-
-        <com.google.android.material.imageview.ShapeableImageView
-            android:id="@+id/img_movie"
-            android:layout_width="@dimen/_64sdp"
-            android:layout_height="@dimen/_36sdp"
-            android:scaleType="centerCrop"
-            app:shapeAppearanceOverlay="@style/imgNotification"
-            android:src="@drawable/logo"
-            android:layout_gravity="center"
-            android:layout_centerVertical="true"
-            android:visibility="gone"
-            android:layout_marginEnd="@dimen/_6sdp"
-            android:layout_toStartOf="@+id/ic_un_read"
-            />
-
-        <ImageView
-            android:layout_width="@dimen/_8sdp"
-            android:layout_height="@dimen/_8sdp"
-            android:id="@+id/ic_un_read"
-            android:src="@drawable/ic_un_read"
-            android:layout_centerVertical="true"
-            android:layout_alignParentEnd="true"
-            android:layout_marginEnd="@dimen/_6sdp"/>
-
-    </RelativeLayout>
-</layout>
+    </LinearLayout>
+</com.daimajia.swipe.SwipeLayout>

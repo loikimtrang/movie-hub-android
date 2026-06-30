@@ -325,12 +325,14 @@ public abstract class BaseActivity<B extends ViewDataBinding, V extends BaseView
         switch (message.getCmd()) {
             case OneSignalCommand.CMD_REPLY_COMMENT:
             case OneSignalCommand.CMD_TOXIC_COMMENT_LOCKED:
+            case OneSignalCommand.CMD_VOTE_COMMENT:
                 MessageCommentResponse messageCommentResponse = GsonUtils.fromJson(message.getData(), MessageCommentResponse.class);
                 if (messageCommentResponse != null && messageCommentResponse.getMovieId() != null) {
                     getMovieDetailByNotification(Long.valueOf(messageCommentResponse.getMovieId()), message);
                 }
                 break;
             case OneSignalCommand.CMD_TOXIC_REVIEW_LOCKED:
+            case OneSignalCommand.CMD_VOTE_REVIEW:
                 MessageReviewResponse messageReviewResponse = GsonUtils.fromJson(message.getData(), MessageReviewResponse.class);
                 if (messageReviewResponse != null && messageReviewResponse.getMovieId() != null) {
                     getMovieDetailByNotification(Long.valueOf(messageReviewResponse.getMovieId()), message);

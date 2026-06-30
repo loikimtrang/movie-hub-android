@@ -314,6 +314,10 @@
     <string name="error_select_at_least_3">Vui lòng chọn ít nhất 3 tác phẩm</string>
     <string name="notification">Thông báo</string>
     <string name="empty_notification">Bạn không có thông báo nào</string>
+    <string name="notification_from">Từ %1$s</string>
+    <string name="notification_room_by_host">%1$s mời bạn xem chung</string>
+    <string name="notification_premiere_at">Công chiếu: %1$s</string>
+    <string name="notification_content_hidden">Nội dung đã bị ẩn</string>
     <string name="time_just_now">vừa xong</string>
     <string name="time_minutes_ago">%d phút trước</string>
     <string name="time_hours_ago">%d giờ trước</string>
@@ -368,6 +372,7 @@
     <string name="msg_room_ended">Phòng chiếu phim đã kết thúc</string>
     <string name="msg_waiting_for_host">Chủ phòng chưa tham gia, vui lòng đợi</string>
     <string name="msg_premier_ready_ask">Đã đến thời gian công chiếu, bạn có muốn bắt đầu không?</string>
+    <string name="msg_premier_expired">Phòng hiện tại đã quá thời gian công chiếu</string>
 
     <string name="room_code_title">Mã phòng</string>
     <string name="room_info_title">Thông tin phòng</string>
