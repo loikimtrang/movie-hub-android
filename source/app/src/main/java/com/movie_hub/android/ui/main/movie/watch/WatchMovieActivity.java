@@ -40,7 +40,6 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.widget.SwitchCompat;
 import androidx.core.view.WindowCompat;
 import androidx.media3.common.C;
 import androidx.media3.common.Format;
@@ -177,8 +176,6 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
     private boolean suppressModelSpeedObserver = false;
     private boolean suppressMqttPublishFromModel = false;
     @Nullable private Float normalSpeedBeforePress = null;
-    private boolean suppressSyncSwitchListener = false;
-
     private Handler handlerPing = new Handler(Looper.getMainLooper());
     private Runnable runnablePing;
 
@@ -260,7 +257,7 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
                 viewModel.roomDetail = GsonUtils.fromJson(roomJson, RoomResponse.class);
                 viewModel.refreshLiveRoomUiState();
                 viewModel.initLiveRoomViewerCount();
-                setupSyncWithHostToggle();
+                setupSyncWithHostButton();
 
                 if (viewModel.isHost) {
                     startSchedule();
@@ -553,33 +550,17 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
         }
     }
 
-    private void setupSyncWithHostToggle() {
-        if (!viewModel.isHost) {
-            viewModel.setSyncWithHost(true);
-            viewBinding.layoutSync.setVisibility(View.VISIBLE);
-        } else {
-            return;
-        }
+    private void setupSyncWithHostButton() {
+        if (viewModel.isHost) return;
 
-        SwitchCompat syncSwitch = viewBinding.switchSyncWithHost;
+        viewModel.setSyncWithHost(true);
+        viewBinding.layoutSync.setVisibility(View.VISIBLE);
+    }
 
-        viewModel.getIsSyncWithHost().observe(this, enabled -> {
-            boolean v = enabled == null || enabled;
-            if (syncSwitch.isChecked() == v) return;
-            suppressSyncSwitchListener = true;
-            syncSwitch.setChecked(v);
-            suppressSyncSwitchListener = false;
-        });
-
-        syncSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            if (suppressSyncSwitchListener) return;
-            boolean wasEnabled = viewModel.isSyncWithHostEnabled();
-            viewModel.setSyncWithHost(isChecked);
-
-            if (!wasEnabled && isChecked && viewModel.isLiveRoom && !viewModel.isHost) {
-                requestSyncFromHost();
-            }
-        });
+    /** Manual re-sync when playback drifts from the host. */
+    private void resyncWithHost() {
+        if (viewModel.isHost || !viewModel.isLiveRoom) return;
+        requestSyncFromHost();
     }
 
     private void requestSyncFromHost() {
@@ -2410,6 +2391,9 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
             case R.id.btn_room_info:
                 showRoomInfoDialog();
                 break;
+            case R.id.layout_sync:
+                resyncWithHost();
+                break;
             default:
                 break;
         }
@@ -2910,7 +2894,7 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
         if (!viewModel.isSyncWithHostEnabled()) return;
         String json =  GsonUtils.toJson(message.getData());
         if (json != null) {
-            RoomStateModel roomStateModel = GsonUtils.fromJson(json, RoomStateModel.class);
+            RoomStateModel roomStateModel = GsonUtils.fromJsonRoomStateModel(json);
             if (player != null && roomStateModel != null) {
 
                 switch (roomStateModel.getSubCmd()) {
@@ -2935,13 +2919,13 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
     }
 
     public void syncRoomWithHost(RoomStateModel roomStateModel) {
-        player.seekTo(roomStateModel.getCurrentPositionMovie());
+        player.seekTo((long) roomStateModel.getCurrentPositionMovie());
         updatePlayPauseState(roomStateModel.isPlay(), true);
         applyPlaybackSpeed((float) roomStateModel.getPlaySpeed(), false);
     }
 
     public void seekRoom(RoomStateModel roomStateModel) {
-        player.seekTo(roomStateModel.getCurrentPositionMovie());
+        player.seekTo((long) roomStateModel.getCurrentPositionMovie());
     }
 
     public void endRoom(Message message) {

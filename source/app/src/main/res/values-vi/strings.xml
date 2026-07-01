@@ -24,6 +24,7 @@
     <string name="menu_privacy_policy">Chính sách bảo mật</string>
     <string name="menu_contact">Liên hệ</string>
     <string name="menu_language">Ngôn ngữ</string>
+    <string name="sync">Đồng bộ</string>
 
     <string name="confirm">Đồng ý</string>
     <string name="cancel">Hủy</string>

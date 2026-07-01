@@ -3,6 +3,8 @@ package com.movie_hub.android.utils;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
+import com.movie_hub.android.data.model.mqtt.RoomStateModel;
+import com.movie_hub.android.data.model.mqtt.RoomStateModelDeserializer;
 
 import java.lang.reflect.Type;
 import java.util.List;
@@ -13,6 +15,12 @@ public final class GsonUtils {
     private static final Gson gson = new GsonBuilder()
             .setLenient()
             .serializeNulls()  // giữ luôn key null khi convert
+            .create();
+
+    private static final Gson roomStateGson = new GsonBuilder()
+            .setLenient()
+            .serializeNulls()
+            .registerTypeAdapter(RoomStateModel.class, new RoomStateModelDeserializer())
             .create();
 
     private GsonUtils() {
@@ -55,6 +63,16 @@ public final class GsonUtils {
         try {
             Type type = new TypeToken<Map<String, Object>>() {}.getType();
             return gson.fromJson(json, type);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    /** Parse room playback state; accepts int/long/double for numeric fields. */
+    public static RoomStateModel fromJsonRoomStateModel(String json) {
+        try {
+            return roomStateGson.fromJson(json, RoomStateModel.class);
         } catch (Exception e) {
             e.printStackTrace();
             return null;

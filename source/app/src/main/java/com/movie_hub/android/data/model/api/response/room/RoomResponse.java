@@ -22,4 +22,5 @@ public class RoomResponse {
 
     private UserResponse host;
     private MovieItemResponse movieItem;
+    private Integer currentViewers;
 }

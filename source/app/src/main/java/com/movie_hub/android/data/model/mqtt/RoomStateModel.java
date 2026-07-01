@@ -7,6 +7,6 @@ public class RoomStateModel {
     String subCmd;
 
     boolean isPlay;
-    long currentPositionMovie;
+    double currentPositionMovie;
     double playSpeed;
 }

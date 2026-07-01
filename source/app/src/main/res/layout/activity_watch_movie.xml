@@ -282,23 +282,24 @@
                                 android:layout_centerVertical="true"
                                 android:layout_toStartOf="@+id/btn_open_chat"
                                 android:orientation="horizontal"
+                                android:gravity="center"
+                                android:clickable="true"
+                                android:focusable="true"
+                                android:onClick="onClick"
+                                android:background="?attr/selectableItemBackgroundBorderless"
                                 android:visibility="gone">
 
-                                <androidx.appcompat.widget.SwitchCompat
-                                    android:id="@+id/switch_sync_with_host"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:thumb="@drawable/thumb_custom"
-                                    app:track="@drawable/track_custom"
-                                    android:switchMinWidth="@dimen/_30sdp"
-                                    android:layout_alignParentEnd="true"
-                                    android:layout_centerVertical="true"/>
+                                <ImageView
+                                    android:layout_width="@dimen/_16sdp"
+                                    android:layout_height="@dimen/_16sdp"
+                                    android:src="@drawable/ic_sync"
+                                    android:tint="@color/white" />
 
                                 <TextView
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     style="@style/Text_14_Normal"
-                                    android:text="@string/sync_with_host"
+                                    android:text="@string/sync"
                                     android:layout_marginStart="@dimen/_6sdp"/>
                             </LinearLayout>
 

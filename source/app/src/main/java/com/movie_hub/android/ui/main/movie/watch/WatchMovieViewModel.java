@@ -96,7 +96,7 @@ public class WatchMovieViewModel extends BaseViewModel {
      * Public for layout Data Binding ({@code vm.participantPlaybackRestricted}).
      */
     public final MutableLiveData<Boolean> participantPlaybackRestricted = new MutableLiveData<>(false);
-    /** Null when not in a live room; updated by server {@code CMD_UPDATE_PARTICIPANT_COUNT}. */
+    /** Null when not in a live room; seeded from join API {@code currentViewers}, then MQTT updates. */
     private final MutableLiveData<Integer> liveRoomViewerCount = new MutableLiveData<>();
     public ClientPingModel clientPingModel = new ClientPingModel();
     public Message msgPing = new Message();
@@ -224,14 +224,24 @@ public class WatchMovieViewModel extends BaseViewModel {
         return liveRoomViewerCount;
     }
 
+    /** Initial value from join API {@code currentViewers}; kept in sync via {@code CMD_UPDATE_PARTICIPANT_COUNT}. */
     public void initLiveRoomViewerCount() {
-        // Chỉ cập nhật qua CMD_UPDATE_PARTICIPANT_COUNT từ server, không dùng participantCount từ API.
-        liveRoomViewerCount.setValue(null);
+        if (roomDetail == null) {
+            liveRoomViewerCount.setValue(null);
+            return;
+        }
+        Integer count = roomDetail.getCurrentViewers();
+        if (count != null) {
+            liveRoomViewerCount.setValue(count);
+        } else {
+            liveRoomViewerCount.setValue(null);
+        }
     }
 
     public void applyServerViewerCount(@NonNull String roomId, int currentViewers) {
         if (roomDetail == null || roomDetail.getId() == null) return;
         if (!roomId.equals(String.valueOf(roomDetail.getId()))) return;
+        roomDetail.setCurrentViewers(currentViewers);
         roomDetail.setParticipantCount(currentViewers);
         liveRoomViewerCount.setValue(currentViewers);
     }

@@ -612,6 +612,9 @@ public class CreateRoomActivity extends BaseActivity<ActivityCreateRoomBinding, 
 
             @Override
             public void doSuccess(RoomResponse object) {
+                if (object != null) {
+                    viewModel.roomResponse = object;
+                }
                 createMqtt();
             }
         }, viewModel.roomResponse.getId());
