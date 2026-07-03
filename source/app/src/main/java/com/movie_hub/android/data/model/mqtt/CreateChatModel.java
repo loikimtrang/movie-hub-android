@@ -13,16 +13,15 @@ import lombok.NoArgsConstructor;
 public class CreateChatModel {
     private String accountId;
     private String content;
-    private UserResponse author;
-    private String createDate;
-    /** Local-only: true when the message arrived while the chat panel was closed. */
-    private boolean unread;
+    private UserResponse user;
+    private String createdDate;
+    private transient Boolean isRead;
 
-    public CreateChatModel(String accountId, String content, UserResponse author, String createDate) {
+    public CreateChatModel(String accountId, String content, UserResponse user, String createdDate, Boolean isRead) {
         this.accountId = accountId;
         this.content = content;
-        this.author = author;
-        this.createDate = createDate;
-        this.unread = false;
+        this.user = user;
+        this.createdDate = createdDate;
+        this.isRead = isRead;
     }
 }

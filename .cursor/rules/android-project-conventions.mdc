@@ -1,0 +1,120 @@
+---
+description: Quy ước code cho dự án Android Movie Hub — MVVM, MQTT, Dialog, UI patterns
+alwaysApply: true
+---
+
+# Movie Hub Android — Project Conventions
+
+## Kiến trúc
+
+- MVVM: Activity/Fragment → ViewModel → Repository
+- DataBinding: dùng `viewBinding.xxx` (auto-generated từ id snake_case → camelCase)
+- LiveData: dùng `MutableLiveData` trong ViewModel, observe trong Activity
+- Async: RxJava3 (`Schedulers.io()` + `AndroidSchedulers.mainThread()`)
+
+## Model
+
+- Dùng Lombok `@Data` cho MQTT models, `@Getter @Setter` cho response models
+- Parse JSON: `GsonUtils.fromJson()` / `GsonUtils.toJson()` — không dùng Gson trực tiếp
+- Avatar/media URL: nếu không phải `http`, prefix bằng `Constants.MEDIA_URL`
+
+```java
+// ✅ ĐÚNG
+if (!avatar.contains("http")) avatar = Constants.MEDIA_URL + avatar;
+
+// ❌ SAI
+String url = BuildConfig.BASE_URL + avatar;
+```
+
+## Dialog
+
+**Luôn dùng `DialogUtils`** — không tạo Dialog thủ công:
+
+```java
+// Confirm 2 nút
+DialogUtils.dialogConfirm(context, message, positiveText, positiveListener, negativeText, null);
+
+// Thông báo 1 nút
+DialogUtils.dialogConfirmSingleButton(context, message, buttonText, listener);
+```
+
+## MQTT
+
+- Command constants: thêm vào `Command.java`
+- Topic cá nhân user: `Constants.TOPIC + roomId + "/" + userId`
+- Topic phòng: `Constants.TOPIC + roomId`
+- Gửi message: `sendMqttMessage(msg, topic)` trong Activity
+- Handle trong `onMessageReceived()`: thêm `case Command.CMD_XXX` vào switch
+
+```java
+// Thêm command mới
+public static final String CMD_XXX = "CMD_XXX";
+```
+
+## String Resources
+
+Khi thêm string mới, **luôn thêm vào cả 2 file**:
+- `res/values/strings.xml` — tiếng Việt
+- `res/values-en/strings.xml` — tiếng Anh
+
+## RecyclerView Adapter
+
+Pattern chuẩn:
+
+```java
+public class XxxAdapter extends RecyclerView.Adapter<XxxAdapter.ViewHolder> {
+    public interface OnXxxListener { void onXxx(Item item); }
+
+    private final List<Item> items = new ArrayList<>();
+    public void submitList(List<Item> list) {
+        items.clear();
+        if (list != null) items.addAll(list);
+        notifyDataSetChanged();
+    }
+}
+```
+
+## PopupWindow
+
+```java
+View popupView = LayoutInflater.from(context).inflate(R.layout.layout_popup_xxx, null);
+PopupWindow popup = new PopupWindow(popupView,
+    ViewGroup.LayoutParams.WRAP_CONTENT,
+    ViewGroup.LayoutParams.WRAP_CONTENT, true);
+popup.setOutsideTouchable(true);
+popup.showAsDropDown(anchor, 0, 0); // ngay dưới anchor
+```
+
+## UI — Right Panel (Live Room)
+
+- Panel bên phải (id: `layout_chat`, weight=3): Chat tab + Thành viên tab
+- `switchToTab(boolean membersTab)` để switch
+- `openPanelToTab(boolean)` để mở panel + switch tab
+- Tiêu đề panel: `viewBinding.tvPanelTitle.setText(...)` — chỉ hiện tên tab đang active
+- Khi members tab active: chat observer **không** được thay đổi visibility chat views
+
+## Live Room MQTT Commands
+
+> Xem chi tiết đầy đủ payload + flow trong `watch-together-mqtt-protocol.mdc`
+
+| Command | Hướng | Topic | Mô tả |
+|---|---|---|---|
+| `CMD_CLIENT_PING` | Host → room | `room/{roomId}` | Heartbeat mỗi 10s |
+| `CMD_PARTICIPANT_JOIN` | Participant → Host | `room/{roomId}` | Video sẵn sàng, báo tham gia |
+| `CMD_ROOM_SYNC` | Participant → Host | `room/{roomId}` | Yêu cầu đồng bộ lại |
+| `CMD_PARTICIPANT_LEFT` | Client → room | `room/{roomId}` | Rời phòng |
+| `CMD_CREATE_CHAT` | Any → room | `room/{roomId}` | Gửi chat |
+| `CMD_ROOM_STATE` | Host → room/user | `room/{roomId}` or personal | Đồng bộ playback (có subCmd) |
+| `CMD_KICK` | Host → user | `room/{roomId}/{targetUserId}` | Kick thành viên |
+| `CMD_UPDATE_PARTICIPANT_COUNT` | Server → All | `room/{roomId}` | Cập nhật số người + danh sách |
+| `CMD_END_ROOM` | Server → All | `room/{roomId}` | Kết thúc phòng |
+
+### CMD_ROOM_STATE subCmd
+
+| subCmd | Khi nào |
+|---|---|
+| `CMD_ROOM_PLAY` | Host bấm play |
+| `CMD_ROOM_PAUSE` | Host bấm pause |
+| `CMD_ROOM_SEEK` | Host seek (seekbar, ±10s, skip intro…) |
+| `CMD_ROOM_PLAY_SPEED` | Host đổi tốc độ |
+| `CMD_ROOM_ALL_STATE` | Point-to-point khi participant join/sync |

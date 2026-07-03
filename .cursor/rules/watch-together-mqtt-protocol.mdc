@@ -1,0 +1,373 @@
+---
+description: Đặc tả đầy đủ MQTT protocol cho tính năng Watch Together — topics, CMDs, payload, flow
+alwaysApply: true
+---
+
+# Watch Together — MQTT Protocol Specification
+
+## 1. Kết nối MQTT
+
+| Thông số | Giá trị |
+|---|---|
+| Auth | `MQTT_USERNAME` / `MQTT_PASSWORD` |
+| Client ID | `userId` (string) |
+| QoS | 2 (subscribe + publish) |
+
+### Message wrapper (mọi message đều dùng format này)
+
+```json
+{
+  "cmd": "CMD_XXX",
+  "data": { ... }
+}
+```
+
+Model Android:
+```java
+public class Message {
+    private String cmd;
+    private Object data;
+}
+```
+
+---
+
+## 2. Topics
+
+### 2.1 Bảng topics
+
+| Topic | Subscribe | Publish |
+|---|---|---|
+| `room/{roomId}` | Host + Participant | Participant (join, leave, chat, ping, sync request) |
+| `room/{roomId}/{userId}` | Chỉ Participant (userId của chính mình) | Chỉ Host (gửi snapshot point-to-point) |
+
+### 2.2 Subscribe theo vai trò
+
+```
+Host    → subscribe: ["room/{roomId}"]
+Participant → subscribe: ["room/{roomId}", "room/{roomId}/{myUserId}"]
+```
+
+> **Web lưu ý:** Participant phải subscribe cả 2 topic để nhận snapshot đồng bộ ban đầu từ host.
+
+---
+
+## 3. Danh sách CMD — Phân loại theo hướng
+
+```
+┌─────────────────────────────────────────────────────────┐
+│ PARTICIPANT → HOST  (topic: room/{roomId})               │
+│  • CMD_PARTICIPANT_JOIN                                  │
+│  • CMD_ROOM_SYNC                                        │
+│  • CMD_PARTICIPANT_LEFT                                  │
+│  • CMD_CREATE_CHAT                                       │
+│  • CMD_CLIENT_PING  ← chỉ host gửi (xem mục 4.1)       │
+├─────────────────────────────────────────────────────────┤
+│ HOST → ALL PARTICIPANTS  (topic: room/{roomId})          │
+│  • CMD_ROOM_STATE + subCmd: PLAY / PAUSE / SEEK / SPEED │
+├─────────────────────────────────────────────────────────┤
+│ HOST → 1 PARTICIPANT  (topic: room/{roomId}/{userId})    │
+│  • CMD_ROOM_STATE + subCmd: CMD_ROOM_ALL_STATE           │
+│  • CMD_KICK                                              │
+├─────────────────────────────────────────────────────────┤
+│ BACKEND → TẤT CẢ  (topic: room/{roomId})                │
+│  • CMD_END_ROOM                                          │
+│  • CMD_UPDATE_PARTICIPANT_COUNT                          │
+└─────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 4. Chi tiết từng CMD
+
+### 4.1 CMD_CLIENT_PING — Host heartbeat
+
+- **Ai gửi:** Host
+- **Topic:** `room/{roomId}`
+- **Tần suất:** Mỗi 10 giây
+- **Mục đích:** Giữ phòng sống, backend detect host còn online
+
+```json
+{
+  "cmd": "CMD_CLIENT_PING",
+  "data": {
+    "accountId": "12345"
+  }
+}
+```
+
+---
+
+### 4.2 CMD_PARTICIPANT_JOIN — Participant báo sẵn sàng
+
+- **Ai gửi:** Participant
+- **Topic:** `room/{roomId}`
+- **Khi nào:** Lần đầu vào room khi video đã phát được (Web: event `canplay`)
+
+```json
+{
+  "cmd": "CMD_PARTICIPANT_JOIN",
+  "data": {
+    "id": "67890"
+  }
+}
+```
+
+**Flow:**
+```
+Participant: video canplay → publish CMD_PARTICIPANT_JOIN
+Host nhận   → publish CMD_ROOM_ALL_STATE tới room/{roomId}/{joinerUserId}
+```
+
+---
+
+### 4.3 CMD_ROOM_SYNC — Participant yêu cầu đồng bộ lại
+
+- **Ai gửi:** Participant
+- **Topic:** `room/{roomId}`
+- **Khi nào:** Bật lại toggle "Sync with Host" sau khi đã tắt
+
+```json
+{
+  "cmd": "CMD_ROOM_SYNC",
+  "data": { "id": "67890" }
+}
+```
+
+**Flow:** Giống CMD_PARTICIPANT_JOIN — Host nhận → gửi CMD_ROOM_ALL_STATE tới topic cá nhân.
+
+---
+
+### 4.4 CMD_ROOM_STATE — Đồng bộ playback (core)
+
+Model data (`RoomStateModel`):
+```java
+public class RoomStateModel {
+    String subCmd;           // sub-command (xem các mục dưới)
+    boolean isPlay;          // Gson key: "isPlay"
+    long currentPositionMovie; // milliseconds
+    double playSpeed;
+}
+```
+
+> **Web lưu ý:** Gson serialize field `isPlay` thành key `"isPlay"` (không phải `"play"`).
+> `currentPositionMovie` là **milliseconds**.
+
+#### 4.4.1 CMD_ROOM_PLAY / CMD_ROOM_PAUSE
+
+- **Ai gửi:** Host → **Topic:** `room/{roomId}`
+
+```json
+// PLAY
+{
+  "cmd": "CMD_ROOM_STATE",
+  "data": { "subCmd": "CMD_ROOM_PLAY", "isPlay": true, "currentPositionMovie": 0, "playSpeed": 0.0 }
+}
+
+// PAUSE
+{
+  "cmd": "CMD_ROOM_STATE",
+  "data": { "subCmd": "CMD_ROOM_PAUSE", "isPlay": false, "currentPositionMovie": 0, "playSpeed": 0.0 }
+}
+```
+
+#### 4.4.2 CMD_ROOM_SEEK
+
+- **Ai gửi:** Host → **Topic:** `room/{roomId}`
+- **Khi nào:** Host seek (seekbar, ±10s, replay, skip intro, resume position…)
+
+```json
+{
+  "cmd": "CMD_ROOM_STATE",
+  "data": { "subCmd": "CMD_ROOM_SEEK", "isPlay": false, "currentPositionMovie": 125430, "playSpeed": 0.0 }
+}
+```
+
+Web xử lý: `video.currentTime = currentPositionMovie / 1000`
+
+#### 4.4.3 CMD_ROOM_PLAY_SPEED
+
+- **Ai gửi:** Host → **Topic:** `room/{roomId}`
+
+```json
+{
+  "cmd": "CMD_ROOM_STATE",
+  "data": { "subCmd": "CMD_ROOM_PLAY_SPEED", "isPlay": false, "currentPositionMovie": 0, "playSpeed": 1.5 }
+}
+```
+
+Web xử lý: `video.playbackRate = playSpeed`
+
+#### 4.4.4 CMD_ROOM_ALL_STATE — Snapshot đầy đủ (point-to-point)
+
+- **Ai gửi:** Host → **Topic:** `room/{roomId}/{participantUserId}`
+- **Khi nào:** Participant join hoặc request sync
+
+```json
+{
+  "cmd": "CMD_ROOM_STATE",
+  "data": { "subCmd": "CMD_ROOM_ALL_STATE", "isPlay": true, "currentPositionMovie": 543210, "playSpeed": 1.0 }
+}
+```
+
+Web xử lý: seek + play/pause + playbackRate cùng lúc.
+
+---
+
+### 4.5 CMD_CREATE_CHAT — Chat trong phòng
+
+- **Ai gửi:** Bất kỳ ai trong phòng
+- **Topic:** `room/{roomId}`
+
+```json
+{
+  "cmd": "CMD_CREATE_CHAT",
+  "data": {
+    "accountId": "67890",
+    "content": "Hello room!",
+    "author": {
+      "id": 67890,
+      "fullName": "User Name",
+      "avatarPath": "/path/avatar.jpg",
+      "username": "user123"
+    },
+    "createDate": "2026-06-22T10:30:45.123Z"
+  }
+}
+```
+
+> `createDate`: ISO 8601 UTC — `yyyy-MM-dd'T'HH:mm:ss.SSS'Z'`
+
+---
+
+### 4.6 CMD_PARTICIPANT_LEFT — Rời phòng
+
+- **Ai gửi:** Participant hoặc Host (khi destroy / chọn Continue sau khi phòng kết thúc)
+- **Topic:** `room/{roomId}`
+
+```json
+{
+  "cmd": "CMD_PARTICIPANT_LEFT",
+  "data": {
+    "accountId": "12345"
+  }
+}
+```
+
+---
+
+### 4.7 CMD_END_ROOM — Backend kết thúc phòng
+
+- **Ai gửi:** Backend → **Topic:** `room/{roomId}`
+
+```json
+{
+  "cmd": "CMD_END_ROOM",
+  "data": {
+    "roomId": "42",
+    "reason": "HOST_LEFT"
+  }
+}
+```
+
+| `reason` | Constant | Xử lý |
+|---|---|---|
+| `ROOM_TIMEOUT` | `ROOM_REASON_TIMEOUT` | Host: đếm ngược 5s rồi thoát. Participant: dialog Continue / Exit |
+| `ROOM_END` | `ROOM_REASON_END` | Dialog Continue / Exit |
+| `HOST_LEFT` | `ROOM_REASON_HOST_LEFT` | Dialog Continue / Exit |
+
+> **Nếu chọn Continue:** thoát khỏi live room mode, xem bình thường như không có Watch Together.
+
+---
+
+### 4.8 CMD_UPDATE_PARTICIPANT_COUNT — Server cập nhật số người xem
+
+- **Ai gửi:** Backend → **Topic:** `room/{roomId}`
+
+```json
+{
+  "cmd": "CMD_UPDATE_PARTICIPANT_COUNT",
+  "data": {
+    "roomId": "42",
+    "currentViewers": 5,
+    "participants": [
+      {
+        "id": 1,
+        "user": {
+          "id": 12345,
+          "username": "user123",
+          "fullName": "Nguyễn Văn A",
+          "avatarPath": "/avatar/a.jpg"
+        },
+        "role": 1,
+        "state": 1
+      }
+    ]
+  }
+}
+```
+
+| Field | Type | Mô tả |
+|---|---|---|
+| `roomId` | string | ID phòng — client phải so khớp trước khi xử lý |
+| `currentViewers` | number | Số người đang xem (cập nhật badge UI) |
+| `participants` | array | Danh sách thành viên (có thể null nếu server chưa gửi) |
+| `participants[].role` | number | `1` = host, `0` = participant |
+| `participants[].state` | number | `0` = pending, `1` = joined, `2` = left |
+
+**Khi nào server bắn:**
+- Participant join (`CMD_PARTICIPANT_JOIN`) → tăng count
+- Participant/Host leave (`CMD_PARTICIPANT_LEFT`) → giảm count
+- Host disconnect / timeout → cập nhật lại
+
+**Khởi tạo ban đầu:** Dùng `participantCount` từ API room response, MQTT cập nhật realtime sau.
+
+---
+
+### 4.9 CMD_KICK — Host kick thành viên *(thêm mới)*
+
+- **Ai gửi:** Host
+- **Topic:** `room/{roomId}/{targetUserId}` (point-to-point tới đúng user bị kick)
+
+```json
+{
+  "cmd": "CMD_KICK",
+  "data": {
+    "roomId": "42",
+    "targetUserId": "67890"
+  }
+}
+```
+
+**Flow:**
+```
+Host bấm kick → publish CMD_KICK tới room/{roomId}/{targetUserId}
+Participant nhận → kiểm tra targetUserId == myUserId
+  → Đúng: hiện dialog "Bạn đã bị kích khỏi phòng"
+  → Bấm Thoát: publish CMD_PARTICIPANT_LEFT rồi disconnect
+```
+
+> **Web lưu ý:**
+> - Participant phải **đã subscribe** `room/{roomId}/{myUserId}` mới nhận được CMD_KICK
+> - Sau khi bị kick, publish `CMD_PARTICIPANT_LEFT` trước khi disconnect để backend cập nhật count
+> - Dialog không cho dismiss (buộc phải bấm Thoát)
+
+---
+
+## 5. Giá trị khởi tạo khi vào phòng
+
+```
+1. Gọi API lấy room detail → lấy participantCount làm viewer count ban đầu
+2. Subscribe MQTT topics theo vai trò (xem mục 2.2)
+3. Participant: khi video sẵn sàng → publish CMD_PARTICIPANT_JOIN
+4. Host: nhận JOIN → publish CMD_ROOM_ALL_STATE point-to-point
+5. Realtime updates qua CMD_UPDATE_PARTICIPANT_COUNT
+```
+
+## 6. Lưu ý quan trọng cho Web
+
+- Mọi message đều wrap trong `{ cmd, data }` — parse `cmd` trước, rồi parse `data` theo từng cmd
+- `currentPositionMovie` luôn là **milliseconds** → Web: `/ 1000` để ra giây
+- `isPlay` là boolean, không phải `"play"` hay `"isPlaying"`
+- Participants chỉ nhận CMD_ROOM_STATE khi `isSyncWithHost = true`; nếu tắt sync thì bỏ qua
+- Khi nhận CMD_UPDATE_PARTICIPANT_COUNT, phải so khớp `roomId` với phòng hiện tại trước khi xử lý

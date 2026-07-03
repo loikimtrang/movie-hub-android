@@ -111,6 +111,9 @@
     <color name="bg_chat">#1E1E1E</color>
     <color name="bg_input_chat">#2C2C2C</color>
 
+    <color name="bg_swipe_delete">#BF3131</color>
+    <color name="bg_swipe_copy">#1C5B8B</color>
+
     <color name="subtitle_text_yellow">#FFF09B</color>
     <color name="subtitle_bg_black_80">#CC000000</color>
     <color name="subtitle_bg_black_50">#80000000</color>

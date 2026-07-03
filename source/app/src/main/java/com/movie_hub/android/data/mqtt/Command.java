@@ -21,4 +21,7 @@ public class Command {
     public static final String CMD_END_ROOM = "CMD_END_ROOM";
     public static final String CMD_UPDATE_PARTICIPANT_COUNT = "CMD_UPDATE_PARTICIPANT_COUNT";
 
+    // Host kick participant
+    public static final String CMD_KICK = "CMD_KICK";
+
 }

@@ -34,6 +34,8 @@ import android.view.WindowManager;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageView;
+import android.view.LayoutInflater;
+import android.widget.PopupWindow;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -88,12 +90,15 @@ import com.movie_hub.android.data.model.api.response.season.SeasonResponse;
 import com.movie_hub.android.data.model.api.response.subtitle.SubtitleResponse;
 import com.movie_hub.android.data.model.api.response.user.UserResponse;
 import com.movie_hub.android.data.model.api.response.video.VideoResponse;
+import com.movie_hub.android.data.model.api.response.room.ParticipantDto;
 import com.movie_hub.android.data.model.mqtt.CreateChatModel;
 import com.movie_hub.android.data.model.mqtt.ClientPingModel;
 import com.movie_hub.android.data.model.mqtt.EndRoomModel;
+import com.movie_hub.android.data.model.mqtt.KickModel;
 import com.movie_hub.android.data.model.mqtt.ParticipantJoinModel;
 import com.movie_hub.android.data.model.mqtt.RoomStateModel;
 import com.movie_hub.android.data.model.mqtt.UpdateParticipantCountModel;
+import com.movie_hub.android.ui.main.movie.watch.adapter.ParticipantListAdapter;
 import com.movie_hub.android.data.mqtt.Command;
 import com.movie_hub.android.data.mqtt.Message;
 import com.movie_hub.android.databinding.ActivityWatchMovieBinding;
@@ -180,8 +185,11 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
     private Runnable runnablePing;
 
     private ChatAdapter chatAdapter;
+    private ParticipantListAdapter membersAdapter;
+    private boolean isMembersTabActive = false;
     private final Handler handlerRetryGetListSubtitle = new Handler(Looper.getMainLooper());
     private boolean lastImeVisible = false;
+    private int lastKeyboardHeight = 0;
     @Nullable private ViewTreeObserver.OnGlobalLayoutListener imeLayoutListener;
     private void startSchedule() {
         runnablePing = new Runnable() {
@@ -266,7 +274,9 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
                 viewBinding.btnOpenChat.setVisibility(View.VISIBLE);
                 viewBinding.btnRoomInfo.setVisibility(View.VISIBLE);
                 setupChatUi();
+                setupMembersUi();
                 setupImeAwareChatInput();
+                viewModel.loadChatHistory(viewModel.roomDetail.getId());
             }
 
 
@@ -290,44 +300,31 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
 
             // Heuristic threshold to decide IME visibility (landscape + immersive can vary)
             boolean imeVisible = heightDiff > dpToPx(140);
-            if (imeVisible == lastImeVisible) return;
+            if (imeVisible == lastImeVisible && heightDiff == lastKeyboardHeight) return;
             lastImeVisible = imeVisible;
+            lastKeyboardHeight = heightDiff;
 
-            applyChatImeState(imeVisible);
+            applyChatImeState(imeVisible, heightDiff);
         };
         root.getViewTreeObserver().addOnGlobalLayoutListener(imeLayoutListener);
     }
 
-    private void applyChatImeState(boolean imeVisible) {
+    private void applyChatImeState(boolean imeVisible, int keyboardHeight) {
         // Only animate when chat is actually open/visible (prevents background layout churn).
         if (viewBinding.layoutChat.getVisibility() != View.VISIBLE) return;
 
-        TransitionManager.beginDelayedTransition(viewBinding.layoutChat, new ChangeBounds());
-        ViewGroup.LayoutParams lp = viewBinding.bottomComment.getLayoutParams();
-        ViewGroup.LayoutParams inputLp = viewBinding.lInput.getLayoutParams();
-        ViewGroup.LayoutParams editLp = viewBinding.edtComment.getLayoutParams();
-
         if (imeVisible) {
-            // Expand the input panel so the EditText can grow into remaining space.
-            lp.height = ViewGroup.LayoutParams.MATCH_PARENT;
-            viewBinding.bottomComment.setLayoutParams(lp);
-            viewBinding.rvChat.setVisibility(View.GONE);
-            inputLp.height = ViewGroup.LayoutParams.MATCH_PARENT;
-            viewBinding.lInput.setLayoutParams(inputLp);
-            editLp.height = ViewGroup.LayoutParams.MATCH_PARENT;
-            viewBinding.edtComment.setLayoutParams(editLp);
-            viewBinding.edtComment.setMinLines(4);
-            viewBinding.edtComment.setMaxLines(12);
-            viewBinding.edtComment.setGravity(Gravity.START | Gravity.TOP);
+            // Push chat content (list + input) above the keyboard by adding bottom padding.
+            // adjustNothing means the window doesn't resize, so we compensate manually.
+            viewBinding.layoutChat.setPadding(0, 0, 0, keyboardHeight);
+            viewBinding.edtComment.setMaxLines(3);
+            // Scroll to latest message so user can see context while typing.
+            List<?> chatList = viewModel.getChatModels();
+            if (!chatList.isEmpty()) {
+                viewBinding.rvChat.scrollToPosition(chatList.size() - 1);
+            }
         } else {
-            // Restore normal chat list + compact input.
-            lp.height = ViewGroup.LayoutParams.WRAP_CONTENT;
-            viewBinding.bottomComment.setLayoutParams(lp);
-            viewBinding.rvChat.setVisibility(View.VISIBLE);
-            inputLp.height = ViewGroup.LayoutParams.WRAP_CONTENT;
-            viewBinding.lInput.setLayoutParams(inputLp);
-            editLp.height = ViewGroup.LayoutParams.WRAP_CONTENT;
-            viewBinding.edtComment.setLayoutParams(editLp);
+            viewBinding.layoutChat.setPadding(0, 0, 0, 0);
             viewBinding.edtComment.setMinLines(1);
             viewBinding.edtComment.setMaxLines(4);
             viewBinding.edtComment.setGravity(Gravity.START | Gravity.CENTER_VERTICAL);
@@ -503,12 +500,23 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
         viewBinding.rvChat.setLayoutManager(new LinearLayoutManager(this));
         viewBinding.rvChat.setAdapter(chatAdapter);
         viewModel.getChatModelsLiveData().observe(this, list -> {
+            if (isMembersTabActive) {
+                // Only update adapter data; don't touch visibility while members tab is showing
+                if (list != null) chatAdapter.submitList(new ArrayList<>(list));
+                else chatAdapter.submitList(Collections.emptyList());
+                return;
+            }
             if (list == null) {
                 chatAdapter.submitList(Collections.emptyList());
+                viewBinding.layoutChatEmpty.setVisibility(View.VISIBLE);
+                viewBinding.rvChat.setVisibility(View.GONE);
                 return;
             }
             chatAdapter.submitList(new ArrayList<>(list));
-            if (!list.isEmpty()) {
+            boolean isEmpty = list.isEmpty();
+            viewBinding.layoutChatEmpty.setVisibility(isEmpty ? View.VISIBLE : View.GONE);
+            viewBinding.rvChat.setVisibility(isEmpty ? View.GONE : View.VISIBLE);
+            if (!isEmpty) {
                 viewBinding.rvChat.post(() ->
                         viewBinding.rvChat.scrollToPosition(list.size() - 1));
             }
@@ -517,6 +525,73 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
                 viewBinding.icUnread.setVisibility(Boolean.TRUE.equals(visible)
                         ? View.VISIBLE
                         : View.INVISIBLE));
+    }
+
+    private void setupMembersUi() {
+        long myUserId = viewModel.getUserId() != null ? viewModel.getUserId() : -1L;
+        long hostUserId = viewModel.roomDetail != null && viewModel.roomDetail.getHost() != null
+                ? viewModel.roomDetail.getHost().getId() : -1L;
+
+        membersAdapter = new ParticipantListAdapter(myUserId, hostUserId, viewModel.isHost,
+                this::showKickPopup);
+
+        viewBinding.rvMembers.setLayoutManager(new LinearLayoutManager(this));
+        viewBinding.rvMembers.setAdapter(membersAdapter);
+
+        viewModel.getLiveRoomParticipants().observe(this, list -> {
+            if (membersAdapter != null) {
+                membersAdapter.submitList(list);
+            }
+        });
+    }
+
+    private void switchToTab(boolean membersTab) {
+        isMembersTabActive = membersTab;
+
+        viewBinding.tvPanelTitle.setText(membersTab ? R.string.tab_members : R.string.chat);
+
+        if (membersTab) {
+            viewBinding.rvChat.setVisibility(View.GONE);
+            viewBinding.layoutChatEmpty.setVisibility(View.GONE);
+            viewBinding.bottomComment.setVisibility(View.GONE);
+            viewBinding.rvMembers.setVisibility(View.VISIBLE);
+        } else {
+            viewBinding.rvMembers.setVisibility(View.GONE);
+            viewBinding.bottomComment.setVisibility(View.VISIBLE);
+            // Restore chat content state manually
+            List<CreateChatModel> chatList = viewModel.getChatModels();
+            boolean isEmpty = chatList.isEmpty();
+            viewBinding.layoutChatEmpty.setVisibility(isEmpty ? View.VISIBLE : View.GONE);
+            viewBinding.rvChat.setVisibility(isEmpty ? View.GONE : View.VISIBLE);
+        }
+    }
+
+    private void openPanelToTab(boolean membersTab) {
+        switchToTab(membersTab);
+        if (viewBinding.layoutChat.getVisibility() != View.VISIBLE) {
+            openChatAnimated();
+        }
+    }
+
+    private void showKickPopup(View anchor, ParticipantDto participant) {
+        View popupView = LayoutInflater.from(this)
+                .inflate(R.layout.layout_popup_kick_option, null);
+
+        PopupWindow popup = new PopupWindow(
+                popupView,
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                true);
+        popup.setOutsideTouchable(true);
+        popup.setElevation(dpToPx(4));
+
+        popupView.findViewById(R.id.btn_kick).setOnClickListener(v -> {
+            popup.dismiss();
+            showKickConfirmDialog(participant);
+        });
+
+        // Show popup directly below the "..." button
+        popup.showAsDropDown(anchor, 0, 0);
     }
 
     private void applyScreenCaptureProtection() {
@@ -2380,10 +2455,11 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
                 onNextEpisodeClick();
                 break;
             case R.id.btn_open_chat:
-                toggleChatAnimated();
+                openPanelToTab(false);
                 break;
             case R.id.btn_close_chat:
                 closeChatAnimated();
+                isMembersTabActive = false;
                 break;
             case R.id.btn_create_comment:
                 sendRoomChatMessage();
@@ -2393,6 +2469,9 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
                 break;
             case R.id.layout_sync:
                 resyncWithHost();
+                break;
+            case R.id.layout_count_participant:
+                openPanelToTab(true);
                 break;
             default:
                 break;
@@ -2758,6 +2837,9 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
             case Command.CMD_CREATE_CHAT:
                 handleIncomingRoomChatMessage(message);
                 break;
+            case Command.CMD_KICK:
+                handleKicked(message);
+                break;
             default:
                 break;
         }
@@ -2788,12 +2870,72 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
             if (!isMqttMessageForCurrentRoom(payload.getRoomId())) {
                 return;
             }
-            runOnUiThread(() -> viewModel.applyServerViewerCount(
-                    payload.getRoomId(),
-                    payload.getCurrentViewers()));
+            runOnUiThread(() -> {
+                viewModel.applyServerViewerCount(payload.getRoomId(), payload.getCurrentViewers());
+                viewModel.applyParticipantList(payload.getParticipants());
+            });
         } catch (Exception e) {
             Timber.e(e, "MQTT participant count parse");
         }
+    }
+
+    private void handleKicked(Message message) {
+        if (viewModel.isHost) return;
+        try {
+            KickModel kick = GsonUtils.fromJson(
+                    GsonUtils.toJson(message.getData()),
+                    KickModel.class);
+            String myId = viewModel.getUserId() != null ? viewModel.getUserId().toString() : "";
+            if (kick != null && !myId.isEmpty() && myId.equals(kick.getTargetUserId())) {
+                runOnUiThread(this::showKickedDialog);
+            }
+        } catch (Exception e) {
+            Timber.e(e, "MQTT kick parse");
+        }
+    }
+
+    private void showKickedDialog() {
+        boolean[] destroyed = {false};
+        DialogUtils.dialogConfirmSingleButton(
+                this,
+                getString(R.string.kicked_message),
+                getString(R.string.action_exit),
+                (dlg, which) -> {
+                    leaveRoom(() -> destroyMqttAfterLeave(destroyed, this::finish));
+                    destroyMqttAfterLeave(destroyed, this::finish);
+                });
+    }
+
+    private void showKickConfirmDialog(ParticipantDto participant) {
+        if (participant == null || participant.getUser() == null) return;
+        String name = !TextUtils.isEmpty(participant.getUser().getFullName())
+                ? participant.getUser().getFullName()
+                : participant.getUser().getUsername();
+
+        DialogUtils.dialogConfirm(
+                this,
+                getString(R.string.kick_confirm_message, name != null ? name : ""),
+                getString(R.string.kick_action),
+                (dlg, which) -> sendKickCommand(participant),  // panel stays open
+                getString(R.string.cancel),
+                null);
+    }
+
+    private void sendKickCommand(ParticipantDto participant) {
+        if (!viewModel.isHost || viewModel.roomDetail == null || participant.getUser() == null) return;
+        Long targetId = participant.getUser().getId();
+        if (targetId == null) return;
+
+        KickModel kickModel = new KickModel();
+        kickModel.setRoomId(String.valueOf(viewModel.roomDetail.getId()));
+        kickModel.setTargetUserId(String.valueOf(targetId));
+
+        Message msg = new Message();
+        msg.setCmd(Command.CMD_KICK);
+        msg.setData(kickModel);
+
+        String topic = Constants.TOPIC + viewModel.roomDetail.getId() + "/" + targetId;
+        sendMqttMessage(msg, topic);
     }
 
     private boolean isMqttMessageForCurrentRoom(@Nullable String roomId) {

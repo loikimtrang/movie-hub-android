@@ -28,6 +28,7 @@ import com.movie_hub.android.data.model.api.request.user.UserUpdateProfileReques
 import com.movie_hub.android.data.model.api.response.MovieItem.MovieItemResponse;
 import com.movie_hub.android.data.model.api.response.appversion.CheckAppVersionResponse;
 import com.movie_hub.android.data.model.api.response.category.CategoryResponse;
+import com.movie_hub.android.data.model.api.response.chat.ChatResponse;
 import com.movie_hub.android.data.model.api.response.collection.CollectionResponse;
 import com.movie_hub.android.data.model.api.response.comment.CommentResponse;
 import com.movie_hub.android.data.model.api.response.comment.VoteListResponse;
@@ -287,4 +288,7 @@ public interface ApiService {
 
     @GET("v1/room/get-by-code/{code}")
     Observable<ResponseWrapper<RoomResponse>> getRoomByCode(@Path("code") String code);
+
+    @GET("v1/chat/list")
+    Observable<ResponseWrapper<ResponseListObj<ChatResponse>>> getChatList(@QueryMap Map<String, Object> query);
 }

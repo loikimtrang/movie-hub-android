@@ -387,6 +387,7 @@
     <string name="action_continue">Continue</string>
     <string name="action_exit">Exit</string>
     <string name="chat">Chat</string>
+    <string name="empty_chat">Chưa có tin nhắn nào</string>
     <string name="msg_premier_not_started">The premiere has not started yet</string>
     <string name="msg_room_ended">The movie room has ended</string>
     <string name="msg_waiting_for_host">The host hasn\'t joined yet, please wait</string>
@@ -400,6 +401,15 @@
     <string name="room_code_label">Room code:</string>
     <string name="copy_room_code">Copy room code</string>
     <string name="room_code_copied">Room code copied</string>
+
+    <string name="participants_title">Thành viên phòng</string>
+    <string name="tab_members">Thành viên</string>
+    <string name="label_you"> (bạn)</string>
+    <string name="kick_confirm_title">Kick thành viên</string>
+    <string name="kick_confirm_message">Bạn có chắc muốn kick %s khỏi phòng không?</string>
+    <string name="kick_action">Kick</string>
+    <string name="kicked_title">Bạn đã bị kick</string>
+    <string name="kicked_message">Bạn đã bị kích khỏi phòng bởi host.</string>
 
     <string name="title_information">Information</string>
     <string name="action_start">Start</string>

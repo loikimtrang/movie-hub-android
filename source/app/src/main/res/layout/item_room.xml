@@ -17,7 +17,7 @@
             android:id="@+id/layout_copy"
             android:layout_width="@dimen/_80sdp"
             android:layout_height="match_parent"
-            android:background="#3B82F6">
+            android:background="@color/bg_swipe_copy">
             <ImageView
                 android:layout_width="@dimen/_24sdp"
                 android:layout_height="@dimen/_24sdp"
@@ -30,7 +30,7 @@
             android:id="@+id/layout_delete"
             android:layout_width="@dimen/_80sdp"
             android:layout_height="match_parent"
-            android:background="#FF1744">
+            android:background="@color/bg_swipe_delete">
             <ImageView
                 android:layout_width="@dimen/_24sdp"
                 android:layout_height="@dimen/_24sdp"

@@ -31,7 +31,7 @@ public class ChatAdapter extends ListAdapter<CreateChatModel, ChatAdapter.ChatVi
         @Override
         public boolean areItemsTheSame(@NonNull CreateChatModel oldItem, @NonNull CreateChatModel newItem) {
             return TextUtils.equals(oldItem.getAccountId(), newItem.getAccountId())
-                    && TextUtils.equals(oldItem.getCreateDate(), newItem.getCreateDate())
+                    && TextUtils.equals(oldItem.getCreatedDate(), newItem.getCreatedDate())
                     && TextUtils.equals(oldItem.getContent(), newItem.getContent());
         }
 
@@ -73,7 +73,7 @@ public class ChatAdapter extends ListAdapter<CreateChatModel, ChatAdapter.ChatVi
             binding.tvContent.setText(item.getContent() != null ? item.getContent() : "");
             binding.imgAvatar.setVisibility(View.VISIBLE);
             binding.layoutInfChat.setVisibility(View.VISIBLE);
-            UserResponse author = item.getAuthor();
+            UserResponse author = item.getUser();
             String name = "";
             String avatar = "";
             if (author != null) {
@@ -87,7 +87,7 @@ public class ChatAdapter extends ListAdapter<CreateChatModel, ChatAdapter.ChatVi
                 }
             }
             binding.tvNameAuthor.setText(name);
-            binding.tvTime.setText(formatDisplayTime(item.getCreateDate()));
+            binding.tvTime.setText(formatDisplayTime(item.getCreatedDate()));
             if (!TextUtils.isEmpty(avatar) && !avatar.contains("http")) {
                 avatar = Constants.MEDIA_URL + avatar;
             }
@@ -116,7 +116,7 @@ public class ChatAdapter extends ListAdapter<CreateChatModel, ChatAdapter.ChatVi
 //                    }
 //                }
 //                binding.tvNameAuthor.setText(name);
-//                binding.tvTime.setText(formatDisplayTime(item.getCreateDate()));
+//                binding.tvTime.setText(formatDisplayTime(item.getCreatedDate()));
 //                if (!TextUtils.isEmpty(avatar) && !avatar.contains("http")) {
 //                    avatar = Constants.MEDIA_URL + avatar;
 //                }
@@ -137,8 +137,8 @@ public class ChatAdapter extends ListAdapter<CreateChatModel, ChatAdapter.ChatVi
                     nullToEmpty(previous.getAccountId()))) {
                 return false;
             }
-            long tCur = parseUtcMillis(current.getCreateDate());
-            long tPrev = parseUtcMillis(previous.getCreateDate());
+            long tCur = parseUtcMillis(current.getCreatedDate());
+            long tPrev = parseUtcMillis(previous.getCreatedDate());
             if (tCur < 0L || tPrev < 0L) return false;
             return (tCur - tPrev) < GROUP_TIME_WINDOW_MS;
         }
@@ -147,31 +147,39 @@ public class ChatAdapter extends ListAdapter<CreateChatModel, ChatAdapter.ChatVi
             return s != null ? s : "";
         }
 
-        private static long parseUtcMillis(String createDateStr) {
-            if (TextUtils.isEmpty(createDateStr)) return -1L;
-            try {
-                SimpleDateFormat iso = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US);
-                iso.setTimeZone(TimeZone.getTimeZone("UTC"));
-                Date d = iso.parse(createDateStr);
-                return d != null ? d.getTime() : -1L;
-            } catch (Exception ignored) {
-                return -1L;
-            }
+        private static final SimpleDateFormat MQTT_DATE_FORMAT;
+        private static final SimpleDateFormat ISO_DATE_FORMAT;
+        static {
+            MQTT_DATE_FORMAT = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.US);
+            MQTT_DATE_FORMAT.setTimeZone(TimeZone.getTimeZone("UTC"));
+            ISO_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US);
+            ISO_DATE_FORMAT.setTimeZone(TimeZone.getTimeZone("UTC"));
         }
 
-        private static String formatDisplayTime(String createDateStr) {
-            if (TextUtils.isEmpty(createDateStr)) return "";
+        private static Date parseDate(String createdDateStr) {
+            if (TextUtils.isEmpty(createdDateStr)) return null;
             try {
-                SimpleDateFormat iso = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US);
-                iso.setTimeZone(TimeZone.getTimeZone("UTC"));
-                Date d = iso.parse(createDateStr);
-                if (d != null) {
-                    return new SimpleDateFormat("HH:mm", Locale.getDefault()).format(d);
-                }
-            } catch (Exception ignored) {
-                // fall through
+                return MQTT_DATE_FORMAT.parse(createdDateStr);
+            } catch (Exception ignored) {}
+            try {
+                String normalized = createdDateStr.length() > 19 ? createdDateStr.substring(0, 19) : createdDateStr;
+                return ISO_DATE_FORMAT.parse(normalized);
+            } catch (Exception ignored) {}
+            return null;
+        }
+
+        private static long parseUtcMillis(String createdDateStr) {
+            Date d = parseDate(createdDateStr);
+            return d != null ? d.getTime() : -1L;
+        }
+
+        private static String formatDisplayTime(String createdDateStr) {
+            if (TextUtils.isEmpty(createdDateStr)) return "";
+            Date d = parseDate(createdDateStr);
+            if (d != null) {
+                return new SimpleDateFormat("HH:mm", Locale.getDefault()).format(d);
             }
-            return createDateStr;
+            return createdDateStr;
         }
     }
 }

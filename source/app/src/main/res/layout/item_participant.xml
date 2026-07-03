@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:paddingHorizontal="@dimen/_12sdp"
+    android:paddingVertical="@dimen/_8sdp">
+
+    <com.google.android.material.imageview.ShapeableImageView
+        android:id="@+id/iv_participant_avatar"
+        android:layout_width="@dimen/_32sdp"
+        android:layout_height="@dimen/_32sdp"
+        android:scaleType="centerCrop"
+        android:src="@drawable/ic_user"
+        app:shapeAppearanceOverlay="@style/roundImg" />
+
+    <TextView
+        android:id="@+id/tv_participant_name"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:layout_marginStart="@dimen/_10sdp"
+        android:maxLines="1"
+        android:ellipsize="end"
+        style="@style/Text_12_Normal" />
+
+    <TextView
+        android:id="@+id/btn_participant_more"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="⋯"
+        android:textSize="18sp"
+        android:padding="@dimen/_6sdp"
+        android:clickable="true"
+        android:focusable="true"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:textColor="@color/white"
+        android:visibility="gone" />
+
+</LinearLayout>

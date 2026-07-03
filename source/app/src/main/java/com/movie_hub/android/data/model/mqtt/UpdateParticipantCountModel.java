@@ -1,5 +1,9 @@
 package com.movie_hub.android.data.model.mqtt;
 
+import com.movie_hub.android.data.model.api.response.room.ParticipantDto;
+
+import java.util.List;
+
 import lombok.Data;
 
 /**
@@ -10,4 +14,5 @@ import lombok.Data;
 public class UpdateParticipantCountModel {
     private String roomId;
     private Integer currentViewers;
+    private List<ParticipantDto> participants;
 }

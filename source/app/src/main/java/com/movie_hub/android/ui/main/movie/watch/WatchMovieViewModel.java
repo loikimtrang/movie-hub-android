@@ -22,10 +22,12 @@ import com.movie_hub.android.data.model.api.request.subtitle.SubtitleRequest;
 import com.movie_hub.android.data.model.api.response.MovieItem.MovieItemResponse;
 import com.movie_hub.android.data.model.api.response.history.ListWatchHistoryResponse;
 import com.movie_hub.android.data.model.api.response.movie.MovieResponse;
+import com.movie_hub.android.data.model.api.response.room.ParticipantDto;
 import com.movie_hub.android.data.model.api.response.room.RoomResponse;
 import com.movie_hub.android.data.model.api.response.subtitle.SubtitleResponse;
 import com.movie_hub.android.data.model.api.response.user.UserResponse;
 import com.movie_hub.android.data.model.api.response.video.VideoResponse;
+import com.movie_hub.android.data.model.api.response.chat.ChatResponse;
 import com.movie_hub.android.data.model.mqtt.ClientPingModel;
 import com.movie_hub.android.data.model.mqtt.CreateChatModel;
 import com.movie_hub.android.data.mqtt.Command;
@@ -98,6 +100,8 @@ public class WatchMovieViewModel extends BaseViewModel {
     public final MutableLiveData<Boolean> participantPlaybackRestricted = new MutableLiveData<>(false);
     /** Null when not in a live room; seeded from join API {@code currentViewers}, then MQTT updates. */
     private final MutableLiveData<Integer> liveRoomViewerCount = new MutableLiveData<>();
+    /** Current participant list from CMD_UPDATE_PARTICIPANT_COUNT. */
+    private final MutableLiveData<List<ParticipantDto>> liveRoomParticipants = new MutableLiveData<>(new ArrayList<>());
     public ClientPingModel clientPingModel = new ClientPingModel();
     public Message msgPing = new Message();
     SettingVideoModel settingVideoModel = new SettingVideoModel();
@@ -164,7 +168,7 @@ public class WatchMovieViewModel extends BaseViewModel {
 
     private void markAllChatMessagesRead() {
         for (CreateChatModel m : chatModels) {
-            m.setUnread(false);
+            m.setIsRead(true);
         }
     }
 
@@ -178,9 +182,9 @@ public class WatchMovieViewModel extends BaseViewModel {
     public void appendIncomingChatMessage(CreateChatModel model) {
         if (model == null || TextUtils.isEmpty(model.getContent())) return;
         if (isChatOpen) {
-            model.setUnread(false);
+            model.setIsRead(true);
         } else {
-            model.setUnread(true);
+            model.setIsRead(false);
             chatUnreadIndicatorVisible.setValue(true);
         }
         chatModels.add(model);
@@ -191,6 +195,38 @@ public class WatchMovieViewModel extends BaseViewModel {
         chatModels.clear();
         chatUnreadIndicatorVisible.setValue(false);
         postChatListUpdate();
+    }
+
+    public void loadChatHistory(long roomId) {
+        Map<String, Object> query = new java.util.HashMap<>();
+        query.put("roomId", roomId);
+        query.put("pageNumber", 0);
+        query.put("pageSize", 1000);
+
+        compositeDisposable.add(repository.getApiService().getChatList(query)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        response -> {
+                            if (response.isResult() && response.getData() != null
+                                    && response.getData().getContent() != null) {
+                                chatModels.clear();
+                                for (ChatResponse item : response.getData().getContent()) {
+                                    CreateChatModel model = new CreateChatModel(
+                                            item.getUser() != null ? String.valueOf(item.getUser().getId()) : "",
+                                            item.getContent(),
+                                            item.getUser(),
+                                            item.getCreatedDate(),
+                                            true
+                                    );
+                                    chatModels.add(model);
+                                }
+                                postChatListUpdate();
+                            }
+                        },
+                        throwable -> Timber.e(throwable, "loadChatHistory error")
+                )
+        );
     }
 
     public Message buildRoomChatMqttMessage(CreateChatModel payload) {
@@ -210,10 +246,10 @@ public class WatchMovieViewModel extends BaseViewModel {
         String accountId = user != null
                 ? String.valueOf(user.getId())
                 : String.valueOf(getUserId());
-        SimpleDateFormat isoUtc = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US);
-        isoUtc.setTimeZone(TimeZone.getTimeZone("UTC"));
-        String createDate = isoUtc.format(new Date());
-        return new CreateChatModel(accountId, messageContent.trim(), user, createDate);
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.US);
+        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+        String createdDate = sdf.format(new Date());
+        return new CreateChatModel(accountId, messageContent.trim(), user, createdDate, true);
     }
 
     public LiveData<Boolean> getParticipantPlaybackRestricted() {
@@ -244,6 +280,14 @@ public class WatchMovieViewModel extends BaseViewModel {
         roomDetail.setCurrentViewers(currentViewers);
         roomDetail.setParticipantCount(currentViewers);
         liveRoomViewerCount.setValue(currentViewers);
+    }
+
+    public LiveData<List<ParticipantDto>> getLiveRoomParticipants() {
+        return liveRoomParticipants;
+    }
+
+    public void applyParticipantList(@Nullable List<ParticipantDto> participants) {
+        liveRoomParticipants.setValue(participants != null ? new ArrayList<>(participants) : new ArrayList<>());
     }
 
     public void clearLiveRoomViewerCount() {
