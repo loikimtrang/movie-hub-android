@@ -34,11 +34,13 @@ import com.movie_hub.android.data.model.api.ResponseWrapper;
 import com.movie_hub.android.data.model.api.request.comment.CommentRequest;
 import com.movie_hub.android.data.model.api.request.comment.CreateCommentReactionRequest;
 import com.movie_hub.android.data.model.api.request.comment.CreateCommentRequest;
+import com.movie_hub.android.data.model.api.request.comment.UpdateCommentRequest;
 import com.movie_hub.android.data.model.api.response.comment.CommentResponse;
 import com.movie_hub.android.data.model.api.response.comment.VoteListResponse;
 import com.movie_hub.android.data.model.api.response.movie.MovieResponse;
 import com.movie_hub.android.data.model.api.response.report.CreateReportRequest;
 import com.movie_hub.android.data.model.onesignal.MessageCommentResponse;
+import com.movie_hub.android.data.model.onesignal.MessageOneSignal;
 import com.movie_hub.android.data.model.onesignal.OneSignalCommand;
 import com.movie_hub.android.data.model.other.ToastMessage;
 import com.movie_hub.android.databinding.ActivityCommentBinding;
@@ -77,6 +79,7 @@ public class CommentActivity extends BaseActivity<ActivityCommentBinding, Commen
     private EpisodeCommentShimmerAdapter episodeCommentShimmerAdapter;
     private ActivityResultLauncher<Intent> loginLauncher;
     private boolean isStateReply = false;
+    private boolean isStateEdit = false;
     private boolean isShowShimmer = false;
     public static final String MSG_CMT = "MSG_CMT";
     public static final String MSG_CMD = "MSG_CMD";
@@ -166,6 +169,9 @@ public class CommentActivity extends BaseActivity<ActivityCommentBinding, Commen
         viewModel.commentList.setValue(new ArrayList<>());
         viewModel.voteList.setValue(new ArrayList<>());
         viewModel.replyTo = new CommentResponse();
+        viewModel.editTarget = new CommentResponse();
+        isStateReply = false;
+        isStateEdit = false;
         isShowShimmerComment = false;
         commentParentAdapter.clearData();
         showShimmerComment();
@@ -232,7 +238,7 @@ public class CommentActivity extends BaseActivity<ActivityCommentBinding, Commen
     }
 
     public void createComment(CreateCommentRequest request) {
-        hideStateReply();
+        hideInputState();
         viewModel.createComment(new MainCallback<ResponseWrapper>() {
             @Override
             public void doError(Throwable error) {
@@ -265,6 +271,107 @@ public class CommentActivity extends BaseActivity<ActivityCommentBinding, Commen
             }
         }, request);
     }
+
+    public void updateComment(String content) {
+        if (viewModel.editTarget.getId() == null) {
+            return;
+        }
+
+        long editId = viewModel.editTarget.getId();
+        UpdateCommentRequest request = new UpdateCommentRequest();
+        request.setId(editId);
+        request.setContent(content);
+
+        hideInputState();
+        viewModel.updateComment(new MainCallback<ResponseWrapper>() {
+            @Override
+            public void doError(Throwable error) {
+                new ToastMessage(ToastMessage.TYPE_WARNING, getString(R.string.an_error_occurred))
+                        .showMessage(CommentActivity.this);
+            }
+
+            @Override
+            public void doSuccess() {
+            }
+
+            @Override
+            public void doSuccess(ResponseWrapper object) {
+                if (object.isResult()) {
+                    refreshCommentById(editId);
+                    new ToastMessage(ToastMessage.TYPE_NORMAL, getString(R.string.update_comment_success))
+                            .showMessage(CommentActivity.this);
+                }
+            }
+
+            @Override
+            public void doFail() {
+                new ToastMessage(ToastMessage.TYPE_WARNING, getString(R.string.an_error_occurred))
+                        .showMessage(CommentActivity.this);
+            }
+        }, request);
+    }
+
+    public void refreshCommentById(long commentId) {
+        if (isStateEdit && viewModel.editTarget.getId() != null
+                && viewModel.editTarget.getId() == commentId) {
+            hideInputState();
+        }
+
+        viewModel.getCommentById(new MainCallback<CommentResponse>() {
+            @Override
+            public void doError(Throwable error) {
+            }
+
+            @Override
+            public void doSuccess() {
+            }
+
+            @Override
+            public void doSuccess(CommentResponse commentResponse) {
+                if (viewModel.containsCommentId(commentId)) {
+                    viewModel.updateCommentInList(commentResponse);
+                } else {
+                    getListComment(viewModel.getCommentRequest());
+                }
+            }
+
+            @Override
+            public void doFail() {
+            }
+        }, commentId);
+    }
+
+    public void onNotificationReceived(MessageOneSignal message) {
+        runOnUiThread(() -> handleNotificationData(message));
+    }
+
+    @Override
+    protected void handleNotificationData(MessageOneSignal message) {
+        if (message == null || message.getCmd() == null) {
+            return;
+        }
+
+        if (OneSignalCommand.CMD_TOXIC_COMMENT_LOCKED.equals(message.getCmd())) {
+            MessageCommentResponse data = GsonUtils.fromJson(message.getData(), MessageCommentResponse.class);
+            if (data != null && data.getId() != null && isCurrentMovieNotification(data)) {
+                refreshCommentById(Long.parseLong(data.getId()));
+                return;
+            }
+        }
+
+        super.handleNotificationData(message);
+    }
+
+    private boolean isCurrentMovieNotification(MessageCommentResponse data) {
+        if (viewModel.movieDetails == null || viewModel.movieDetails.getId() == null) {
+            return false;
+        }
+        if (data.getMovieId() == null) {
+            return true;
+        }
+        return String.valueOf(viewModel.movieDetails.getId()).equals(data.getMovieId());
+    }
+
     public void getListComment(CommentRequest request) {
         showLoading();
         viewModel.getListComment(new MainCallback<ResponseListObj<CommentResponse>>() {
@@ -616,6 +723,7 @@ public class CommentActivity extends BaseActivity<ActivityCommentBinding, Commen
             showLoginRequiredDialog();
             return;
         }
+        hideInputState();
         isStateReply = true;
         viewModel.replyTo = commentResponse;
         viewBinding.tvReplyTo.setText(getString(R.string.replying_to) + " @" + commentResponse.getAuthor().getFullName());
@@ -632,27 +740,31 @@ public class CommentActivity extends BaseActivity<ActivityCommentBinding, Commen
             case R.id.btn_create_comment:
                 String content = viewBinding.edtComment.getText().toString().trim();
                 if (!content.isEmpty()) {
-                    CreateCommentRequest request = viewModel.getCreateCommentRequest();
-                    request.setContent(content);
+                    if (isStateEdit) {
+                        updateComment(content);
+                    } else {
+                        CreateCommentRequest request = viewModel.getCreateCommentRequest();
+                        request.setContent(content);
 
-                    if (isStateReply) {
-                        if (viewModel.replyTo.getParent() != null && viewModel.replyTo.getParent().getId() != null) {
-                            request.setParentId(viewModel.replyTo.getParent().getId());
-                            request.setReplyToKind(viewModel.replyTo.getParent().getAuthor().getKind());
-                            request.setReplyToId(viewModel.replyTo.getParent().getAuthor().getId());
-                        } else if (viewModel.replyTo.getId() != null) {
-                            request.setParentId(viewModel.replyTo.getId());
-                            request.setReplyToKind(viewModel.replyTo.getAuthor().getKind());
-                            request.setReplyToId(viewModel.replyTo.getAuthor().getId());
+                        if (isStateReply) {
+                            if (viewModel.replyTo.getParent() != null && viewModel.replyTo.getParent().getId() != null) {
+                                request.setParentId(viewModel.replyTo.getParent().getId());
+                                request.setReplyToKind(viewModel.replyTo.getParent().getAuthor().getKind());
+                                request.setReplyToId(viewModel.replyTo.getParent().getAuthor().getId());
+                            } else if (viewModel.replyTo.getId() != null) {
+                                request.setParentId(viewModel.replyTo.getId());
+                                request.setReplyToKind(viewModel.replyTo.getAuthor().getKind());
+                                request.setReplyToId(viewModel.replyTo.getAuthor().getId());
+                            }
                         }
-                    }
 
-                    createComment(request);
+                        createComment(request);
+                    }
                     viewBinding.edtComment.setText("");
                 }
                 break;
             case R.id.btn_cancel_cmt:
-                hideStateReply();
+                hideInputState();
                 break;
             default:
                 break;
@@ -660,10 +772,49 @@ public class CommentActivity extends BaseActivity<ActivityCommentBinding, Commen
     }
 
     public void hideStateReply() {
-        viewBinding.lReplyTo.setVisibility(View.GONE);
         isStateReply = false;
+        viewModel.replyTo = new CommentResponse();
+    }
+
+    public void hideInputState() {
+        viewBinding.lReplyTo.setVisibility(View.GONE);
         viewBinding.edtComment.setText("");
         viewBinding.tvReplyTo.setText(getString(R.string.replying_to));
+        hideStateReply();
+        isStateEdit = false;
+        viewModel.editTarget = new CommentResponse();
+    }
+
+    private void showEditState(CommentResponse commentResponse) {
+        if (!viewModel.isLogin()) {
+            showLoginRequiredDialog();
+            return;
+        }
+        if (commentResponse == null || commentResponse.getId() == null) {
+            return;
+        }
+
+        hideInputState();
+        isStateEdit = true;
+        viewModel.editTarget = commentResponse;
+        viewBinding.tvReplyTo.setText(getString(R.string.editing_comment));
+        viewBinding.lReplyTo.setVisibility(View.VISIBLE);
+        viewBinding.edtComment.setText(commentResponse.getContent());
+        viewBinding.edtComment.setSelection(commentResponse.getContent() != null
+                ? commentResponse.getContent().length() : 0);
+        viewBinding.edtComment.requestFocus();
+        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.showSoftInput(viewBinding.edtComment, InputMethodManager.SHOW_IMPLICIT);
+    }
+
+    @Override
+    public void onEditClick(CommentResponse commentResponse) {
+        showEditState(commentResponse);
+    }
+
+    @Override
+    public void onEditChildClick(CommentResponse commentResponse) {
+        showEditState(commentResponse);
     }
 
     @Override
@@ -701,6 +852,7 @@ public class CommentActivity extends BaseActivity<ActivityCommentBinding, Commen
             showLoginRequiredDialog();
             return;
         }
+        hideInputState();
         isStateReply = true;
         viewModel.replyTo = commentResponse;
         viewBinding.tvReplyTo.setText(getString(R.string.replying_to) + " @" + commentResponse.getAuthor().getFullName());

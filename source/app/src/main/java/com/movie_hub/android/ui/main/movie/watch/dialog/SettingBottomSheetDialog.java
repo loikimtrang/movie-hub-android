@@ -30,6 +30,7 @@ public class SettingBottomSheetDialog extends BaseBottomSheetDialog {
         void onSubtitleClicked();
         void onLockScreenClicked();
         void onMoreOptionsClicked();
+        void onReportClicked();
     }
     public SettingBottomSheetDialog(@NonNull Context context, SettingVideoModel settingVideoModel,
                                     SettingBottomSheetCallback callback) {
@@ -70,6 +71,7 @@ public class SettingBottomSheetDialog extends BaseBottomSheetDialog {
         binding.btnSubtitle.setOnClickListener(v -> onSubtitleClicked());
         binding.btnLockScreen.setOnClickListener(v -> onLockScreenClicked());
         binding.btnMoreOption.setOnClickListener(v -> onMoreOptionClicked());
+        binding.btnReport.setOnClickListener(v -> onReportClicked());
 
         videoQuality.observeForever(qualityObserver);
         settingVideoModel.getPlaybackSpeedLive().observeForever(playSpeedObserver);
@@ -112,6 +114,11 @@ public class SettingBottomSheetDialog extends BaseBottomSheetDialog {
     }
     private void onMoreOptionClicked() {
         callback.onMoreOptionsClicked();
+        dismiss();
+    }
+
+    private void onReportClicked() {
+        callback.onReportClicked();
         dismiss();
     }
     @SuppressLint("SetTextI18n")

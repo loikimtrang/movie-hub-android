@@ -15,4 +15,14 @@
         <item>Copyright violation</item>
         <item>@string/report_reason_other</item>
     </string-array>
+
+    <string-array name="video_report_reasons">
+        <item>Video cannot play</item>
+        <item>Video is lagging</item>
+        <item>Audio issue</item>
+        <item>Subtitle issue</item>
+        <item>Poor video quality</item>
+        <item>Video does not match movie/episode content</item>
+        <item>@string/report_reason_other</item>
+    </string-array>
 </resources>

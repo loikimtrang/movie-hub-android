@@ -6,6 +6,7 @@ import com.movie_hub.android.data.model.api.ResponseListObj;
 import com.movie_hub.android.data.model.api.ResponseWrapper;
 import com.movie_hub.android.data.model.api.request.comment.CreateCommentReactionRequest;
 import com.movie_hub.android.data.model.api.request.comment.CreateCommentRequest;
+import com.movie_hub.android.data.model.api.request.comment.UpdateCommentRequest;
 import com.movie_hub.android.data.model.api.request.forgot.ForgotChangePasswordRequest;
 import com.movie_hub.android.data.model.api.request.forgot.ForgotPasswordRequest;
 import com.movie_hub.android.data.model.api.request.history.TrackingWatchHistoryRequest;
@@ -179,6 +180,12 @@ public interface ApiService {
 
     @DELETE("v1/comment/delete/{id}")
     Observable<ResponseWrapper> deleteComment(@Path("id") Long id);
+
+    @PUT("v1/comment/update")
+    Observable<ResponseWrapper> updateComment(@Body UpdateCommentRequest request);
+
+    @GET("v1/comment/get/{id}")
+    Observable<ResponseWrapper<CommentResponse>> getComment(@Path("id") Long id);
 
     // Review
     @GET("v1/review/list")

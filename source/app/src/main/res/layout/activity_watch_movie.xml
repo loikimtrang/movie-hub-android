@@ -1025,6 +1025,24 @@
                             />
 
                         <TextView
+                            android:id="@+id/btn_report_error_video"
+                            android:layout_width="@dimen/_80sdp"
+                            android:layout_height="@dimen/_25sdp"
+                            android:foreground="?attr/selectableItemBackground"
+                            android:clickable="true"
+                            android:focusable="true"
+                            android:text="@string/send_report"
+                            style="@style/Text_10_Bold"
+                            android:background="@drawable/bg_btn_white_radius_6sdp"
+                            android:gravity="center"
+                            android:layout_marginStart="@dimen/_5sdp"
+                            android:layout_marginEnd="@dimen/_5sdp"
+                            android:textColor="@color/black"
+                            android:onClick="onClick"
+                            tools:ignore="UsingOnClickInXml"
+                            />
+
+                        <TextView
                             android:id="@+id/btn_exit_error_video_"
                             android:layout_width="@dimen/_80sdp"
                             android:layout_height="@dimen/_25sdp"

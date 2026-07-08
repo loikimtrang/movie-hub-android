@@ -2,10 +2,13 @@ package com.movie_hub.android.utils;
 
 import android.app.Dialog;
 import android.content.Context;
+import android.graphics.Rect;
 import android.view.View;
 import android.content.res.ColorStateList;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.view.Window;
+import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
@@ -19,8 +22,6 @@ import com.movie_hub.android.data.model.other.ToastMessage;
 
 public class ReportDialogUtils {
 
-    private static final int VISIBLE_REASON_COUNT = 6;
-
     private ReportDialogUtils() {
     }
 
@@ -29,16 +30,27 @@ public class ReportDialogUtils {
     }
 
     public static void show(Context context, String title, OnReportSubmitListener listener) {
+        show(context, title, R.array.report_reasons, listener);
+    }
+
+    public static void show(Context context, String title, int reasonsArrayResId, OnReportSubmitListener listener) {
         Dialog dialog = new Dialog(context);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.setContentView(R.layout.layout_dialog_report);
         dialog.setCancelable(true);
 
+        int screenHeight = context.getResources().getDisplayMetrics().heightPixels;
+        int dialogHeight = (int) (screenHeight * 0.82f);
+
         if (dialog.getWindow() != null) {
             dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+            dialog.getWindow().setSoftInputMode(
+                    WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE
+                            | WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN
+            );
             dialog.getWindow().setLayout(
                     ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT
+                    dialogHeight
             );
         }
 
@@ -49,7 +61,7 @@ public class ReportDialogUtils {
         tvTitle.setText(title);
 
         String otherReasonLabel = context.getString(R.string.report_reason_other);
-        String[] reasons = context.getResources().getStringArray(R.array.report_reasons);
+        String[] reasons = context.getResources().getStringArray(reasonsArrayResId);
         int padding = context.getResources().getDimensionPixelSize(R.dimen._8sdp);
         for (String reason : reasons) {
             RadioButton radioButton = new RadioButton(context);
@@ -75,10 +87,11 @@ public class ReportDialogUtils {
                 edtOtherReason.setText("");
             } else {
                 edtOtherReason.requestFocus();
+                scrollReasons.post(() -> scrollReasons.fullScroll(View.FOCUS_DOWN));
             }
         });
 
-        radioGroup.post(() -> limitReasonListHeight(scrollReasons, radioGroup, VISIBLE_REASON_COUNT));
+        setupKeyboardVisibilityListener(dialog, dialogHeight);
 
         dialog.findViewById(R.id.btn_close).setOnClickListener(v -> dialog.dismiss());
 
@@ -117,30 +130,35 @@ public class ReportDialogUtils {
         dialog.show();
     }
 
-    private static void limitReasonListHeight(NestedScrollView scrollView, RadioGroup radioGroup, int visibleCount) {
-        int childCount = radioGroup.getChildCount();
-        if (childCount == 0) {
+    private static void setupKeyboardVisibilityListener(Dialog dialog, int defaultDialogHeight) {
+        if (dialog.getWindow() == null) {
             return;
         }
 
-        int width = scrollView.getWidth();
-        if (width <= 0) {
-            width = scrollView.getResources().getDisplayMetrics().widthPixels
-                    - scrollView.getResources().getDimensionPixelSize(R.dimen._40sdp) * 2;
-        }
+        View decorView = dialog.getWindow().getDecorView();
+        ViewTreeObserver.OnGlobalLayoutListener keyboardListener = () -> {
+            if (dialog.getWindow() == null) {
+                return;
+            }
 
-        int itemsToMeasure = Math.min(visibleCount, childCount);
-        int totalHeight = 0;
-        int widthSpec = View.MeasureSpec.makeMeasureSpec(width, View.MeasureSpec.AT_MOST);
+            Rect visibleFrame = new Rect();
+            decorView.getWindowVisibleDisplayFrame(visibleFrame);
+            int screenHeight = decorView.getRootView().getHeight();
+            int keypadHeight = screenHeight - visibleFrame.bottom;
 
-        for (int i = 0; i < itemsToMeasure; i++) {
-            View child = radioGroup.getChildAt(i);
-            child.measure(widthSpec, View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
-            totalHeight += child.getMeasuredHeight();
-        }
+            int targetHeight = keypadHeight > screenHeight * 0.15
+                    ? visibleFrame.height()
+                    : defaultDialogHeight;
 
-        ViewGroup.LayoutParams params = scrollView.getLayoutParams();
-        params.height = totalHeight;
-        scrollView.setLayoutParams(params);
+            ViewGroup.LayoutParams layoutParams = decorView.getLayoutParams();
+            if (layoutParams != null && layoutParams.height != targetHeight) {
+                dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, targetHeight);
+            }
+        };
+
+        decorView.getViewTreeObserver().addOnGlobalLayoutListener(keyboardListener);
+        dialog.setOnDismissListener(d ->
+                decorView.getViewTreeObserver().removeOnGlobalLayoutListener(keyboardListener)
+        );
     }
 }

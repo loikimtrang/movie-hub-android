@@ -43,6 +43,7 @@ import com.movie_hub.android.others.MyTimberDebugTree;
 import com.movie_hub.android.others.MyTimberReleaseTree;
 import com.movie_hub.android.ui.main.MainActivity;
 import com.movie_hub.android.ui.main.movie.detail.MovieDetailActivity;
+import com.movie_hub.android.ui.main.movie.detail.comment.CommentActivity;
 import com.movie_hub.android.ui.main.splash.SplashActivity;
 import com.movie_hub.android.utils.DialogUtils;
 import com.movie_hub.android.utils.GsonUtils;
@@ -146,6 +147,8 @@ public class MVVMApplication extends Application implements LifecycleObserver {
         return intent;
     }
     public void showCustomNotification(MessageOneSignal messageOneSignal) {
+        deliverNotificationToCurrentActivity(messageOneSignal);
+
         String channelId = "movie_hub_notifications";
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
@@ -182,6 +185,17 @@ public class MVVMApplication extends Application implements LifecycleObserver {
 
         notificationManager.notify(requestCode, notificationBuilder.build());
     }
+
+    private void deliverNotificationToCurrentActivity(MessageOneSignal messageOneSignal) {
+        if (!isAppRunning || currentActivity == null || messageOneSignal == null) {
+            return;
+        }
+        if (currentActivity instanceof CommentActivity
+                && OneSignalCommand.CMD_TOXIC_COMMENT_LOCKED.equals(messageOneSignal.getCmd())) {
+            ((CommentActivity) currentActivity).onNotificationReceived(messageOneSignal);
+        }
+    }
+
     public void setOneSignalExternalId(String userId) {
         if (userId == null || userId.isEmpty()) {
             Timber.e("ONESIGNAL_LOG: UserId bị trống, không thể set External ID");

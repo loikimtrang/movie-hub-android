@@ -16,9 +16,13 @@ public class ReportUtils {
         String message;
         if (response != null
                 && Constants.CODE_USER_REPORT_ALREADY_EXISTED.equals(response.getCode())) {
-            message = reportType == Constants.USER_REPORT_TYPE_COMMENT
-                    ? context.getString(R.string.report_comment_already)
-                    : context.getString(R.string.report_review_already);
+            if (reportType == Constants.USER_REPORT_TYPE_COMMENT) {
+                message = context.getString(R.string.report_comment_already);
+            } else if (reportType == Constants.USER_REPORT_TYPE_REVIEW) {
+                message = context.getString(R.string.report_review_already);
+            } else {
+                message = context.getString(R.string.report_video_already);
+            }
         } else {
             message = context.getString(R.string.an_error_occurred);
         }

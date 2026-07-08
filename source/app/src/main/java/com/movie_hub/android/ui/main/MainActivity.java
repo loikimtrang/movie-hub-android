@@ -5,6 +5,7 @@ import static com.movie_hub.android.ui.main.home.HomeFragment.NavigateToWatchMov
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.Manifest;
 import android.os.Bundle;
 import android.view.View;
 
@@ -68,6 +69,7 @@ import com.movie_hub.android.ui.main.search.SearchFragment;
 import com.movie_hub.android.ui.main.splash.SplashActivity;
 import com.movie_hub.android.utils.DialogUtils;
 import com.movie_hub.android.utils.GsonUtils;
+import com.movie_hub.android.utils.NotificationPermissionUtils;
 
 import java.util.List;
 import java.util.Objects;
@@ -85,6 +87,8 @@ public class MainActivity extends BaseActivity<ActivityMainBinding, MainViewMode
     private AccountFragment accountFragment;
     private UnLoginAccountFragment unLoginAccountFragment;
     private RoomClickCoordinator roomClickCoordinator;
+    private boolean notificationPermissionPromptShown = false;
+    private ActivityResultLauncher<String> notificationPermissionLauncher;
 
     public MainViewModel getViewModel() {
         return viewModel;
@@ -158,6 +162,15 @@ public class MainActivity extends BaseActivity<ActivityMainBinding, MainViewMode
         viewBinding.setA(this);
         viewBinding.setVm(viewModel);
         setUpFragment();
+
+        notificationPermissionLauncher = registerForActivityResult(
+                new ActivityResultContracts.RequestPermission(),
+                isGranted -> {
+                    if (!isGranted && !NotificationPermissionUtils.shouldShowRationale(this)) {
+                        showNotificationPermissionDialog(true);
+                    }
+                }
+        );
 
 //        if (viewModel.isLogin()) {
 //            getUserProfile();
@@ -394,8 +407,43 @@ public class MainActivity extends BaseActivity<ActivityMainBinding, MainViewMode
         @Override
     protected void onResume() {
         super.onResume();
-
+        promptNotificationPermissionIfNeeded();
     }
+
+    private void promptNotificationPermissionIfNeeded() {
+        if (!NotificationPermissionUtils.isRequired()
+                || NotificationPermissionUtils.isGranted(this)
+                || notificationPermissionPromptShown) {
+            return;
+        }
+
+        notificationPermissionPromptShown = true;
+        showNotificationPermissionDialog(false);
+    }
+
+    private void showNotificationPermissionDialog(boolean forceOpenSettings) {
+        boolean canRequestAgain = !forceOpenSettings
+                && NotificationPermissionUtils.shouldShowRationale(this);
+        String positiveText = canRequestAgain
+                ? getString(R.string.notification_permission_allow)
+                : getString(R.string.notification_permission_settings);
+
+        DialogUtils.dialogConfirm(
+                this,
+                getString(R.string.notification_permission_message),
+                positiveText,
+                (dialog, which) -> {
+                    if (canRequestAgain) {
+                        notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS);
+                    } else {
+                        NotificationPermissionUtils.openAppNotificationSettings(this);
+                    }
+                },
+                getString(R.string.notification_permission_later),
+                null
+        );
+    }
+
     @Override
     public int getLayoutId() {
         return R.layout.activity_main;

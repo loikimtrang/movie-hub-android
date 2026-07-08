@@ -41,6 +41,7 @@ public class CommentChildAdapter extends RecyclerView.Adapter<CommentChildAdapte
         void onDislikeChildClick(CommentResponse commentResponse);
         void onReplyChildClick(CommentResponse commentResponse);
         void onReportChildClick(CommentResponse commentResponse);
+        void onEditChildClick(CommentResponse commentResponse);
         void onDeleteChildClick(CommentResponse commentResponse);
     }
 
@@ -166,6 +167,11 @@ public class CommentChildAdapter extends RecyclerView.Adapter<CommentChildAdapte
                         () -> {
                             if (listener != null) {
                                 listener.onReportChildClick(item);
+                            }
+                        },
+                        () -> {
+                            if (listener != null) {
+                                listener.onEditChildClick(item);
                             }
                         },
                         () -> {

@@ -46,6 +46,7 @@ public class CommentParentAdapter extends RecyclerView.Adapter<CommentParentAdap
         void onLikeClick(CommentResponse commentResponse);
         void onReplyClick(CommentResponse commentResponse);
         void onReportClick(CommentResponse commentResponse);
+        void onEditClick(CommentResponse commentResponse);
         void onDeleteClick(CommentResponse commentResponse);
     }
 
@@ -259,6 +260,11 @@ public class CommentParentAdapter extends RecyclerView.Adapter<CommentParentAdap
                         () -> {
                             if (listener != null) {
                                 listener.onReportClick(item);
+                            }
+                        },
+                        () -> {
+                            if (listener != null) {
+                                listener.onEditClick(item);
                             }
                         },
                         () -> {

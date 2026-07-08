@@ -204,6 +204,7 @@
     <string name="report">Report</string>
     <string name="report_comment_title">Report comment</string>
     <string name="report_review_title">Report review</string>
+    <string name="report_video_title">Report video</string>
     <string name="report_close">Close</string>
     <string name="report_submit">Submit report</string>
     <string name="report_select_reason">Please select a report reason</string>
@@ -213,8 +214,14 @@
     <string name="report_success">Report submitted successfully</string>
     <string name="report_comment_already">You have already reported this comment</string>
     <string name="report_review_already">You have already reported this review</string>
+    <string name="report_video_already">You have already reported this video</string>
+    <string name="video_report_reason_cannot_play">Video cannot play</string>
+    <string name="send_report">Send report</string>
     <string name="delete_comment_confirm">Are you sure you want to delete this comment?</string>
     <string name="delete_comment_success">Comment deleted successfully</string>
+    <string name="edit">Edit</string>
+    <string name="editing_comment">Editing comment</string>
+    <string name="update_comment_success">Comment updated successfully</string>
     <string name="author_you_suffix">(you)</string>
     <string name="comment_non_up">comments</string>
     <string name="comment_non_up_one">comment</string>
@@ -247,6 +254,10 @@
     <string name="add_to_list">Add to playlist</string>
     <string name="choose">Choose</string>
     <string name="permission_install">You need permission to install the application</string>
+    <string name="notification_permission_message">Enable notifications to receive replies, likes, and updates from Movie Hub.</string>
+    <string name="notification_permission_allow">Allow</string>
+    <string name="notification_permission_settings">Open Settings</string>
+    <string name="notification_permission_later">Later</string>
     <string name="slogan_app">Phim hay cả rổ</string>
     <string name="what_are_you_interested">What are you interested in?</string>
 

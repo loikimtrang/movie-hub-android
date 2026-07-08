@@ -21,12 +21,12 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.GestureDetector;
 import android.view.HapticFeedbackConstants;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
 import android.view.Window;
 import android.view.WindowInsets;
 import android.view.WindowInsetsController;
@@ -34,7 +34,7 @@ import android.view.WindowManager;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageView;
-import android.view.LayoutInflater;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.PopupWindow;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -42,7 +42,10 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowCompat;
+import androidx.core.view.WindowInsetsCompat;
+import androidx.core.graphics.Insets;
 import androidx.media3.common.C;
 import androidx.media3.common.Format;
 import androidx.media3.common.MediaItem;
@@ -79,6 +82,9 @@ import com.google.common.collect.ImmutableList;
 import com.movie_hub.android.MVVMApplication;
 import com.movie_hub.android.R;
 import com.movie_hub.android.constant.Constants;
+import com.movie_hub.android.data.model.api.ResponseWrapper;
+import com.movie_hub.android.data.model.api.response.report.CreateReportRequest;
+import com.movie_hub.android.data.model.other.ToastMessage;
 import com.movie_hub.android.data.model.api.request.history.TrackingWatchHistoryRequest;
 import com.movie_hub.android.data.model.api.request.setting.UserSettingsRequest;
 import com.movie_hub.android.data.model.api.response.MovieItem.MovieItemResponse;
@@ -121,6 +127,8 @@ import com.movie_hub.android.ui.main.movie.watch.setting.SettingVideoModel;
 import com.movie_hub.android.ui.main.movie.watch.setting.VideoQuality;
 import com.movie_hub.android.utils.DeviceUtils;
 import com.movie_hub.android.utils.DialogUtils;
+import com.movie_hub.android.utils.ReportDialogUtils;
+import com.movie_hub.android.utils.ReportUtils;
 import com.movie_hub.android.utils.RoomDialogUtils;
 import com.movie_hub.android.utils.GsonUtils;
 import com.movie_hub.android.utils.LiveDataUtils;
@@ -188,9 +196,7 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
     private ParticipantListAdapter membersAdapter;
     private boolean isMembersTabActive = false;
     private final Handler handlerRetryGetListSubtitle = new Handler(Looper.getMainLooper());
-    private boolean lastImeVisible = false;
-    private int lastKeyboardHeight = 0;
-    @Nullable private ViewTreeObserver.OnGlobalLayoutListener imeLayoutListener;
+    private boolean chatImeSetup = false;
     private void startSchedule() {
         runnablePing = new Runnable() {
             @SuppressLint("TimberArgCount")
@@ -287,47 +293,50 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
     }
 
     private void setupImeAwareChatInput() {
-        if (imeLayoutListener != null) return;
+        if (chatImeSetup) {
+            return;
+        }
+        chatImeSetup = true;
 
-        final View root = viewBinding.getRoot();
-        imeLayoutListener = () -> {
-            Rect r = new Rect();
-            root.getWindowVisibleDisplayFrame(r);
-
-            int screenHeight = root.getRootView().getHeight();
-            int visibleHeight = r.height();
-            int heightDiff = Math.max(0, screenHeight - visibleHeight);
-
-            // Heuristic threshold to decide IME visibility (landscape + immersive can vary)
-            boolean imeVisible = heightDiff > dpToPx(140);
-            if (imeVisible == lastImeVisible && heightDiff == lastKeyboardHeight) return;
-            lastImeVisible = imeVisible;
-            lastKeyboardHeight = heightDiff;
-
-            applyChatImeState(imeVisible, heightDiff);
-        };
-        root.getViewTreeObserver().addOnGlobalLayoutListener(imeLayoutListener);
+        // WatchMovieActivity uses adjustNothing so the video player does not resize.
+        // Apply IME insets to the chat panel only, similar to CommentActivity's adjustResize behavior.
+        ViewCompat.setOnApplyWindowInsetsListener(viewBinding.layoutChat, (v, windowInsets) -> {
+            Insets imeInsets = windowInsets.getInsets(WindowInsetsCompat.Type.ime());
+            applyChatImeState(imeInsets.bottom > dpToPx(48), imeInsets.bottom);
+            return windowInsets;
+        });
+        ViewCompat.requestApplyInsets(viewBinding.layoutChat);
     }
 
     private void applyChatImeState(boolean imeVisible, int keyboardHeight) {
-        // Only animate when chat is actually open/visible (prevents background layout churn).
-        if (viewBinding.layoutChat.getVisibility() != View.VISIBLE) return;
+        if (viewBinding.layoutChat.getVisibility() != View.VISIBLE) {
+            return;
+        }
 
         if (imeVisible) {
-            // Push chat content (list + input) above the keyboard by adding bottom padding.
-            // adjustNothing means the window doesn't resize, so we compensate manually.
             viewBinding.layoutChat.setPadding(0, 0, 0, keyboardHeight);
             viewBinding.edtComment.setMaxLines(3);
-            // Scroll to latest message so user can see context while typing.
             List<?> chatList = viewModel.getChatModels();
             if (!chatList.isEmpty()) {
-                viewBinding.rvChat.scrollToPosition(chatList.size() - 1);
+                viewBinding.rvChat.post(() ->
+                        viewBinding.rvChat.scrollToPosition(chatList.size() - 1));
             }
         } else {
-            viewBinding.layoutChat.setPadding(0, 0, 0, 0);
-            viewBinding.edtComment.setMinLines(1);
-            viewBinding.edtComment.setMaxLines(4);
-            viewBinding.edtComment.setGravity(Gravity.START | Gravity.CENTER_VERTICAL);
+            resetChatImeState();
+        }
+    }
+
+    private void resetChatImeState() {
+        viewBinding.layoutChat.setPadding(0, 0, 0, 0);
+        viewBinding.edtComment.setMinLines(1);
+        viewBinding.edtComment.setMaxLines(4);
+        viewBinding.edtComment.setGravity(Gravity.START | Gravity.CENTER_VERTICAL);
+    }
+
+    private void hideChatKeyboard() {
+        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        if (imm != null && viewBinding.edtComment.getWindowToken() != null) {
+            imm.hideSoftInputFromWindow(viewBinding.edtComment.getWindowToken(), 0);
         }
     }
 
@@ -373,6 +382,7 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
         ViewGroup root = (ViewGroup) viewBinding.getRoot();
         TransitionManager.beginDelayedTransition(root, buildChatTransition(true));
         viewBinding.layoutChat.setVisibility(View.VISIBLE);
+        ViewCompat.requestApplyInsets(viewBinding.layoutChat);
     }
 
     private void closeChatAnimated() {
@@ -383,6 +393,8 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
         }
 
         viewModel.setChatOpen(false);
+        hideChatKeyboard();
+        resetChatImeState();
         // IMPORTANT: Do a single TransitionManager transition so bounds + slide/fade stay in sync.
         // Manual property animations here will cause a second pass (stutter) and delay the video resize.
         viewBinding.layoutChat.animate().cancel();
@@ -1467,7 +1479,97 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
                 finish();
             });
 
+            viewBinding.btnReportErrorVideo.setOnClickListener(v ->
+                    submitVideoReport(getString(R.string.video_report_reason_cannot_play))
+            );
+
         });
+    }
+
+    private Long getCurrentVideoId() {
+        return viewModel.nowVideoPlay != null ? viewModel.nowVideoPlay.getId() : null;
+    }
+
+    private void showVideoReportDialog() {
+        if (!viewModel.isLogin()) {
+            showLoginRequiredDialog();
+            return;
+        }
+        Long videoId = getCurrentVideoId();
+        if (videoId == null) {
+            return;
+        }
+
+        ReportDialogUtils.show(
+                this,
+                getString(R.string.report_video_title),
+                R.array.video_report_reasons,
+                content -> submitVideoReport(content)
+        );
+    }
+
+    private void submitVideoReport(String content) {
+        if (!viewModel.isLogin()) {
+            showLoginRequiredDialog();
+            return;
+        }
+        Long videoId = getCurrentVideoId();
+        if (videoId == null || TextUtils.isEmpty(content)) {
+            return;
+        }
+
+        CreateReportRequest request = new CreateReportRequest();
+        request.setObjectId(videoId);
+        request.setType(Constants.USER_REPORT_TYPE_VIDEO);
+        request.setContent(content);
+
+        viewModel.createReport(new MainCallback<ResponseWrapper>() {
+            @Override
+            public void doError(Throwable error) {
+                new ToastMessage(ToastMessage.TYPE_WARNING, getString(R.string.an_error_occurred))
+                        .showMessage(WatchMovieActivity.this);
+            }
+
+            @Override
+            public void doSuccess() {
+            }
+
+            @Override
+            public void doSuccess(ResponseWrapper response) {
+                new ToastMessage(ToastMessage.TYPE_NORMAL, getString(R.string.report_success))
+                        .showMessage(WatchMovieActivity.this);
+            }
+
+            @Override
+            public void doErrorForm(ResponseWrapper response) {
+                ReportUtils.showReportFailMessage(
+                        WatchMovieActivity.this,
+                        response,
+                        Constants.USER_REPORT_TYPE_VIDEO
+                );
+            }
+
+            @Override
+            public void doFail() {
+                new ToastMessage(ToastMessage.TYPE_WARNING, getString(R.string.an_error_occurred))
+                        .showMessage(WatchMovieActivity.this);
+            }
+        }, request);
+    }
+
+    private void showLoginRequiredDialog() {
+        DialogUtils.dialogConfirm(
+                this,
+                getString(R.string.not_login),
+                getString(R.string.login),
+                (dialog, which) -> {
+                    Intent it = new Intent(this, LoginActivity.class);
+                    it.putExtra("login_from_other", "login_from_other");
+                    startActivity(it);
+                },
+                getString(R.string.cancel),
+                null
+        );
     }
     private void updatePlayPauseState(boolean isPlaying) {
         updatePlayPauseState(isPlaying, false);
@@ -2327,16 +2429,6 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
     }
     @Override
     protected void onDestroy() {
-        if (imeLayoutListener != null) {
-            View root = viewBinding != null ? viewBinding.getRoot() : null;
-            if (root != null) {
-                ViewTreeObserver vto = root.getViewTreeObserver();
-                if (vto.isAlive()) {
-                    vto.removeOnGlobalLayoutListener(imeLayoutListener);
-                }
-            }
-            imeLayoutListener = null;
-        }
         super.onDestroy();
 
         if (player != null) {
@@ -2525,6 +2617,11 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
     @Override
     public void onMoreOptionsClicked() {
         showSettingsMoreOptionBottomSheet();
+    }
+
+    @Override
+    public void onReportClicked() {
+        showVideoReportDialog();
     }
 
     // region === Handle Setting ===

@@ -12,6 +12,7 @@ import com.movie_hub.android.data.model.api.ResponseWrapper;
 import com.movie_hub.android.data.model.api.request.comment.CommentRequest;
 import com.movie_hub.android.data.model.api.request.comment.CreateCommentReactionRequest;
 import com.movie_hub.android.data.model.api.request.comment.CreateCommentRequest;
+import com.movie_hub.android.data.model.api.request.comment.UpdateCommentRequest;
 import com.movie_hub.android.data.model.api.response.comment.CommentResponse;
 import com.movie_hub.android.data.model.api.response.comment.VoteListResponse;
 import com.movie_hub.android.data.model.api.response.movie.MovieResponse;
@@ -49,6 +50,7 @@ public class CommentViewModel extends BaseViewModel {
     TagComment tagCommentSelect = new TagComment();
 
     public CommentResponse replyTo = new CommentResponse();
+    public CommentResponse editTarget = new CommentResponse();
     public MutableLiveData<Long> totalComment = new MutableLiveData<>(0L);
     public CommentViewModel(Repository repository, MVVMApplication application) {
         super(repository, application);
@@ -294,6 +296,126 @@ public class CommentViewModel extends BaseViewModel {
                         }
                 )
         );
+    }
+
+    public void updateComment(MainCallback<ResponseWrapper> callback, UpdateCommentRequest request) {
+        compositeDisposable.add(repository.getApiService().updateComment(request)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .retryWhen(throwable ->
+                        throwable.flatMap((Function<Throwable, ObservableSource<?>>) throwable1 -> {
+                            if (NetworkUtils.checkNetworkError(throwable1)) {
+                                hideLoading();
+                                return application.showDialogNoInternetAccess();
+                            } else {
+                                return Observable.error(throwable1);
+                            }
+                        })
+                )
+                .subscribe(
+                        response -> {
+                            if (response.isResult()) {
+                                callback.doSuccess(response);
+                            } else {
+                                callback.doFail();
+                            }
+                        }, throwable -> {
+                            Timber.e(throwable);
+                            callback.doError(throwable);
+                        }
+                )
+        );
+    }
+
+    public void getCommentById(MainCallback<CommentResponse> callback, long commentId) {
+        compositeDisposable.add(repository.getApiService().getComment(commentId)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .retryWhen(throwable ->
+                        throwable.flatMap((Function<Throwable, ObservableSource<?>>) throwable1 -> {
+                            if (NetworkUtils.checkNetworkError(throwable1)) {
+                                hideLoading();
+                                return application.showDialogNoInternetAccess();
+                            } else {
+                                return Observable.error(throwable1);
+                            }
+                        })
+                )
+                .subscribe(
+                        response -> {
+                            if (response.isResult() && response.getData() != null) {
+                                callback.doSuccess(response.getData());
+                            } else {
+                                callback.doFail();
+                            }
+                        }, throwable -> {
+                            Timber.e(throwable);
+                            callback.doError(throwable);
+                        }
+                )
+        );
+    }
+
+    public boolean containsCommentId(long commentId) {
+        List<CommentResponse> list = commentList.getValue();
+        if (list == null) {
+            return false;
+        }
+
+        for (CommentResponse parent : list) {
+            if (parent.getId() != null && parent.getId() == commentId) {
+                return true;
+            }
+            if (parent.getChildComments() != null) {
+                for (CommentResponse child : parent.getChildComments()) {
+                    if (child.getId() != null && child.getId() == commentId) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    public void updateCommentInList(CommentResponse updated) {
+        if (updated == null || updated.getId() == null) {
+            return;
+        }
+
+        List<CommentResponse> list = commentList.getValue();
+        if (list == null) {
+            return;
+        }
+
+        for (CommentResponse parent : list) {
+            if (parent.getId() != null && parent.getId().equals(updated.getId())) {
+                preserveCommentUiState(parent, updated);
+                int index = list.indexOf(parent);
+                list.set(index, updated);
+                commentList.setValue(new ArrayList<>(list));
+                return;
+            }
+
+            if (parent.getChildComments() != null) {
+                for (int i = 0; i < parent.getChildComments().size(); i++) {
+                    CommentResponse child = parent.getChildComments().get(i);
+                    if (child.getId() != null && child.getId().equals(updated.getId())) {
+                        preserveCommentUiState(child, updated);
+                        parent.getChildComments().set(i, updated);
+                        commentList.setValue(new ArrayList<>(list));
+                        return;
+                    }
+                }
+            }
+        }
+    }
+
+    private void preserveCommentUiState(CommentResponse oldItem, CommentResponse updated) {
+        updated.setIsOpenChildComment(oldItem.getIsOpenChildComment());
+        updated.setChildComments(oldItem.getChildComments());
+        updated.setLike(oldItem.isLike());
+        updated.setDislike(oldItem.isDislike());
+        updated.setDisplay(false);
     }
 
     public void voteComment(MainCallback<ResponseWrapper> callback, CreateCommentReactionRequest request) {

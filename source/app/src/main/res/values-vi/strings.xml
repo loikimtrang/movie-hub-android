@@ -205,6 +205,7 @@
     <string name="report">Báo cáo</string>
     <string name="report_comment_title">Báo cáo bình luận</string>
     <string name="report_review_title">Báo cáo đánh giá</string>
+    <string name="report_video_title">Báo cáo video</string>
     <string name="report_close">Đóng</string>
     <string name="report_submit">Gửi báo cáo</string>
     <string name="report_select_reason">Vui lòng chọn lý do báo cáo</string>
@@ -214,8 +215,14 @@
     <string name="report_success">Gửi báo cáo thành công</string>
     <string name="report_comment_already">Bạn đã báo cáo bình luận này trước đây</string>
     <string name="report_review_already">Bạn đã báo cáo đánh giá này trước đây</string>
+    <string name="report_video_already">Bạn đã báo cáo video này trước đây</string>
+    <string name="video_report_reason_cannot_play">Video không phát được</string>
+    <string name="send_report">Gửi báo cáo</string>
     <string name="delete_comment_confirm">Bạn có chắc chắn muốn xóa bình luận này?</string>
     <string name="delete_comment_success">Xóa bình luận thành công</string>
+    <string name="edit">Chỉnh sửa</string>
+    <string name="editing_comment">Đang chỉnh sửa bình luận</string>
+    <string name="update_comment_success">Cập nhật bình luận thành công</string>
     <string name="author_you_suffix">(bạn)</string>
     <string name="comment_non_up">bình luận</string>
     <string name="comment_non_up_one">bình luận</string>
@@ -248,6 +255,10 @@
     <string name="add_to_list">Thêm vào danh sách</string>
     <string name="choose">Chọn</string>
     <string name="permission_install">Bạn cần cấp quyền để cài ứng dụng</string>
+    <string name="notification_permission_message">Bật thông báo để nhận phản hồi, lượt thích và cập nhật từ Movie Hub.</string>
+    <string name="notification_permission_allow">Cho phép</string>
+    <string name="notification_permission_settings">Mở Cài đặt</string>
+    <string name="notification_permission_later">Để sau</string>
     <string name="slogan_app">Phim hay cả rổ</string>
     <string name="what_are_you_interested">Bạn đang quan tâm gì?</string>
     <string name="label_series">Phim bộ</string>
