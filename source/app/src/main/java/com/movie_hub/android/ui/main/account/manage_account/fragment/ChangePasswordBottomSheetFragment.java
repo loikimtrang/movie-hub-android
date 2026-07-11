@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.InputType;
-import android.util.Patterns;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,28 +17,19 @@ import androidx.annotation.Nullable;
 
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import com.movie_hub.android.R;
-import com.movie_hub.android.data.model.api.FormError;
 import com.movie_hub.android.data.model.api.ResponseWrapper;
-import com.movie_hub.android.data.model.api.request.login.UserRegisterRequest;
 import com.movie_hub.android.data.model.api.request.user.UserChangePasswordRequest;
 import com.movie_hub.android.data.model.other.ToastMessage;
 import com.movie_hub.android.databinding.FragmentBottomSheetChangePasswordBinding;
-import com.movie_hub.android.databinding.FragmentBottomSheetRegisterBinding;
 import com.movie_hub.android.helper.BlurEffectManager;
-import com.movie_hub.android.ui.main.MainActivity;
 import com.movie_hub.android.ui.main.MainCallback;
-import com.movie_hub.android.ui.main.account.fragment.LoginBottomSheetFragment;
 import com.movie_hub.android.ui.main.account.manage_account.ManageAccountActivity;
 import com.movie_hub.android.utils.ClickUtils;
 
-import java.lang.reflect.Type;
 import java.net.ConnectException;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
-import java.util.List;
 import java.util.Objects;
 
 public class ChangePasswordBottomSheetFragment extends BottomSheetDialogFragment {

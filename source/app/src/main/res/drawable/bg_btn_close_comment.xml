@@ -1,0 +1,6 @@
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="oval">
+    <solid android:color="@color/bg_comment" />
+    <stroke android:color="@color/text_time_comment"
+        android:width="@dimen/_1sdp"/>
+</shape>

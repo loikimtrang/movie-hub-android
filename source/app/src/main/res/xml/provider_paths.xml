@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Nếu mày lưu APK trong thư mục Downloads -->
+    <external-path
+        name="external_downloads"
+        path="Download/" />
+
+    <!-- Hoặc nếu dùng getExternalFilesDir(null) -->
+    <external-files-path
+        name="my_external_files"
+        path="." />
+
+    <!-- Nếu dùng getCacheDir() -->
+    <cache-path
+        name="cache"
+        path="." />
+
+</paths>

@@ -8,7 +8,9 @@ import androidx.lifecycle.MutableLiveData;
 import com.movie_hub.android.MVVMApplication;
 import com.movie_hub.android.data.Repository;
 import com.movie_hub.android.data.model.api.RequestToMapConverter;
+import com.movie_hub.android.data.model.api.request.history.ListWatchHistoryRequest;
 import com.movie_hub.android.data.model.api.request.movie.MovieRequest;
+import com.movie_hub.android.data.model.api.response.history.ListWatchHistoryResponse;
 import com.movie_hub.android.data.model.api.response.movie.MovieResponse;
 import com.movie_hub.android.data.model.api.response.user.UserResponse;
 import com.movie_hub.android.data.model.mapper.UserMapper;
@@ -83,7 +85,7 @@ public class SearchTopTrendingViewModel extends BaseFragmentViewModel {
     public void getListMovie(MainCallback<List<MovieResponse>> callback, MovieRequest request) {
         Map<String, Object> query = RequestToMapConverter.convert(request);
 
-        compositeDisposable.add(repository.getApiService().getListMovie(query)
+        compositeDisposable.add(repository.getApiService().getListTopViewsMovie(query)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .retryWhen(throwable ->
@@ -110,6 +112,7 @@ public class SearchTopTrendingViewModel extends BaseFragmentViewModel {
                 )
         );
     }
+
     public void getMovie(MainCallback<MovieResponse> callback, Long id) {
         compositeDisposable.add(repository.getApiService().getMovie(id)
                 .subscribeOn(Schedulers.io())
@@ -138,4 +141,37 @@ public class SearchTopTrendingViewModel extends BaseFragmentViewModel {
                 )
         );
     }
+    public void getListMovieTracking(MainCallback<ListWatchHistoryResponse> callback, long movieId) {
+        ListWatchHistoryRequest request = new ListWatchHistoryRequest();
+        request.setMovieId(movieId);
+
+        Map<String, Object> query = RequestToMapConverter.convert(request);
+        compositeDisposable.add(repository.getApiService().getListWatchHistory(query)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .retryWhen(throwable ->
+                        throwable.flatMap((Function<Throwable, ObservableSource<?>>) throwable1 -> {
+                            if (NetworkUtils.checkNetworkError(throwable1)) {
+                                hideLoading();
+                                return application.showDialogNoInternetAccess();
+                            } else {
+                                return Observable.error(throwable1);
+                            }
+                        })
+                )
+                .subscribe(
+                        response -> {
+                            if (response.isResult()) {
+                                callback.doSuccess(response.getData());
+                            } else {
+                                callback.doFail();
+                            }
+                        }, throwable -> {
+                            Timber.e(throwable);
+                            callback.doError(throwable);
+                        }
+                )
+        );
+    }
+
 }

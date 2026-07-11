@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Lớp nền mờ đều – chỉ 20% đen (rất trong, rõ video) -->
+    <item>
+        <shape>
+            <solid android:color="#33000000" />
+        </shape>
+    </item>
+
+    <!-- Gradient nhẹ từ trên xuống (tăng chiều sâu, không thô) -->
+    <item>
+        <shape>
+            <gradient
+                android:startColor="#20000000"
+                android:endColor="#00000000"
+                android:angle="270" />
+        </shape>
+    </item>
+
+    <!-- Gradient nhẹ từ dưới lên (cân bằng, tự nhiên) -->
+<!--    <item>-->
+<!--        <shape>-->
+<!--            <gradient-->
+<!--                android:startColor="#00000000"-->
+<!--                android:endColor="#20000000"-->
+<!--                android:angle="90" />-->
+<!--        </shape>-->
+<!--    </item>-->
+
+</layer-list>

@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    >
+
+    <data>
+        <variable
+            name="a"
+            type="com.movie_hub.android.ui.main.person.PersonDetailActivity" />
+
+        <variable
+            name="vm"
+            type="com.movie_hub.android.ui.main.person.PersonDetailViewModel" />
+
+        <import type="android.view.View" />
+    </data>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/bg_app"
+        android:fitsSystemWindows="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <FrameLayout
+                    android:id="@+id/back"
+                    android:layout_width="@dimen/_36sdp"
+                    android:layout_height="@dimen/_40sdp"
+                    android:onClick="@{(v)->a.finish()}"
+                    android:layout_gravity="top|start">
+                    <ImageView
+                        android:layout_width="@dimen/_12sdp"
+                        android:layout_height="@dimen/_12sdp"
+                        android:src="@drawable/ic_arrow_right"
+                        android:rotation="180"
+                        android:layout_gravity="center"/>
+                </FrameLayout>
+
+                <LinearLayout
+                    android:id="@+id/btn_favourite"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_alignParentEnd="true"
+                    android:orientation="horizontal"
+                    android:padding="@dimen/_6sdp"
+                    android:layout_marginEnd="@dimen/_6sdp"
+                    android:background="@drawable/bg_btn_press_tran"
+                    android:onClick="onClick"
+                    android:clickable="true"
+                    android:focusable="true">
+
+                    <ImageView
+                        android:id="@+id/ic_favourite"
+                        android:layout_width="@dimen/_14sdp"
+                        android:layout_height="@dimen/_14sdp"
+                        android:src="@drawable/ic_heart"
+                        android:layout_gravity="center"/>
+
+                    <TextView
+                        android:id="@+id/tv_favourite"
+                        style="@style/Text_12_Normal"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/favorite"
+                        android:gravity="center"
+                        android:layout_gravity="center"
+                        android:layout_marginStart="@dimen/_6sdp"
+                        android:padding="@dimen/_2sdp"/>
+
+                </LinearLayout>
+            </RelativeLayout>
+
+            <FrameLayout
+                android:id="@+id/bg_header"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/_200sdp">
+
+                <ImageView
+                    android:id="@+id/bg_blur"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="centerCrop"
+                    android:alpha="0.7" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/bg_bottom_gradient"/>
+
+
+
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/image"
+                    android:layout_width="@dimen/_100sdp"
+                    android:layout_height="@dimen/_100sdp"
+                    android:scaleType="centerCrop"
+                    app:shapeAppearanceOverlay="@style/roundImg"
+                    android:src="@drawable/logo"
+                    android:layout_gravity="center"
+                    android:layout_marginBottom="@dimen/_10sdp"/>
+
+                <TextView
+                    android:id="@+id/name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    style="@style/Text_16_Bold"
+                    android:text="@string/cast"
+                    android:layout_gravity="center_horizontal|bottom"
+                    android:layout_marginBottom="@dimen/_6sdp"/>
+
+            </FrameLayout>
+
+            <LinearLayout
+                android:id="@+id/layout_btn"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/_40sdp"
+                android:orientation="horizontal"
+                android:layout_marginHorizontal="@dimen/_6sdp"
+                android:padding="@dimen/_2sdp"
+                android:background="@drawable/bg_tab_container_search_result"
+                android:layout_marginVertical="@dimen/_12sdp"
+                android:visibility="gone">
+
+                <FrameLayout
+                    android:id="@+id/btn_inf"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_tab_search_result"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:onClick="onClick"
+                    android:layout_marginEnd="@dimen/_1sdp">
+
+                    <TextView
+                        android:id="@+id/tv_inf"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        style="@style/Text_12_Normal"
+                        android:textColor="@color/white"
+                        android:text="@string/info_display"
+                        android:gravity="center"/>
+
+                </FrameLayout>
+
+                <FrameLayout
+                    android:id="@+id/btn_movie"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_tab_search_result"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:onClick="onClick"
+                    android:layout_marginStart="@dimen/_1sdp">
+
+                    <TextView
+                        android:id="@+id/tv_movie"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        style="@style/Text_12_Normal"
+                        android:textColor="@color/white"
+                        android:text="@string/acted_display"
+                        android:gravity="center"/>
+
+                </FrameLayout>
+
+            </LinearLayout>
+
+            <androidx.viewpager2.widget.ViewPager2
+                android:id="@+id/viewPager"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
+
+        </LinearLayout>
+
+        <com.google.android.material.progressindicator.LinearProgressIndicator
+            android:id="@+id/bottom_loading_bar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:indeterminate="true"
+            android:visibility="gone"
+            app:trackThickness="1dp"
+            app:indicatorColor="@color/ic_tab_bar_tint"
+            app:trackColor="@android:color/transparent"
+            style="@style/Widget.MaterialComponents.LinearProgressIndicator"
+            android:layout_marginBottom="@dimen/_25sdp"/>
+
+        <FrameLayout
+            android:id="@+id/loading_overlay"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@android:color/transparent"
+            android:visibility="gone"
+            android:clickable="true"
+            android:focusable="true"/>
+    </FrameLayout>
+</layout>

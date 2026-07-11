@@ -13,7 +13,7 @@ public class PersonRequest {
     private Long offset;
     private String otherName;
     private Integer page;
-    private Integer pageSize;
+    private Integer size;
     private Boolean paged;
     private Boolean sortSorted;
     private Boolean sortUnsorted;

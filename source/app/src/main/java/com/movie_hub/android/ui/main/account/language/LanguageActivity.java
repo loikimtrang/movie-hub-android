@@ -9,8 +9,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.movie_hub.android.BR;
 import com.movie_hub.android.R;
-import com.movie_hub.android.custom.CustomDialog;
-import com.movie_hub.android.data.model.other.ToastMessage;
 import com.movie_hub.android.databinding.ActivityLanguageBinding;
 import com.movie_hub.android.di.component.ActivityComponent;
 import com.movie_hub.android.ui.base.activity.BaseActivity;
@@ -66,7 +64,7 @@ public class LanguageActivity extends BaseActivity<ActivityLanguageBinding, Lang
 
     @Override
     public int getStatusBarColor() {
-        return R.color.account_header;
+        return R.color.header_app;
     }
 
     @Override

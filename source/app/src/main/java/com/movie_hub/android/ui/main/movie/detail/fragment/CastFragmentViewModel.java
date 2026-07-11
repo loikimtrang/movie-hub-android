@@ -3,16 +3,19 @@ package com.movie_hub.android.ui.main.movie.detail.fragment;
 import com.movie_hub.android.MVVMApplication;
 import com.movie_hub.android.data.Repository;
 import com.movie_hub.android.data.model.api.RequestToMapConverter;
+import com.movie_hub.android.data.model.api.ResponseListObj;
+import com.movie_hub.android.data.model.api.request.favourite.CreateFavouriteRequest;
+import com.movie_hub.android.data.model.api.request.favourite.FavouriteListRequest;
 import com.movie_hub.android.data.model.api.request.moviePerson.MoviePersonRequest;
 import com.movie_hub.android.data.model.api.request.person.PersonRequest;
-import com.movie_hub.android.data.model.api.response.movie.MovieResponse;
+import com.movie_hub.android.data.model.api.response.favourite.FavouriteResponse;
 import com.movie_hub.android.data.model.api.response.moviePerson.MoviePersonResponse;
 import com.movie_hub.android.data.model.api.response.person.PersonResponse;
 import com.movie_hub.android.ui.base.fragment.BaseFragmentViewModel;
 import com.movie_hub.android.ui.main.MainCallback;
-import com.movie_hub.android.ui.main.movie.detail.MovieDetailViewModel;
 import com.movie_hub.android.utils.NetworkUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -24,12 +27,14 @@ import io.reactivex.rxjava3.schedulers.Schedulers;
 import timber.log.Timber;
 
 public class CastFragmentViewModel extends BaseFragmentViewModel {
+    List<FavouriteResponse> favouriteResponses  = new ArrayList<>();
     public CastFragmentViewModel(Repository repository, MVVMApplication application) {
         super(repository, application);
     }
 
-    public void getListMoviePerson(MainCallback<List<MoviePersonResponse>> callback, MoviePersonRequest request) {
+    public void getListMoviePerson(MainCallback<ResponseListObj<MoviePersonResponse>> callback, MoviePersonRequest request) {
         Map<String, Object> query = RequestToMapConverter.convert(request);
+
         compositeDisposable.add(repository.getApiService().getListMoviePerson(query)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -46,7 +51,7 @@ public class CastFragmentViewModel extends BaseFragmentViewModel {
                 .subscribe(
                         response -> {
                             if (response.isResult()) {
-                                callback.doSuccess(response.getData().getContent());
+                                callback.doSuccess(response.getData());
                             } else {
                                 callback.doFail();
                             }
@@ -58,7 +63,7 @@ public class CastFragmentViewModel extends BaseFragmentViewModel {
         );
 
     }
-    public void getListPerson(MainCallback<List<PersonResponse>> callback, PersonRequest request) {
+    public void getListPerson(MainCallback<ResponseListObj<PersonResponse>> callback, PersonRequest request) {
         Map<String, Object> query = RequestToMapConverter.convert(request);
 
         compositeDisposable.add(repository.getApiService().getListPerson(query)
@@ -77,13 +82,91 @@ public class CastFragmentViewModel extends BaseFragmentViewModel {
                 .subscribe(
                         response -> {
                             if (response.isResult()) {
-                                callback.doSuccess(response.getData().getContent());
+                                callback.doSuccess(response.getData());
                             } else {
                                 callback.doFail();
                             }
                         }, throwable -> {
                             Timber.e(throwable);
                             callback.doError(throwable);
+                        }
+                )
+        );
+    }
+
+    public void getPerson(MainCallback<PersonResponse> callback, Long id) {
+        compositeDisposable.add(repository.getApiService().getPerson(id)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .retryWhen(throwable ->
+                        throwable.flatMap((Function<Throwable, ObservableSource<?>>) throwable1 -> {
+                            if (NetworkUtils.checkNetworkError(throwable1)) {
+                                return application.showDialogNoInternetAccess();
+                            }else{
+                                return Observable.error(throwable1);
+                            }
+                        })
+                )
+                .subscribe(
+                        response -> {
+                            if (response.isResult()) {
+                                callback.doSuccess(response.getData());
+                            } else {
+                                callback.doFail();
+                            }
+                        }, throwable -> {
+                            Timber.e(throwable);
+                            callback.doError(throwable);
+                        }
+                )
+        );
+    }
+    public void getFavoritePersonList(MainCallback<ResponseListObj<FavouriteResponse>> callback, FavouriteListRequest request) {
+        Map<String, Object> query = RequestToMapConverter.convert(request);
+        compositeDisposable.add(repository.getApiService().getFavouriteList(query)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .retryWhen(throwable ->
+                        throwable.flatMap((Function<Throwable, ObservableSource<?>>) throwable1 -> {
+                            if (NetworkUtils.checkNetworkError(throwable1)) {
+                                return application.showDialogNoInternetAccess();
+                            }else{
+                                return Observable.error(throwable1);
+                            }
+                        })
+                )
+                .subscribe(
+                        response -> {
+                            if (response.isResult()) {
+                                callback.doSuccess(response.getData());
+                            } else {
+                                callback.doFail();
+                            }
+                        }, throwable -> {
+                            Timber.e(throwable);
+                            callback.doError(throwable);
+                        }
+                )
+        );
+    }
+
+    public void deleteFavorite(Long id) {
+        compositeDisposable.add(repository.getApiService().deleteFavourite(id)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .retryWhen(throwable ->
+                        throwable.flatMap((Function<Throwable, ObservableSource<?>>) throwable1 -> {
+                            if (NetworkUtils.checkNetworkError(throwable1)) {
+                                return application.showDialogNoInternetAccess();
+                            } else {
+                                return Observable.error(throwable1);
+                            }
+                        })
+                )
+                .subscribe(
+                        response -> {
+                        }, throwable -> {
+                            Timber.e(throwable);
                         }
                 )
         );

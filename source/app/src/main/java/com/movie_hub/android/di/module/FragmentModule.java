@@ -13,11 +13,16 @@ import com.movie_hub.android.ui.base.fragment.BaseFragment;
 import com.movie_hub.android.ui.main.account.AccountViewModel;
 import com.movie_hub.android.ui.main.account.UnLoginAccountFragment;
 import com.movie_hub.android.ui.main.account.UnLoginAccountViewModel;
+import com.movie_hub.android.ui.main.account.favourite.fragment.MovieFavoriteViewModel;
 import com.movie_hub.android.ui.main.home.HomeViewModel;
+import com.movie_hub.android.ui.main.live.LiveViewModel;
 import com.movie_hub.android.ui.main.movie.detail.fragment.CastFragmentViewModel;
 import com.movie_hub.android.ui.main.movie.detail.fragment.EpisodesFragmentViewModel;
 import com.movie_hub.android.ui.main.movie.detail.fragment.RecommendationFragment;
 import com.movie_hub.android.ui.main.movie.detail.fragment.RecommendationFragmentViewModel;
+import com.movie_hub.android.ui.main.movie.detail.review.ReviewViewModel;
+import com.movie_hub.android.ui.main.person.fragment.InformationFragmentViewModel;
+import com.movie_hub.android.ui.main.person.fragment.MoviesInvolvedFragmentViewModel;
 import com.movie_hub.android.ui.main.schedule.ScheduleViewModel;
 import com.movie_hub.android.ui.main.search.SearchViewModel;
 import com.movie_hub.android.ui.main.search.result.SearchResultFragment;
@@ -131,5 +136,37 @@ public class FragmentModule {
         Supplier<EpisodesFragmentViewModel> supplier = () -> new EpisodesFragmentViewModel(repository, (MVVMApplication)application);
         ViewModelProviderFactory<EpisodesFragmentViewModel> factory = new ViewModelProviderFactory<>(EpisodesFragmentViewModel.class, supplier);
         return new ViewModelProvider(fragment, factory).get(EpisodesFragmentViewModel.class);
+    }
+
+    @Provides
+    @FragmentScope
+    InformationFragmentViewModel provideInformationFragmentViewModel(Repository repository, Context application) {
+        Supplier<InformationFragmentViewModel> supplier = () -> new InformationFragmentViewModel(repository, (MVVMApplication)application);
+        ViewModelProviderFactory<InformationFragmentViewModel> factory = new ViewModelProviderFactory<>(InformationFragmentViewModel.class, supplier);
+        return new ViewModelProvider(fragment, factory).get(InformationFragmentViewModel.class);
+    }
+
+    @Provides
+    @FragmentScope
+    MoviesInvolvedFragmentViewModel provideMoviesInvolvedFragmentViewModel(Repository repository, Context application) {
+        Supplier<MoviesInvolvedFragmentViewModel> supplier = () -> new MoviesInvolvedFragmentViewModel(repository, (MVVMApplication)application);
+        ViewModelProviderFactory<MoviesInvolvedFragmentViewModel> factory = new ViewModelProviderFactory<>(MoviesInvolvedFragmentViewModel.class, supplier);
+        return new ViewModelProvider(fragment, factory).get(MoviesInvolvedFragmentViewModel.class);
+    }
+
+    @Provides
+    @FragmentScope
+    MovieFavoriteViewModel provideMovieFavoriteViewModel(Repository repository, Context application) {
+        Supplier<MovieFavoriteViewModel> supplier = () -> new MovieFavoriteViewModel(repository, (MVVMApplication)application);
+        ViewModelProviderFactory<MovieFavoriteViewModel> factory = new ViewModelProviderFactory<>(MovieFavoriteViewModel.class, supplier);
+        return new ViewModelProvider(fragment, factory).get(MovieFavoriteViewModel.class);
+    }
+
+    @Provides
+    @FragmentScope
+    LiveViewModel provideLiveViewModel(Repository repository, Context application) {
+        Supplier<LiveViewModel> supplier = () -> new LiveViewModel(repository, (MVVMApplication)application);
+        ViewModelProviderFactory<LiveViewModel> factory = new ViewModelProviderFactory<>(LiveViewModel.class, supplier);
+        return new ViewModelProvider(fragment, factory).get(LiveViewModel.class);
     }
 }

@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <variable
+            name="a"
+            type="com.movie_hub.android.ui.main.movie.detail.review.ReviewActivity" />
+
+        <variable
+            name="vm"
+            type="com.movie_hub.android.ui.main.movie.detail.review.ReviewViewModel" />
+
+        <import type="android.view.View" />
+    </data>
+
+    <FrameLayout
+        android:id="@+id/content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fitsSystemWindows="true">
+
+        <View
+            android:id="@+id/dim_background"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/bg_comment_tran"
+            android:alpha="0"
+            android:clickable="true"
+            android:focusable="true"
+            android:onClick="@{() -> a.finish()}"/>
+
+        <FrameLayout
+            android:id="@+id/content_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="@dimen/_80sdp"
+            android:background="@drawable/bg_comment"
+            android:clickable="true"
+            android:focusable="true">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <RelativeLayout
+                    android:id="@+id/header_comment"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <ImageView
+                        android:id="@+id/ic_review"
+                        android:layout_width="@dimen/_16sdp"
+                        android:layout_height="@dimen/_16sdp"
+                        android:src="@drawable/ic_rate"
+                        android:layout_centerVertical="true"
+                        android:layout_marginStart="@dimen/_12sdp"
+                        android:layout_marginVertical="@dimen/_20sdp"/>
+
+                    <TextView
+                        android:id="@+id/tv_count_cmt"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:layout_toEndOf="@+id/ic_review"
+                        style="@style/Text_14_Normal"
+                        android:text="@string/rating"
+                        android:layout_marginStart="@dimen/_6sdp"/>
+
+                    <FrameLayout
+                        android:id="@+id/btn_close"
+                        android:layout_width="@dimen/_24sdp"
+                        android:layout_height="@dimen/_24sdp"
+                        android:layout_alignParentEnd="true"
+                        android:layout_centerVertical="true"
+                        android:background="@drawable/bg_btn_close_comment"
+                        android:layout_marginEnd="@dimen/_12sdp"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:onClick="@{v -> a.finish()}">
+
+                        <ImageView
+                            android:layout_width="@dimen/_14sdp"
+                            android:layout_height="@dimen/_14sdp"
+                            android:src="@drawable/ic_down_arrow"
+                            android:layout_gravity="center"
+                            android:layout_marginTop="@dimen/_1sdp"/>
+
+                    </FrameLayout>
+
+
+                </RelativeLayout>
+
+                <FrameLayout
+                    android:id="@+id/l_comment"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1">
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:id="@+id/rv_review"/>
+
+                    <FrameLayout
+                        android:id="@+id/layout_empty"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="@color/bg_comment"
+                        android:layout_marginTop="@dimen/_1sdp"
+                        android:visibility="gone">
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:layout_gravity="center|top"
+                            android:layout_marginTop="@dimen/_84sdp"
+                            android:visibility="visible">
+                            <ImageView
+                                android:layout_width="@dimen/_60sdp"
+                                android:layout_height="@dimen/_60sdp"
+                                android:src="@drawable/ic_empty"
+                                android:layout_gravity="center"/>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                style="@style/Text_12_Normal"
+                                android:text="@string/no_review_yet"
+                                android:textColor="@color/text_empty"
+                                android:layout_gravity="center"
+                                android:layout_marginTop="@dimen/_6sdp"/>
+                        </LinearLayout>
+
+                    </FrameLayout>
+
+                </FrameLayout>
+
+
+
+                <RelativeLayout
+                    android:id="@+id/bottom_review"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@color/bg_input_comment"
+                    android:visibility="gone">
+
+                    <com.google.android.material.progressindicator.LinearProgressIndicator
+                        android:id="@+id/bottom_loading_bar"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="bottom"
+                        android:indeterminate="true"
+                        android:visibility="gone"
+                        app:trackThickness="1dp"
+                        app:indicatorColor="@color/ic_tab_bar_tint"
+                        app:trackColor="@android:color/transparent"
+                        style="@style/Widget.MaterialComponents.LinearProgressIndicator"/>
+
+
+                    <FrameLayout
+                        android:id="@+id/btn_open_review"
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/_36sdp"
+                        android:background="@drawable/bg_btn_white_radius_3sdp"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:onClick="onClick"
+                        android:foreground="?attr/selectableItemBackground"
+                        android:layout_marginHorizontal="@dimen/_12sdp"
+                        android:layout_marginTop="@dimen/_12sdp"
+                        android:layout_marginBottom="@dimen/_20sdp">
+
+                        <TextView
+                            android:id="@+id/tv_skip"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            style="@style/Text_12_Normal"
+                            android:text="@string/rating"
+                            android:textColor="@color/black"
+                            />
+                    </FrameLayout>
+
+                </RelativeLayout>
+
+            </LinearLayout>
+
+
+            <FrameLayout
+                android:id="@+id/loading_overlay"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@android:color/transparent"
+                android:visibility="gone"
+                android:clickable="true"
+                android:focusable="true"/>
+        </FrameLayout>
+
+    </FrameLayout>
+</layout>

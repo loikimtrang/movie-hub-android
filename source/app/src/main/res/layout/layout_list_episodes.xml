@@ -1,0 +1,67 @@
+<layout xmlns:tools="http://schemas.android.com/tools"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <data>
+        <variable
+            name="vm"
+            type="com.movie_hub.android.ui.main.movie.watch.WatchMovieViewModel" />
+
+        <variable
+            name="a"
+            type="com.movie_hub.android.ui.main.movie.watch.WatchMovieActivity" />
+
+        <import type="android.view.View" />
+
+    </data>
+
+    <LinearLayout
+        android:id="@+id/list_episode"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:background="@color/bg_list_episode"
+        android:visibility="gone"
+        android:clickable="false"
+        android:focusable="false">
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/_60sdp">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/rv_season"
+                android:layout_marginEnd="@dimen/_58sdp"
+                android:padding="@dimen/_12sdp"/>
+
+            <FrameLayout
+                android:id="@+id/btn_close_episodes"
+                android:layout_width="@dimen/_32sdp"
+                android:layout_height="@dimen/_32sdp"
+                android:layout_gravity="end"
+                android:layout_marginVertical="@dimen/_12sdp"
+                android:layout_marginEnd="@dimen/_12sdp"
+                android:onClick="onClick"
+                android:clickable="true"
+                android:focusable="true"
+                android:background="@drawable/bg_btn_close"
+                android:padding="@dimen/_6sdp">
+
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:src="@drawable/ic_close"
+                    android:layout_margin="@dimen/_3sdp"/>
+            </FrameLayout>
+
+        </FrameLayout>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/rv_episode"/>
+
+    </LinearLayout>
+
+</layout>

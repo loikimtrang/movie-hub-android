@@ -12,18 +12,54 @@
 
         <import type="android.view.View"/>
     </data>
-
-    <FrameLayout
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/bg_app">
+        android:layout_height="match_parent"
+        android:fillViewport="true">
+
+        <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/bg_app"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:id="@+id/btn_choose_season"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="@dimen/_12sdp"
+            android:gravity="center"
+            android:onClick="@{v -> f.showSeasonListBottomSheet()}">
+
+            <ImageView
+                android:layout_width="@dimen/_12sdp"
+                android:layout_height="@dimen/_12sdp"
+                android:src="@drawable/ic_season"/>
+
+            <TextView
+                android:id="@+id/tv_season"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/Text_14_Normal"
+                android:text="@string/season"
+                android:layout_marginHorizontal="@dimen/_6sdp"/>
+            <ImageView
+                android:layout_width="@dimen/_12sdp"
+                android:layout_height="@dimen/_12sdp"
+                android:src="@drawable/ic_down"
+                android:layout_gravity="bottom"
+                android:layout_marginBottom="@dimen/_1sdp"/>
+
+
+        </LinearLayout>
 
         <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rv_recommendation"
+            android:id="@+id/rv_episode"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="@dimen/_12sdp"/>
+            android:layout_height="wrap_content"/>
 
-    </FrameLayout>
+    </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
 
 </layout>

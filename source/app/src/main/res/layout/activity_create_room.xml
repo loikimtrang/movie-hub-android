@@ -1,0 +1,444 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    >
+
+    <data>
+        <variable
+            name="a"
+            type="com.movie_hub.android.ui.main.live.create.CreateRoomActivity" />
+
+        <variable
+            name="vm"
+            type="com.movie_hub.android.ui.main.live.create.CreateRoomViewModel" />
+
+        <import type="android.view.View" />
+    </data>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/bg_app"
+        android:fitsSystemWindows="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/_40sdp"
+                android:background="@color/header_app">
+
+                <FrameLayout
+                    android:id="@+id/back"
+                    android:layout_width="@dimen/_36sdp"
+                    android:layout_height="@dimen/_40sdp"
+                    android:onClick="@{(v)->a.finish()}">
+                    <ImageView
+                        android:layout_width="@dimen/_12sdp"
+                        android:layout_height="@dimen/_12sdp"
+                        android:src="@drawable/ic_arrow_right"
+                        android:rotation="180"
+                        android:layout_gravity="center"/>
+                </FrameLayout>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/create_room"
+                    style="@style/Text_14_Bold"
+                    android:layout_toEndOf="@+id/back"
+                    android:layout_centerVertical="true"
+                    />
+
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <androidx.core.widget.NestedScrollView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_above="@+id/layout_bottom">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="vertical"
+                        android:paddingHorizontal="@dimen/_12sdp">
+
+                        <androidx.constraintlayout.widget.ConstraintLayout
+                            android:layout_width="@dimen/_100sdp"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:layout_marginTop="@dimen/_20sdp">
+
+                            <com.google.android.material.imageview.ShapeableImageView
+                                android:id="@+id/image"
+                                android:layout_width="0dp"
+                                android:layout_height="0dp"
+                                android:scaleType="centerCrop"
+                                app:shapeAppearanceOverlay="@style/movieVerticalImg"
+                                app:layout_constraintDimensionRatio="2:3"
+                                app:layout_constraintTop_toTopOf="parent"
+                                app:layout_constraintStart_toStartOf="parent"
+                                app:layout_constraintEnd_toEndOf="parent"/>
+                        </androidx.constraintlayout.widget.ConstraintLayout>
+
+                        <TextView
+                            android:id="@+id/title"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Movie Title"
+                            style="@style/Text_14_Normal"
+                            android:maxLines="2"
+                            android:ellipsize="end"
+                            android:layout_marginTop="@dimen/_6sdp"
+                            android:gravity="center"
+                            android:paddingHorizontal="@dimen/_20sdp" />
+
+                        <TextView
+                            android:id="@+id/sub_title"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Movie Title"
+                            style="@style/Text_12_Normal"
+                            android:maxLines="2"
+                            android:ellipsize="end"
+                            android:gravity="center"
+                            android:paddingHorizontal="@dimen/_20sdp"
+                            android:textColor="@color/text_gray"/>
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/name_room"
+                            style="@style/Text_12_Normal"
+                            android:ellipsize="end"
+                            android:layout_marginTop="@dimen/_20sdp"
+                            />
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            style="@style/CustomOutlinedBox"
+                            app:endIconMode="custom"
+                            android:layout_marginTop="@dimen/_3sdp">
+
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/tv_name_room"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                style="@style/Text_12_Normal"
+                                android:clickable="true"
+                                android:paddingHorizontal="@dimen/_6sdp"
+                                android:singleLine="true"
+                                android:ellipsize="end"
+                                android:maxLength="100"
+                                />
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/_12sdp"
+                            android:ellipsize="end"
+                            android:text="@string/room_type"
+                            style="@style/Text_12_Normal" />
+
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/_3sdp">
+
+                            <TextView
+                                android:id="@+id/tv_private_room"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_alignParentStart="true"
+                                android:layout_centerVertical="true"
+                                android:layout_toStartOf="@+id/switch_private_room"
+                                android:text="@string/private_room"
+                                style="@style/Text_12_Normal"
+                                android:textColor="@color/text_gray" />
+
+                            <androidx.appcompat.widget.SwitchCompat
+                                android:id="@+id/switch_private_room"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_alignParentEnd="true"
+                                android:layout_centerVertical="true"
+                                android:checked="false"
+                                android:switchMinWidth="@dimen/_40sdp"
+                                android:thumb="@drawable/thumb_custom"
+                                app:track="@drawable/track_custom" />
+                        </RelativeLayout>
+
+                        <LinearLayout
+                            android:id="@+id/layout_private_members"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/_6sdp"
+                            android:orientation="vertical"
+                            android:visibility="gone">
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text="@string/private_room_member_hint"
+                                style="@style/Text_10_Normal"
+                                android:textColor="@color/text_gray" />
+
+                            <com.google.android.material.textfield.TextInputLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                style="@style/CustomOutlinedBox"
+                                android:layout_marginTop="@dimen/_3sdp">
+
+                                <com.google.android.material.textfield.TextInputEditText
+                                    android:id="@+id/edt_member_search"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    style="@style/Text_12_Normal"
+                                    android:hint="@string/hint_search_member"
+                                    android:imeOptions="actionDone"
+                                    android:inputType="text"
+                                    android:paddingHorizontal="@dimen/_6sdp"
+                                    android:singleLine="true" />
+                            </com.google.android.material.textfield.TextInputLayout>
+
+                            <androidx.cardview.widget.CardView
+                                android:id="@+id/card_suggestions"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="@dimen/_3sdp"
+                                android:visibility="gone"
+                                app:cardBackgroundColor="@color/bg_comment"
+                                app:cardCornerRadius="@dimen/_6sdp"
+                                app:cardElevation="@dimen/_2sdp">
+
+                                <androidx.recyclerview.widget.RecyclerView
+                                    android:id="@+id/rv_account_suggestions"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:nestedScrollingEnabled="true"
+                                    android:overScrollMode="never" />
+                            </androidx.cardview.widget.CardView>
+
+                            <TextView
+                                android:id="@+id/tv_selected_members_label"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="@dimen/_8sdp"
+                                android:text="@string/selected_members"
+                                style="@style/Text_12_Normal"
+                                android:visibility="gone" />
+
+                            <com.google.android.flexbox.FlexboxLayout
+                                android:id="@+id/flex_selected_members"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="@dimen/_4sdp"
+                                app:alignItems="flex_start"
+                                app:flexWrap="wrap"
+                                app:justifyContent="flex_start" />
+                        </LinearLayout>
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/time_setting"
+                            style="@style/Text_12_Normal"
+                            android:ellipsize="end"
+                            android:layout_marginTop="@dimen/_12sdp"
+                            />
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/start_mode_description"
+                            style="@style/Text_10_Normal"
+                            android:textColor="@color/text_gray"
+                            android:ellipsize="end"
+                            android:layout_marginTop="@dimen/_3sdp"
+                            />
+
+                        <FrameLayout
+                            android:id="@+id/layout_calender"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/_3sdp"
+                            android:visibility="gone">
+                            <EditText
+                                android:id="@+id/edt_calender"
+                                android:layout_width="match_parent"
+                                android:layout_height="@dimen/_44sdp"
+                                android:background="@drawable/bg_date_time"
+                                style="@style/Text_12_Normal"
+                                android:paddingHorizontal="@dimen/_6sdp"
+                                android:focusable="false"
+                                android:clickable="true"
+                                android:cursorVisible="false"/>
+
+                            <ImageView
+                                android:layout_width="@dimen/_14sdp"
+                                android:layout_height="@dimen/_14sdp"
+                                android:src="@drawable/ic_calender"
+                                android:layout_gravity="end|center_vertical"
+                                android:layout_marginEnd="@dimen/_6sdp"/>
+
+                        </FrameLayout>
+
+
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:clipToOutline="true">
+
+                            <FrameLayout
+                                android:id="@+id/btn_start_schedule"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:paddingVertical="@dimen/_6sdp"
+                                android:paddingEnd="@dimen/_8sdp">
+                                <FrameLayout
+                                    android:layout_width="@dimen/_12sdp"
+                                    android:layout_height="@dimen/_12sdp"
+                                    android:background="@drawable/ic_check_box_un_check"/>
+                            </FrameLayout>
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text="@string/nav_schedule_premiere"
+                                style="@style/Text_12_Normal"
+                                android:textColor="@color/text_gray"
+                                android:ellipsize="end"
+                                android:layout_gravity="center_vertical"
+                                android:layout_marginBottom="@dimen/_1sdp"/>
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:id="@+id/layout_episode"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/_12sdp"
+                            android:visibility="gone"
+                            android:orientation="vertical">
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text="@string/episode_room"
+                                style="@style/Text_12_Normal"
+                                android:ellipsize="end"
+                                />
+
+                            <LinearLayout
+                                android:id="@+id/btn_choose_season"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal"
+                                android:paddingVertical="@dimen/_6sdp"
+                                android:gravity="center"
+                                android:onClick="@{v -> a.showSeasonListBottomSheet()}">
+
+                                <ImageView
+                                    android:layout_width="@dimen/_10sdp"
+                                    android:layout_height="@dimen/_10sdp"
+                                    android:src="@drawable/ic_season"/>
+
+                                <TextView
+                                    android:id="@+id/tv_season"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    style="@style/Text_12_Normal"
+                                    android:text="@string/season"
+                                    android:layout_marginHorizontal="@dimen/_6sdp"/>
+                                <ImageView
+                                    android:layout_width="@dimen/_10sdp"
+                                    android:layout_height="@dimen/_10sdp"
+                                    android:src="@drawable/ic_down"
+                                    android:layout_gravity="bottom"
+                                    android:layout_marginBottom="@dimen/_1sdp"/>
+
+
+                            </LinearLayout>
+
+                            <androidx.recyclerview.widget.RecyclerView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:id="@+id/rv_episode"/>
+
+                        </LinearLayout>
+                    </LinearLayout>
+
+                </androidx.core.widget.NestedScrollView>
+
+                <FrameLayout
+                    android:id="@+id/layout_bottom"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentBottom="true">
+
+                    <com.google.android.material.progressindicator.LinearProgressIndicator
+                        android:id="@+id/bottom_loading_bar"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="top"
+                        android:indeterminate="true"
+                        android:visibility="gone"
+                        app:trackThickness="1dp"
+                        app:indicatorColor="@color/ic_tab_bar_tint"
+                        app:trackColor="@android:color/transparent"
+                        style="@style/Widget.MaterialComponents.LinearProgressIndicator"
+                       />
+
+
+                    <FrameLayout
+                        android:id="@+id/btn_login"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginHorizontal="@dimen/_12sdp"
+                        android:layout_marginTop="@dimen/_12sdp"
+                        android:layout_marginBottom="@dimen/_20sdp"
+                        android:foreground="?attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:focusable="true">
+
+                        <TextView
+                            android:id="@+id/btn_create"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:background="@drawable/bg_btn_yellow_radius_3sdp"
+                            android:text="@string/create_room"
+                            style="@style/Text_12_Bold"
+                            android:textColor="@color/black"
+                            android:gravity="center"
+                            android:paddingVertical="@dimen/_12sdp"/>
+
+                    </FrameLayout>
+
+
+                </FrameLayout>
+
+            </RelativeLayout>
+
+
+
+        </LinearLayout>
+
+        <FrameLayout
+            android:id="@+id/loading_overlay"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@android:color/transparent"
+            android:visibility="gone"
+            android:clickable="true"
+            android:focusable="true"/>
+    </FrameLayout>
+</layout>

@@ -1,6 +1,7 @@
 package com.movie_hub.android.ui.main.search.suggestion.adapter;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
@@ -21,12 +22,14 @@ public class ActorAdapter extends RecyclerView.Adapter<ActorAdapter.ActorViewHol
     private final List<PersonResponse> movieList = new ArrayList<>();
     private OnActorClickListener listener;
 
+    Context context;
     public interface OnActorClickListener {
         void onActorClick(PersonResponse actor);
     }
 
-    public ActorAdapter(OnActorClickListener listener) {
+    public ActorAdapter(OnActorClickListener listener, Context context) {
         this.listener = listener;
+        this.context = context;
     }
 
     @NonNull
@@ -42,7 +45,7 @@ public class ActorAdapter extends RecyclerView.Adapter<ActorAdapter.ActorViewHol
     public void onBindViewHolder(@NonNull ActorViewHolder holder, @SuppressLint("RecyclerView") int position) {
         PersonResponse actor = movieList.get(position);
 
-        holder.binding.name.setText(actor.getName());
+        holder.binding.name.setText(actor.getOtherName());
 
         Glide.with(holder.binding.getRoot().getContext())
                 .load(Constants.MEDIA_URL + actor.getAvatarPath())
@@ -62,6 +65,21 @@ public class ActorAdapter extends RecyclerView.Adapter<ActorAdapter.ActorViewHol
             }, 50L);
             lastPosition = position;
         }
+
+        ViewGroup.MarginLayoutParams layoutParams =
+                (ViewGroup.MarginLayoutParams) holder.binding.getRoot().getLayoutParams();
+
+        int margin = (int) context.getResources().getDimension(R.dimen._6sdp);
+        layoutParams.setMarginStart(margin);
+        layoutParams.setMarginEnd(margin);
+        if (position == 0) {
+            layoutParams.setMarginStart(margin * 2);
+        }
+        if (position == movieList.size() - 1) {
+            layoutParams.setMarginEnd(margin * 2);
+        }
+
+        holder.binding.getRoot().setLayoutParams(layoutParams);
     }
     @Override
     public void onViewDetachedFromWindow(@NonNull ActorViewHolder holder) {

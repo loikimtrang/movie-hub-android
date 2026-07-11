@@ -13,6 +13,7 @@ import com.bumptech.glide.Glide;
 import com.movie_hub.android.R;
 import com.movie_hub.android.constant.Constants;
 import com.movie_hub.android.data.model.api.response.moviePerson.MoviePersonResponse;
+import com.movie_hub.android.data.model.api.response.person.PersonResponse;
 import com.movie_hub.android.databinding.ItemMoviePersonBinding;
 
 import java.util.ArrayList;
@@ -79,7 +80,11 @@ public class MoviePersonAdapter extends RecyclerView.Adapter<MoviePersonAdapter.
         notifyDataSetChanged();
     }
 
-
+    public void addData(List<MoviePersonResponse> moreItems) {
+        int startPos = movieList.size();
+        movieList.addAll(moreItems);
+        notifyItemRangeInserted(startPos, moreItems.size());
+    }
     @Override
     public int getItemCount() {
         return movieList.size();

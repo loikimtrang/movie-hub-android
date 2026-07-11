@@ -1,0 +1,11 @@
+<!-- seekbar_thumb.xml -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="oval">
+    <size android:width="@dimen/_10sdp" android:height="@dimen/_10sdp"/>
+    <solid android:color="@color/progress"/>
+    <padding
+        android:left="@dimen/_1sdp"
+        android:right="@dimen/_1sdp"
+        android:top="@dimen/_1sdp"
+        android:bottom="@dimen/_1sdp"/>
+</shape>

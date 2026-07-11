@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Nền mờ toàn màn hình -->
+    <item>
+        <shape>
+            <solid android:color="#33000000" />
+        </shape>
+    </item>
+
+    <!-- Gradient từ sáng (trên) → tối (dưới) -->
+    <item>
+        <shape>
+            <gradient
+                android:startColor="#00000000"
+                android:endColor="#B0000000"
+                android:angle="270" />
+        </shape>
+    </item>
+
+</layer-list>

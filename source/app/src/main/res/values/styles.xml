@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
 
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.MaterialComponents.Light.Bridge">
@@ -15,16 +15,87 @@
         <item name="cornerSize">50%</item>
     </style>
 
+    <style name="imgNotification">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">@dimen/_6sdp</item>
+    </style>
+
+    <!-- res/values/styles.xml -->
+    <style name="TransparentActivity" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:backgroundDimEnabled">false</item> <!-- TẮT MỜ MẶC ĐỊNH -->
+        <item name="android:windowIsTranslucent">true</item>
+    </style>
+
+    <style name="BottomSheetLikeTheme" parent="Theme.MaterialComponents.DayNight.Dialog">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowAnimationStyle">@style/BottomSheetAnimation</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:backgroundDimEnabled">true</item>
+        <item name="android:windowNoTitle">true</item>
+    </style>
+
+    <style name="BottomSheetAnimation" parent="@android:style/Animation">
+        <item name="android:windowEnterAnimation">@anim/slide_in_bottom</item>
+        <item name="android:windowExitAnimation">@anim/slide_out_bottom</item>
+    </style>
+
     <style name="movieVerticalImg">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">@dimen/_12sdp</item>
+    </style>
+
+    <style name="movieEpisodeImg">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">@dimen/_5sdp</item>
+    </style>
+
+    <style name="movieCollectionImg_type1">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">@dimen/_12sdp</item>
+    </style>
+    <style name="movieCollectionImg_type2">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">@dimen/_6sdp</item>
+    </style>
+
+    <style name="movieCollectionImg_type4">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">@dimen/_12sdp</item>
+    </style>
+
+    <style name="movieBannerImg">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">@dimen/_12sdp</item>
+    </style>
+
+    <style name="movieHistoryHomeImg">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">@dimen/_6sdp</item>
+    </style>
+
+    <style name="thumbnailVtt">
         <item name="cornerFamily">rounded</item>
         <item name="cornerSize">5%</item>
     </style>
     <style name="SplashTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
-        <item name="android:windowBackground">@drawable/splash_screen</item>
         <item name="android:windowNoTitle">true</item>
-        <item name="android:windowFullscreen">true</item>
-        <item name="android:statusBarColor">@color/bg_app</item>
-        <item name="android:navigationBarColor">@color/bg_app</item>
+        <item name="android:windowBackground">@color/bg_app</item>
+        <item name="android:windowLayoutInDisplayCutoutMode" tools:targetApi="o_mr1">shortEdges</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+    </style>
+
+    <style name="TransparentBottomSheetDialog" parent="Theme.Design.BottomSheetDialog">
+        <item name="android:windowIsFloating">false</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="bottomSheetStyle">@style/TransparentBottomSheetStyle</item>
+    </style>
+
+    <style name="TransparentBottomSheetStyle" parent="Widget.Design.BottomSheet.Modal">
+        <item name="android:background">@android:color/transparent</item>
     </style>
 
     <style name="Theme.MovieHub.NoActionBar" parent="Theme.MaterialComponents.DayNight.NoActionBar">
@@ -53,6 +124,23 @@
         <item name="android:textColorHint">@color/text_gray</item>
         <item name="iconEndPadding">12dp</item>
     </style>
+
+    <style name="CustomOutlinedAddPlayList" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+        <item name="boxStrokeWidth">1dp</item>
+        <item name="boxStrokeWidthFocused">2dp</item>
+        <item name="boxStrokeColor">@color/custom_box_stroke_color_playlist</item>
+        <item name="hintTextColor">@color/tx_select</item>
+        <item name="android:textColorHint">@color/text_gray</item>
+        <item name="iconEndPadding">12dp</item>
+    </style>
+
+    <style name="CustomOutlinedBoxOtp" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+        <item name="boxStrokeWidth">1dp</item>
+        <item name="boxStrokeWidthFocused">2dp</item>
+        <item name="boxStrokeColor">@color/custom_box_stroke_color</item>
+        <item name="hintTextColor">@color/tx_select</item>
+        <item name="android:textColorHint">@color/text_gray</item>
+    </style>
     <!-- Style cơ bản dùng Inter Regular -->
     <style name="BaseText_Inter">
         <item name="android:fontFamily">@font/inter</item>
@@ -65,9 +153,6 @@
         <item name="android:textColor">@color/text</item>
         <item name="android:textStyle">bold</item>
     </style>
-
-
-
 
 
     <style name="Text_6_Normal" parent="BaseText_Inter">
@@ -161,5 +246,12 @@
     <style name="Text_Transparent" parent="TextAppearance.MaterialComponents.Headline6">
         <item name="android:textColor">@android:color/transparent</item>
     </style>
-
+    <style name="DialogAnimation">
+        <item name="android:windowEnterAnimation">@anim/slide_in_bottom</item>
+        <item name="android:windowExitAnimation">@anim/slide_out_bottom</item>
+    </style>
+    <style name="DialogAnimationCenter">
+        <item name="android:windowEnterAnimation">@anim/zoom_in</item>
+        <item name="android:windowExitAnimation">@anim/zoom_out</item>
+    </style>
 </resources>

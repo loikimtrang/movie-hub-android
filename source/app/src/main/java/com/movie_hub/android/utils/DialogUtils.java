@@ -53,6 +53,37 @@ public class DialogUtils {
         return dialog;
     }
 
+    public static Dialog dialogConfirmSingleButton(Context context,
+                                                   String msg,
+                                                   String btnPositive,
+                                                   DialogInterface.OnClickListener positive) {
+        Dialog dialog = new Dialog(context);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.layout_dialog);
+        dialog.setCancelable(false);
+
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        }
+
+        TextView messageView = dialog.findViewById(R.id.dialog_message);
+        messageView.setText(msg);
+
+        TextView btnOk = dialog.findViewById(R.id.btn_ok);
+        btnOk.setText(btnPositive);
+        btnOk.setOnClickListener(v -> {
+            if (positive != null) positive.onClick(dialog, DialogInterface.BUTTON_POSITIVE);
+            dialog.dismiss();
+        });
+
+        TextView btnCancel = dialog.findViewById(R.id.btn_cancel);
+        btnCancel.setVisibility(View.GONE);
+
+        dialog.show();
+        return dialog;
+    }
+
+
     public static Dialog createDialogLoading(Context context, String msg) {
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 

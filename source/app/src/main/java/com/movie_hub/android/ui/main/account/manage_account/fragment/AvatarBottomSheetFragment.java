@@ -4,6 +4,7 @@ import static android.app.Activity.RESULT_OK;
 
 import android.Manifest;
 import android.app.Dialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -233,14 +234,14 @@ public class AvatarBottomSheetFragment extends BottomSheetDialogFragment impleme
     }
     public void setUpMenu() {
         List<ManageAccountItemModel> menuItems1 = Arrays.asList(
-                new ManageAccountItemModel(R.drawable.ic_user_picture, R.string.view_avatar),
+//                new ManageAccountItemModel(R.drawable.ic_user_picture, R.string.view_avatar),
                 new ManageAccountItemModel(R.drawable.ic_picture_1, R.string.choose_avatar)
         );
 
         List<ManageAccountItemModel> menuItems2 = Arrays.asList(
                 new ManageAccountItemModel(R.drawable.ic_camera, R.string.take_photo),
-                new ManageAccountItemModel(R.drawable.ic_picture_2, R.string.choose_from_library),
-                new ManageAccountItemModel(R.drawable.ic_picture_3, R.string.choose_existing_photo)
+                new ManageAccountItemModel(R.drawable.ic_picture_2, R.string.choose_from_library)
+//                new ManageAccountItemModel(R.drawable.ic_picture_3, R.string.choose_existing_photo)
         );
 
         menu1 = new AvatarMenuAdapter(menuItems1, this);
@@ -327,5 +328,10 @@ public class AvatarBottomSheetFragment extends BottomSheetDialogFragment impleme
     public void onDestroyView() {
         super.onDestroyView();
         binding = null;
+    }
+    @Override
+    public void onDismiss(@NonNull DialogInterface dialog) {
+        super.onDismiss(dialog);
+        BlurEffectManager.removeBlurEffect(requireActivity());
     }
 }

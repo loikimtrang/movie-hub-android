@@ -2,7 +2,6 @@ package com.movie_hub.android.ui.main.account;
 
 import android.annotation.SuppressLint;
 
-import androidx.lifecycle.MutableLiveData;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.bumptech.glide.Glide;
@@ -17,11 +16,12 @@ import com.movie_hub.android.ui.main.MainActivity;
 import com.movie_hub.android.ui.main.account.adapter.AccountMenuAdapter;
 import com.movie_hub.android.ui.main.account.manage_account.ManageAccountActivity;
 import com.movie_hub.android.ui.main.account.model.MenuItemModel;
+import com.movie_hub.android.utils.DialogUtils;
 
 import java.util.Arrays;
 import java.util.List;
 
-import eu.davidea.flexibleadapter.databinding.BR;
+import com.movie_hub.android.BR;
 import timber.log.Timber;
 
 public class AccountFragment extends BaseFragment<FragmentAccountBinding, AccountViewModel> implements AccountMenuAdapter.OnItemClickListener, SystemBarColorProvider {
@@ -35,7 +35,7 @@ public class AccountFragment extends BaseFragment<FragmentAccountBinding, Accoun
         viewModel.getUser();
         viewModel.getCurrentUserLiveData().observe(getViewLifecycleOwner(), user -> {
             if (user != null) {
-                Timber.d("👤 Hiển thị user: %s", user.getUsername());
+                Timber.d(" Hiển thị user: %s", user.getUsername());
                 setUpUser(user);
             }
         });
@@ -63,7 +63,7 @@ public class AccountFragment extends BaseFragment<FragmentAccountBinding, Accoun
     }
     @Override
     public int getStatusBarColor() {
-        return R.color.account_header;
+        return R.color.header_app;
     }
 
     @Override
@@ -71,8 +71,6 @@ public class AccountFragment extends BaseFragment<FragmentAccountBinding, Accoun
         return R.color.bg_tab_bar;
     }
     public void setUpUser(UserResponse profile) {
-
-
         if (profile == null) return;
         Glide.with(this)
                 .load(Constants.MEDIA_URL + profile.getAvatarPath())
@@ -94,7 +92,9 @@ public class AccountFragment extends BaseFragment<FragmentAccountBinding, Accoun
                 new MenuItemModel(R.drawable.ic_heart, R.string.menu_favorites),
                 new MenuItemModel(R.drawable.ic_policy, R.string.menu_privacy_policy),
                 new MenuItemModel(R.drawable.ic_question_contact, R.string.menu_contact),
-                new MenuItemModel(R.drawable.ic_language, R.string.menu_language)
+                new MenuItemModel(R.drawable.ic_language, R.string.menu_language),
+                new MenuItemModel(R.drawable.ic_update_app, R.string.check_for_update),
+                new MenuItemModel(R.drawable.ic_setting_video, R.string.setting)
         );
 
         adapter = new AccountMenuAdapter(menuItems, this);
@@ -105,24 +105,44 @@ public class AccountFragment extends BaseFragment<FragmentAccountBinding, Accoun
         ((MainActivity) requireActivity()).navigateToNewActivity(getContext(), ManageAccountActivity.class);
     }
     public void onSignOutClick() {
-        ((MainActivity) requireActivity()).userSignOut();
+        DialogUtils.dialogConfirm(
+                requireContext(),
+                getString(R.string.do_you_want_log_out), // message
+                getString(R.string.log_out), // btn Positive
+                (dialog, which) -> {
+                    ((MainActivity) requireActivity()).userSignOut();
+                },
+                getString(R.string.cancel), // btn Negative
+                (dialog, which) -> dialog.dismiss()
+        );
     }
     @SuppressLint("NonConstantResourceId")
     @Override
     public void onItemClick(MenuItemModel item) {
         switch (item.title) {
             case R.string.menu_watch_now:
+                ((MainActivity) requireActivity()).navigateToHistory();
                 break;
             case R.string.menu_my_movies:
+                ((MainActivity) requireActivity()).navigateToPlayList();
                 break;
             case R.string.menu_favorites:
+                ((MainActivity) requireActivity()).navigateToFavourite();
                 break;
             case R.string.menu_privacy_policy:
+                ((MainActivity) requireActivity()).navigateToPrivacy();
                 break;
             case R.string.menu_contact:
+                ((MainActivity) requireActivity()).navigateToContact();
                 break;
             case R.string.menu_language:
                 ((MainActivity) requireActivity()).navigateToLanguage();
+                break;
+            case R.string.check_for_update:
+                ((MainActivity) requireActivity()).navigateToCheckUpdate();
+                break;
+            case R.string.setting:
+                ((MainActivity) requireActivity()).getUserProfile();
                 break;
         }
     }

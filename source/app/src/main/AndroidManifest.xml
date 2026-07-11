@@ -15,7 +15,6 @@
     <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
     <uses-permission android:name="android.permission.CAMERA" />
@@ -29,9 +28,9 @@
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
     <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.VIBRATE" />
-
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="28" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
-
     <application
         android:requestLegacyExternalStorage="true"
         android:name="com.movie_hub.android.MVVMApplication"
@@ -47,6 +46,9 @@
         android:hardwareAccelerated="true"
         android:windowSoftInputMode="adjustResize|stateHidden">
 
+        <meta-data android:name="com.onesignal.NotificationServiceExtension"
+            android:value="com.movie_hub.android.ui.main.service.NotificationServiceExtension" />
+        <service android:name="org.eclipse.paho.android.service.MqttService" />
         <activity
             android:name=".ui.main.splash.SplashActivity"
             android:theme="@style/SplashTheme"
@@ -58,26 +60,148 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name=".ui.main.splash.survey.SurveyActivity"
+            android:theme="@style/SplashTheme"
+            android:screenOrientation="portrait"
+            android:exported="true">
+
+        </activity>
+
         <activity android:name=".ui.main.MainActivity"
             android:windowSoftInputMode="adjustResize|stateHidden"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"
+            android:exported="true"/>
 
         <activity android:name=".ui.main.account.language.LanguageActivity"
             android:windowSoftInputMode="adjustResize"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"
+            android:exported="true"/>
+
+        <activity android:name=".ui.main.account.contact.ContactActivity"
+            android:windowSoftInputMode="adjustResize"
+            android:screenOrientation="portrait"
+            android:exported="true"/>
+
+        <activity android:name=".ui.main.account.privacy.PrivacyActivity"
+            android:windowSoftInputMode="adjustResize"
+            android:screenOrientation="portrait"
+            android:exported="true"/>
+
+        <activity
+            android:name=".ui.main.movie.detail.comment.CommentActivity"
+            android:theme="@style/TransparentActivity"
+            android:windowSoftInputMode="adjustResize"
+            android:screenOrientation="portrait"
+            android:exported="true"/>
+
+        <activity
+            android:name=".ui.main.movie.detail.review.ReviewActivity"
+            android:theme="@style/TransparentActivity"
+            android:windowSoftInputMode="adjustResize"
+            android:screenOrientation="portrait"
+            android:exported="true"/>
+
+        <activity android:name=".ui.main.account.favourite.FavouriteActivity"
+            android:windowSoftInputMode="adjustResize"
+            android:screenOrientation="portrait"
+            android:exported="true"/>
+
+        <activity android:name=".ui.main.account.setting.SettingActivity"
+            android:windowSoftInputMode="adjustResize"
+            android:screenOrientation="portrait"
+            android:exported="true"/>
+
+        <activity android:name=".ui.main.account.history.HistoryActivity"
+            android:windowSoftInputMode="adjustResize"
+            android:screenOrientation="portrait"
+            android:exported="true"/>
+
+        <activity android:name=".ui.main.home.notification.NotificationActivity"
+            android:windowSoftInputMode="adjustResize"
+            android:screenOrientation="portrait"
+            android:exported="true"/>
+
+        <activity android:name=".ui.main.account.playlist.PlayListActivity"
+            android:windowSoftInputMode="adjustResize"
+            android:screenOrientation="portrait"
+            android:exported="true"/>
+
+        <activity android:name=".ui.main.live.create.CreateRoomActivity"
+            android:windowSoftInputMode="adjustResize"
+            android:screenOrientation="portrait"
+            android:exported="true"/>
+
+        <activity android:name=".ui.main.person.PersonDetailActivity"
+            android:windowSoftInputMode="adjustResize"
+            android:screenOrientation="portrait"
+            android:exported="true"/>
+
+        <activity android:name=".ui.main.home.detail.HomeSideBarDetailActivity"
+            android:windowSoftInputMode="adjustResize"
+            android:screenOrientation="portrait"
+            android:exported="true"/>
+
+        <activity android:name=".ui.main.home.topic.HomeMoreTopicActivity"
+            android:windowSoftInputMode="adjustResize"
+            android:screenOrientation="portrait"
+            android:exported="true"/>
+
+        <activity android:name=".ui.main.home.topic.topic_detail.HomeTopicDetailActivity"
+            android:windowSoftInputMode="adjustResize"
+            android:screenOrientation="portrait"
+            android:exported="true"/>
+
+        <activity android:name=".ui.main.home.filter.FilterActivity"
+            android:windowSoftInputMode="adjustResize"
+            android:screenOrientation="portrait"
+            android:exported="true"/>
+
+        <activity android:name=".ui.main.account.updateapp.CheckUpdateActivity"
+            android:windowSoftInputMode="adjustResize"
+            android:screenOrientation="portrait"
+            android:exported="true"/>
 
         <activity android:name=".ui.main.account.manage_account.ManageAccountActivity"/>
         <activity android:name=".ui.main.movie.detail.MovieDetailActivity"
             android:screenOrientation="portrait"
-            />
+
+            android:exported="true"/>
         <activity android:name=".ui.main.movie.watch.WatchMovieActivity"
+            android:windowSoftInputMode="adjustNothing|stateHidden"
             android:screenOrientation="landscape"
-            />
+            android:exported="true"/>
 
         <activity
             android:name="com.yalantis.ucrop.UCropActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar"
+            android:exported="true"/>
+
+        <activity android:name=".ui.main.account.login.LoginActivity"
+            android:windowSoftInputMode="adjustResize"
+            android:screenOrientation="portrait"
+            android:exported="true"/>
+
+        <activity android:name=".ui.main.account.forgot_password.ChangePasswordActivity"
+            android:windowSoftInputMode="adjustResize"
+            android:screenOrientation="portrait"
+            android:exported="true"/>
+
+        <activity android:name=".ui.main.account.forgot_password.ForgotPasswordActivity"
+            android:windowSoftInputMode="adjustResize"
+            android:screenOrientation="portrait"
+            android:exported="true"/>
+
+        <activity android:name=".ui.main.account.register.RegisterActivity"
+            android:windowSoftInputMode="adjustResize"
+            android:screenOrientation="portrait"
+            android:exported="true"/>
+
+        <activity android:name=".ui.main.account.verifyotp.VerifyOtpActivity"
+            android:windowSoftInputMode="adjustResize"
+            android:screenOrientation="portrait"
+            android:exported="true"/>
 
         <provider
             android:name="androidx.core.content.FileProvider"
@@ -88,6 +212,8 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/provider_path" />
         </provider>
+
+
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />

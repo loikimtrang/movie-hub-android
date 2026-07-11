@@ -18,16 +18,59 @@
         android:background="@color/bg_app"
         android:fitsSystemWindows="true">
 
-        <com.google.android.material.tabs.TabLayout
-            android:id="@+id/tabLayout"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="@dimen/_40sdp"
-            app:tabGravity="fill"
-            app:tabIndicator="@null"
-            app:tabRippleColor="@null"
-            android:layout_margin="@dimen/_6sdp"
+            android:orientation="horizontal"
+            android:layout_marginHorizontal="@dimen/_6sdp"
             android:padding="@dimen/_2sdp"
-            android:background="@drawable/bg_tab_container_search_result"/>
+            android:background="@drawable/bg_tab_container_search_result"
+            android:layout_marginVertical="@dimen/_12sdp">
+
+            <FrameLayout
+                android:id="@+id/btn_movie"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@drawable/bg_tab_search_result"
+                android:clickable="true"
+                android:focusable="true"
+                android:layout_marginEnd="@dimen/_1sdp">
+
+                <TextView
+                    android:id="@+id/tv_movie"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    style="@style/Text_12_Normal"
+                    android:textColor="@color/white"
+                    android:text="@string/movie"
+                    android:gravity="center"/>
+
+            </FrameLayout>
+
+            <FrameLayout
+                android:id="@+id/btn_cast"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@drawable/bg_tab_search_result"
+                android:clickable="true"
+                android:focusable="true"
+                android:layout_marginStart="@dimen/_1sdp">
+
+                <TextView
+                    android:id="@+id/tv_cast"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    style="@style/Text_12_Normal"
+                    android:textColor="@color/white"
+                    android:text="@string/cast"
+                    android:gravity="center"/>
+
+            </FrameLayout>
+
+        </LinearLayout>
+
 
         <androidx.viewpager2.widget.ViewPager2
             android:id="@+id/viewPager"

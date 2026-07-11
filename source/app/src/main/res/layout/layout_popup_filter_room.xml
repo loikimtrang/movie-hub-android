@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="@dimen/_160sdp"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@drawable/bg_room_ft"
+    android:elevation="@dimen/_4sdp"
+    android:padding="@dimen/_6sdp">
+
+    <FrameLayout
+        android:id="@+id/btn_all"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_btn_press_tran">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/_8sdp"
+            android:text="@string/all"
+            style="@style/Text_12_Normal"
+            android:textColor="@color/white" />
+
+        <ImageView
+            android:layout_width="@dimen/_10sdp"
+            android:layout_height="@dimen/_10sdp"
+            android:id="@+id/check_all"
+            android:src="@drawable/ic_check"
+            android:layout_gravity="center_vertical|end"
+            android:layout_marginEnd="@dimen/_8sdp"/>
+    </FrameLayout>
+
+
+    <FrameLayout
+        android:id="@+id/btn_live"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_btn_press_tran">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/_8sdp"
+            android:text="@string/status_live"
+            style="@style/Text_12_Normal"
+            android:textColor="@color/white" />
+
+        <ImageView
+            android:layout_width="@dimen/_10sdp"
+            android:layout_height="@dimen/_10sdp"
+            android:id="@+id/check_un_live"
+            android:src="@drawable/ic_check"
+            android:layout_gravity="center_vertical|end"
+            android:layout_marginEnd="@dimen/_8sdp"/>
+    </FrameLayout>
+
+
+    <FrameLayout
+        android:id="@+id/btn_waiting"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_btn_press_tran">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/_8sdp"
+            android:text="@string/status_waiting"
+            style="@style/Text_12_Normal"
+            android:textColor="@color/white" />
+
+        <ImageView
+            android:layout_width="@dimen/_10sdp"
+            android:layout_height="@dimen/_10sdp"
+            android:id="@+id/check_waiting"
+            android:src="@drawable/ic_check"
+            android:layout_gravity="center_vertical|end"
+            android:layout_marginEnd="@dimen/_8sdp"/>
+    </FrameLayout>
+
+    <FrameLayout
+        android:id="@+id/btn_end"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_btn_press_tran">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/_8sdp"
+            android:text="@string/status_ended"
+            style="@style/Text_12_Normal"
+            android:textColor="@color/white" />
+
+        <ImageView
+            android:layout_width="@dimen/_10sdp"
+            android:layout_height="@dimen/_10sdp"
+            android:id="@+id/check_end"
+            android:src="@drawable/ic_check"
+            android:layout_gravity="center_vertical|end"
+            android:layout_marginEnd="@dimen/_8sdp"/>
+    </FrameLayout>
+
+</LinearLayout>

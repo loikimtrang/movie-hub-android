@@ -1,9 +1,17 @@
 package com.movie_hub.android.utils;
 
+import android.content.Context;
 import android.text.TextUtils;
+
+import androidx.annotation.RawRes;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileFilter;
@@ -12,8 +20,10 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -1148,4 +1158,49 @@ public final class FileUtils {
     public interface OnReplaceListener {
         boolean onReplace();
     }
+
+    public static String readRawResource(Context context, @RawRes int resId) {
+        try {
+            InputStream is = context.getResources().openRawResource(resId);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
+            StringBuilder builder = new StringBuilder();
+            String line;
+
+            while ((line = reader.readLine()) != null) {
+                builder.append(line);
+            }
+
+            reader.close();
+            is.close();
+
+            return builder.toString();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public static String getLabelByValue(
+            Context context,
+            @RawRes int resId,
+            String value
+    ) {
+        try {
+            String json = readRawResource(context, resId);
+            if (json == null) return null;
+
+            JSONArray jsonArray = new JSONArray(json);
+
+            for (int i = 0; i < jsonArray.length(); i++) {
+                JSONObject obj = jsonArray.getJSONObject(i);
+                if (value.equalsIgnoreCase(obj.optString("value"))) {
+                    return obj.optString("label");
+                }
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
 }

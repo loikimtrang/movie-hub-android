@@ -3,11 +3,9 @@ package com.movie_hub.android.ui.main.account.manage_account;
 import android.annotation.SuppressLint;
 import android.net.Uri;
 import android.os.Bundle;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.lifecycle.MutableLiveData;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.bumptech.glide.Glide;
@@ -36,7 +34,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
-import eu.davidea.flexibleadapter.databinding.BR;
+import com.movie_hub.android.BR;
 import timber.log.Timber;
 
 public class ManageAccountActivity extends BaseActivity<ActivityManageAccountBinding, ManageAccountViewModel> implements ManageAccountMenuAdapter.OnItemClickListener, SystemBarColorProvider {
@@ -83,7 +81,7 @@ public class ManageAccountActivity extends BaseActivity<ActivityManageAccountBin
     public void setUpMenu() {
         List<ManageAccountItemModel> menuItems = Arrays.asList(
                 new ManageAccountItemModel(R.drawable.ic_edit, R.string.update_information),
-                new ManageAccountItemModel(R.drawable.ic_lock, R.string.change_password)
+                new ManageAccountItemModel(R.drawable.ic_lock_screen, R.string.change_password)
         );
 
         adapter = new ManageAccountMenuAdapter(menuItems, this);
@@ -129,7 +127,7 @@ public class ManageAccountActivity extends BaseActivity<ActivityManageAccountBin
 
     @Override
     public int getStatusBarColor() {
-        return R.color.account_header;
+        return R.color.header_app;
     }
 
     @Override

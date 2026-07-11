@@ -26,8 +26,7 @@
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="@dimen/_40sdp"
-            android:background="@color/account_header"
-            >
+            android:background="@color/header_app">
 
             <FrameLayout
                 android:id="@+id/back"

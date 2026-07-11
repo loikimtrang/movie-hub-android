@@ -1,6 +1,7 @@
 package com.movie_hub.android.ui.main.search.suggestion.adapter;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
@@ -22,12 +23,14 @@ public class MovieSuggestAdapter extends RecyclerView.Adapter<MovieSuggestAdapte
     private final List<MovieResponse> movieList = new ArrayList<>();
     private OnMovieClickListener listener;
 
+    Context context;
     public interface OnMovieClickListener {
         void onMovieClick(MovieResponse movie);
     }
 
-    public MovieSuggestAdapter(OnMovieClickListener listener) {
+    public MovieSuggestAdapter(OnMovieClickListener listener, Context context) {
         this.listener = listener;
+        this.context = context;
     }
 
     @NonNull
@@ -47,7 +50,7 @@ public class MovieSuggestAdapter extends RecyclerView.Adapter<MovieSuggestAdapte
         holder.binding.subtitle.setText(movie.getOriginalTitle());
 
         Glide.with(holder.binding.getRoot().getContext())
-                .load(Constants.MEDIA_URL + movie.getThumbnailUrl())
+                .load(movie.getPosterUrl())
                 .placeholder(R.drawable.place_holder_2_3)
                 .error(R.drawable.place_holder_2_3)
                 .into(holder.binding.image);
@@ -65,6 +68,21 @@ public class MovieSuggestAdapter extends RecyclerView.Adapter<MovieSuggestAdapte
             }, 50L);
             lastPosition = position;
         }
+
+        ViewGroup.MarginLayoutParams layoutParams =
+                (ViewGroup.MarginLayoutParams) holder.binding.getRoot().getLayoutParams();
+
+        int margin = (int) context.getResources().getDimension(R.dimen._6sdp);
+        layoutParams.setMarginStart(margin);
+        layoutParams.setMarginEnd(margin);
+        if (position == 0) {
+            layoutParams.setMarginStart(margin * 2);
+        }
+        if (position == movieList.size() - 1) {
+            layoutParams.setMarginEnd(margin * 2);
+        }
+
+        holder.binding.getRoot().setLayoutParams(layoutParams);
     }
     @Override
     public void onViewDetachedFromWindow(@NonNull MovieSuggestViewHolder holder) {

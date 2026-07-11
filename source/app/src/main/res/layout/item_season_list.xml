@@ -1,0 +1,70 @@
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/_65sdp"
+    android:background="@drawable/bg_season_list"
+    android:clickable="true"
+    android:focusable="true">
+
+    <FrameLayout
+        android:id="@+id/layout_ic_season"
+        android:layout_width="@dimen/_40sdp"
+        android:layout_height="@dimen/_40sdp"
+        android:layout_marginHorizontal="@dimen/_12sdp"
+        android:background="@drawable/bg_season_list_ic"
+        android:layout_marginVertical="@dimen/_12sdp">
+
+        <ImageView
+            android:id="@+id/ic_season"
+            android:layout_width="@dimen/_22sdp"
+            android:layout_height="@dimen/_22sdp"
+            android:src="@drawable/ic_season_no_select"
+            android:layout_gravity="center"/>
+
+    </FrameLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_toEndOf="@+id/layout_ic_season"
+        android:layout_centerVertical="true">
+
+        <TextView
+            android:id="@+id/tv_season"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="@style/Text_12_Bold"
+            android:text="@string/season"
+            android:textColor="@color/text_season"
+            android:layout_marginBottom="@dimen/_3sdp"/>
+
+        <TextView
+            android:id="@+id/tv_year_release"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="@style/Text_12_Normal"
+            android:text="2025"
+            android:textColor="@color/text_season"/>
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/tv_episode"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/_40sdp"
+        style="@style/Text_12_Normal"
+        android:text="10 tập"
+        android:layout_marginTop="@dimen/_12sdp"
+        android:gravity="center"
+        android:layout_alignParentEnd="true"
+        android:layout_marginEnd="@dimen/_12sdp"
+        android:textColor="@color/text_season"/>
+
+    <View
+        android:id="@+id/line"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/line_playlist"
+        android:layout_alignParentBottom="true"/>
+</RelativeLayout>

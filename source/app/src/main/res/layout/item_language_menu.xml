@@ -1,9 +1,8 @@
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="@dimen/_45sdp"
-    android:background="@color/bg_app"
-    android:foreground="?attr/selectableItemBackground"
+    android:layout_height="@dimen/_50sdp"
+    android:background="@drawable/bg_btn_press_tran"
     android:clickable="true"
     android:focusable="true"
     android:paddingHorizontal="@dimen/_12sdp">
@@ -13,7 +12,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/vi"
-        style="@style/Text_12_Normal"
+        style="@style/Text_14_Normal"
         android:layout_marginStart="@dimen/_12sdp"
         android:layout_centerVertical="true" />
 

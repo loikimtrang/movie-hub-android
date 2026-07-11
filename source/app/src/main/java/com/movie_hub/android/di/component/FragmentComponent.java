@@ -5,10 +5,14 @@ import com.movie_hub.android.di.module.FragmentModule;
 import com.movie_hub.android.di.scope.FragmentScope;
 import com.movie_hub.android.ui.main.account.AccountFragment;
 import com.movie_hub.android.ui.main.account.UnLoginAccountFragment;
+import com.movie_hub.android.ui.main.account.favourite.fragment.MovieFavoriteFragment;
 import com.movie_hub.android.ui.main.home.HomeFragment;
+import com.movie_hub.android.ui.main.live.LiveFragment;
 import com.movie_hub.android.ui.main.movie.detail.fragment.CastFragment;
 import com.movie_hub.android.ui.main.movie.detail.fragment.EpisodesFragment;
 import com.movie_hub.android.ui.main.movie.detail.fragment.RecommendationFragment;
+import com.movie_hub.android.ui.main.person.fragment.InformationFragment;
+import com.movie_hub.android.ui.main.person.fragment.MoviesInvolvedFragment;
 import com.movie_hub.android.ui.main.schedule.ScheduleFragment;
 import com.movie_hub.android.ui.main.search.SearchFragment;
 import com.movie_hub.android.ui.main.search.result.SearchResultFragment;
@@ -33,4 +37,8 @@ public interface FragmentComponent {
     void inject(CastFragment fragment);
     void inject(RecommendationFragment fragment);
     void inject(EpisodesFragment fragment);
+    void inject(InformationFragment fragment);
+    void inject(MoviesInvolvedFragment fragment);
+    void inject(MovieFavoriteFragment fragment);
+    void inject(LiveFragment fragment);
 }

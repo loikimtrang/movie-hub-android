@@ -9,17 +9,20 @@ import lombok.Lombok;
 
 public interface PreferencesService {
     public static final String KEY_BEARER_TOKEN="KEY_BEARER_TOKEN";
-
+    public static final String KEY_BEARER_REFRESH_TOKEN="KEY_BEARER_REFRESH_TOKEN";
     String KEY_ACCESS_TOKEN_OBJECT = "KEY_ACCESS_TOKEN_OBJECT";
     String KEY_USER_RESPONSE = "KEY_USER_RESPONSE";
-
     String KEY_USER_ID = "KEY_USER_ID";
+    String KEY_USER_SETTING= "KEY_USER_SETTING";
+    String KEY_BLOCK_SCREEN_CAPTURE = "KEY_BLOCK_SCREEN_CAPTURE";
 
     void saveAccessTokenObject(UserLoginResponse userLoginResponse);
     UserLoginResponse getUserAccessTokenObject();
     void clearAuthData();
     String getToken();
+    String getRefreshToken();
     void setToken(String token);
+    void setRefreshToken(String refreshToken);
 
     Long getUserId();
     void setUserId(Long id);
@@ -48,4 +51,7 @@ public interface PreferencesService {
     <T> T getObjectVal(String key, Class<T> mModelClass);
     public void setAppLanguage(String langCode);
     public String getAppLanguage();
+
+    boolean isBlockScreenCaptureEnabled();
+    void setBlockScreenCaptureEnabled(boolean enabled);
 }

@@ -65,6 +65,77 @@
             android:clickable="true"
             android:focusable="true"/>
 
+        <FrameLayout
+            android:id="@+id/l_dialog_exit"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/bg_loading"
+            android:visibility="gone"
+            android:onClick="onClick"
+            tools:ignore="UsingOnClickInXml">
+            <LinearLayout
+                android:orientation="vertical"
+                android:padding="@dimen/_12sdp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_dialog"
+                android:gravity="center"
+                android:layout_marginHorizontal="@dimen/_20sdp"
+                android:layout_gravity="center">
+
+                <TextView
+                    android:id="@+id/dialog_message"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    style="@style/Text_12_Bold"
+                    android:gravity="center"
+                    android:text="@string/exit_confirm"
+                    android:maxLines="2"
+                    android:layout_marginBottom="@dimen/_12sdp"/>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:background="@color/header_app">
+
+                    <TextView
+                        android:id="@+id/btn_ok"
+                        android:layout_width="@dimen/_80sdp"
+                        android:layout_height="@dimen/_25sdp"
+                        android:foreground="?attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:text="@string/confirm"
+                        style="@style/Text_10_Bold"
+                        android:background="@drawable/bg_btn_yellow_radius_3sdp"
+                        android:gravity="center"
+                        android:layout_marginStart="@dimen/_10sdp"
+                        android:layout_marginEnd="@dimen/_5sdp"
+                        android:textColor="@color/black"
+                        android:onClick="onClick"
+                        tools:ignore="UsingOnClickInXml"/>
+
+                    <TextView
+                        android:id="@+id/btn_cancel"
+                        android:layout_width="@dimen/_80sdp"
+                        android:layout_height="@dimen/_25sdp"
+                        android:foreground="?attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:text="@string/cancel"
+                        android:textColor="@color/black"
+                        style="@style/Text_10_Bold"
+                        android:background="@drawable/bg_btn_white_radius_3sdp"
+                        android:gravity="center"
+                        android:layout_marginStart="@dimen/_5sdp"
+                        android:layout_marginEnd="@dimen/_10sdp"
+                        android:onClick="onClick"
+                        tools:ignore="UsingOnClickInXml"/>
+
+                </LinearLayout>
+            </LinearLayout>
+        </FrameLayout>
 
     </FrameLayout>
 </layout>

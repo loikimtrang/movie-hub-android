@@ -1,7 +1,8 @@
 package com.movie_hub.android.ui.main.account;
 
 import android.annotation.SuppressLint;
-import android.util.Log;
+import android.content.Intent;
+import android.view.View;
 
 import androidx.recyclerview.widget.LinearLayoutManager;
 
@@ -12,18 +13,19 @@ import com.movie_hub.android.ui.base.activity.SystemBarColorProvider;
 import com.movie_hub.android.ui.base.fragment.BaseFragment;
 import com.movie_hub.android.ui.main.MainActivity;
 import com.movie_hub.android.ui.main.account.adapter.AccountMenuAdapter;
-import com.movie_hub.android.ui.main.account.fragment.LoginBottomSheetFragment;
-import com.movie_hub.android.ui.main.account.fragment.RegisterBottomSheetFragment;
-import com.movie_hub.android.ui.main.account.language.LanguageActivity;
+import com.movie_hub.android.ui.main.account.login.LoginActivity;
 import com.movie_hub.android.ui.main.account.model.MenuItemModel;
 import com.movie_hub.android.utils.ClickUtils;
+import com.movie_hub.android.utils.DialogUtils;
 
 import java.util.Arrays;
 import java.util.List;
 
-import eu.davidea.flexibleadapter.databinding.BR;
+import com.movie_hub.android.BR;
 
-public class UnLoginAccountFragment extends BaseFragment<FragmentUnLoginAccountBinding, UnLoginAccountViewModel> implements SystemBarColorProvider, AccountMenuAdapter.OnItemClickListener {
+public class UnLoginAccountFragment extends BaseFragment<FragmentUnLoginAccountBinding, UnLoginAccountViewModel> implements SystemBarColorProvider,
+        AccountMenuAdapter.OnItemClickListener,
+        View.OnClickListener {
     private AccountMenuAdapter adapter;
     @Override
     protected void performDataBinding() {
@@ -39,7 +41,8 @@ public class UnLoginAccountFragment extends BaseFragment<FragmentUnLoginAccountB
                 new MenuItemModel(R.drawable.ic_heart, R.string.menu_favorites),
                 new MenuItemModel(R.drawable.ic_policy, R.string.menu_privacy_policy),
                 new MenuItemModel(R.drawable.ic_question_contact, R.string.menu_contact),
-                new MenuItemModel(R.drawable.ic_language, R.string.menu_language)
+                new MenuItemModel(R.drawable.ic_language, R.string.menu_language),
+                new MenuItemModel(R.drawable.ic_update_app, R.string.check_for_update)
         );
 
         adapter = new AccountMenuAdapter(menuItems, this);
@@ -64,7 +67,7 @@ public class UnLoginAccountFragment extends BaseFragment<FragmentUnLoginAccountB
 
     @Override
     public int getStatusBarColor() {
-        return R.color.account_header;
+        return R.color.header_app;
     }
 
     @Override
@@ -76,33 +79,55 @@ public class UnLoginAccountFragment extends BaseFragment<FragmentUnLoginAccountB
     @Override
     public void onItemClick(MenuItemModel item) {
         switch (item.title) {
+
             case R.string.menu_watch_now:
-                break;
             case R.string.menu_my_movies:
-                break;
             case R.string.menu_favorites:
+                showLoginRequiredDialog();
                 break;
             case R.string.menu_privacy_policy:
+                ((MainActivity) requireActivity()).navigateToPrivacy();
                 break;
             case R.string.menu_contact:
+                ((MainActivity) requireActivity()).navigateToContact();
                 break;
             case R.string.menu_language:
                 ((MainActivity) requireActivity()).navigateToLanguage();
                 break;
+            case R.string.check_for_update:
+                ((MainActivity) requireActivity()).navigateToCheckUpdate();
+                break;
+
         }
-    }
-
-    public void onRegisterClick() {
-        ClickUtils.debounceClick(binding.register);
-
-        RegisterBottomSheetFragment registerBottom = new RegisterBottomSheetFragment();
-        registerBottom.show(requireActivity().getSupportFragmentManager(), registerBottom.getTag());
     }
 
     public void onLoginClick() {
         ClickUtils.debounceClick(binding.login);
+        ((MainActivity) requireActivity()).navigateToNewActivity(getContext(), LoginActivity.class);
+    }
 
-        LoginBottomSheetFragment loginBottom = new LoginBottomSheetFragment();
-        loginBottom.show(requireActivity().getSupportFragmentManager(), loginBottom.getTag());
+    public void showLoginRequiredDialog() {
+        DialogUtils.dialogConfirm(
+                getContext(),
+                getString(R.string.not_login),
+                getString(R.string.login),
+                (dialog, which) -> {
+                    ((MainActivity) requireActivity()).navigateToNewActivity(getContext(), LoginActivity.class);
+                },
+                getString(R.string.cancel),
+                null
+        );
+    }
+
+    @SuppressLint("NonConstantResourceId")
+    @Override
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.login:
+                ((MainActivity) requireActivity()).navigateToNewActivity(getContext(), LoginActivity.class);
+                break;
+            default:
+                break;
+        }
     }
 }

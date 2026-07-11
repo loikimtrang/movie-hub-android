@@ -52,6 +52,7 @@ public class AppPreferencesService implements PreferencesService {
     @Override
     public void clearAuthData() {
         removeKey(KEY_BEARER_TOKEN);
+        removeKey(KEY_BEARER_REFRESH_TOKEN);
         removeKey(KEY_ACCESS_TOKEN_OBJECT);
         removeKey(KEY_USER_RESPONSE);
         removeKey(KEY_USER_ID);
@@ -63,8 +64,18 @@ public class AppPreferencesService implements PreferencesService {
     }
 
     @Override
+    public String getRefreshToken() {
+        return mPrefs.getString(KEY_BEARER_REFRESH_TOKEN, Constants.VALUE_BEARER_TOKEN_DEFAULT);
+    }
+
+    @Override
     public void setToken(String token) {
         mPrefs.edit().putString(KEY_BEARER_TOKEN, token).apply();
+    }
+
+    @Override
+    public void setRefreshToken(String refreshToken) {
+        mPrefs.edit().putString(KEY_BEARER_REFRESH_TOKEN, refreshToken).apply();
     }
 
     @Override
@@ -165,6 +176,16 @@ public class AppPreferencesService implements PreferencesService {
 
     public String getAppLanguage() {
         return mPrefs.getString(KEY_LANGUAGE_CODE, "vi");
+    }
+
+    @Override
+    public boolean isBlockScreenCaptureEnabled() {
+        return mPrefs.getBoolean(KEY_BLOCK_SCREEN_CAPTURE, true);
+    }
+
+    @Override
+    public void setBlockScreenCaptureEnabled(boolean enabled) {
+        mPrefs.edit().putBoolean(KEY_BLOCK_SCREEN_CAPTURE, enabled).apply();
     }
 
 }

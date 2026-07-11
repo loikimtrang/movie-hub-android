@@ -12,18 +12,133 @@
             type="com.movie_hub.android.ui.main.splash.SplashViewModel" />
         <import type="android.view.View"/>
     </data>
-    <LinearLayout
+
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:gravity="center"
-        android:background="#15151F"
-        android:fitsSystemWindows="true">
+        android:background="@color/bg_app">
 
-        <ImageView
-            android:layout_width="@dimen/_150sdp"
-            android:layout_height="@dimen/_150sdp"
-            android:src="@drawable/logo" />
-    </LinearLayout>
+        <LinearLayout
+            android:id="@+id/layout_logo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:layout_centerInParent="true">
+
+            <ImageView
+                android:layout_width="@dimen/_100sdp"
+                android:layout_height="@dimen/_100sdp"
+                android:src="@drawable/logo" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/app_name"
+                style="@style/Text_16_Bold"
+                android:textSize="@dimen/_20ssp"
+                android:layout_marginTop="@dimen/_12sdp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Phim hay cả rổ"
+                style="@style/Text_14_Normal"/>
+
+
+        </LinearLayout>
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="@dimen/_20ssp"
+            android:layout_below="@+id/layout_logo">
+            <ProgressBar
+                android:id="@+id/loading_progress"
+                android:layout_width="@dimen/_36sdp"
+                android:layout_height="@dimen/_36sdp"
+                android:layout_gravity="bottom|center_horizontal"
+                android:indeterminate="true"
+                style="@style/Widget.AppCompat.ProgressBar"
+                android:indeterminateTint="@color/progress"/>
+
+            <LinearLayout
+                android:id="@+id/layout_button"
+                android:layout_width="@dimen/_180sdp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:visibility="gone"
+                android:layout_marginHorizontal="@dimen/_12sdp"
+                android:orientation="vertical"
+                android:background="@color/bg_app">
+
+                <FrameLayout
+                    android:id="@+id/btn_login"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/_36sdp"
+                    android:foreground="?attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:onClick="onClick"
+                    android:background="@drawable/bg_btn_yellow_radius_3sdp">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_gravity="center">
+
+                        <ImageView
+                            android:layout_width="@dimen/_12sdp"
+                            android:layout_height="@dimen/_12sdp"
+                            android:src="@drawable/ic_user"
+                            android:layout_gravity="center"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/login"
+                            style="@style/Text_12_Bold"
+                            android:textColor="@color/black"
+                            android:gravity="center"
+                            android:layout_marginStart="@dimen/_12sdp"/>
+                    </LinearLayout>
+
+                </FrameLayout>
+
+                <FrameLayout
+                    android:id="@+id/btn_skip"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/_36sdp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:onClick="onClick"
+                    android:background="@drawable/bg_btn_skip"
+                    android:layout_marginTop="@dimen/_12sdp">
+
+                    <ImageView
+                        android:layout_width="@dimen/_12sdp"
+                        android:layout_height="@dimen/_12sdp"
+                        android:src="@drawable/ic_skip"
+                        android:layout_gravity="end|center_vertical"
+                        android:layout_marginEnd="@dimen/_12sdp"
+                        />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/skip"
+                        style="@style/Text_12_Bold"
+                        android:layout_gravity="center"/>
+
+                </FrameLayout>
+
+
+            </LinearLayout>
+
+        </FrameLayout>
+
+    </RelativeLayout>
 </layout>
 

@@ -1,0 +1,65 @@
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/_65sdp"
+    android:background="@drawable/bg_season_list"
+    android:clickable="false"
+    android:focusable="false">
+
+    <FrameLayout
+        android:id="@+id/btn_check"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/_6sdp"
+        android:background="@drawable/bg_btn_press_tran"
+        android:layout_marginVertical="@dimen/_12sdp"
+        android:layout_centerVertical="true"
+        android:padding="@dimen/_6sdp"
+        android:clickable="true"
+        android:focusable="true">
+
+        <ImageView
+            android:id="@+id/ic_check"
+            android:layout_width="@dimen/_14sdp"
+            android:layout_height="@dimen/_14sdp"
+            android:src="@drawable/ic_check_box_un_check"
+            android:layout_gravity="center"/>
+
+    </FrameLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_toEndOf="@+id/btn_check"
+        android:layout_centerVertical="true">
+
+        <TextView
+            android:id="@+id/tv_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="@style/Text_12_Bold"
+            android:text="@string/name"
+            android:layout_marginBottom="@dimen/_3sdp"/>
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/tv_count"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/_40sdp"
+        style="@style/Text_12_Normal"
+        android:text="10 phim"
+        android:layout_marginTop="@dimen/_12sdp"
+        android:gravity="center"
+        android:layout_alignParentEnd="true"
+        android:layout_marginEnd="@dimen/_12sdp"
+        android:textColor="@color/text_season"/>
+
+    <View
+        android:id="@+id/line"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/line_playlist"
+        android:layout_alignParentBottom="true"/>
+</RelativeLayout>
