@@ -26,6 +26,7 @@ import com.movie_hub.android.data.model.api.response.comment.VoteListResponse;
 import com.movie_hub.android.data.model.api.response.movie.MovieResponse;
 import com.movie_hub.android.data.model.api.response.report.CreateReportRequest;
 import com.movie_hub.android.data.model.api.response.review.ReviewResponse;
+import com.movie_hub.android.data.model.onesignal.MessageOneSignal;
 import com.movie_hub.android.data.model.onesignal.MessageReviewResponse;
 import com.movie_hub.android.data.model.onesignal.OneSignalCommand;
 import com.movie_hub.android.data.model.other.ToastMessage;
@@ -555,6 +556,86 @@ public class ReviewActivity extends BaseActivity<ActivityReviewBinding, ReviewVi
         reviewItemAdapter.stopTimeUpdater();
     }
 
+    public void onNotificationReceived(MessageOneSignal message) {
+        runOnUiThread(() -> handleNotificationData(message));
+    }
+
+    @Override
+    protected void handleNotificationData(MessageOneSignal message) {
+        if (message == null || message.getCmd() == null) {
+            return;
+        }
+
+        if (OneSignalCommand.shouldRefreshReviewOnForeground(message.getCmd())) {
+            MessageReviewResponse data = GsonUtils.fromJson(message.getData(), MessageReviewResponse.class);
+            if (data != null && data.getId() != null && isCurrentMovieNotification(data)) {
+                refreshReviewById(Long.parseLong(data.getId()));
+                return;
+            }
+        }
+
+        super.handleNotificationData(message);
+    }
+
+    private boolean isCurrentMovieNotification(MessageReviewResponse data) {
+        if (viewModel.movieDetails == null || viewModel.movieDetails.getId() == null) {
+            return false;
+        }
+        if (data.getMovieId() == null) {
+            return true;
+        }
+        return String.valueOf(viewModel.movieDetails.getId()).equals(data.getMovieId());
+    }
+
+    public void refreshReviewById(long reviewId) {
+        int position = reviewItemAdapter.findPositionById(reviewId);
+        if (position < 0) {
+            reloadReviewListFromStart();
+            return;
+        }
+
+        ReviewRequest request = new ReviewRequest();
+        request.setId(reviewId);
+        request.setMovieId(viewModel.movieDetails.getId());
+        request.setPage(0);
+        request.setSize(1);
+
+        viewModel.getListReview(new MainCallback<ResponseListObj<ReviewResponse>>() {
+            @Override
+            public void doError(Throwable error) {
+            }
+
+            @Override
+            public void doSuccess() {
+            }
+
+            @Override
+            public void doSuccess(ResponseListObj<ReviewResponse> data) {
+                if (data == null || data.getContent() == null || data.getContent().isEmpty()) {
+                    reloadReviewListFromStart();
+                    return;
+                }
+                ReviewResponse updated = viewModel.setupVoteList(data.getContent()).get(0);
+                int latestPosition = reviewItemAdapter.findPositionById(reviewId);
+                if (latestPosition >= 0) {
+                    reviewItemAdapter.updateItemAt(latestPosition, updated);
+                } else {
+                    reloadReviewListFromStart();
+                }
+            }
+
+            @Override
+            public void doFail() {
+            }
+        }, request);
+    }
+
+    private void reloadReviewListFromStart() {
+        currentPage = 0;
+        isLastPage = false;
+        getVoteList();
+    }
+
     private void scrollToNotificationReviewIfNeeded() {
         String json = getIntent().getStringExtra(MSG_REVIEW);
         String cmd = getIntent().getStringExtra(MSG_CMD);
@@ -562,6 +643,7 @@ public class ReviewActivity extends BaseActivity<ActivityReviewBinding, ReviewVi
             return;
         }
         if (!OneSignalCommand.CMD_TOXIC_REVIEW_LOCKED.equals(cmd)
+                && !OneSignalCommand.CMD_REVIEW_UNLOCKED.equals(cmd)
                 && !OneSignalCommand.CMD_VOTE_REVIEW.equals(cmd)) {
             return;
         }

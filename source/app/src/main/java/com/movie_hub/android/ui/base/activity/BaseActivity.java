@@ -322,9 +322,13 @@ public abstract class BaseActivity<B extends ViewDataBinding, V extends BaseView
      * Hàm này có thể được override ở Activity con nếu cần logic riêng biệt
      */
     protected void handleNotificationData(MessageOneSignal message) {
+        if (message == null || message.getCmd() == null) {
+            return;
+        }
         switch (message.getCmd()) {
             case OneSignalCommand.CMD_REPLY_COMMENT:
             case OneSignalCommand.CMD_TOXIC_COMMENT_LOCKED:
+            case OneSignalCommand.CMD_COMMENT_UNLOCKED:
             case OneSignalCommand.CMD_VOTE_COMMENT:
                 MessageCommentResponse messageCommentResponse = GsonUtils.fromJson(message.getData(), MessageCommentResponse.class);
                 if (messageCommentResponse != null && messageCommentResponse.getMovieId() != null) {
@@ -332,6 +336,7 @@ public abstract class BaseActivity<B extends ViewDataBinding, V extends BaseView
                 }
                 break;
             case OneSignalCommand.CMD_TOXIC_REVIEW_LOCKED:
+            case OneSignalCommand.CMD_REVIEW_UNLOCKED:
             case OneSignalCommand.CMD_VOTE_REVIEW:
                 MessageReviewResponse messageReviewResponse = GsonUtils.fromJson(message.getData(), MessageReviewResponse.class);
                 if (messageReviewResponse != null && messageReviewResponse.getMovieId() != null) {

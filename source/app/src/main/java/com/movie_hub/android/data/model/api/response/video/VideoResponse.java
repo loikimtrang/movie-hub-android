@@ -6,6 +6,7 @@ import android.os.Parcel;
 import androidx.annotation.NonNull;
 
 import com.movie_hub.android.constant.Constants;
+import com.movie_hub.android.utils.StreamingMediaUrlUtils;
 
 import lombok.Data;
 
@@ -33,8 +34,7 @@ public class VideoResponse {
 
     public String getSpriteUrl() {
         if (spriteUrl == null || spriteUrl.isEmpty()) return "";
-        if (spriteUrl.contains("http")) return spriteUrl;
-        return Constants.MEDIA_URL_VTT + spriteUrl;
+        return StreamingMediaUrlUtils.buildPublicDownloadUrl(hostname, spriteUrl);
     }
 
     public String getThumbnailUrl() {
@@ -45,7 +45,6 @@ public class VideoResponse {
 
     public String getVttUrl() {
         if (vttUrl == null || vttUrl.isEmpty()) return "";
-        if (vttUrl.contains("http")) return vttUrl;
-        return Constants.MEDIA_URL_VTT + vttUrl;
+        return StreamingMediaUrlUtils.buildPublicDownloadUrl(hostname, vttUrl);
     }
 }

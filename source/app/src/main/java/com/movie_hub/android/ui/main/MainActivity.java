@@ -192,6 +192,7 @@ public class MainActivity extends BaseActivity<ActivityMainBinding, MainViewMode
                 switch (cmd) {
                     case OneSignalCommand.CMD_REPLY_COMMENT:
                     case OneSignalCommand.CMD_TOXIC_COMMENT_LOCKED:
+                    case OneSignalCommand.CMD_COMMENT_UNLOCKED:
                     case OneSignalCommand.CMD_VOTE_COMMENT:
                         if (dataJson != null && !dataJson.isEmpty()) {
                             MessageCommentResponse messageCommentResponse = GsonUtils.fromJson(dataJson, MessageCommentResponse.class);
@@ -204,6 +205,7 @@ public class MainActivity extends BaseActivity<ActivityMainBinding, MainViewMode
                         }
                         break;
                     case OneSignalCommand.CMD_TOXIC_REVIEW_LOCKED:
+                    case OneSignalCommand.CMD_REVIEW_UNLOCKED:
                     case OneSignalCommand.CMD_VOTE_REVIEW:
                         if (dataJson != null && !dataJson.isEmpty()) {
                             MessageReviewResponse messageReviewResponse = GsonUtils.fromJson(dataJson, MessageReviewResponse.class);

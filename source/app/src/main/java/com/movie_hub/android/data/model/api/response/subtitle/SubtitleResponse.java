@@ -1,6 +1,8 @@
 package com.movie_hub.android.data.model.api.response.subtitle;
 
-import com.movie_hub.android.BuildConfig;
+import androidx.annotation.Nullable;
+
+import com.movie_hub.android.utils.StreamingMediaUrlUtils;
 
 import lombok.Data;
 
@@ -13,9 +15,10 @@ public class SubtitleResponse {
     private String label;
 
     public String getSubtitleUrl() {
-        if (fileUrl != null && fileUrl.startsWith("http")) {
-            return fileUrl;
-        }
-        return BuildConfig.MEDIA_URL_VTT + fileUrl;
+        return getSubtitleUrl(null);
+    }
+
+    public String getSubtitleUrl(@Nullable String hostname) {
+        return StreamingMediaUrlUtils.buildPublicDownloadUrl(hostname, fileUrl);
     }
 }

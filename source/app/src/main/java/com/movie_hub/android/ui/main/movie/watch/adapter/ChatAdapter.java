@@ -92,9 +92,9 @@ public class ChatAdapter extends ListAdapter<CreateChatModel, ChatAdapter.ChatVi
                 avatar = Constants.MEDIA_URL + avatar;
             }
             Glide.with(binding.imgAvatar.getContext())
-                    .load(TextUtils.isEmpty(avatar) ? R.drawable.logo : avatar)
-                    .placeholder(R.drawable.logo)
-                    .error(R.drawable.logo)
+                    .load(TextUtils.isEmpty(avatar) ? R.drawable.ic_user : avatar)
+                    .placeholder(R.drawable.ic_user)
+                    .error(R.drawable.ic_user)
                     .into(binding.imgAvatar);
 //            if (groupWithPrevious) {
 //                binding.imgAvatar.setVisibility(View.INVISIBLE);

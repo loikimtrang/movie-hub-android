@@ -2,9 +2,16 @@ package com.movie_hub.android.utils;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
+import com.movie_hub.android.data.model.mqtt.KickModel;
+import com.movie_hub.android.data.model.mqtt.KickModelDeserializer;
+import com.movie_hub.android.data.model.mqtt.MqttMessageDeserializer;
+import com.movie_hub.android.data.model.mqtt.ParticipantJoinModel;
+import com.movie_hub.android.data.model.mqtt.ParticipantJoinModelDeserializer;
 import com.movie_hub.android.data.model.mqtt.RoomStateModel;
 import com.movie_hub.android.data.model.mqtt.RoomStateModelDeserializer;
+import com.movie_hub.android.data.mqtt.Message;
 
 import java.lang.reflect.Type;
 import java.util.List;
@@ -21,6 +28,21 @@ public final class GsonUtils {
             .setLenient()
             .serializeNulls()
             .registerTypeAdapter(RoomStateModel.class, new RoomStateModelDeserializer())
+            .create();
+
+    private static final Gson mqttGson = new GsonBuilder()
+            .setLenient()
+            .registerTypeAdapter(Message.class, new MqttMessageDeserializer())
+            .create();
+
+    private static final Gson kickGson = new GsonBuilder()
+            .setLenient()
+            .registerTypeAdapter(KickModel.class, new KickModelDeserializer())
+            .create();
+
+    private static final Gson participantJoinGson = new GsonBuilder()
+            .setLenient()
+            .registerTypeAdapter(ParticipantJoinModel.class, new ParticipantJoinModelDeserializer())
             .create();
 
     private GsonUtils() {
@@ -77,6 +99,45 @@ public final class GsonUtils {
             e.printStackTrace();
             return null;
         }
+    }
+
+    /** Parse MQTT envelope; keeps {@code data} as {@link JsonElement} to preserve snowflake IDs. */
+    public static Message fromJsonMqttMessage(String json) {
+        try {
+            return mqttGson.fromJson(json, Message.class);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public static KickModel fromJsonKickModel(String json) {
+        try {
+            return kickGson.fromJson(json, KickModel.class);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public static ParticipantJoinModel fromJsonParticipantJoinModel(String json) {
+        try {
+            return participantJoinGson.fromJson(json, ParticipantJoinModel.class);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    /** Serialize MQTT {@code data} without losing large numeric IDs from web payloads. */
+    public static String dataToJson(Object data) {
+        if (data == null) {
+            return null;
+        }
+        if (data instanceof JsonElement) {
+            return data.toString();
+        }
+        return toJson(data);
     }
 
     /** Lấy Gson instance nếu cần tùy chỉnh thêm */

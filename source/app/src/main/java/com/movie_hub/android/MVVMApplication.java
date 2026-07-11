@@ -44,6 +44,7 @@ import com.movie_hub.android.others.MyTimberReleaseTree;
 import com.movie_hub.android.ui.main.MainActivity;
 import com.movie_hub.android.ui.main.movie.detail.MovieDetailActivity;
 import com.movie_hub.android.ui.main.movie.detail.comment.CommentActivity;
+import com.movie_hub.android.ui.main.movie.detail.review.ReviewActivity;
 import com.movie_hub.android.ui.main.splash.SplashActivity;
 import com.movie_hub.android.utils.DialogUtils;
 import com.movie_hub.android.utils.GsonUtils;
@@ -190,9 +191,13 @@ public class MVVMApplication extends Application implements LifecycleObserver {
         if (!isAppRunning || currentActivity == null || messageOneSignal == null) {
             return;
         }
+        String cmd = messageOneSignal.getCmd();
         if (currentActivity instanceof CommentActivity
-                && OneSignalCommand.CMD_TOXIC_COMMENT_LOCKED.equals(messageOneSignal.getCmd())) {
+                && OneSignalCommand.shouldRefreshCommentOnForeground(cmd)) {
             ((CommentActivity) currentActivity).onNotificationReceived(messageOneSignal);
+        } else if (currentActivity instanceof ReviewActivity
+                && OneSignalCommand.shouldRefreshReviewOnForeground(cmd)) {
+            ((ReviewActivity) currentActivity).onNotificationReceived(messageOneSignal);
         }
     }
 
@@ -308,7 +313,7 @@ public class MVVMApplication extends Application implements LifecycleObserver {
                 Timber.w("MQTT_LOG: MESSAGE FROM [%s] | Payload: %s", topicName, payload);
 
                 try {
-                    Message msg = GsonUtils.fromJson(payload, Message.class);
+                    Message msg = GsonUtils.fromJsonMqttMessage(payload);
                     int requestId = msg.hashCode();
                     synchronized (pendingTimeouts) {
                         TimerTask task = pendingTimeouts.remove(requestId);

@@ -101,6 +101,7 @@ import com.movie_hub.android.data.model.mqtt.CreateChatModel;
 import com.movie_hub.android.data.model.mqtt.ClientPingModel;
 import com.movie_hub.android.data.model.mqtt.EndRoomModel;
 import com.movie_hub.android.data.model.mqtt.KickModel;
+import com.movie_hub.android.data.model.mqtt.MqttJsonHelper;
 import com.movie_hub.android.data.model.mqtt.ParticipantJoinModel;
 import com.movie_hub.android.data.model.mqtt.RoomStateModel;
 import com.movie_hub.android.data.model.mqtt.UpdateParticipantCountModel;
@@ -284,9 +285,6 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
                 setupImeAwareChatInput();
                 viewModel.loadChatHistory(viewModel.roomDetail.getId());
             }
-
-
-            loadSubtitlesForCurrentVideo();
         }
 
         setupChatSwipeToClose();
@@ -683,18 +681,7 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
             @Override
             public void doSuccess(UserResponse response) {
                 viewModel.userResponse = response;
-                String settingJson = response.getSettings();
-
-                if (settingJson != null && !settingJson.isEmpty()) {
-                    try {
-                        viewModel.setting = GsonUtils.fromJson(settingJson, UserSettingsRequest.class);
-                    } catch (Exception e) {
-                        viewModel.setting = createDefaultSettings();
-                    }
-                } else {
-                    viewModel.setting = createDefaultSettings();
-                }
-
+                applyUserSettingsFromProfile(response);
                 applyUserSubtitleSettings();
                 initMovie();
             }
@@ -721,6 +708,7 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
             @Override
             public void doSuccess(UserResponse response) {
                 viewModel.userResponse = response;
+                applyUserSettingsFromProfile(response);
                 initMovie();
             }
 
@@ -729,6 +717,23 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
 
             }
         });
+    }
+
+    private void applyUserSettingsFromProfile(@Nullable UserResponse response) {
+        if (response == null) {
+            viewModel.setting = createDefaultSettings();
+            return;
+        }
+        String settingJson = response.getSettings();
+        if (settingJson != null && !settingJson.isEmpty()) {
+            try {
+                viewModel.setting = GsonUtils.fromJson(settingJson, UserSettingsRequest.class);
+            } catch (Exception e) {
+                viewModel.setting = createDefaultSettings();
+            }
+        } else {
+            viewModel.setting = createDefaultSettings();
+        }
     }
 
     private void loadSubtitlesForCurrentVideo() {
@@ -1064,6 +1069,7 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
         setupSeekBarVolume();
 
         handleObserveTracking();
+        loadSubtitlesForCurrentVideo();
     }
 
     private String getVideoUri(VideoResponse videoResponse) {
@@ -2342,8 +2348,9 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
 
         MediaItem.Builder builder = new MediaItem.Builder().setUri(viewModel.nowUriPlay);
         if (subtitle != null) {
+            String hostname = viewModel.nowVideoPlay != null ? viewModel.nowVideoPlay.getHostname() : null;
             MediaItem.SubtitleConfiguration subtitleConfig =
-                    new MediaItem.SubtitleConfiguration.Builder(Uri.parse(subtitle.getSubtitleUrl()))
+                    new MediaItem.SubtitleConfiguration.Builder(Uri.parse(subtitle.getSubtitleUrl(hostname)))
                             .setMimeType(MimeTypes.TEXT_VTT)
                             .setLanguage(subtitle.getLanguage())
                             .setSelectionFlags(C.SELECTION_FLAG_DEFAULT)
@@ -2945,7 +2952,7 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
     private void handleIncomingRoomChatMessage(Message message) {
         if (message.getData() == null) return;
         try {
-            String json = GsonUtils.toJson(message.getData());
+            String json = GsonUtils.dataToJson(message.getData());
             CreateChatModel chat = GsonUtils.fromJson(json, CreateChatModel.class);
             if (chat != null && chat.getContent() != null && !chat.getContent().isEmpty()) {
                 runOnUiThread(() -> viewModel.appendIncomingChatMessage(chat));
@@ -2959,7 +2966,7 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
         if (!viewModel.isLiveRoom || message.getData() == null) return;
         try {
             UpdateParticipantCountModel payload = GsonUtils.fromJson(
-                    GsonUtils.toJson(message.getData()),
+                    GsonUtils.dataToJson(message.getData()),
                     UpdateParticipantCountModel.class);
             if (payload == null || payload.getRoomId() == null || payload.getCurrentViewers() == null) {
                 return;
@@ -2977,13 +2984,14 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
     }
 
     private void handleKicked(Message message) {
-        if (viewModel.isHost) return;
+        if (viewModel.isHost || message.getData() == null) return;
         try {
-            KickModel kick = GsonUtils.fromJson(
-                    GsonUtils.toJson(message.getData()),
-                    KickModel.class);
+            String json = GsonUtils.dataToJson(message.getData());
+            KickModel kick = GsonUtils.fromJsonKickModel(json);
+            if (kick == null || kick.getTargetUserId() == null) return;
+
             String myId = viewModel.getUserId() != null ? viewModel.getUserId().toString() : "";
-            if (kick != null && !myId.isEmpty() && myId.equals(kick.getTargetUserId())) {
+            if (!myId.isEmpty() && MqttJsonHelper.idsMatch(myId, kick.getTargetUserId())) {
                 runOnUiThread(this::showKickedDialog);
             }
         } catch (Exception e) {
@@ -3068,7 +3076,8 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
     private void hostBroadcastSyncData(Message message) {
         if (!viewModel.isLiveRoom || !viewModel.isHost) return;
         if (player == null || viewModel.roomDetail == null) return;
-        ParticipantJoinModel participantJoinModel = GsonUtils.fromJson(GsonUtils.toJson(message.getData()), ParticipantJoinModel.class);
+        ParticipantJoinModel participantJoinModel = GsonUtils.fromJsonParticipantJoinModel(
+                GsonUtils.dataToJson(message.getData()));
 
         if (participantJoinModel != null && participantJoinModel.getId() != null) {
             String topic = Constants.TOPIC + viewModel.roomDetail.getId() + "/" + participantJoinModel.getId();
@@ -3092,9 +3101,9 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
     }
     public void participantJoin(Message message) {
         if (!viewModel.isHost) return;
-        String json =  GsonUtils.toJson(message.getData());
+        String json = GsonUtils.dataToJson(message.getData());
         if (json != null) {
-            ParticipantJoinModel participantJoinModel = GsonUtils.fromJson(json, ParticipantJoinModel.class);
+            ParticipantJoinModel participantJoinModel = GsonUtils.fromJsonParticipantJoinModel(json);
             if (participantJoinModel != null) {
                 String topic = Constants.TOPIC + viewModel.roomDetail.getId() + "/" + participantJoinModel.getId();
                 Message msg = new Message();
@@ -3131,7 +3140,7 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
     public void roomOption(Message message) {
         if (viewModel.isHost) return;
         if (!viewModel.isSyncWithHostEnabled()) return;
-        String json =  GsonUtils.toJson(message.getData());
+        String json = GsonUtils.dataToJson(message.getData());
         if (json != null) {
             RoomStateModel roomStateModel = GsonUtils.fromJsonRoomStateModel(json);
             if (player != null && roomStateModel != null) {
@@ -3170,7 +3179,7 @@ public class WatchMovieActivity extends BaseActivity<ActivityWatchMovieBinding, 
     public void endRoom(Message message) {
         if (!viewModel.isLiveRoom || message.getData() == null) return;
 
-        EndRoomModel endRoomModel = GsonUtils.fromJson(GsonUtils.toJson(message.getData()), EndRoomModel.class);
+        EndRoomModel endRoomModel = GsonUtils.fromJson(GsonUtils.dataToJson(message.getData()), EndRoomModel.class);
 
         if (endRoomModel == null || endRoomModel.getReason() == null) return;
         if (!isMqttMessageForCurrentRoom(endRoomModel.getRoomId())) return;

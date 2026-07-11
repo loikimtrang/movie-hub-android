@@ -143,11 +143,19 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
 
     private void bindAvatar(NotificationViewHolder holder, NotificationDisplayModel display) {
         holder.binding.imgAvatar.setVisibility(View.VISIBLE);
-        if (display.isShowAvatar() && !TextUtils.isEmpty(display.getAvatarUrl())) {
+        if (display.isUseAppLogoAvatar()) {
+            Glide.with(context)
+                    .load(R.drawable.logo)
+                    .into(holder.binding.imgAvatar);
+        } else if (display.isShowAvatar() && !TextUtils.isEmpty(display.getAvatarUrl())) {
             Glide.with(context)
                     .load(display.getAvatarUrl())
-                    .placeholder(R.drawable.logo)
-                    .error(R.drawable.logo)
+                    .placeholder(R.drawable.ic_user_light)
+                    .error(R.drawable.ic_user_light)
+                    .into(holder.binding.imgAvatar);
+        } else if (display.isShowAvatar()) {
+            Glide.with(context)
+                    .load(R.drawable.ic_user_light)
                     .into(holder.binding.imgAvatar);
         } else {
             Glide.with(context)

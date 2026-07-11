@@ -23,7 +23,7 @@
                 android:layout_height="@dimen/_16sdp"
                 android:scaleType="centerCrop"
                 app:shapeAppearanceOverlay="@style/roundImg"
-                android:src="@drawable/logo"
+                android:src="@drawable/ic_user"
                 android:layout_marginTop="@dimen/_8sdp"
                 android:visibility="visible"/>
 

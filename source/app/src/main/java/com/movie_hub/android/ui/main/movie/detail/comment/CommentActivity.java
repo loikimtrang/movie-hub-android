@@ -351,7 +351,7 @@ public class CommentActivity extends BaseActivity<ActivityCommentBinding, Commen
             return;
         }
 
-        if (OneSignalCommand.CMD_TOXIC_COMMENT_LOCKED.equals(message.getCmd())) {
+        if (OneSignalCommand.shouldRefreshCommentOnForeground(message.getCmd())) {
             MessageCommentResponse data = GsonUtils.fromJson(message.getData(), MessageCommentResponse.class);
             if (data != null && data.getId() != null && isCurrentMovieNotification(data)) {
                 refreshCommentById(Long.parseLong(data.getId()));
@@ -1001,6 +1001,7 @@ public class CommentActivity extends BaseActivity<ActivityCommentBinding, Commen
         if (currentList == null) return -1;
 
         if (OneSignalCommand.CMD_TOXIC_COMMENT_LOCKED.equals(cmd)
+                || OneSignalCommand.CMD_COMMENT_UNLOCKED.equals(cmd)
                 || OneSignalCommand.CMD_VOTE_COMMENT.equals(cmd)) {
             if (mCmtResponse.getId() == null) return -1;
             long commentId = Long.parseLong(mCmtResponse.getId());

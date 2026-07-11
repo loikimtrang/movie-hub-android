@@ -9,6 +9,7 @@ public class NotificationDisplayModel {
     private String preview;
     private String avatarUrl;
     private boolean showAvatar;
+    private boolean useAppLogoAvatar;
     private boolean previewMasked;
     private String toxicSpans;
     private Integer toxicStatus;

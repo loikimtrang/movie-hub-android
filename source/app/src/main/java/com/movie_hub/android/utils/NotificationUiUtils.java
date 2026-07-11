@@ -40,10 +40,12 @@ public final class NotificationUiUtils {
         switch (cmd) {
             case OneSignalCommand.CMD_REPLY_COMMENT:
             case OneSignalCommand.CMD_TOXIC_COMMENT_LOCKED:
+            case OneSignalCommand.CMD_COMMENT_UNLOCKED:
             case OneSignalCommand.CMD_VOTE_COMMENT:
                 fillComment(context, model, payloadJson, item, cmd);
                 break;
             case OneSignalCommand.CMD_TOXIC_REVIEW_LOCKED:
+            case OneSignalCommand.CMD_REVIEW_UNLOCKED:
             case OneSignalCommand.CMD_VOTE_REVIEW:
                 fillReview(context, model, payloadJson, item, cmd);
                 break;
@@ -79,9 +81,8 @@ public final class NotificationUiUtils {
                                     NotificationResponse item, String cmd) {
         MessageCommentResponse data = parseJson(json, MessageCommentResponse.class);
         if (data != null) {
-            boolean isLocked = OneSignalCommand.CMD_TOXIC_COMMENT_LOCKED.equals(cmd);
             String authorName = resolveAuthorName(data.getAuthor());
-            if (!isLocked && !TextUtils.isEmpty(authorName)) {
+            if (OneSignalCommand.shouldShowAuthorInNotification(cmd) && !TextUtils.isEmpty(authorName)) {
                 model.setSubtitle(context.getString(R.string.notification_from, authorName));
             }
             if (!TextUtils.isEmpty(data.getContent())) {
@@ -90,7 +91,7 @@ public final class NotificationUiUtils {
                 model.setPreview(data.getMovieTitle());
             }
             String avatar = data.getAuthor() != null ? data.getAuthor().getAvatarPath() : null;
-            setAvatar(model, avatar);
+            applyNotificationAvatar(model, cmd, avatar);
             applyPreviewMask(context, model, cmd, data.getToxicSpans());
         }
         fillFallbackTexts(model, item);
@@ -100,9 +101,8 @@ public final class NotificationUiUtils {
                                    NotificationResponse item, String cmd) {
         MessageReviewResponse data = parseJson(json, MessageReviewResponse.class);
         if (data != null) {
-            boolean isLocked = OneSignalCommand.CMD_TOXIC_REVIEW_LOCKED.equals(cmd);
             String authorName = resolveAuthorName(data.getAuthor());
-            if (!isLocked && !TextUtils.isEmpty(authorName)) {
+            if (OneSignalCommand.shouldShowAuthorInNotification(cmd) && !TextUtils.isEmpty(authorName)) {
                 model.setSubtitle(context.getString(R.string.notification_from, authorName));
             }
             if (!TextUtils.isEmpty(data.getContent())) {
@@ -111,15 +111,15 @@ public final class NotificationUiUtils {
                 model.setPreview(data.getMovieTitle());
             }
             String avatar = data.getAuthor() != null ? data.getAuthor().getAvatarPath() : null;
-            setAvatar(model, avatar);
+            applyNotificationAvatar(model, cmd, avatar);
             applyPreviewMask(context, model, cmd, data.getToxicSpans());
         }
         fillFallbackTexts(model, item);
     }
 
     private static void applyPreviewMask(Context context, NotificationDisplayModel model, String cmd, String toxicSpans) {
-        boolean isLocked = OneSignalCommand.CMD_TOXIC_COMMENT_LOCKED.equals(cmd)
-                || OneSignalCommand.CMD_TOXIC_REVIEW_LOCKED.equals(cmd);
+        boolean isLocked = OneSignalCommand.isCommentLockedCmd(cmd)
+                || OneSignalCommand.isReviewLockedCmd(cmd);
         boolean hasToxicSpans = !ToxicTextUtils.parseToxicSpans(toxicSpans).isEmpty();
         if (!isLocked && !hasToxicSpans) {
             return;
@@ -230,6 +230,21 @@ public final class NotificationUiUtils {
         if (!TextUtils.isEmpty(url)) {
             model.setAvatarUrl(url);
             model.setShowAvatar(true);
+        }
+    }
+
+    private static void applyNotificationAvatar(NotificationDisplayModel model, String cmd,
+                                                @Nullable String authorAvatarPath) {
+        if (OneSignalCommand.shouldUseAppLogoInNotification(cmd)) {
+            model.setUseAppLogoAvatar(true);
+            model.setShowAvatar(true);
+            model.setAvatarUrl(null);
+            return;
+        }
+        if (OneSignalCommand.shouldShowAuthorInNotification(cmd)) {
+            model.setUseAppLogoAvatar(false);
+            model.setShowAvatar(true);
+            model.setAvatarUrl(resolveMediaUrl(authorAvatarPath));
         }
     }
 

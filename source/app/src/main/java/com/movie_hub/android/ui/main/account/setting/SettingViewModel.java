@@ -7,6 +7,8 @@ import com.movie_hub.android.data.model.api.request.setting.UserSettingsRequest;
 import com.movie_hub.android.data.model.api.response.user.UserResponse;
 import com.movie_hub.android.ui.base.activity.BaseViewModel;
 import com.movie_hub.android.ui.main.MainCallback;
+import com.movie_hub.android.data.local.prefs.PreferencesService;
+import com.movie_hub.android.utils.GsonUtils;
 import com.movie_hub.android.utils.NetworkUtils;
 
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
@@ -43,7 +45,8 @@ public class SettingViewModel extends BaseViewModel {
                         response -> {
                             hideLoading();
                             if (response.isResult()) {
-                               callback.doSuccess(response);
+                                persistUserSettings(request);
+                                callback.doSuccess(response);
                             } else {
                                 callback.doFail();
                             }
@@ -65,5 +68,16 @@ public class SettingViewModel extends BaseViewModel {
                         }
                 )
         );
+    }
+
+    private void persistUserSettings(UserSettingsRequest request) {
+        if (request == null || userResponse == null || userResponse.getId() <= 0L) {
+            return;
+        }
+        String settingsJson = GsonUtils.toJson(request);
+        userResponse.setSettings(settingsJson);
+        repository.getSharedPreferences().setString(
+                PreferencesService.KEY_USER_SETTING + userResponse.getId(),
+                settingsJson);
     }
 }

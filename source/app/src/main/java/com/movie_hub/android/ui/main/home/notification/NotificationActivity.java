@@ -364,6 +364,7 @@ public class NotificationActivity extends BaseActivity<ActivityNotificationBindi
         switch (item.getCmd()) {
             case OneSignalCommand.CMD_REPLY_COMMENT:
             case OneSignalCommand.CMD_TOXIC_COMMENT_LOCKED:
+            case OneSignalCommand.CMD_COMMENT_UNLOCKED:
             case OneSignalCommand.CMD_VOTE_COMMENT:
                 MessageCommentResponse messageCommentResponse = GsonUtils.fromJson(messageOneSignal.getData(), MessageCommentResponse.class);
                 if (messageCommentResponse != null && messageCommentResponse.getMovieId() != null) {
@@ -371,6 +372,7 @@ public class NotificationActivity extends BaseActivity<ActivityNotificationBindi
                 }
                 break;
             case OneSignalCommand.CMD_TOXIC_REVIEW_LOCKED:
+            case OneSignalCommand.CMD_REVIEW_UNLOCKED:
             case OneSignalCommand.CMD_VOTE_REVIEW:
                 MessageReviewResponse messageReviewResponse = GsonUtils.fromJson(messageOneSignal.getData(), MessageReviewResponse.class);
                 if (messageReviewResponse != null && messageReviewResponse.getMovieId() != null) {
